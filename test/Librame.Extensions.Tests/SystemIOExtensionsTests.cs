@@ -1,46 +1,51 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
+using Xunit;
 
-namespace Librame.Extensions.Tests
+namespace Librame.Extensions
 {
-    [TestClass]
     public class SystemIOExtensionsTests
     {
 
-        [TestMethod]
-        public void HasInvalidPathCharsTest()
-        {
-            var str = nameof(SystemIOExtensionsTests);
-            Assert.IsFalse(str.HasInvalidPathChars());
+        #region Path
 
-            str = str.Append(string.Join(string.Empty, Path.GetInvalidPathChars()));
-            Assert.IsTrue(str.HasInvalidPathChars());
-        }
-
-        [TestMethod]
-        public void HasInvalidFileNameCharsTest()
-        {
-            var str = nameof(SystemIOExtensionsTests);
-            Assert.IsFalse(str.HasInvalidFileNameChars());
-
-            str = str.Append(string.Join(string.Empty, Path.GetInvalidFileNameChars()));
-            Assert.IsTrue(str.HasInvalidFileNameChars());
-        }
-
-        [TestMethod]
+        [Fact]
         public void CombineRelativePathTest()
         {
             var str = nameof(SystemIOExtensionsTests);
-            Assert.AreEqual($"{str}{Path.DirectorySeparatorChar}", str.CombineRelativePath());
+            Assert.Equal($"{str}{Path.DirectorySeparatorChar}", str.CombineRelativePath());
         }
 
-        [TestMethod]
+
+        [Fact]
+        public void HasInvalidPathCharsTest()
+        {
+            var str = nameof(SystemIOExtensionsTests);
+            Assert.False(str.HasInvalidPathChars());
+
+            str = str.Append(string.Join(string.Empty, Path.GetInvalidPathChars()));
+            Assert.True(str.HasInvalidPathChars());
+        }
+
+        [Fact]
+        public void HasInvalidFileNameCharsTest()
+        {
+            var str = nameof(SystemIOExtensionsTests);
+            Assert.False(str.HasInvalidFileNameChars());
+
+            str = str.Append(string.Join(string.Empty, Path.GetInvalidFileNameChars()));
+            Assert.True(str.HasInvalidFileNameChars());
+        }
+
+
+        [Fact]
         public void TrimDevelopmentRelativePathTest()
         {
             var path = Environment.CurrentDirectory;
-            Assert.AreNotEqual(path, path.TrimDevelopmentRelativePath());
+            Assert.NotEqual(path, path.TrimDevelopmentRelativePath());
         }
+
+        #endregion
 
     }
 }

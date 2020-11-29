@@ -15,16 +15,26 @@ namespace Librame.Extensions.Core.Options
     /// <summary>
     /// 扩展选项接口。
     /// </summary>
-    public interface IExtensionOptions
+    public interface IExtensionOptions : IExtensionBase<IExtensionOptions>
     {
         /// <summary>
-        /// 扩展名称。
+        /// 基础目录（通常为根目录）。
         /// </summary>
-        string Name { get; }
+        string BaseDirectory { get; set; }
 
         /// <summary>
-        /// 目录集合。
+        /// 配置目录（用于存储功能配置的文件夹，通常为一级目录；子级目录可以此为基础路径与模块名+功能目录名为相对路径进行组合）。
         /// </summary>
-        DirectoriesOptions Directories { get; }
+        string ConfigDirectory { get; set; }
+
+        /// <summary>
+        /// 报告目录（用于存储动态生成信息的文件夹，通常为一级目录；子级目录可以此为基础路径与模块名+功能目录名为相对路径进行组合）。
+        /// </summary>
+        string ReportDirectory { get; set; }
+
+        /// <summary>
+        /// 资源目录（用于存储静态资源的文件夹，通常为一级目录；子级目录可以此为基础路径与模块名+功能目录名为相对路径进行组合）。
+        /// </summary>
+        string ResourceDirectory { get; set; }
     }
 }

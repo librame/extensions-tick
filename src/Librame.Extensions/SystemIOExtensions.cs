@@ -24,7 +24,25 @@ namespace Librame.Extensions
     public static class SystemIOExtensions
     {
 
-        #region Path.InvalidChars
+        #region Path
+
+        /// <summary>
+        /// 将字符串组合为相对路径（如：folder => folder/）。
+        /// </summary>
+        /// <param name="str">给定的可空字符串。</param>
+        /// <param name="separatorForward">分隔符前置（可选；默认后置）。</param>
+        /// <returns>返回字符串。</returns>
+        public static string CombineRelativePath(this string? str, bool separatorForward = false)
+        {
+            if (str.HasInvalidPathChars())
+                throw new InvalidOperationException($"'{str}' has invalid path chars.");
+
+            if (separatorForward)
+                return $"{Path.DirectorySeparatorChar}{str}";
+
+            return $"{str}{Path.DirectorySeparatorChar}";
+        }
+
 
         /// <summary>
         /// 含有无效的路径字符集合。
@@ -44,31 +62,13 @@ namespace Librame.Extensions
 
         private static bool HasInvalidChars(this string? str, char[] invalidChars)
         {
-            if (string.IsNullOrWhiteSpace(str))
-                throw new ArgumentNullException(nameof(str));
+            str.NotWhiteSpace(nameof(str));
 
+#pragma warning disable CS8602 // 解引用可能出现空引用。
             return str.ToCharArray().Any(p => invalidChars.Contains(p));
+#pragma warning restore CS8602 // 解引用可能出现空引用。
         }
 
-        #endregion
-
-
-        /// <summary>
-        /// 将字符串组合为相对路径（如：folder => folder/）。
-        /// </summary>
-        /// <param name="str">给定的可空字符串。</param>
-        /// <param name="separatorForward">分隔符前置（可选；默认后置）。</param>
-        /// <returns>返回字符串。</returns>
-        public static string CombineRelativePath(this string? str, bool separatorForward = false)
-        {
-            if (str.HasInvalidPathChars())
-                throw new InvalidOperationException($"'{str}' has invalid path chars.");
-
-            if (separatorForward)
-                return $"{Path.DirectorySeparatorChar}{str}";
-            
-            return $"{str}{Path.DirectorySeparatorChar}";
-        }
 
         /// <summary>
         /// 修剪基础路径中存在的开发相对路径（如：basePath/bin/[x64/]Debug => basePath）。
@@ -77,11 +77,12 @@ namespace Librame.Extensions
         /// <returns>返回目录字符串。</returns>
         public static string TrimDevelopmentRelativePath(this string? basePath)
         {
-            if (string.IsNullOrWhiteSpace(basePath))
-                throw new ArgumentNullException(nameof(basePath));
+            basePath.NotWhiteSpace(nameof(basePath));
 
             var regex = new Regex(CombineDevelopmentRelativePath());
+#pragma warning disable CS8604 // 可能的 null 引用参数。
             if (regex.IsMatch(basePath))
+#pragma warning restore CS8604 // 可能的 null 引用参数。
             {
                 var match = regex.Match(basePath);
                 return basePath.Substring(0, match.Index);
@@ -92,7 +93,7 @@ namespace Librame.Extensions
             string CombineDevelopmentRelativePath()
             {
                 var separator = Regex.Escape(Path.DirectorySeparatorChar.ToString());
-                
+
                 var sb = new StringBuilder();
                 sb.Append($"({separator}bin|{separator}obj)");
                 sb.Append($"({separator}x86|{separator}x64)?");
@@ -101,6 +102,8 @@ namespace Librame.Extensions
                 return sb.ToString();
             }
         }
+
+        #endregion
 
     }
 }

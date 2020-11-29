@@ -10,25 +10,23 @@
 
 #endregion
 
-using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace Librame.Extensions.Core.Builders
+namespace Librame.Extensions.Core
 {
-    using Options;
-
     /// <summary>
-    /// 扩展构建器接口。
+    /// 扩展基础接口。
     /// </summary>
-    public interface IExtensionBuilder : IExtensionBase<IExtensionBuilder>
+    public interface IExtensionBase
     {
         /// <summary>
-        /// 服务集合。
+        /// 当前类型。
         /// </summary>
-        IServiceCollection Services { get; }
+        Type CurrentType { get; }
 
         /// <summary>
-        /// 扩展选项。
+        /// 名称。
         /// </summary>
-        IExtensionOptions Options { get; }
+        string Name { get; }
     }
 }
