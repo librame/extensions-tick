@@ -28,5 +28,10 @@ namespace Librame.Extensions.Core
         /// 名称。
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// 父级。
+        /// </summary>
+        IExtensionInfo? Parent { get; }
     }
 }

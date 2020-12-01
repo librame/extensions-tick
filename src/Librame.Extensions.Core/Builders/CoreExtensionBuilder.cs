@@ -19,7 +19,7 @@ namespace Librame.Extensions.Core.Builders
     /// <summary>
     /// 核心扩展构建器。
     /// </summary>
-    public class CoreExtensionBuilder : CoreExtensionBuilder<CoreExtensionOptions>
+    public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionOptions>
     {
         /// <summary>
         /// 构造一个 <see cref="CoreExtensionBuilder"/>。
@@ -27,7 +27,7 @@ namespace Librame.Extensions.Core.Builders
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
         /// <param name="options">给定的 <see cref="CoreExtensionOptions"/>。</param>
         public CoreExtensionBuilder(IServiceCollection services, CoreExtensionOptions options)
-            : base(services, options)
+            : base(services, options, parent: null)
         {
             Services.AddSingleton(this);
         }

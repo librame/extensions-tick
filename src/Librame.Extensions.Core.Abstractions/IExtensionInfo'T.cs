@@ -15,13 +15,13 @@ namespace Librame.Extensions.Core
     /// <summary>
     /// 扩展信息接口。
     /// </summary>
-    /// <typeparam name="T">指定的扩展类型。</typeparam>
-    public interface IExtensionInfo<T> : IExtensionInfo
-        where T : IExtensionInfo
+    /// <typeparam name="TInfo">指定的扩展信息类型。</typeparam>
+    public interface IExtensionInfo<TInfo> : IExtensionInfo
+        where TInfo : IExtensionInfo
     {
         /// <summary>
         /// 父级。
         /// </summary>
-        T? Parent { get; }
+        new TInfo? Parent { get; }
     }
 }

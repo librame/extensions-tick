@@ -20,6 +20,16 @@ namespace Librame.Extensions.Core
     public abstract class AbstractExtensionInfo : IExtensionInfo
     {
         /// <summary>
+        /// 抽象一个 <see cref="AbstractExtensionInfo"/>。
+        /// </summary>
+        /// <param name="parent">给定的父级 <see cref="IExtensionInfo"/>。</param>
+        public AbstractExtensionInfo(IExtensionInfo? parent)
+        {
+            Parent = parent;
+        }
+
+
+        /// <summary>
         /// 当前类型。
         /// </summary>
         public virtual Type CurrentType
@@ -30,5 +40,10 @@ namespace Librame.Extensions.Core
         /// </summary>
         public virtual string Name
             => CurrentType.Name;
+
+        /// <summary>
+        /// 父级。
+        /// </summary>
+        public virtual IExtensionInfo? Parent { get; }
     }
 }

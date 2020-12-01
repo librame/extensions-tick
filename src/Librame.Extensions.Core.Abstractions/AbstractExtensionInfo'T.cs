@@ -15,15 +15,16 @@ namespace Librame.Extensions.Core
     /// <summary>
     /// 抽象扩展信息（抽象实现 <see cref="IExtensionInfo{T}"/>）。
     /// </summary>
-    /// <typeparam name="T">指定的扩展类型。</typeparam>
-    public abstract class AbstractExtensionInfo<T> : AbstractExtensionInfo, IExtensionInfo<T>
-        where T : IExtensionInfo
+    /// <typeparam name="TInfo">指定的扩展信息类型。</typeparam>
+    public abstract class AbstractExtensionInfo<TInfo> : AbstractExtensionInfo, IExtensionInfo<TInfo>
+        where TInfo : IExtensionInfo
     {
         /// <summary>
         /// 构造一个 <see cref="AbstractExtensionInfo"/>。
         /// </summary>
-        /// <param name="parent">给定的父级 <see cref="T"/>（可选）。</param>
-        public AbstractExtensionInfo(T? parent)
+        /// <param name="parent">给定的父级 <typeparamref name="TInfo"/>。</param>
+        public AbstractExtensionInfo(TInfo? parent)
+            : base(parent)
         {
             Parent = parent;
         }
@@ -32,6 +33,6 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 父级。
         /// </summary>
-        public T? Parent { get; }
+        public new TInfo? Parent { get; }
     }
 }
