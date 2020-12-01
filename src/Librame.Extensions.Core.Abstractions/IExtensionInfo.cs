@@ -15,9 +15,9 @@ using System;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 扩展基础接口。
+    /// 扩展信息接口。
     /// </summary>
-    public interface IExtensionBase
+    public interface IExtensionInfo
     {
         /// <summary>
         /// 当前类型。

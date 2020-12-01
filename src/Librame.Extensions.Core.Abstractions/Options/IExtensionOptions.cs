@@ -15,7 +15,7 @@ namespace Librame.Extensions.Core.Options
     /// <summary>
     /// 扩展选项接口。
     /// </summary>
-    public interface IExtensionOptions : IExtensionBase<IExtensionOptions>
+    public interface IExtensionOptions : IExtensionInfo<IExtensionOptions>
     {
         /// <summary>
         /// 基础目录（通常为根目录）。

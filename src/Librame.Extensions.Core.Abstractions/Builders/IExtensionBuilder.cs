@@ -19,7 +19,7 @@ namespace Librame.Extensions.Core.Builders
     /// <summary>
     /// 扩展构建器接口。
     /// </summary>
-    public interface IExtensionBuilder : IExtensionBase<IExtensionBuilder>
+    public interface IExtensionBuilder : IExtensionInfo<IExtensionBuilder>
     {
         /// <summary>
         /// 服务集合。

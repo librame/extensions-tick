@@ -18,7 +18,7 @@ namespace Librame.Extensions.Core.Options
     /// <summary>
     /// 抽象扩展选项接口（抽象实现 <see cref="IExtensionOptions"/>）。
     /// </summary>
-    public abstract class AbstractExtensionOptions : AbstractExtensionBase<IExtensionOptions>, IExtensionOptions
+    public abstract class AbstractExtensionOptions : AbstractExtensionInfo<IExtensionOptions>, IExtensionOptions
     {
         private string? _baseDirectory;
         private string? _configDirectory;

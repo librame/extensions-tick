@@ -19,7 +19,7 @@ namespace Librame.Extensions.Core.Builders
     /// <summary>
     /// 抽象扩展构建器（抽象实现 <see cref="IExtensionBuilder"/>）。
     /// </summary>
-    public abstract class AbstractExtensionBuilder : AbstractExtensionBase<IExtensionBuilder>, IExtensionBuilder
+    public abstract class AbstractExtensionBuilder : AbstractExtensionInfo<IExtensionBuilder>, IExtensionBuilder
     {
         /// <summary>
         /// 构造一个 <see cref="AbstractExtensionBuilder"/>。

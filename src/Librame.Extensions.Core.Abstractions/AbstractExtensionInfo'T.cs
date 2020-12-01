@@ -13,17 +13,17 @@
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 抽象扩展基础（抽象实现 <see cref="IExtensionBase{T}"/>）。
+    /// 抽象扩展信息（抽象实现 <see cref="IExtensionInfo{T}"/>）。
     /// </summary>
     /// <typeparam name="T">指定的扩展类型。</typeparam>
-    public abstract class AbstractExtensionBase<T> : AbstractExtensionBase, IExtensionBase<T>
-        where T : IExtensionBase
+    public abstract class AbstractExtensionInfo<T> : AbstractExtensionInfo, IExtensionInfo<T>
+        where T : IExtensionInfo
     {
         /// <summary>
-        /// 构造一个 <see cref="AbstractExtensionBase"/>。
+        /// 构造一个 <see cref="AbstractExtensionInfo"/>。
         /// </summary>
         /// <param name="parent">给定的父级 <see cref="T"/>（可选）。</param>
-        public AbstractExtensionBase(T? parent)
+        public AbstractExtensionInfo(T? parent)
         {
             Parent = parent;
         }

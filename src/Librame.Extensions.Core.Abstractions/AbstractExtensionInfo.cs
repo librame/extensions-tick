@@ -15,9 +15,9 @@ using System;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 抽象扩展基础（抽象实现 <see cref="IExtensionBase"/>）。
+    /// 抽象扩展信息（抽象实现 <see cref="IExtensionInfo"/>）。
     /// </summary>
-    public abstract class AbstractExtensionBase : IExtensionBase
+    public abstract class AbstractExtensionInfo : IExtensionInfo
     {
         /// <summary>
         /// 当前类型。

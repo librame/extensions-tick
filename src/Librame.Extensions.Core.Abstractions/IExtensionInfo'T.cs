@@ -13,11 +13,11 @@
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 扩展基础接口。
+    /// 扩展信息接口。
     /// </summary>
     /// <typeparam name="T">指定的扩展类型。</typeparam>
-    public interface IExtensionBase<T> : IExtensionBase
-        where T : IExtensionBase
+    public interface IExtensionInfo<T> : IExtensionInfo
+        where T : IExtensionInfo
     {
         /// <summary>
         /// 父级。

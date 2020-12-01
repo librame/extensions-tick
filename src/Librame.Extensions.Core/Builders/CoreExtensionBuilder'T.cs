@@ -19,17 +19,18 @@ namespace Librame.Extensions.Core.Builders
     /// <summary>
     /// 核心扩展构建器。
     /// </summary>
-    public class CoreExtensionBuilder : CoreExtensionBuilder<CoreExtensionOptions>
+    /// <typeparam name="TOptions">指定的扩展选项类型。</typeparam>
+    public class CoreExtensionBuilder<TOptions> : AbstractExtensionBuilder<TOptions>
+        where TOptions : CoreExtensionOptions
     {
         /// <summary>
-        /// 构造一个 <see cref="CoreExtensionBuilder"/>。
+        /// 构造一个 <see cref="CoreExtensionBuilder{TOptions}"/>。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
-        /// <param name="options">给定的 <see cref="CoreExtensionOptions"/>。</param>
-        public CoreExtensionBuilder(IServiceCollection services, CoreExtensionOptions options)
-            : base(services, options)
+        /// <param name="options">给定的 <typeparamref name="TOptions"/>。</param>
+        public CoreExtensionBuilder(IServiceCollection services, TOptions options)
+            : base(services, options, parent: null)
         {
-            Services.AddSingleton(this);
         }
 
     }
