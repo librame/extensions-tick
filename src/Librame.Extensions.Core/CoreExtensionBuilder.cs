@@ -11,10 +11,11 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace Librame.Extensions.Core.Builders
+namespace Librame.Extensions.Core
 {
-    using Options;
+    using Cryptography;
 
     /// <summary>
     /// 核心扩展构建器。
@@ -24,12 +25,19 @@ namespace Librame.Extensions.Core.Builders
         /// <summary>
         /// 构造一个 <see cref="CoreExtensionBuilder"/>。
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="services"/> 或 <paramref name="options"/> 为空。
+        /// </exception>
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
         /// <param name="options">给定的 <see cref="CoreExtensionOptions"/>。</param>
         public CoreExtensionBuilder(IServiceCollection services, CoreExtensionOptions options)
             : base(services, options, parent: null)
         {
             Services.AddSingleton(this);
+
+            // Cryptography
+            AddOrReplaceByCharacteristic<IAlgorithmParameterGenerator, DefaultAlgorithmParameterGenerator>();
+            AddOrReplaceByCharacteristic<ISymmetricAlgorithm, DefaultSymmetricAlgorithm>();
         }
 
     }

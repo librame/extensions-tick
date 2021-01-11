@@ -10,18 +10,13 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Options
+namespace Librame.Extensions.Core.Cryptography
 {
-    /// <summary>
-    /// 核心扩展选项。
-    /// </summary>
-    public class CoreExtensionOptions : AbstractExtensionOptions
+    class DefaultSymmetricAlgorithm : AbstractSymmetricAlgorithm
     {
-        /// <summary>
-        /// 构造一个 <see cref="CoreExtensionOptions"/>。
-        /// </summary>
-        public CoreExtensionOptions()
-            : base(parent: null)
+        public DefaultSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+            CoreExtensionBuilder extensionBuilder)
+            : base(parameterGenerator, extensionBuilder)
         {
         }
 

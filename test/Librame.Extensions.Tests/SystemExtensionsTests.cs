@@ -5,6 +5,31 @@ namespace Librame.Extensions
     public class SystemExtensionsTests
     {
 
+        #region Digit & Letter
+
+        [Fact]
+        public void DigitLetterTest()
+        {
+            Assert.True("012x".HasDigit());
+            Assert.False("012x".IsDigit());
+            Assert.True("012".IsDigit());
+
+            Assert.True("xX".HasLower());
+            Assert.False("xX".IsLower());
+            Assert.True("x".IsLower());
+
+            Assert.True("xX".HasUpper());
+            Assert.False("xX".IsUpper());
+            Assert.True("X".IsUpper());
+
+            Assert.True("012xX".HasLetter());
+            Assert.False("012xX".IsLetter());
+            Assert.True("xX".IsLetter());
+        }
+
+        #endregion
+
+
         #region String
 
         [Fact]

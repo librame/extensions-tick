@@ -10,18 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core
+namespace Librame.Extensions.Core.Cryptography
 {
-    /// <summary>
-    /// 扩展信息接口。
-    /// </summary>
-    /// <typeparam name="TInfo">指定的扩展信息类型。</typeparam>
-    public interface IExtensionInfo<TInfo> : IExtensionInfo
-        where TInfo : IExtensionInfo
+    class DefaultAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
     {
-        /// <summary>
-        /// 父级。
-        /// </summary>
-        new TInfo? Parent { get; }
     }
 }

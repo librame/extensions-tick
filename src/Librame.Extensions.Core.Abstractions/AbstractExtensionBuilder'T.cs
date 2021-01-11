@@ -11,11 +11,10 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace Librame.Extensions.Core.Builders
+namespace Librame.Extensions.Core
 {
-    using Options;
-
     /// <summary>
     /// 抽象扩展构建器（抽象实现 <see cref="IExtensionBuilder{TOptions}"/>）。
     /// </summary>
@@ -26,6 +25,9 @@ namespace Librame.Extensions.Core.Builders
         /// <summary>
         /// 构造一个 <see cref="AbstractExtensionBuilder{TOptions}"/>。
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="services"/> 或 <paramref name="options"/> 为空。
+        /// </exception>
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
         /// <param name="options">给定的 <typeparamref name="TOptions"/>。</param>
         /// <param name="parent">给定的可空 <see cref="IExtensionBuilder"/>。</param>
@@ -40,6 +42,6 @@ namespace Librame.Extensions.Core.Builders
         /// <summary>
         /// 扩展选项。
         /// </summary>
-        public new TOptions Options { get; }
+        public new TOptions Options { get; private set; }
     }
 }

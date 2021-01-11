@@ -11,31 +11,31 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 扩展信息接口（<see cref="IExtensionOptions"/>、<see cref="IExtensionBuilder"/> 的公共基础扩展接口）。
+    /// 扩展选项接口。
     /// </summary>
-    public interface IExtensionInfo : INotifyProperty
+    public interface IExtensionOptions : IExtensionInfo
     {
         /// <summary>
-        /// 当前类型。
+        /// 目录选项。
         /// </summary>
-        [JsonIgnore]
-        Type CurrentType { get; }
+        DirectoryOptions Directories { get; }
 
         /// <summary>
-        /// 名称。
+        /// 替换服务字典集合。
         /// </summary>
         [JsonIgnore]
-        string Name { get; }
+        IDictionary<Type, Type> ReplacedServices { get; }
 
         /// <summary>
-        /// 父级。
+        /// 服务特征集合。
         /// </summary>
         [JsonIgnore]
-        IExtensionInfo? Parent { get; }
+        ServiceCharacteristicCollection ServiceCharacteristics { get; }
     }
 }
