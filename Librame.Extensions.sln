@@ -15,7 +15,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{622DA40D-4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Tests", "test\Librame.Extensions.Tests\Librame.Extensions.Tests.csproj", "{D378C127-2EC4-40D5-8D81-561C075DFE61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Librame.Extensions.Core.Tests", "test\Librame.Extensions.Core.Tests\Librame.Extensions.Core.Tests.csproj", "{5B7147BF-2DA8-4813-B2D8-35992871B62F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Core.Tests", "test\Librame.Extensions.Core.Tests\Librame.Extensions.Core.Tests.csproj", "{5B7147BF-2DA8-4813-B2D8-35992871B62F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0A92F6D6-9B9C-4491-9801-79BC7EDDC74A}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BD2441C6-B6DC-47EE-AC79-7B1FA55F89F0}"
+	ProjectSection(SolutionItems) = preProject
+		build\Version.props = build\Version.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

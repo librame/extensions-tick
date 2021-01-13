@@ -35,7 +35,7 @@ namespace Librame.Extensions
         [Fact]
         public void AppendTest()
         {
-            string str = null;
+            string str = string.Empty;
             Assert.Equal(string.Empty, str.Append(null));
 
             str = nameof(SystemExtensionsTests);
@@ -48,7 +48,7 @@ namespace Librame.Extensions
         [Fact]
         public void InsertTest()
         {
-            string str = null;
+            string str = string.Empty;
             Assert.Equal(string.Empty, str.Insert(null));
 
             str = nameof(SystemExtensionsTests);
