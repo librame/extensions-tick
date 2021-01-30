@@ -39,6 +39,11 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         /// <summary>
+        /// 密钥最大大小。
+        /// </summary>
+        public int KeyMaxSize { get; set; }
+
+        /// <summary>
         /// 密钥。
         /// </summary>
         [JsonConverter(typeof(Base64JsonConverter))]

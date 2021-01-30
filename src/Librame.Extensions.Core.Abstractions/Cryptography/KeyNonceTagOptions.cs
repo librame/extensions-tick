@@ -33,6 +33,11 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         /// <summary>
+        /// 验证标记最大大小。
+        /// </summary>
+        public int TagMaxSize { get; set; }
+
+        /// <summary>
         /// 验证标记。
         /// </summary>
         [JsonConverter(typeof(Base64JsonConverter))]

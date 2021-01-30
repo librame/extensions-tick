@@ -363,5 +363,10 @@ namespace Librame.Extensions
 
         #endregion
 
+
+        #region Type
+
+        #endregion
+
     }
 }

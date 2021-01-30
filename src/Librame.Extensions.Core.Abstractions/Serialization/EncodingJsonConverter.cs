@@ -30,14 +30,7 @@ namespace Librame.Extensions.Core.Serialization
         /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
         /// <returns>返回 <see cref="Encoding"/>。</returns>
         public override Encoding? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            var str = reader.GetString();
-
-            if (string.IsNullOrEmpty(str))
-                throw new ArgumentNullException($"'reader.GetString()' invoke result is null or empty.");
-
-            return Encoding.GetEncoding(str);
-        }
+            => Encoding.GetEncoding(reader.GetNotEmptyString());
 
         /// <summary>
         /// 写入 JSON。

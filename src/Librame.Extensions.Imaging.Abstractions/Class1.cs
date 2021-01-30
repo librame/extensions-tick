@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Imaging
 {
     public class Class1
     {
-        
     }
 }

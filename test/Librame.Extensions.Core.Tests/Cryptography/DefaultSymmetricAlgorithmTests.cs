@@ -1,27 +1,65 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System.Text;
 using Xunit;
 
 namespace Librame.Extensions.Core.Cryptography
 {
     public class DefaultSymmetricAlgorithmTests
     {
-        private IAlgorithmParameterGenerator _generator;
+        private static Encoding _encoding
+            = Encoding.UTF8;
+        private static byte[] _buffer
+            = _encoding.GetBytes(nameof(DefaultSymmetricAlgorithmTests));
+
+        private ISymmetricAlgorithm? _algorithm;
 
 
-#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
         public DefaultSymmetricAlgorithmTests()
-#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
         {
-#pragma warning disable CS8601 // 可能的 null 引用赋值。
-            _generator = CoreExtensionBuilderHelper.CurrentServices.GetService<IAlgorithmParameterGenerator>();
-#pragma warning restore CS8601 // 可能的 null 引用赋值。
+            _algorithm = CoreExtensionBuilderHelper.CurrentServices.GetService<ISymmetricAlgorithm>();
         }
 
 
         [Fact]
-        public void GenerateKeyTest()
+        public void AesTest()
         {
-            var buffer = _generator.GenerateKey(8);
+            var buffer = _algorithm?.EncryptAes(_buffer);
+
+#pragma warning disable CS8604 // 可能的 null 引用参数。
+            buffer = _algorithm?.DecryptAes(buffer);
+#pragma warning restore CS8604 // 可能的 null 引用参数。
+
+#pragma warning disable CS8604 // 可能的 null 引用参数。
+            Assert.NotEmpty(_encoding.GetString(buffer));
+#pragma warning restore CS8604 // 可能的 null 引用参数。
+        }
+
+        [Fact]
+        public void AesCcmTest()
+        {
+            var buffer = _algorithm?.EncryptAesCcm(_buffer);
+
+#pragma warning disable CS8604 // 可能的 null 引用参数。
+            buffer = _algorithm?.DecryptAesCcm(buffer);
+#pragma warning restore CS8604 // 可能的 null 引用参数。
+
+#pragma warning disable CS8604 // 可能的 null 引用参数。
+            Assert.NotEmpty(_encoding.GetString(buffer));
+#pragma warning restore CS8604 // 可能的 null 引用参数。
+        }
+
+        [Fact]
+        public void AesGcmTest()
+        {
+            var buffer = _algorithm?.EncryptAesGcm(_buffer);
+
+#pragma warning disable CS8604 // 可能的 null 引用参数。
+            buffer = _algorithm?.DecryptAesGcm(buffer);
+#pragma warning restore CS8604 // 可能的 null 引用参数。
+
+#pragma warning disable CS8604 // 可能的 null 引用参数。
+            Assert.NotEmpty(_encoding.GetString(buffer));
+#pragma warning restore CS8604 // 可能的 null 引用参数。
         }
 
     }

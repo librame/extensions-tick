@@ -33,6 +33,11 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         /// <summary>
+        /// 初始向量最大大小。
+        /// </summary>
+        public int NonceMaxSize { get; set; }
+
+        /// <summary>
         /// 初始向量。
         /// </summary>
         [JsonConverter(typeof(Base64JsonConverter))]
