@@ -22,7 +22,7 @@
   </ItemGroup>
     
   <ItemGroup>
-    <ProjectReference Include="..\Librame.Extensions\Librame.Extensions.csproj" />
+    <ProjectReference Include="..\LibrameTick.Extensions\LibrameTick.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

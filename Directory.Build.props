@@ -12,11 +12,11 @@
     <PackageTags>net5</PackageTags>
     <PackageIcon>Librame.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/librame/extensions-next</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/librame/extensions-tick</PackageProjectUrl>
     <RepositoryUrl>https://github.com/librame</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Librame.Extensions.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\LibrameTick.Extensions.pfx</AssemblyOriginatorKeyFile>
     <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 

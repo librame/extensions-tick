@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>Librame.Extensions.Imaging</RootNamespace>
+    <RootNamespace>Librame.Extensions.Data</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -11,5 +11,10 @@
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibrameTick.Extensions.Core\LibrameTick.Extensions.Core.csproj" />
+    <ProjectReference Include="..\LibrameTick.Extensions.Data.Abstractions\LibrameTick.Extensions.Data.Abstractions.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -1,7 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Librame.Extensions.Core</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -21,7 +22,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Librame.Extensions.Core.Abstractions\Librame.Extensions.Core.Abstractions.csproj" />
+    <ProjectReference Include="..\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

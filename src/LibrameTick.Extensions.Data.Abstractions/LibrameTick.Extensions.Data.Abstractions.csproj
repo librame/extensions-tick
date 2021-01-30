@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Librame.Extensions.Data</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -10,5 +11,9 @@
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj" />
+  </ItemGroup>
 
 </Project>

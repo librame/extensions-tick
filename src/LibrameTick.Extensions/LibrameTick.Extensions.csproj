@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>Librame.Extensions.Data</RootNamespace>
+    <RootNamespace>Librame.Extensions</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <IsPackable>false</IsPackable>
     <RootNamespace>Librame.Extensions</RootNamespace>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Librame.Extensions\Librame.Extensions.csproj" />
+    <ProjectReference Include="..\..\src\LibrameTick.Extensions\LibrameTick.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

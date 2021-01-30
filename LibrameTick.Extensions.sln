@@ -3,19 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30711.63
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions", "src\Librame.Extensions\Librame.Extensions.csproj", "{B5BEE114-3B4D-442C-BFF0-BAABD8C637BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions", "src\Librame.Extensions\LibrameTick.Extensions.csproj", "{B5BEE114-3B4D-442C-BFF0-BAABD8C637BA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Core.Abstractions", "src\Librame.Extensions.Core.Abstractions\Librame.Extensions.Core.Abstractions.csproj", "{4BAF5CE3-5888-45C2-B21B-397B9C4AC8A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core.Abstractions", "src\Librame.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj", "{4BAF5CE3-5888-45C2-B21B-397B9C4AC8A9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Core", "src\Librame.Extensions.Core\Librame.Extensions.Core.csproj", "{648994B9-C724-4992-BFA8-19082D7EAAC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core", "src\Librame.Extensions.Core\LibrameTick.Extensions.Core.csproj", "{648994B9-C724-4992-BFA8-19082D7EAAC0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Tests", "test\Librame.Extensions.Tests\Librame.Extensions.Tests.csproj", "{D378C127-2EC4-40D5-8D81-561C075DFE61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Tests", "test\Librame.Extensions.Tests\LibrameTick.Extensions.Tests.csproj", "{D378C127-2EC4-40D5-8D81-561C075DFE61}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Core.Tests", "test\Librame.Extensions.Core.Tests\Librame.Extensions.Core.Tests.csproj", "{5B7147BF-2DA8-4813-B2D8-35992871B62F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core.Tests", "test\Librame.Extensions.Core.Tests\LibrameTick.Extensions.Core.Tests.csproj", "{5B7147BF-2DA8-4813-B2D8-35992871B62F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0A92F6D6-9B9C-4491-9801-79BC7EDDC74A}"
 	ProjectSection(SolutionItems) = preProject
@@ -27,11 +27,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BD2441C6
 		build\Version.props = build\Version.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Data.Abstractions", "src\Librame.Extensions.Data.Abstractions\Librame.Extensions.Data.Abstractions.csproj", "{6723A874-AE94-4D8E-953E-67353CEE1854}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.Abstractions", "src\Librame.Extensions.Data.Abstractions\LibrameTick.Extensions.Data.Abstractions.csproj", "{6723A874-AE94-4D8E-953E-67353CEE1854}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Data.EntityFrameworkCore", "src\Librame.Extensions.Data.EntityFrameworkCore\Librame.Extensions.Data.EntityFrameworkCore.csproj", "{6C7E4FE1-24A8-4B05-881D-A0F0DEE5CB41}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.EntityFrameworkCore", "src\Librame.Extensions.Data.EntityFrameworkCore\LibrameTick.Extensions.Data.EntityFrameworkCore.csproj", "{6C7E4FE1-24A8-4B05-881D-A0F0DEE5CB41}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Librame.Extensions.Imaging.Abstractions", "src\Librame.Extensions.Imaging.Abstractions\Librame.Extensions.Imaging.Abstractions.csproj", "{6675254F-8661-4D5B-B128-661A76D5E013}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Imaging.Abstractions", "src\Librame.Extensions.Imaging.Abstractions\LibrameTick.Extensions.Imaging.Abstractions.csproj", "{6675254F-8661-4D5B-B128-661A76D5E013}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
