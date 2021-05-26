@@ -50,9 +50,12 @@ namespace Librame.Extensions
         /// <typeparam name="TValue">指定的值类型。</typeparam>
         /// <param name="valueFunc">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-        public static TValue Run<TValue>(Func<Stopwatch, TValue> valueFunc)
+        public static TValue Run<TValue>(Func<Stopwatch, TValue>? valueFunc)
         {
-            valueFunc.NotNull(nameof(valueFunc));
+            valueFunc.NotNull(nameof(valueFunc), func =>
+            {
+
+            });
 
 #pragma warning disable CS8602 // 解引用可能出现空引用。
             if (!_stopwatch.Value.IsRunning)

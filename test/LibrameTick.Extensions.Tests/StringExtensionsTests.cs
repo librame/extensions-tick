@@ -1,44 +1,28 @@
 using Xunit;
 
-namespace Librame.Extensions
+namespace Librame.Extensions.Tests
 {
-    public class SystemExtensionsTests
+    public class StringExtensionsTests
     {
 
-        #region Digit & Letter
-
         [Fact]
-        public void DigitLetterTest()
+        public void HasInvalidCharsTest()
         {
-            Assert.True("012x".HasDigit());
-            Assert.False("012x".IsDigit());
-            Assert.True("012".IsDigit());
-
-            Assert.True("xX".HasLower());
-            Assert.False("xX".IsLower());
-            Assert.True("x".IsLower());
-
-            Assert.True("xX".HasUpper());
-            Assert.False("xX".IsUpper());
-            Assert.True("X".IsUpper());
-
-            Assert.True("012xX".HasLetter());
-            Assert.False("012xX".IsLetter());
-            Assert.True("xX".IsLetter());
+            var invalidChars = "#%&".ToCharArray();
+            var str = "abcdefghijklmn#%&opqrstuvwxyz";
+            Assert.True(str.HasInvalidChars(invalidChars));
         }
 
-        #endregion
 
-
-        #region String
+        #region Insert and Append
 
         [Fact]
         public void AppendTest()
         {
-            string str = string.Empty;
+            var str = string.Empty;
             Assert.Equal(string.Empty, str.Append(null));
 
-            str = nameof(SystemExtensionsTests);
+            str = nameof(StringExtensionsTests);
             Assert.Equal(str, str.Append(null));
 
             var append = "123456";
@@ -48,10 +32,10 @@ namespace Librame.Extensions
         [Fact]
         public void InsertTest()
         {
-            string str = string.Empty;
+            var str = string.Empty;
             Assert.Equal(string.Empty, str.Insert(null));
 
-            str = nameof(SystemExtensionsTests);
+            str = nameof(StringExtensionsTests);
             Assert.Equal(str, str.Insert(null));
 
             var insert = "123456";
@@ -63,11 +47,32 @@ namespace Librame.Extensions
             Assert.Equal($"{str}{insert}", str.Insert(insert, startIndex: str.Length));
         }
 
+        #endregion
+
+
+        #region JoinString
+
+        [Fact]
+        public void JoinStringTest()
+        {
+            var str = "abcdefg";
+            Assert.Equal(str, str.ToCharArray().JoinString());
+            Assert.Equal(str, str.ToCharArray().JoinString(','));
+
+            var array = new string[] { "123", "456" };
+            Assert.Equal("123456", array.JoinString());
+            Assert.Equal("123,456", array.JoinString(','));
+        }
+
+        #endregion
+
+
+        #region Leading and Trailing
 
         [Fact]
         public void LeadingTest()
         {
-            var str = nameof(SystemExtensionsTests);
+            var str = nameof(StringExtensionsTests);
 
             var testChar = '#';
 
@@ -89,7 +94,7 @@ namespace Librame.Extensions
         [Fact]
         public void TrailingTest()
         {
-            var str = nameof(SystemExtensionsTests);
+            var str = nameof(StringExtensionsTests);
 
             var testChar = '#';
 
@@ -108,6 +113,10 @@ namespace Librame.Extensions
             Assert.Equal($"{str}{testString}", result); // no append
         }
 
+        #endregion
+
+
+        #region Trim
 
         [Fact]
         public void TrimTest()
@@ -129,11 +138,6 @@ namespace Librame.Extensions
             var str = "000abcdefg000";
             Assert.Equal("000abcdefg", str.TrimEnd("000"));
         }
-
-        #endregion
-
-
-        #region Type
 
         #endregion
 
