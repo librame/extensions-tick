@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace Librame.Extensions.Tests
+namespace Librame.Extensions
 {
     public class StringExtensionsTests
     {
@@ -20,10 +20,10 @@ namespace Librame.Extensions.Tests
         public void AppendTest()
         {
             var str = string.Empty;
-            Assert.Equal(string.Empty, str.Append(null));
+            Assert.Equal(string.Empty, str.Append(string.Empty));
 
             str = nameof(StringExtensionsTests);
-            Assert.Equal(str, str.Append(null));
+            Assert.Equal(str, str.Append(string.Empty));
 
             var append = "123456";
             Assert.Equal($"{str}{append}", str.Append(append));
@@ -33,10 +33,10 @@ namespace Librame.Extensions.Tests
         public void InsertTest()
         {
             var str = string.Empty;
-            Assert.Equal(string.Empty, str.Insert(null));
+            Assert.Equal(string.Empty, str.Insert(string.Empty));
 
             str = nameof(StringExtensionsTests);
-            Assert.Equal(str, str.Insert(null));
+            Assert.Equal(str, str.Insert(string.Empty));
 
             var insert = "123456";
             Assert.Equal($"{insert}{str}", str.Insert(insert));

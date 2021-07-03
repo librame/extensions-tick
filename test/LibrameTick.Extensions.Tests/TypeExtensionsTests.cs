@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 
-namespace Librame.Extensions.Tests
+namespace Librame.Extensions
 {
     public class TypeExtensionsTests
     {
@@ -22,11 +22,15 @@ namespace Librame.Extensions.Tests
         [Fact]
         public void InvokeTypesTest()
         {
-            var count = typeof(TypeExtensionsTests).Assembly.InvokeTypes(type =>
+            var assembly = typeof(TypeExtensionsTests).Assembly;
+
+            var count = assembly.InvokeTypes(type =>
             {
                 Assert.NotNull(type);
             });
             Assert.True(count > 0);
+
+            Assert.Equal(count, assembly.ExportedTypes.Count());
         }
 
         #endregion
@@ -59,10 +63,10 @@ namespace Librame.Extensions.Tests
         {
             var listType = typeof(List<string>);
 
-            Assert.True(listType.IsImplementedInterfaceType<IList<string>>());
-            Assert.True(typeof(IList<string>).IsImplementedInterfaceType<IEnumerable<string>>());
+            Assert.True(listType.IsImplementedType<IList<string>>());
+            Assert.True(typeof(IList<string>).IsImplementedType<IEnumerable<string>>());
 
-            Assert.True(listType.IsImplementedInterfaceType(typeof(ICollection<>), out Type? resultType));
+            Assert.True(listType.IsImplementedType(typeof(ICollection<>), out Type? resultType));
             Assert.True(resultType?.GetGenericArguments().Single() == typeof(string));
         }
 
@@ -71,13 +75,13 @@ namespace Librame.Extensions.Tests
         {
             var type = typeof(MD5);
 
-            Assert.True(type.IsImplementedBaseType<HashAlgorithm>());
+            Assert.True(type.IsImplementedType<HashAlgorithm>());
             Assert.ThrowsAny<NotSupportedException>(() =>
             {
-                type.IsImplementedBaseType<ICryptoTransform>();
+                type.IsImplementedType<ICryptoTransform>();
             });
 
-            Assert.True(type.IsImplementedBaseType<HashAlgorithm>(out Type? resultType));
+            Assert.True(type.IsImplementedType<HashAlgorithm>(out Type? resultType));
             Assert.Equal(typeof(HashAlgorithm), resultType);
         }
 

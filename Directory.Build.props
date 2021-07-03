@@ -8,7 +8,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Librame Pong</Authors>
     <Company>https://github.com/librame</Company>
-    <Copyright>Copyright © 2012-2021</Copyright>
+    <Copyright>Copyright © Librame 2012-2021</Copyright>
     <PackageTags>net5</PackageTags>
     <PackageIcon>Librame.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

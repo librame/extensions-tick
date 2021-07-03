@@ -12,7 +12,7 @@
 
 using Xunit;
 
-namespace Librame.Extensions.Tests
+namespace Librame.Extensions
 {
     public class ValidationExtensionsTests
     {

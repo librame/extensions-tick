@@ -11,7 +11,6 @@
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,42 +22,41 @@ namespace Librame.Extensions
     /// </summary>
     public static class PathExtensions
     {
+        /// <summary>
+        /// <see cref="Directory.GetCurrentDirectory()"/> 当前目录。
+        /// </summary>
+        public static readonly string CurrentDirectory
+            = Directory.GetCurrentDirectory();
+
 
         /// <summary>
         /// 创建目录。
         /// </summary>
         /// <param name="path">给定的路径。</param>
         /// <returns>返回 <see cref="DirectoryInfo"/>。</returns>
-        public static DirectoryInfo CreateDirectory([NotNullWhen(false)] this string? path)
-        {
-            return path.NotEmpty(nameof(path), p =>
-            {
-                if (p.EndsWith(ExtensionDefaults.CurrentPathSeparator))
-                    p = p.TrimEnd(ExtensionDefaults.CurrentPathSeparator);
-
-                return Directory.CreateDirectory(p);
-            });
-        }
+        public static DirectoryInfo CreateDirectory(this string path)
+            => Directory.CreateDirectory(path);
 
         /// <summary>
         /// 设置基础路径。
         /// </summary>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="relativePath"/> is null or empty.
+        /// </exception>
         /// <param name="relativePath">给定的相对路径。</param>
         /// <param name="basePath">给定的基础路径（可选；默认使用没有开发相对路径的当前目录）。</param>
         /// <returns>返回路径字符串。</returns>
-        public static string SetBasePath([NotNullWhen(false)] this string? relativePath,
-            [NotNullWhen(false)] string? basePath = null)
+        public static string SetBasePath(this string relativePath, string? basePath = null)
         {
+            relativePath.NotEmpty(nameof(relativePath));
+
             if (basePath.IsEmpty())
-                basePath = ExtensionDefaults.CurrentDirectory.TrimDevelopmentRelativePath();
+                basePath = CurrentDirectory.TrimDevelopmentRelativePath();
 
-            return relativePath.NotEmpty(nameof(relativePath), p =>
-            {
-                if (p.StartsWith("./") || !p.StartsWith(basePath))
-                    return Path.Combine(basePath, p);
+            if (relativePath.StartsWith("./") || !relativePath.StartsWith(basePath))
+                return Path.Combine(basePath, relativePath);
 
-                return p;
-            });
+            return relativePath;
         }
 
 
@@ -70,24 +68,27 @@ namespace Librame.Extensions
         /// <param name="basePath">给定的基础路径。</param>
         /// <param name="relativePath">给定的相对路径。</param>
         /// <returns>返回路径字符串。</returns>
-        public static string CombinePath([NotNullWhen(false)] this string? basePath, string relativePath)
-            => basePath.NotEmpty(nameof(basePath), p => Path.Combine(p, relativePath));
+        public static string CombinePath(this string basePath, string relativePath)
+            => Path.Combine(basePath, relativePath);
 
         /// <summary>
         /// 将字符串组合为相对路径（如：folder => folder/）。
         /// </summary>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="value"/> is null or empty.
+        /// </exception>
         /// <param name="value">给定的字符串值。</param>
         /// <param name="pathSeparatorForward">路径分隔符前置（可选；默认后置）。</param>
         /// <returns>返回路径字符串。</returns>
-        public static string CombineRelativePath([NotNullWhen(false)] this string? value, bool pathSeparatorForward = false)
+        public static string CombineRelativePath(this string value, bool pathSeparatorForward = false)
         {
             if (value.HasInvalidPathChars())
                 throw new InvalidOperationException($"'{value}' has invalid path chars.");
 
             if (pathSeparatorForward)
-                return $"{ExtensionDefaults.CurrentPathSeparator}{value}";
+                return $"{Path.DirectorySeparatorChar}{value}";
 
-            return $"{value}{ExtensionDefaults.CurrentPathSeparator}";
+            return $"{value}{Path.DirectorySeparatorChar}";
         }
 
         #endregion
@@ -98,17 +99,23 @@ namespace Librame.Extensions
         /// <summary>
         /// 含有无效的路径字符集合。
         /// </summary>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path"/> is null or empty.
+        /// </exception>
         /// <param name="path">给定的路径。</param>
         /// <returns>返回布尔值。</returns>
-        public static bool HasInvalidPathChars([NotNullWhen(false)] this string? path)
+        public static bool HasInvalidPathChars(this string path)
             => path.HasInvalidChars(Path.GetInvalidPathChars());
 
         /// <summary>
         /// 含有无效的文件名称字符集合。
         /// </summary>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="fileName"/> is null or empty.
+        /// </exception>
         /// <param name="fileName">给定的文件名。</param>
         /// <returns>返回布尔值。</returns>
-        public static bool HasInvalidFileNameChars([NotNullWhen(false)] this string? fileName)
+        public static bool HasInvalidFileNameChars(this string fileName)
             => fileName.HasInvalidChars(Path.GetInvalidFileNameChars());
 
         #endregion
@@ -120,7 +127,7 @@ namespace Librame.Extensions
 
         private static string InitDevelopmentRelativePath()
         {
-            var separator = Regex.Escape(ExtensionDefaults.CurrentPathSeparatorString);
+            var separator = Regex.Escape(Path.DirectorySeparatorChar.ToString());
 
             var sb = new StringBuilder();
             sb.Append($"({separator}bin|{separator}obj)");
@@ -135,19 +142,16 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="path">给定的路径。</param>
         /// <returns>返回修剪后的路径字符串。</returns>
-        public static string TrimDevelopmentRelativePath([NotNullWhen(true)] this string? path)
+        public static string TrimDevelopmentRelativePath(this string path)
         {
-            return path.NotEmpty(nameof(path), p =>
+            var regex = new Regex(_developmentRelativePath);
+            if (regex.IsMatch(path))
             {
-                var regex = new Regex(_developmentRelativePath);
-                if (regex.IsMatch(p))
-                {
-                    var match = regex.Match(p);
-                    return p.Substring(0, match.Index);
-                }
+                var match = regex.Match(path);
+                return path.Substring(0, match.Index);
+            }
 
-                return p;
-            });
+            return path;
         }
 
         #endregion

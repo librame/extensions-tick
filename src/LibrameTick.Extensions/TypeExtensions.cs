@@ -28,11 +28,14 @@ namespace Librame.Extensions
         /// <summary>
         /// 获取基础类型集合。
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="type"/> is null.
+        /// </exception>
         /// <param name="type">给定的类型。</param>
         /// <returns>返回 <see cref="IEnumerable{Type}"/>。</returns>
         public static IEnumerable<Type> GetBaseTypes([NotNullWhen(true)] this Type? type)
         {
-            type = type.NotNull(nameof(type));
+            type.NotNull(nameof(type));
 
             // 当前基类（Object 为最顶层基类，接口会直接返回 NULL）
             type = type.BaseType;
@@ -46,43 +49,93 @@ namespace Librame.Extensions
         }
 
 
-        #region InvokeTypes and ExportedTypes
+        #region ExportedTypes and InvokeTypes
+
+        /// <summary>
+        /// 导出类型列表。
+        /// </summary>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="assemblies"/> is null or empty.
+        /// </exception>
+        /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
+        /// <param name="filterTypes">给定的类型过滤工厂方法（可选）。</param>
+        /// <param name="exceptionAction">给定的异常处理动作（可选）。</param>
+        /// <returns>返回 <see cref="IReadOnlyList{Type}"/>。</returns>
+        public static List<Type> ExportedTypes(this IEnumerable<Assembly> assemblies,
+            Func<IEnumerable<Type>, IEnumerable<Type>>? filterTypes = null,
+            Action<Exception>? exceptionAction = null)
+        {
+            assemblies.NotEmpty(nameof(assemblies));
+
+            var allTypes = new List<Type>();
+
+            foreach (var assembly in assemblies)
+            {
+                try
+                {
+                    allTypes.AddRange(assembly.GetExportedTypes());
+                }
+                catch (NotSupportedException notSupported)
+                {
+                    exceptionAction?.Invoke(notSupported);
+                    continue;
+                }
+                catch (FileNotFoundException fileNotFound)
+                {
+                    exceptionAction?.Invoke(fileNotFound);
+                    continue;
+                }
+            }
+
+            if (filterTypes is not null)
+                allTypes = filterTypes.Invoke(allTypes).ToList();
+
+            return allTypes;
+        }
+
 
         /// <summary>
         /// 调用类型集合。
         /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="assembly"/> or <paramref name="action"/> is null.
+        /// </exception>
         /// <param name="assembly">给定的 <see cref="Assembly"/>。</param>
         /// <param name="action">给定的注册动作。</param>
         /// <param name="filterTypes">给定的类型过滤工厂方法（可选）。</param>
         /// <returns>返回已调用的类型集合数。</returns>
-        public static int InvokeTypes([NotNullWhen(false)] this Assembly? assembly, Action<Type> action,
+        public static int InvokeTypes(this Assembly assembly, Action<Type> action,
             Func<IEnumerable<Type>, IEnumerable<Type>>? filterTypes = null)
         {
-            return assembly.NotNull(nameof(assembly), a =>
-            {
-                var allTypes = a.GetExportedTypes();
+            assembly.NotNull(nameof(assembly));
+            action.NotNull(nameof(action));
 
-                filterTypes.IfNotNull(f =>
-                {
-                    allTypes = f.Invoke(allTypes).ToArray();
-                });
+            IEnumerable<Type> allTypes = assembly.GetExportedTypes();
 
-                foreach (var type in allTypes)
-                    action.Invoke(type);
+            if (filterTypes is not null)
+                allTypes = filterTypes.Invoke(allTypes);
 
-                return allTypes.Length;
-            });
+            foreach (var type in allTypes)
+                action.Invoke(type);
+
+            return allTypes.Count();
         }
 
         /// <summary>
         /// 调用类型集合。
         /// </summary>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="assemblies"/> is null or empty.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="action"/> is null.
+        /// </exception>
         /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
         /// <param name="action">给定的注册动作。</param>
         /// <param name="filterTypes">给定的类型过滤工厂方法（可选）。</param>
         /// <param name="exceptionAction">给定的异常处理动作（可选）。</param>
         /// <returns>返回已调用的类型集合数。</returns>
-        public static int InvokeTypes([NotNullWhen(false)] this IEnumerable<Assembly>? assemblies, Action<Type> action,
+        public static int InvokeTypes(this IEnumerable<Assembly> assemblies, Action<Type> action,
             Func<IEnumerable<Type>, IEnumerable<Type>>? filterTypes = null,
             Action<Exception>? exceptionAction = null)
         {
@@ -94,49 +147,6 @@ namespace Librame.Extensions
                 action.Invoke(type);
 
             return allTypes.Count;
-        }
-
-
-        /// <summary>
-        /// 导出类型列表。
-        /// </summary>
-        /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
-        /// <param name="filterTypes">给定的类型过滤工厂方法（可选）。</param>
-        /// <param name="exceptionAction">给定的异常处理动作（可选）。</param>
-        /// <returns>返回 <see cref="IReadOnlyList{Type}"/>。</returns>
-        public static List<Type> ExportedTypes([NotNullWhen(false)] this IEnumerable<Assembly>? assemblies,
-            Func<IEnumerable<Type>, IEnumerable<Type>>? filterTypes = null,
-            Action<Exception>? exceptionAction = null)
-        {
-            return assemblies.NotEmpty(nameof(assemblies), a =>
-            {
-                var allTypes = new List<Type>();
-
-                foreach (var assembly in a)
-                {
-                    try
-                    {
-                        allTypes.AddRange(assembly.GetExportedTypes());
-                    }
-                    catch (NotSupportedException notSupported)
-                    {
-                        exceptionAction?.Invoke(notSupported);
-                        continue;
-                    }
-                    catch (FileNotFoundException fileNotFound)
-                    {
-                        exceptionAction?.Invoke(fileNotFound);
-                        continue;
-                    }
-                }
-
-                filterTypes.IfNotNull(f =>
-                {
-                    allTypes = f.Invoke(allTypes).ToList();
-                });
-
-                return allTypes;
-            });
         }
 
         #endregion
@@ -156,21 +166,15 @@ namespace Librame.Extensions
         /// <param name="baseType">给定的基础类型。</param>
         /// <param name="targetType">给定的目标类型。</param>
         /// <returns>返回布尔值。</returns>
-        public static bool IsAssignableFromTargetType(this Type? baseType, Type? targetType)
+        public static bool IsAssignableFromTargetType([NotNullWhen(true)] this Type? baseType,
+            [NotNullWhen(true)] Type? targetType)
         {
             baseType = baseType.NotNull(nameof(baseType));
-            targetType = targetType.NotNull(nameof(targetType));
 
             // 对泛型类型定义提供支持
-            if (baseType.IsGenericTypeDefinition)
-            {
-                if (baseType.IsInterface)
-                    return targetType.IsImplementedInterfaceType(baseType);
-
-                return targetType.IsImplementedBaseType(baseType);
-            }
-
-            return baseType.IsAssignableFrom(targetType);
+            return baseType.IsGenericTypeDefinition
+                ? targetType.IsImplementedType(baseType)
+                : baseType.IsAssignableFrom(targetType);
         }
 
         /// <summary>
@@ -185,8 +189,9 @@ namespace Librame.Extensions
         /// <param name="targetType">给定的目标类型。</param>
         /// <param name="baseType">给定的基础类型。</param>
         /// <returns>返回布尔值。</returns>
-        public static bool IsAssignableToBaseType(this Type? targetType, Type? baseType)
-            => baseType.NotNull(nameof(baseType), t => t.IsAssignableFromTargetType(targetType));
+        public static bool IsAssignableToBaseType([NotNullWhen(true)] this Type? targetType,
+            [NotNullWhen(true)] Type? baseType)
+            => baseType.IsAssignableFromTargetType(targetType);
 
         #endregion
 
@@ -194,118 +199,70 @@ namespace Librame.Extensions
         #region IsImplementedType
 
         /// <summary>
-        /// 是否已实现某个接口类型。
+        /// 是否已实现指定类型（支持基础类型、接口、泛型类型定义等）。
         /// </summary>
-        /// <typeparam name="TInterface">指定的接口类型（支持泛型类型定义）。</typeparam>
-        /// <param name="type">给定的当前类型。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedInterfaceType<TInterface>([NotNullWhen(false)] this Type? type)
-            => type.IsImplementedInterfaceType(typeof(TInterface), out _);
+        /// <typeparam name="T">指定的已实现类型（支持基础类型、接口、泛型类型定义等）。</typeparam>
+        /// <param name="currentType">给定的当前类型。</param>
+        /// <returns>返回是否已实现的布尔值。</returns>
+        public static bool IsImplementedType<T>([NotNullWhen(true)] this Type? currentType)
+            => currentType.IsImplementedType(typeof(T), out _);
 
         /// <summary>
-        /// 是否已实现某个接口类型。
+        /// 是否已实现指定类型（支持基础类型、接口、泛型类型定义等）。
         /// </summary>
-        /// <typeparam name="TInterface">指定的接口类型（支持泛型类型定义）。</typeparam>
-        /// <param name="type">给定的当前类型。</param>
-        /// <param name="resultType">输出此结果类型（当接口类型为泛型定义时，可用于得到泛型参数等操作）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedInterfaceType<TInterface>([NotNullWhen(false)] this Type? type, out Type? resultType)
-            => type.IsImplementedInterfaceType(typeof(TInterface), out resultType);
+        /// <typeparam name="T">指定的已实现类型（支持基础类型、接口、泛型类型定义等）。</typeparam>
+        /// <param name="currentType">给定的当前类型。</param>
+        /// <param name="resultType">输出此结果类型（当基础类型为泛型定义时，可用于得到泛型参数等操作）。</param>
+        /// <returns>返回是否已实现的布尔值。</returns>
+        public static bool IsImplementedType<T>([NotNullWhen(true)] this Type? currentType,
+            out Type? resultType)
+            => currentType.IsImplementedType(typeof(T), out resultType);
 
         /// <summary>
-        /// 是否已实现某个接口类型。
+        /// 是否已实现指定类型（支持基础类型、接口、泛型类型定义等）。
         /// </summary>
-        /// <param name="type">给定的当前类型。</param>
-        /// <param name="interfaceType">给定的接口类型（支持泛型类型定义）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedInterfaceType([NotNullWhen(false)] this Type? type, Type? interfaceType)
-            => type.IsImplementedInterfaceType(interfaceType, out _);
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="currentType"/> or <paramref name="implementedType"/> is null.
+        /// </exception>
+        /// <param name="currentType">给定的当前类型。</param>
+        /// <param name="implementedType">给定的已实现类型（支持基础类型、接口、泛型类型定义等）。</param>
+        /// <returns>返回是否已实现的布尔值。</returns>
+        public static bool IsImplementedType([NotNullWhen(true)] this Type? currentType,
+            Type implementedType)
+            => currentType.IsImplementedType(implementedType, out _);
 
         /// <summary>
-        /// 是否已实现某个接口类型。
+        /// 是否已实现指定类型（支持基础类型、接口、泛型类型定义等）。
         /// </summary>
-        /// <param name="type">给定的当前类型。</param>
-        /// <param name="interfaceType">给定的接口类型（支持泛型类型定义）。</param>
-        /// <param name="resultType">输出此结果类型（当接口类型为泛型定义时，可用于得到泛型参数等操作）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedInterfaceType([NotNullWhen(false)] this Type? type, Type? interfaceType, out Type? resultType)
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="currentType"/> or <paramref name="implementedType"/> is null.
+        /// </exception>
+        /// <param name="currentType">给定的当前类型。</param>
+        /// <param name="implementedType">给定的已实现类型（支持基础类型、接口、泛型类型定义等）。</param>
+        /// <param name="resultType">输出此结果类型（当基础类型为泛型定义时，可用于得到泛型参数等操作）。</param>
+        /// <returns>返回是否已实现的布尔值。</returns>
+        public static bool IsImplementedType([NotNullWhen(true)] this Type? currentType,
+            Type implementedType, out Type? resultType)
         {
-            type = type.NotNull(nameof(type));
-            interfaceType = interfaceType.NotNull(nameof(interfaceType));
+            implementedType.NotNull(nameof(implementedType));
 
-            var allInterfaceTypes = type.GetInterfaces();
+            var allImplementedTypes = implementedType.IsInterface
+                ? currentType.NotNull(nameof(currentType)).GetInterfaces()
+                : currentType.GetBaseTypes(); // Extensions
 
-            // 如果判定的接口类型是泛型定义
-            if (interfaceType.IsGenericTypeDefinition)
+            // 如果已实现类型是泛型定义
+            if (implementedType.IsGenericTypeDefinition)
             {
-                resultType = allInterfaceTypes
+                resultType = allImplementedTypes?
                     .Where(type => type.IsGenericType)
-                    .FirstOrDefault(type => type.GetGenericTypeDefinition() == interfaceType);
-
-                return resultType.IsNotNull();
+                    .FirstOrDefault(type => type.GetGenericTypeDefinition() == implementedType);
+            }
+            else
+            {
+                resultType = allImplementedTypes?.FirstOrDefault(type => type == implementedType);
             }
 
-            resultType = allInterfaceTypes.FirstOrDefault(type => type == interfaceType);
-            return resultType.IsNotNull();
-        }
-
-
-        /// <summary>
-        /// 是否已实现某个基础（非接口）类型。
-        /// </summary>
-        /// <typeparam name="TBase">指定的基础类型（支持泛型类型定义）。</typeparam>
-        /// <param name="type">给定的当前类型。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedBaseType<TBase>(this Type? type)
-            => type.IsImplementedBaseType(typeof(TBase), out _);
-
-        /// <summary>
-        /// 是否已实现某个基础（非接口）类型。
-        /// </summary>
-        /// <typeparam name="TBase">指定的基础类型（支持泛型类型定义）。</typeparam>
-        /// <param name="type">给定的当前类型。</param>
-        /// <param name="resultType">输出此结果类型（当基础类型为泛型定义时，可用于得到泛型参数等操作）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedBaseType<TBase>(this Type? type, out Type? resultType)
-            => type.IsImplementedBaseType(typeof(TBase), out resultType);
-
-        /// <summary>
-        /// 是否已实现某个基础（非接口）类型。
-        /// </summary>
-        /// <param name="type">给定的当前类型。</param>
-        /// <param name="baseType">给定的基础类型（支持泛型类型定义）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedBaseType(this Type? type, Type? baseType)
-            => type.IsImplementedBaseType(baseType, out _);
-
-        /// <summary>
-        /// 是否已实现某个基础（非接口）类型。
-        /// </summary>
-        /// <param name="type">给定的当前类型。</param>
-        /// <param name="baseType">给定的基础类型（支持泛型类型定义）。</param>
-        /// <param name="resultType">输出此结果类型（当基础类型为泛型定义时，可用于得到泛型参数等操作）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsImplementedBaseType(this Type? type, Type? baseType, out Type? resultType)
-        {
-            baseType = baseType.NotNull(nameof(baseType));
-
-            if (baseType.IsInterface)
-                throw new NotSupportedException($"The base type '{baseType}' does not support interface.");
-
-            var allBaseTypes = type.GetBaseTypes();
-
-            // 如果判定的基础类型是泛型定义
-            if (baseType.IsGenericTypeDefinition)
-            {
-                resultType = allBaseTypes
-                    .Where(type => type.IsGenericType)
-                    .FirstOrDefault(type => type.GetGenericTypeDefinition() == baseType);
-
-                return resultType.IsNotNull();
-            }
-
-            resultType = allBaseTypes.FirstOrDefault(type => type == baseType);
-            return resultType.IsNotNull();
+            return resultType is not null;
         }
 
         #endregion
@@ -313,22 +270,32 @@ namespace Librame.Extensions
 
         #region IsType
 
+        private static readonly Type NullableGenericTypeDefinition = typeof(Nullable<>);
+
+
         /// <summary>
         /// 是具体类型（即非抽象、接口类型）。
         /// </summary>
         /// <param name="type">给定的类型。</param>
         /// <returns>返回布尔值。</returns>
-        public static bool IsConcreteType([NotNullWhen(true)] this Type type)
-            => type.NotNull(nameof(type), t => !t.IsAbstract && !t.IsInterface);
+        public static bool IsConcreteType(this Type type)
+        {
+            type.NotNull(nameof(type));
+
+            return !type.IsAbstract && !type.IsInterface;
+        }
 
         /// <summary>
         /// 是可空泛类型。
         /// </summary>
         /// <param name="type">给定的类型。</param>
         /// <returns>返回布尔值。</returns>
-        public static bool IsNullableType([NotNullWhen(true)] this Type type)
-            => type.NotNull(nameof(type),
-                t => t.IsGenericType && t.GetGenericTypeDefinition() == ExtensionDefaults.NullableGenericTypeDefinition);
+        public static bool IsNullableType(this Type type)
+        {
+            type.NotNull(nameof(type));
+
+            return type.IsGenericType && type.GetGenericTypeDefinition() == NullableGenericTypeDefinition;
+        }
 
         #endregion
 

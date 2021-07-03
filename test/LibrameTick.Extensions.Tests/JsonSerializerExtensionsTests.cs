@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Xunit;
 
-namespace Librame.Extensions.Tests
+namespace Librame.Extensions
 {
     public class JsonSerializerExtensionsTests
     {
@@ -13,8 +13,10 @@ namespace Librame.Extensions.Tests
         }
 
 
+        #region ReadJson and WriteJson
+
         [Fact]
-        public void ReadAndWriteJson()
+        public void ReadJsonAndWriteJsonTest()
         {
             var options = new TestOptions
             {
@@ -31,6 +33,8 @@ namespace Librame.Extensions.Tests
 
             File.Delete(path);
         }
+
+        #endregion
 
     }
 }

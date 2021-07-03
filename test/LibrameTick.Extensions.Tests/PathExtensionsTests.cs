@@ -1,8 +1,7 @@
-using System;
 using System.IO;
 using Xunit;
 
-namespace Librame.Extensions.Tests
+namespace Librame.Extensions
 {
     public class PathExtensionsTests
     {
@@ -29,6 +28,17 @@ namespace Librame.Extensions.Tests
         #region CombinePath
 
         [Fact]
+        public void CombinePathTest()
+        {
+            var root = PathExtensions.CurrentDirectory;
+            var str = nameof(PathExtensionsTests);
+            var path = root.CombinePath(str);
+
+            Assert.StartsWith(root, path);
+            Assert.EndsWith(str, path);
+        }
+
+        [Fact]
         public void CombineRelativePathTest()
         {
             var str = nameof(PathExtensionsTests);
@@ -39,7 +49,7 @@ namespace Librame.Extensions.Tests
         #endregion
 
 
-        #region InvalidPath
+        #region InvalidPathChars
 
         [Fact]
         public void HasInvalidPathCharsTest()
@@ -69,7 +79,7 @@ namespace Librame.Extensions.Tests
         [Fact]
         public void TrimDevelopmentRelativePathTest()
         {
-            var path = Environment.CurrentDirectory;
+            var path = PathExtensions.CurrentDirectory;
             Assert.NotEqual(path, path.TrimDevelopmentRelativePath());
         }
 

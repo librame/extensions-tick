@@ -59,7 +59,7 @@ namespace Librame.Extensions.Core.Cryptography
         {
             EnsureAesOptions(options);
 
-            return AlgorithmUtility.RunAes(aes =>
+            return AlgorithmExtensions.RunAes(aes =>
             {
                 var transform = aes.CreateEncryptor();
                 return transform.TransformFinalBlock(buffer, 0, buffer.Length);
@@ -76,7 +76,7 @@ namespace Librame.Extensions.Core.Cryptography
         {
             EnsureAesOptions(options);
 
-            return AlgorithmUtility.RunAes(aes =>
+            return AlgorithmExtensions.RunAes(aes =>
             {
                 var transform = aes.CreateDecryptor();
                 return transform.TransformFinalBlock(buffer, 0, buffer.Length);

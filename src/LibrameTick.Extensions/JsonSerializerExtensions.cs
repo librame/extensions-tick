@@ -30,13 +30,13 @@ namespace Librame.Extensions
         /// </summary>
         /// <typeparam name="T">指定的反序列化类型。</typeparam>
         /// <param name="filePath">给定的文件路径。</param>
-        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="ExtensionDefaults.CurrentEncoding"/>）。</param>
+        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
         /// <returns>返回反序列化对象。</returns>
         public static T? ReadJson<T>(this string filePath, Encoding? encoding = null,
             JsonSerializerOptions? options = null)
         {
-            var json = File.ReadAllText(filePath, encoding ?? ExtensionDefaults.CurrentEncoding);
+            var json = File.ReadAllText(filePath, encoding ?? EncodingExtensions.UTF8Encoding);
             return JsonSerializer.Deserialize<T>(json, options);
         }
 
@@ -45,13 +45,13 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="filePath">给定的文件路径。</param>
         /// <param name="type">给定的反序列化对象类型。</param>
-        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="ExtensionDefaults.CurrentEncoding"/>）。</param>
+        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
         /// <returns>返回反序列化对象。</returns>
         public static object? ReadJson(this string filePath, Type type, Encoding? encoding = null,
             JsonSerializerOptions? options = null)
         {
-            var json = File.ReadAllText(filePath, encoding ?? ExtensionDefaults.CurrentEncoding);
+            var json = File.ReadAllText(filePath, encoding ?? EncodingExtensions.UTF8Encoding);
             return JsonSerializer.Deserialize(json, type, options);
         }
 
@@ -61,7 +61,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="filePath">给定的文件路径。</param>
         /// <param name="value">给定的对象值。</param>
-        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="ExtensionDefaults.CurrentEncoding"/>）。</param>
+        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
         /// <param name="autoCreateDirectory">自动创建目录（可选；默认启用）。</param>
         /// <returns>返回 JSON 字符串。</returns>
@@ -73,7 +73,7 @@ namespace Librame.Extensions
             if (autoCreateDirectory)
                 filePath.CreateDirectory();
 
-            File.WriteAllText(filePath, json, encoding ?? ExtensionDefaults.CurrentEncoding);
+            File.WriteAllText(filePath, json, encoding ?? EncodingExtensions.UTF8Encoding);
             return json;
         }
 
