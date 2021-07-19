@@ -54,8 +54,7 @@ namespace Librame.Extensions.Data
             ranking.NotNull(nameof(ranking));
             newRankFactory.NotNull(nameof(newRankFactory));
 
-            return Task.Run(() => ranking.Rank = newRankFactory.Invoke(ranking.Rank),
-                cancellationToken).AsValueTask();
+            return cancellationToken.RunValueTask(() => ranking.Rank = newRankFactory.Invoke(ranking.Rank));
         }
 
 
@@ -71,8 +70,8 @@ namespace Librame.Extensions.Data
             ranking.NotNull(nameof(ranking));
             newRankFactory.NotNull(nameof(newRankFactory));
 
-            var newRank = ranking.GetObjectRank();
-            return ranking.SetObjectRank(newRankFactory.Invoke(newRank));
+            var currentRank = ranking.GetObjectRank();
+            return ranking.SetObjectRank(newRankFactory.Invoke(currentRank));
         }
 
         /// <summary>
@@ -88,10 +87,10 @@ namespace Librame.Extensions.Data
             ranking.NotNull(nameof(ranking));
             newRankFactory.NotNull(nameof(newRankFactory));
 
-            var newRank = await ranking.GetObjectRankAsync(cancellationToken)
+            var currentRank = await ranking.GetObjectRankAsync(cancellationToken)
                 .ConfigureAwaitWithoutContext();
 
-            return await ranking.SetObjectRankAsync(newRankFactory.Invoke(newRank),
+            return await ranking.SetObjectRankAsync(newRankFactory.Invoke(currentRank),
                 cancellationToken).ConfigureAwaitWithoutContext();
         }
 

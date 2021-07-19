@@ -12,25 +12,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Librame.Extensions.Collections
 {
-    using Core.Identifiers;
+    using Data;
 
     /// <summary>
-    /// 可树形接口。
+    /// 定义一个树形列表接口。
     /// </summary>
-    /// <typeparam name="T">指定实现 <see cref="IParentIdentifier{TId}"/> 的元素类型。</typeparam>
+    /// <typeparam name="TItem">指定实现 <see cref="IParentIdentifier{TId}"/>、<see cref="IEquatable{TItem}"/> 等接口的项类型。</typeparam>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
-    [SuppressMessage("Microsoft.Design", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
-    public interface ITreeable<T, TId> : IEnumerable<TreeingNode<T, TId>>
-        where T : IParentIdentifier<TId>
+    public interface ITreeingList<TItem, TId> : ICollection<TreeingNode<TItem, TId>>
+        where TItem : IParentIdentifier<TId>, IEquatable<TItem>
         where TId : IEquatable<TId>
     {
-        /// <summary>
-        /// 节点数。
-        /// </summary>
-        int Count { get; }
     }
 }

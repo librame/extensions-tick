@@ -10,12 +10,12 @@ namespace Librame.Extensions
         public void AsTest()
         {
             object? obj = 1;
-            Assert.Equal(1, obj.AsOrDefault<int>());
+            Assert.Equal(1, obj.AsOrDefaultIfNull<int>());
 
             obj = null;
             Assert.Throws<ArgumentNullException>(() =>
             {
-                obj!.AsIfNotNull<int>(nameof(obj));
+                obj!.AsNotNull<int>(nameof(obj));
             });
         }
 

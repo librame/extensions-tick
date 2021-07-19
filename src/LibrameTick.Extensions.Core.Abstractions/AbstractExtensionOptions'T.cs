@@ -38,16 +38,12 @@ namespace Librame.Extensions.Core
 
         private void AbstractExtensionOptions_PropertyChanging(object? sender, PropertyChangingEventArgs e)
         {
-#pragma warning disable CS8604 // 可能的 null 引用参数。
-            PropertyChangingAction?.Invoke((TOptions)sender, e as NotifyPropertyChangingEventArgs);
-#pragma warning restore CS8604 // 可能的 null 引用参数。
+            PropertyChangingAction?.Invoke((TOptions)sender!, (NotifyPropertyChangingEventArgs)e);
         }
 
         private void AbstractExtensionOptions_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-#pragma warning disable CS8604 // 可能的 null 引用参数。
-            PropertyChangedAction?.Invoke((TOptions)sender, e as NotifyPropertyChangedEventArgs);
-#pragma warning restore CS8604 // 可能的 null 引用参数。
+            PropertyChangedAction?.Invoke((TOptions)sender!, (NotifyPropertyChangedEventArgs)e);
         }
 
 

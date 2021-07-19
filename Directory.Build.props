@@ -2,14 +2,13 @@
   <Import Project="build\Version.props" />
     
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
     <ApplicationIcon>..\..\Librame.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Librame Pong</Authors>
     <Company>https://github.com/librame</Company>
     <Copyright>Copyright © Librame 2012-2021</Copyright>
-    <PackageTags>net5</PackageTags>
+    <PackageTags>net6</PackageTags>
     <PackageIcon>Librame.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/librame/extensions-tick</PackageProjectUrl>

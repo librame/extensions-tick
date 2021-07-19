@@ -23,5 +23,14 @@ namespace Librame.Extensions.Data
         /// 排名。
         /// </summary>
         TRank Rank { get; set; }
+
+
+        /// <summary>
+        /// 转换为排名。
+        /// </summary>
+        /// <param name="rank">给定的排名对象。</param>
+        /// <param name="paramName">给定的参数名称。</param>
+        /// <returns>返回 <typeparamref name="TRank"/>。</returns>
+        TRank ToRank(object rank, string? paramName);
     }
 }

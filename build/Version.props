@@ -1,7 +1,7 @@
 <Project>
-    <PropertyGroup>
-        <AssemblyVersion>5.0.1</AssemblyVersion>
-        <FileVersion>5.0.1.58</FileVersion>
-        <Version>5.0.1</Version>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <FileVersion>6.0.1.58</FileVersion>
+    <Version>6.0.1</Version>
+  </PropertyGroup>
 </Project>

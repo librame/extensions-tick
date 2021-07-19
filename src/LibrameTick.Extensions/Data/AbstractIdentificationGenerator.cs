@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Services;
+    using Core;
 
     /// <summary>
     /// 抽象标识生成器接口。
@@ -34,36 +34,36 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 生成标识。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>。</param>
         /// <returns>返回 <typeparamref name="TId"/>。</returns>
-        public abstract TId GenerateId(IClockService clock);
+        public abstract TId GenerateId(IClock clock);
 
         /// <summary>
         /// 异步生成标识。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <typeparamref name="TId"/> 的异步操作。</returns>
-        public abstract Task<TId> GenerateIdAsync(IClockService clock,
+        public abstract Task<TId> GenerateIdAsync(IClock clock,
             CancellationToken cancellationToken = default);
 
 
         /// <summary>
         /// 生成标识对象。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>。</param>
         /// <returns>返回标识符对象。</returns>
-        public virtual object GenerateObjectId(IClockService clock)
+        public virtual object? GenerateObjectId(IClock clock)
             => GenerateId(clock);
 
         /// <summary>
         /// 异步生成标识对象。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识符对象的异步操作。</returns>
-        public virtual async Task<object> GenerateObjectIdAsync(IClockService clock,
+        public virtual async Task<object?> GenerateObjectIdAsync(IClock clock,
             CancellationToken cancellationToken = default)
-            => await GenerateIdAsync(clock, cancellationToken).ConfigureAwait();
+            => await GenerateIdAsync(clock, cancellationToken).ConfigureAwaitWithoutContext();
     }
 }

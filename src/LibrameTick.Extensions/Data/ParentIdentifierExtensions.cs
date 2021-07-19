@@ -11,7 +11,6 @@
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,6 +21,7 @@ namespace Librame.Extensions.Data
     /// </summary>
     public static class ParentIdentifierExtensions
     {
+
         /// <summary>
         /// 异步设置父标识。
         /// </summary>
@@ -37,7 +37,7 @@ namespace Librame.Extensions.Data
             parentIdentifier.NotNull(nameof(parentIdentifier));
             newParentIdFactory.NotNull(nameof(newParentIdFactory));
 
-            return cancellationToken.RunOrCancelValueAsync(()
+            return cancellationToken.RunValueTask(()
                 => parentIdentifier.ParentId = newParentIdFactory.Invoke(parentIdentifier.ParentId));
         }
 
@@ -49,16 +49,16 @@ namespace Librame.Extensions.Data
         /// <param name="newParentIdFactory">给定的新对象父标识工厂方法。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含父标识（兼容各种引用与值类型标识）的异步操作。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
         public static async ValueTask<object> SetObjectParentIdAsync(this IObjectParentIdentifier parentIdentifier,
             Func<object, object> newParentIdFactory, CancellationToken cancellationToken = default)
         {
             parentIdentifier.NotNull(nameof(parentIdentifier));
             newParentIdFactory.NotNull(nameof(newParentIdFactory));
 
-            var newParentId = await parentIdentifier.GetObjectParentIdAsync(cancellationToken).ConfigureAwait();
-            return await parentIdentifier.SetObjectParentIdAsync(newParentIdFactory.Invoke(newParentId), cancellationToken)
-                .ConfigureAwait();
+            var currentParentId = await parentIdentifier.GetObjectParentIdAsync(cancellationToken).ConfigureAwaitWithoutContext();
+
+            return await parentIdentifier.SetObjectParentIdAsync(newParentIdFactory.Invoke(currentParentId), cancellationToken)
+                .ConfigureAwaitWithoutContext();
         }
 
     }

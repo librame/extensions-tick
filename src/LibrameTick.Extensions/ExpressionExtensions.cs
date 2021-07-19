@@ -54,10 +54,10 @@ namespace Librame.Extensions
         /// </summary>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <typeparam name="TValue">指定的属性值类型。</typeparam>
-        /// <param name="source">给定要获取属性值的类型实例。</param>
         /// <param name="propertyExpression">给定的属性表达式。</param>
+        /// <param name="source">给定要获取属性值的类型实例。</param>
         /// <returns>返回属性值。</returns>
-        public static TValue? AsPropertyValue<T, TValue>(this T source, Expression<Func<T, TValue>> propertyExpression)
+        public static TValue? AsPropertyValue<T, TValue>(this Expression<Func<T, TValue>> propertyExpression, T source)
         {
             source.NotNull(nameof(source));
 

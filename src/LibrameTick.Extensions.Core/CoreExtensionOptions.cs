@@ -41,7 +41,7 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 字符编码。
         /// </summary>
-        [JsonConverter(typeof(EncodingJsonConverter))]
+        [JsonConverter(typeof(JsonStringEncodingConverter))]
         public Encoding Encoding { get; set; }
 
 

@@ -37,7 +37,7 @@ namespace Librame.Extensions.Data
         /// </summary>
         protected AbstractPublicationIdentifier()
         {
-            PublishedTime = CreatedTime = DataSettings.Preference.DefaultCreatedTime;
+            PublishedTime = CreatedTime = DateTimeExtensions.GetUtcNow();
             PublishedTimeTicks = CreatedTimeTicks = PublishedTime.Ticks;
         }
 
@@ -45,13 +45,13 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 创建时间周期数。
         /// </summary>
-        [Display(Name = nameof(CreatedTimeTicks), ResourceType = typeof(AbstractEntityResource))]
+        [Display(Name = nameof(CreatedTimeTicks), ResourceType = typeof(DataResource))]
         public virtual long CreatedTimeTicks { get; set; }
 
         /// <summary>
         /// 发表时间周期数。
         /// </summary>
-        [Display(Name = nameof(PublishedTimeTicks), ResourceType = typeof(AbstractEntityResource))]
+        [Display(Name = nameof(PublishedTimeTicks), ResourceType = typeof(DataResource))]
         public virtual long PublishedTimeTicks { get; set; }
 
 
@@ -62,8 +62,9 @@ namespace Librame.Extensions.Data
         /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
         public override object SetObjectCreatedTime(object newCreatedTime)
         {
-            CreatedTime = newCreatedTime.CastTo<object, DateTimeOffset>(nameof(newCreatedTime));
+            CreatedTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
             CreatedTimeTicks = CreatedTime.Ticks;
+
             return newCreatedTime;
         }
 
@@ -76,11 +77,11 @@ namespace Librame.Extensions.Data
         public override ValueTask<object> SetObjectCreatedTimeAsync(object newCreatedTime,
             CancellationToken cancellationToken = default)
         {
-            var realNewCreatedTime = newCreatedTime.CastTo<object, DateTimeOffset>(nameof(newCreatedTime));
+            var createdTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
-                CreatedTime = realNewCreatedTime;
+                CreatedTime = createdTime;
                 CreatedTimeTicks = CreatedTime.Ticks;
                 return newCreatedTime;
             });
@@ -94,8 +95,9 @@ namespace Librame.Extensions.Data
         /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
         public override object SetObjectPublishedTime(object newPublishedTime)
         {
-            PublishedTime = newPublishedTime.CastTo<object, DateTimeOffset>(nameof(newPublishedTime));
+            PublishedTime = ToCreatedTime(newPublishedTime, nameof(newPublishedTime));
             PublishedTimeTicks = PublishedTime.Ticks;
+
             return newPublishedTime;
         }
 
@@ -105,14 +107,16 @@ namespace Librame.Extensions.Data
         /// <param name="newPublishedTime">给定的新发表时间对象。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-        public override ValueTask<object> SetObjectPublishedTimeAsync(object newPublishedTime, CancellationToken cancellationToken = default)
+        public override ValueTask<object> SetObjectPublishedTimeAsync(object newPublishedTime,
+            CancellationToken cancellationToken = default)
         {
-            var realNewPublishedTime = newPublishedTime.CastTo<object, DateTimeOffset>(nameof(newPublishedTime));
+            var publishedTime = ToCreatedTime(newPublishedTime, nameof(newPublishedTime));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
-                PublishedTime = realNewPublishedTime;
+                PublishedTime = publishedTime;
                 PublishedTimeTicks = PublishedTime.Ticks;
+
                 return newPublishedTime;
             });
         }
@@ -143,22 +147,53 @@ namespace Librame.Extensions.Data
         where TPublishedTime : struct
     {
         /// <summary>
-        /// 发表时间。
+        /// 发表为（如：资源链接）。
         /// </summary>
-        [Display(Name = nameof(PublishedTime), ResourceType = typeof(AbstractEntityResource))]
-        public virtual TPublishedTime PublishedTime { get; set; }
+        [Display(Name = nameof(PublishedAs), ResourceType = typeof(DataResource))]
+        public virtual string? PublishedAs { get; set; }
 
         /// <summary>
         /// 发表者。
         /// </summary>
-        [Display(Name = nameof(PublishedBy), ResourceType = typeof(AbstractEntityResource))]
-        public virtual TPublishedBy PublishedBy { get; set; }
+        [Display(Name = nameof(PublishedBy), ResourceType = typeof(DataResource))]
+        public virtual TPublishedBy? PublishedBy { get; set; }
 
         /// <summary>
-        /// 发表为（如：资源链接）。
+        /// 发表时间。
         /// </summary>
-        [Display(Name = nameof(PublishedAs), ResourceType = typeof(AbstractEntityResource))]
-        public virtual string PublishedAs { get; set; }
+        [Display(Name = nameof(PublishedTime), ResourceType = typeof(DataResource))]
+        public virtual TPublishedTime PublishedTime { get; set; }
+
+
+        /// <summary>
+        /// 发表者类型。
+        /// </summary>
+        [NotMapped]
+        public virtual Type PublishedByType
+            => CreatedByType;
+
+        /// <summary>
+        /// 发表时间类型。
+        /// </summary>
+        [NotMapped]
+        public virtual Type PublishedTimeType
+            => CreatedTimeType;
+
+
+        /// <summary>
+        /// 获取对象发表者。
+        /// </summary>
+        /// <returns>返回发表者（兼容标识或字符串）。</returns>
+        public virtual object? GetObjectPublishedBy()
+            => PublishedBy;
+
+        /// <summary>
+        /// 异步获取对象发表者。
+        /// </summary>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含发表者（兼容标识或字符串）的异步操作。</returns>
+        public virtual ValueTask<object?> GetObjectPublishedByAsync(CancellationToken cancellationToken)
+            => cancellationToken.RunValueTask(() => (object?)PublishedBy);
 
 
         /// <summary>
@@ -174,23 +209,37 @@ namespace Librame.Extensions.Data
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
         public virtual ValueTask<object> GetObjectPublishedTimeAsync(CancellationToken cancellationToken)
-            => cancellationToken.RunOrCancelValueAsync(() => (object)PublishedTime);
+            => cancellationToken.RunValueTask(() => (object)PublishedTime);
 
 
         /// <summary>
-        /// 获取对象发表者。
+        /// 设置对象发表者。
         /// </summary>
-        /// <returns>返回发表者（兼容标识或字符串）。</returns>
-        public virtual object GetObjectPublishedBy()
-            => PublishedBy;
+        /// <param name="newPublishedBy">给定的新发表者对象。</param>
+        /// <returns>返回一个包含发表者（兼容标识或字符串）的异步操作。</returns>
+        public virtual object? SetObjectPublishedBy(object? newPublishedBy)
+        {
+            PublishedBy = ToCreatedBy(newPublishedBy, nameof(newPublishedBy));
+            return newPublishedBy;
+        }
 
         /// <summary>
-        /// 异步获取对象发表者。
+        /// 异步设置对象发表者。
         /// </summary>
+        /// <param name="newPublishedBy">给定的新发表者对象。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含发表者（兼容标识或字符串）的异步操作。</returns>
-        public virtual ValueTask<object> GetObjectPublishedByAsync(CancellationToken cancellationToken)
-            => cancellationToken.RunOrCancelValueAsync(() => (object)PublishedBy);
+        public virtual ValueTask<object?> SetObjectPublishedByAsync(object? newPublishedBy,
+            CancellationToken cancellationToken = default)
+        {
+            var publishedBy = ToCreatedBy(newPublishedBy, nameof(newPublishedBy));
+
+            return cancellationToken.RunValueTask(() =>
+            {
+                PublishedBy = publishedBy;
+                return newPublishedBy;
+            });
+        }
 
 
         /// <summary>
@@ -200,7 +249,7 @@ namespace Librame.Extensions.Data
         /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
         public virtual object SetObjectPublishedTime(object newPublishedTime)
         {
-            PublishedTime = newPublishedTime.CastTo<object, TPublishedTime>(nameof(newPublishedTime));
+            PublishedTime = ToCreatedTime(newPublishedTime, nameof(newPublishedTime));
             return newPublishedTime;
         }
 
@@ -213,42 +262,12 @@ namespace Librame.Extensions.Data
         public virtual ValueTask<object> SetObjectPublishedTimeAsync(object newPublishedTime,
             CancellationToken cancellationToken = default)
         {
-            var realNewPublishedTime = newPublishedTime.CastTo<object, TPublishedTime>(nameof(newPublishedTime));
+            var realNewPublishedTime = ToCreatedTime(newPublishedTime, nameof(newPublishedTime));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
                 PublishedTime = realNewPublishedTime;
                 return newPublishedTime;
-            });
-        }
-
-
-        /// <summary>
-        /// 设置对象发表者。
-        /// </summary>
-        /// <param name="newPublishedBy">给定的新发表者对象。</param>
-        /// <returns>返回一个包含发表者（兼容标识或字符串）的异步操作。</returns>
-        public virtual object SetObjectPublishedBy(object newPublishedBy)
-        {
-            PublishedBy = newPublishedBy.CastTo<object, TPublishedBy>(nameof(newPublishedBy));
-            return newPublishedBy;
-        }
-
-        /// <summary>
-        /// 异步设置对象发表者。
-        /// </summary>
-        /// <param name="newPublishedBy">给定的新发表者对象。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含发表者（兼容标识或字符串）的异步操作。</returns>
-        public virtual ValueTask<object> SetObjectPublishedByAsync(object newPublishedBy,
-            CancellationToken cancellationToken = default)
-        {
-            var realNewPublishedBy = newPublishedBy.CastTo<object, TPublishedBy>(nameof(newPublishedBy));
-
-            return cancellationToken.RunOrCancelValueAsync(() =>
-            {
-                PublishedBy = realNewPublishedBy;
-                return newPublishedBy;
             });
         }
 

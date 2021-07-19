@@ -37,7 +37,7 @@ namespace Librame.Extensions.Data
         /// </summary>
         protected AbstractUpdationIdentifier()
         {
-            UpdatedTime = CreatedTime = DataSettings.Preference.DefaultCreatedTime;
+            UpdatedTime = CreatedTime = DateTimeExtensions.GetUtcNow();
             UpdatedTimeTicks = CreatedTimeTicks = UpdatedTime.Ticks;
         }
 
@@ -45,13 +45,13 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 创建时间周期数。
         /// </summary>
-        [Display(Name = nameof(CreatedTimeTicks), ResourceType = typeof(AbstractEntityResource))]
+        [Display(Name = nameof(CreatedTimeTicks), ResourceType = typeof(DataResource))]
         public virtual long CreatedTimeTicks { get; set; }
 
         /// <summary>
         /// 更新时间周期数。
         /// </summary>
-        [Display(Name = nameof(UpdatedTimeTicks), ResourceType = typeof(AbstractEntityResource))]
+        [Display(Name = nameof(UpdatedTimeTicks), ResourceType = typeof(DataResource))]
         public virtual long UpdatedTimeTicks { get; set; }
 
 
@@ -62,8 +62,9 @@ namespace Librame.Extensions.Data
         /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
         public override object SetObjectCreatedTime(object newCreatedTime)
         {
-            CreatedTime = newCreatedTime.CastTo<object, DateTimeOffset>(nameof(newCreatedTime));
+            CreatedTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
             CreatedTimeTicks = CreatedTime.Ticks;
+
             return newCreatedTime;
         }
 
@@ -76,12 +77,13 @@ namespace Librame.Extensions.Data
         public override ValueTask<object> SetObjectCreatedTimeAsync(object newCreatedTime,
             CancellationToken cancellationToken = default)
         {
-            var realNewCreatedTime = newCreatedTime.CastTo<object, DateTimeOffset>(nameof(newCreatedTime));
+            var createdTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
-                CreatedTime = realNewCreatedTime;
+                CreatedTime = createdTime;
                 CreatedTimeTicks = CreatedTime.Ticks;
+
                 return newCreatedTime;
             });
         }
@@ -94,8 +96,9 @@ namespace Librame.Extensions.Data
         /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
         public override object SetObjectUpdatedTime(object newUpdatedTime)
         {
-            UpdatedTime = newUpdatedTime.CastTo<object, DateTimeOffset>(nameof(newUpdatedTime));
+            UpdatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
             UpdatedTimeTicks = UpdatedTime.Ticks;
+
             return newUpdatedTime;
         }
 
@@ -107,11 +110,11 @@ namespace Librame.Extensions.Data
         /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
         public override ValueTask<object> SetObjectUpdatedTimeAsync(object newUpdatedTime, CancellationToken cancellationToken = default)
         {
-            var realNewUpdatedTime = newUpdatedTime.CastTo<object, DateTimeOffset>(nameof(newUpdatedTime));
+            var updatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
-                UpdatedTime = realNewUpdatedTime;
+                UpdatedTime = updatedTime;
                 UpdatedTimeTicks = UpdatedTime.Ticks;
                 return newUpdatedTime;
             });
@@ -136,8 +139,7 @@ namespace Librame.Extensions.Data
     /// <typeparam name="TUpdatedTime">指定的更新时间类型（提供对 DateTime 或 DateTimeOffset 的支持）。</typeparam>
     [NotMapped]
     public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
-        : AbstractCreationIdentifier<TId, TUpdatedBy, TUpdatedTime>
-        , IUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
+        : AbstractCreationIdentifier<TId, TUpdatedBy, TUpdatedTime>, IUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
         where TId : IEquatable<TId>
         where TUpdatedBy : IEquatable<TUpdatedBy>
         where TUpdatedTime : struct
@@ -145,14 +147,45 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 更新者。
         /// </summary>
-        [Display(Name = nameof(UpdatedBy), ResourceType = typeof(AbstractEntityResource))]
-        public virtual TUpdatedBy UpdatedBy { get; set; }
+        [Display(Name = nameof(UpdatedBy), ResourceType = typeof(DataResource))]
+        public virtual TUpdatedBy? UpdatedBy { get; set; }
 
         /// <summary>
         /// 更新时间。
         /// </summary>
-        [Display(Name = nameof(UpdatedTime), ResourceType = typeof(AbstractEntityResource))]
+        [Display(Name = nameof(UpdatedTime), ResourceType = typeof(DataResource))]
         public virtual TUpdatedTime UpdatedTime { get; set; }
+
+
+        /// <summary>
+        /// 更新者类型。
+        /// </summary>
+        [NotMapped]
+        public virtual Type UpdatedByType
+            => CreatedByType;
+
+        /// <summary>
+        /// 更新时间类型。
+        /// </summary>
+        [NotMapped]
+        public virtual Type UpdatedTimeType
+            => CreatedTimeType;
+
+
+        /// <summary>
+        /// 获取对象更新者。
+        /// </summary>
+        /// <returns>返回更新者（兼容标识或字符串）。</returns>
+        public virtual object? GetObjectUpdatedBy()
+            => UpdatedBy;
+
+        /// <summary>
+        /// 异步获取对象更新者。
+        /// </summary>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含更新者（兼容标识或字符串）的异步操作。</returns>
+        public virtual ValueTask<object?> GetObjectUpdatedByAsync(CancellationToken cancellationToken)
+            => cancellationToken.RunValueTask(() => (object?)UpdatedBy);
 
 
         /// <summary>
@@ -168,23 +201,37 @@ namespace Librame.Extensions.Data
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
         public virtual ValueTask<object> GetObjectUpdatedTimeAsync(CancellationToken cancellationToken)
-            => cancellationToken.RunOrCancelValueAsync(() => (object)UpdatedTime);
+            => cancellationToken.RunValueTask(() => (object)UpdatedTime);
 
 
         /// <summary>
-        /// 获取对象更新者。
+        /// 设置对象更新者。
         /// </summary>
-        /// <returns>返回更新者（兼容标识或字符串）。</returns>
-        public virtual object GetObjectUpdatedBy()
-            => UpdatedBy;
+        /// <param name="newUpdatedBy">给定的新更新者对象。</param>
+        /// <returns>返回创建者（兼容标识或字符串）。</returns>
+        public virtual object? SetObjectUpdatedBy(object? newUpdatedBy)
+        {
+            UpdatedBy = ToCreatedBy(newUpdatedBy, nameof(newUpdatedBy));
+            return newUpdatedBy;
+        }
 
         /// <summary>
-        /// 异步获取对象更新者。
+        /// 异步设置对象更新者。
         /// </summary>
+        /// <param name="newUpdatedBy">给定的新更新者对象。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含更新者（兼容标识或字符串）的异步操作。</returns>
-        public virtual ValueTask<object> GetObjectUpdatedByAsync(CancellationToken cancellationToken)
-            => cancellationToken.RunOrCancelValueAsync(() => (object)UpdatedBy);
+        /// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
+        public virtual ValueTask<object?> SetObjectUpdatedByAsync(object? newUpdatedBy,
+            CancellationToken cancellationToken = default)
+        {
+            var updatedBy = ToCreatedBy(newUpdatedBy, nameof(newUpdatedBy));
+
+            return cancellationToken.RunValueTask(() =>
+            {
+                UpdatedBy = updatedBy;
+                return newUpdatedBy;
+            });
+        }
 
 
         /// <summary>
@@ -194,7 +241,7 @@ namespace Librame.Extensions.Data
         /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
         public virtual object SetObjectUpdatedTime(object newUpdatedTime)
         {
-            UpdatedTime = newUpdatedTime.CastTo<object, TUpdatedTime>(nameof(newUpdatedTime));
+            UpdatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
             return newUpdatedTime;
         }
 
@@ -207,42 +254,12 @@ namespace Librame.Extensions.Data
         public virtual ValueTask<object> SetObjectUpdatedTimeAsync(object newUpdatedTime,
             CancellationToken cancellationToken = default)
         {
-            var realNewUpdatedTime = newUpdatedTime.CastTo<object, TUpdatedTime>(nameof(newUpdatedTime));
+            var updatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
-                UpdatedTime = realNewUpdatedTime;
+                UpdatedTime = updatedTime;
                 return newUpdatedTime;
-            });
-        }
-
-
-        /// <summary>
-        /// 设置对象更新者。
-        /// </summary>
-        /// <param name="newUpdatedBy">给定的新更新者对象。</param>
-        /// <returns>返回创建者（兼容标识或字符串）。</returns>
-        public virtual object SetObjectUpdatedBy(object newUpdatedBy)
-        {
-            UpdatedBy = newUpdatedBy.CastTo<object, TUpdatedBy>(nameof(newUpdatedBy));
-            return newUpdatedBy;
-        }
-
-        /// <summary>
-        /// 异步设置对象更新者。
-        /// </summary>
-        /// <param name="newUpdatedBy">给定的新更新者对象。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
-        public virtual ValueTask<object> SetObjectUpdatedByAsync(object newUpdatedBy,
-            CancellationToken cancellationToken = default)
-        {
-            var realNewUpdatedBy = newUpdatedBy.CastTo<object, TUpdatedBy>(nameof(newUpdatedBy));
-
-            return cancellationToken.RunOrCancelValueAsync(() =>
-            {
-                UpdatedBy = realNewUpdatedBy;
-                return newUpdatedBy;
             });
         }
 

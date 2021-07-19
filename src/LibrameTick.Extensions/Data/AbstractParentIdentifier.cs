@@ -18,8 +18,7 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Core.Identifiers;
-    using Data.Resources;
+    using Resources;
 
     /// <summary>
     /// 抽象父标识。
@@ -29,11 +28,16 @@ namespace Librame.Extensions.Data
     public abstract class AbstractParentIdentifier<TId> : AbstractIdentifier<TId>, IParentIdentifier<TId>
         where TId : IEquatable<TId>
     {
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
         /// <summary>
         /// 父标识。
         /// </summary>
-        [Display(Name = nameof(ParentId), GroupName = "GlobalGroup", ResourceType = typeof(AbstractEntityResource))]
+        [Display(Name = nameof(ParentId), GroupName = nameof(DataResource.DataGroup), ResourceType = typeof(DataResource))]
         public virtual TId ParentId { get; set; }
+
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
 
         /// <summary>
@@ -49,7 +53,7 @@ namespace Librame.Extensions.Data
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
         public virtual ValueTask<object> GetObjectParentIdAsync(CancellationToken cancellationToken)
-            => cancellationToken.RunOrCancelValueAsync(() => (object)ParentId);
+            => cancellationToken.RunValueTask(() => (object)ParentId);
 
 
         /// <summary>
@@ -59,7 +63,7 @@ namespace Librame.Extensions.Data
         /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
         public virtual object SetObjectParentId(object newParentId)
         {
-            ParentId = newParentId.CastTo<object, TId>(nameof(newParentId));
+            ParentId = ToId(newParentId, nameof(newParentId));
             return newParentId;
         }
 
@@ -71,11 +75,11 @@ namespace Librame.Extensions.Data
         /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
         public virtual ValueTask<object> SetObjectParentIdAsync(object newParentId, CancellationToken cancellationToken = default)
         {
-            var realNewParentId = newParentId.CastTo<object, TId>(nameof(newParentId));
+            var parentId = ToId(newParentId, nameof(newParentId));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
-                ParentId = realNewParentId;
+                ParentId = parentId;
                 return newParentId;
             });
         }

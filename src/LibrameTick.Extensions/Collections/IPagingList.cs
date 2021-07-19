@@ -29,13 +29,13 @@ namespace Librame.Extensions.Collections
 
 
         /// <summary>
-        /// 筛选列表。
+        /// 筛选列表（通常用于内存分页）。
         /// </summary>
         /// <param name="func">给定的筛选方法。</param>
         void Filtrate(Func<IEnumerable<T>, IEnumerable<T>> func);
 
         /// <summary>
-        /// 筛选列表。
+        /// 筛选列表（通常用于动态分页）。
         /// </summary>
         /// <param name="func">给定的筛选方法。</param>
         void Filtrate(Func<IQueryable<T>, IQueryable<T>> func);

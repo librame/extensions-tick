@@ -11,290 +11,280 @@
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Core.Services;
-
     /// <summary>
     /// 发表静态扩展。
     /// </summary>
     public static class PublicationExtensions
     {
+
+        #region IPublication<TPublishedBy>
+
         /// <summary>
-        /// 填充发表属性（已集成填充创建属性）。
+        /// 填充创建属性。
         /// </summary>
-        /// <typeparam name="TPublishedBy">指定的发表者类型。</typeparam>
+        /// <typeparam name="TPublishedBy">指定的创建者类型（提供对整数、字符串、GUID 等类型的支持）。</typeparam>
         /// <param name="publication">给定的 <see cref="IPublication{TPublishedBy}"/>。</param>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="newPublishedBy">给定的新创建者。</param>
+        /// <param name="newPublishedTime">给定的新创建日期。</param>
         /// <returns>返回 <see cref="IPublication{TPublishedBy}"/>。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
-        public static IPublication<TPublishedBy> PopulatePublication<TPublishedBy>
-            (this IPublication<TPublishedBy> publication, IClockService clock)
+        public static IPublication<TPublishedBy> PopulatePublication<TPublishedBy>(this IPublication<TPublishedBy> publication,
+            TPublishedBy? newPublishedBy, DateTimeOffset newPublishedTime)
             where TPublishedBy : IEquatable<TPublishedBy>
         {
-            publication.PopulateCreation(clock);
+            publication.PopulateCreation<TPublishedBy>(newPublishedBy, newPublishedTime);
 
-            publication.PublishedTime = publication.CreatedTime;
-            publication.PublishedTimeTicks = publication.CreatedTimeTicks;
+            publication.PublishedTime = newPublishedTime;
+            publication.PublishedTimeTicks = publication.PublishedTime.Ticks;
+            publication.PublishedBy = newPublishedBy;
 
             return publication;
         }
 
         /// <summary>
-        /// 异步填充发表属性（已集成填充创建属性）。
+        /// 异步填充创建属性。
         /// </summary>
-        /// <typeparam name="TPublishedBy">指定的发表者类型。</typeparam>
+        /// <typeparam name="TPublishedBy">指定的创建者类型（提供对整数、字符串、GUID 等类型的支持）。</typeparam>
         /// <param name="publication">给定的 <see cref="IPublication{TPublishedBy}"/>。</param>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="newPublishedBy">给定的新创建者。</param>
+        /// <param name="newPublishedTime">给定的新创建日期。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <see cref="IPublication{TPublishedBy}"/> 的异步操作。</returns>
-        [SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
-        public static async Task<IPublication<TPublishedBy>> PopulatePublicationAsync<TPublishedBy>
-            (this IPublication<TPublishedBy> publication, IClockService clock,
-            CancellationToken cancellationToken = default)
+        public static async Task<IPublication<TPublishedBy>> PopulatePublicationAsync<TPublishedBy>(this IPublication<TPublishedBy> publication,
+            TPublishedBy? newPublishedBy, DateTimeOffset newPublishedTime, CancellationToken cancellationToken = default)
             where TPublishedBy : IEquatable<TPublishedBy>
         {
-            await publication.PopulateCreationAsync(clock, cancellationToken)
-                .ConfigureAwait();
+            await publication.PopulateCreationAsync<TPublishedBy>(newPublishedBy, newPublishedTime, cancellationToken)
+                .ConfigureAwaitWithoutContext();
 
-            publication.PublishedTime = publication.CreatedTime;
-            publication.PublishedTimeTicks = publication.CreatedTimeTicks;
+            publication.PublishedTime = newPublishedTime;
+            publication.PublishedTimeTicks = publication.PublishedTime.Ticks;
+            publication.PublishedBy = newPublishedBy;
 
             return publication;
         }
 
+        #endregion
+
+
+        #region IObjectPublication
 
         /// <summary>
-        /// 填充发表属性（支持日期时间为可空类型；已集成填充创建属性）。
+        /// 填充创建属性（支持日期时间为可空类型）。
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="publication"/> or <paramref name="clock"/> is null.
+        /// <paramref name="publication"/> is null.
         /// </exception>
-        /// <typeparam name="TPublication">指定的发表类型。</typeparam>
+        /// <typeparam name="TPublication">指定的创建类型。</typeparam>
         /// <param name="publication">给定的 <typeparamref name="TPublication"/>。</param>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
-        /// <param name="newPublishedBy">给定的新发表者对象。</param>
+        /// <param name="newPublishedTime">给定的新创建日期对象（可选）。</param>
+        /// <param name="newPublishedBy">给定的新创建者对象。</param>
         /// <returns>返回 <typeparamref name="TPublication"/>。</returns>
-        [SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
         public static TPublication PopulatePublication<TPublication>(this TPublication publication,
-            IClockService clock, object newPublishedBy)
+            object newPublishedBy, object? newPublishedTime = null)
             where TPublication : IObjectPublication
         {
-            publication.NotNull(nameof(publication));
+            publication.PopulateCreation(newPublishedBy, newPublishedTime);
 
-            var newPublishedTime = StoreHelper.GetDateTimeNow(clock, publication.CreatedTimeType);
             if (newPublishedTime.IsNotNull())
-            {
-                publication.SetObjectCreatedTime(newPublishedTime);
                 publication.SetObjectPublishedTime(newPublishedTime);
-            }
 
-            publication.SetObjectCreatedBy(newPublishedBy);
             publication.SetObjectPublishedBy(newPublishedBy);
 
             return publication;
         }
 
         /// <summary>
-        /// 异步填充发表属性（支持日期时间为可空类型；已集成填充创建属性）。
+        /// 异步填充创建属性（支持日期时间为可空类型）。
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="publication"/> or <paramref name="clock"/> is null.
+        /// <paramref name="publication"/> is null.
         /// </exception>
-        /// <typeparam name="TPublication">指定的发表类型。</typeparam>
+        /// <typeparam name="TPublication">指定的创建类型。</typeparam>
         /// <param name="publication">给定的 <typeparamref name="TPublication"/>。</param>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
-        /// <param name="newPublishedBy">给定的新发表者对象。</param>
+        /// <param name="newPublishedBy">给定的新创建者对象。</param>
+        /// <param name="newPublishedTime">给定的新创建日期对象（可选）。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <typeparamref name="TPublication"/> 的异步操作。</returns>
-        [SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
         public static async Task<TPublication> PopulatePublicationAsync<TPublication>(this TPublication publication,
-            IClockService clock, object newPublishedBy, CancellationToken cancellationToken = default)
+            object? newPublishedBy, object? newPublishedTime = null, CancellationToken cancellationToken = default)
             where TPublication : IObjectPublication
         {
-            publication.NotNull(nameof(publication));
-
-            var newPublishedTime = await StoreHelper.GetDateTimeNowAsync(clock,
-                publication.CreatedTimeType, cancellationToken).ConfigureAwait();
+            await publication.PopulateCreationAsync(newPublishedBy, newPublishedTime)
+                .ConfigureAwaitWithoutContext();
 
             if (newPublishedTime.IsNotNull())
             {
-                await publication.SetObjectCreatedTimeAsync(newPublishedTime, cancellationToken)
-                    .ConfigureAwait();
-
                 await publication.SetObjectPublishedTimeAsync(newPublishedTime, cancellationToken)
-                    .ConfigureAwait();
+                    .ConfigureAwaitWithoutContext();
             }
 
-            await publication.SetObjectCreatedByAsync(newPublishedBy, cancellationToken)
-                .ConfigureAwait();
-
             await publication.SetObjectPublishedByAsync(newPublishedBy, cancellationToken)
-                .ConfigureAwait();
+                .ConfigureAwaitWithoutContext();
 
             return publication;
         }
 
+        #endregion
+
+
+        #region IPublisher<TPublishedBy>
 
         /// <summary>
-        /// 获取发表时间。
+        /// 获取创建者。
         /// </summary>
-        /// <typeparam name="TPublishedBy">指定的发表者类型。</typeparam>
-        /// <typeparam name="TPublishedTime">指定的发表时间类型（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</typeparam>
-        /// <param name="publication">给定的 <see cref="IPublication{TPublishedBy, TPublishedTime}"/>。</param>
-        /// <param name="newPublishedTimeFactory">给定的新发表时间工厂方法。</param>
-        /// <returns>返回 <typeparamref name="TPublishedTime"/>（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
-        public static TPublishedTime SetPublishedTime<TPublishedBy, TPublishedTime>
-            (this IPublication<TPublishedBy, TPublishedTime> publication,
-            Func<TPublishedTime, TPublishedTime> newPublishedTimeFactory)
-            where TPublishedBy : IEquatable<TPublishedBy>
-            where TPublishedTime : struct
-        {
-            publication.NotNull(nameof(publication));
-            return publication.PublishedTime = newPublishedTimeFactory.Invoke(publication.PublishedTime);
-        }
-
-        /// <summary>
-        /// 异步获取发表时间。
-        /// </summary>
-        /// <typeparam name="TPublishedBy">指定的发表者类型。</typeparam>
-        /// <typeparam name="TPublishedTime">指定的发表时间类型（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</typeparam>
-        /// <param name="publication">给定的 <see cref="IPublication{TPublishedBy, TPublishedTime}"/>。</param>
-        /// <param name="newPublishedTimeFactory">给定的新发表时间工厂方法。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含 <typeparamref name="TPublishedTime"/>（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-        public static ValueTask<TPublishedTime> SetPublishedTimeAsync<TPublishedBy, TPublishedTime>
-            (this IPublication<TPublishedBy, TPublishedTime> publication,
-            Func<TPublishedTime, TPublishedTime> newPublishedTimeFactory,
-            CancellationToken cancellationToken = default)
-            where TPublishedBy : IEquatable<TPublishedBy>
-            where TPublishedTime : struct
-        {
-            publication.NotNull(nameof(publication));
-
-            return cancellationToken.RunOrCancelValueAsync(()
-                => publication.PublishedTime = newPublishedTimeFactory.Invoke(publication.PublishedTime));
-        }
-
-
-        /// <summary>
-        /// 获取发表者。
-        /// </summary>
-        /// <typeparam name="TPublishedBy">指定的发表者类型。</typeparam>
-        /// <typeparam name="TPublishedTime">指定的发表时间类型（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</typeparam>
-        /// <param name="publication">给定的 <see cref="IPublication{TPublishedBy, TPublishedTime}"/>。</param>
-        /// <param name="newPublishedByFactory">给定的新发表者工厂方法。</param>
+        /// <typeparam name="TPublishedBy">指定的创建者类型（提供对整数、字符串、GUID 等类型的支持）。</typeparam>
+        /// <param name="publisher">给定的 <see cref="IPublisher{TPublishedBy}"/>。</param>
+        /// <param name="newPublishedByFactory">给定的新创建者工厂方法。</param>
         /// <returns>返回 <typeparamref name="TPublishedBy"/>（兼容标识或字符串）。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
-        public static TPublishedBy SetPublishedBy<TPublishedBy, TPublishedTime>
-            (this IPublication<TPublishedBy, TPublishedTime> publication,
-            Func<TPublishedBy, TPublishedBy> newPublishedByFactory)
+        public static TPublishedBy? SetPublishedBy<TPublishedBy>(this IPublisher<TPublishedBy> publisher,
+            Func<TPublishedBy?, TPublishedBy?> newPublishedByFactory)
             where TPublishedBy : IEquatable<TPublishedBy>
-            where TPublishedTime : struct
         {
-            publication.NotNull(nameof(publication));
-            return publication.PublishedBy = newPublishedByFactory.Invoke(publication.PublishedBy);
+            publisher.SetCreatedBy(newPublishedByFactory);
+
+            return publisher.PublishedBy = newPublishedByFactory.Invoke(publisher.PublishedBy);
         }
 
         /// <summary>
-        /// 异步获取发表者。
+        /// 异步获取创建者。
         /// </summary>
-        /// <typeparam name="TPublishedBy">指定的发表者类型。</typeparam>
-        /// <typeparam name="TPublishedTime">指定的发表时间类型（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</typeparam>
-        /// <param name="publication">给定的 <see cref="IPublication{TPublishedBy, TPublishedTime}"/>。</param>
-        /// <param name="newPublishedByFactory">给定的新发表者工厂方法。</param>
+        /// <typeparam name="TPublishedBy">指定的创建者类型（提供对整数、字符串、GUID 等类型的支持）。</typeparam>
+        /// <param name="publisher">给定的 <see cref="IPublisher{TPublishedBy}"/>。</param>
+        /// <param name="newPublishedByFactory">给定的新创建者工厂方法。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <typeparamref name="TPublishedBy"/>（兼容标识或字符串）的异步操作。</returns>
-        public static ValueTask<TPublishedBy> SetPublishedByAsync<TPublishedBy, TPublishedTime>(
-            this IPublication<TPublishedBy, TPublishedTime> publication, Func<TPublishedBy, TPublishedBy> newPublishedByFactory,
-            CancellationToken cancellationToken = default)
+        public static async ValueTask<TPublishedBy?> SetPublishedByAsync<TPublishedBy>(this IPublisher<TPublishedBy> publisher,
+            Func<TPublishedBy?, TPublishedBy?> newPublishedByFactory, CancellationToken cancellationToken = default)
             where TPublishedBy : IEquatable<TPublishedBy>
+        {
+            await publisher.SetCreatedByAsync(newPublishedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
+
+            return publisher.PublishedBy = newPublishedByFactory.Invoke(publisher.PublishedBy);
+        }
+
+        #endregion
+
+
+        #region IPublicationTime<TPublishedTime>
+
+        /// <summary>
+        /// 获取创建时间。
+        /// </summary>
+        /// <typeparam name="TPublishedTime">指定的创建时间类型（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</typeparam>
+        /// <param name="publicationTime">给定的 <see cref="IPublicationTime{TPublishedTime}"/>。</param>
+        /// <param name="newPublishedTimeFactory">给定的新创建时间工厂方法。</param>
+        /// <returns>返回 <typeparamref name="TPublishedTime"/>（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
+        public static TPublishedTime SetPublishedTime<TPublishedTime>(this IPublicationTime<TPublishedTime> publicationTime,
+            Func<TPublishedTime, TPublishedTime> newPublishedTimeFactory)
             where TPublishedTime : struct
         {
-            publication.NotNull(nameof(publication));
+            publicationTime.SetCreatedTime(newPublishedTimeFactory);
 
-            return cancellationToken.RunOrCancelValueAsync(()
-                => publication.PublishedBy = newPublishedByFactory.Invoke(publication.PublishedBy));
+            return publicationTime.PublishedTime = newPublishedTimeFactory.Invoke(publicationTime.PublishedTime);
         }
 
+        /// <summary>
+        /// 异步获取创建时间。
+        /// </summary>
+        /// <typeparam name="TPublishedTime">指定的创建时间类型（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</typeparam>
+        /// <param name="publicationTime">给定的 <see cref="IPublicationTime{TPublishedTime}"/>。</param>
+        /// <param name="newPublishedTimeFactory">给定的新创建时间工厂方法。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含 <typeparamref name="TPublishedTime"/> （兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
+        public static async ValueTask<TPublishedTime> SetPublishedTimeAsync<TPublishedTime>(this IPublicationTime<TPublishedTime> publicationTime,
+            Func<TPublishedTime, TPublishedTime> newPublishedTimeFactory, CancellationToken cancellationToken = default)
+            where TPublishedTime : struct
+        {
+            await publicationTime.SetCreatedTimeAsync(newPublishedTimeFactory, cancellationToken).ConfigureAwaitWithoutContext();
+
+            return publicationTime.PublishedTime = newPublishedTimeFactory.Invoke(publicationTime.PublishedTime);
+        }
+
+        #endregion
+
+
+        #region IObjectPublisher
 
         /// <summary>
-        /// 设置对象发表时间。
+        /// 设置对象创建者。
         /// </summary>
-        /// <param name="publication">给定的 <see cref="IObjectPublication"/>。</param>
-        /// <param name="newPublishedTimeFactory">给定的新对象发表时间工厂方法。</param>
-        /// <returns>返回发表时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
-        public static object SetObjectPublishedTime(this IObjectPublication publication,
+        /// <param name="publisher">给定的 <see cref="IObjectPublisher"/>。</param>
+        /// <param name="newPublishedByFactory">给定的新对象创建者工厂方法。</param>
+        /// <returns>返回创建者（兼容标识或字符串）。</returns>
+        public static object? SetObjectPublishedBy(this IObjectPublisher publisher,
+            Func<object?, object?> newPublishedByFactory)
+        {
+            publisher.SetObjectCreatedBy(newPublishedByFactory);
+
+            var currentPublishedBy = publisher.GetObjectCreatedBy();
+
+            return publisher.SetObjectPublishedBy(newPublishedByFactory.Invoke(currentPublishedBy));
+        }
+
+        /// <summary>
+        /// 异步设置对象创建者。
+        /// </summary>
+        /// <param name="publisher">给定的 <see cref="IObjectPublisher"/>。</param>
+        /// <param name="newPublishedByFactory">给定的新对象创建者工厂方法。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
+        public static async ValueTask<object?> SetObjectPublishedByAsync(this IObjectPublisher publisher,
+            Func<object?, object?> newPublishedByFactory, CancellationToken cancellationToken = default)
+        {
+            await publisher.SetObjectCreatedByAsync(newPublishedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
+
+            var currentPublishedBy = await publisher.GetObjectPublishedByAsync(cancellationToken)
+                .ConfigureAwaitWithoutContext();
+
+            return await publisher.SetObjectPublishedByAsync(newPublishedByFactory.Invoke(currentPublishedBy), cancellationToken)
+                .ConfigureAwaitWithoutContext();
+        }
+
+        #endregion
+
+
+        #region IObjectPublicationTime
+
+        /// <summary>
+        /// 设置对象创建时间。
+        /// </summary>
+        /// <param name="publicationTime">给定的 <see cref="IObjectPublicationTime"/>。</param>
+        /// <param name="newPublishedTimeFactory">给定的新对象创建时间工厂方法。</param>
+        /// <returns>返回创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
+        public static object SetObjectPublishedTime(this IObjectPublicationTime publicationTime,
             Func<object, object> newPublishedTimeFactory)
         {
-            publication.NotNull(nameof(publication));
-            newPublishedTimeFactory.NotNull(nameof(newPublishedTimeFactory));
+            publicationTime.SetObjectCreatedTime(newPublishedTimeFactory);
 
-            var newPublishedTime = publication.GetObjectPublishedTime();
-            return publication.SetObjectPublishedTime(newPublishedTimeFactory.Invoke(newPublishedTime));
+            var currentPublishedTime = publicationTime.GetObjectPublishedTime();
+            return publicationTime.SetObjectPublishedTime(newPublishedTimeFactory.Invoke(currentPublishedTime));
         }
 
         /// <summary>
-        /// 异步设置对象发表时间。
+        /// 异步设置对象创建时间。
         /// </summary>
-        /// <param name="publication">给定的 <see cref="IObjectPublication"/>。</param>
-        /// <param name="newPublishedTimeFactory">给定的新对象发表时间工厂方法。</param>
+        /// <param name="publicationTime">给定的 <see cref="IObjectPublicationTime"/>。</param>
+        /// <param name="newPublishedTimeFactory">给定的新对象创建时间工厂方法。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含发表时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
-        public static async ValueTask<object> SetObjectPublishedTimeAsync(this IObjectPublication publication,
+        /// <returns>返回一个包含创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
+        public static async ValueTask<object> SetObjectPublishedTimeAsync(this IObjectPublicationTime publicationTime,
             Func<object, object> newPublishedTimeFactory, CancellationToken cancellationToken = default)
         {
-            publication.NotNull(nameof(publication));
-            newPublishedTimeFactory.NotNull(nameof(newPublishedTimeFactory));
+            await publicationTime.SetObjectCreatedTimeAsync(newPublishedTimeFactory, cancellationToken);
 
-            var newPublishedTime = await publication.GetObjectPublishedTimeAsync(cancellationToken).ConfigureAwait();
-            return await publication.SetObjectPublishedTimeAsync(newPublishedTimeFactory.Invoke(newPublishedTime), cancellationToken)
-                .ConfigureAwait();
+            var currentPublishedTime = await publicationTime.GetObjectPublishedTimeAsync(cancellationToken)
+                .ConfigureAwaitWithoutContext();
+
+            return await publicationTime.SetObjectPublishedTimeAsync(newPublishedTimeFactory.Invoke(currentPublishedTime), cancellationToken)
+                .ConfigureAwaitWithoutContext();
         }
 
-
-        /// <summary>
-        /// 设置对象发表者。
-        /// </summary>
-        /// <param name="publication">给定的 <see cref="IObjectPublication"/>。</param>
-        /// <param name="newPublishedByFactory">给定的新对象发表者工厂方法。</param>
-        /// <returns>返回发表者（兼容标识或字符串）。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
-        public static object SetObjectPublishedBy(this IObjectPublication publication,
-            Func<object, object> newPublishedByFactory)
-        {
-            publication.NotNull(nameof(publication));
-            newPublishedByFactory.NotNull(nameof(newPublishedByFactory));
-
-            var newPublishedBy = publication.GetObjectPublishedBy();
-            return publication.SetObjectPublishedBy(newPublishedByFactory.Invoke(newPublishedBy));
-        }
-
-        /// <summary>
-        /// 异步设置对象发表者。
-        /// </summary>
-        /// <param name="publication">给定的 <see cref="IObjectPublication"/>。</param>
-        /// <param name="newPublishedByFactory">给定的新对象发表者工厂方法。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含发表者（兼容标识或字符串）的异步操作。</returns>
-        [SuppressMessage("Design", "CA1062:验证公共方法的参数", Justification = "<挂起>")]
-        public static async ValueTask<object> SetObjectPublishedByAsync(this IObjectPublication publication,
-            Func<object, object> newPublishedByFactory, CancellationToken cancellationToken = default)
-        {
-            publication.NotNull(nameof(publication));
-            newPublishedByFactory.NotNull(nameof(newPublishedByFactory));
-
-            var newPublishedBy = await publication.GetObjectPublishedByAsync(cancellationToken).ConfigureAwait();
-            return await publication.SetObjectPublishedByAsync(newPublishedByFactory.Invoke(newPublishedBy), cancellationToken)
-                .ConfigureAwait();
-        }
+        #endregion
 
     }
 }

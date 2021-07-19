@@ -40,7 +40,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 验证标记。
         /// </summary>
-        [JsonConverter(typeof(Base64JsonConverter))]
+        [JsonConverter(typeof(JsonStringBase64Converter))]
         public byte[]? Tag
         {
             get => NotifyProperty.GetValue<byte[]?>(nameof(Tag));
@@ -48,10 +48,10 @@ namespace Librame.Extensions.Core.Cryptography
         }
 
         /// <summary>
-        /// 设置验证标记工厂方法。
+        /// 设置验证标记方法。
         /// </summary>
         [JsonIgnore]
-        public Func<byte[]> SetTagFactory
+        public Func<byte[]> SetTagFunc
         {
             set => NotifyProperty.SetValue(nameof(Tag), value);
         }

@@ -18,9 +18,9 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core.Serialization
 {
     /// <summary>
-    /// BASE64 类型的 <see cref="JsonConverter"/>。
+    /// 将 <see cref="Encoding"/> 与 JSON 字符串进行转换。
     /// </summary>
-    public class Base64JsonConverter : JsonConverter<byte[]>
+    public class JsonStringEncodingConverter : JsonConverter<Encoding>
     {
         /// <summary>
         /// 读取 JSON。
@@ -29,8 +29,8 @@ namespace Librame.Extensions.Core.Serialization
         /// <param name="typeToConvert">给定的类型转换。</param>
         /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
         /// <returns>返回 <see cref="Encoding"/>。</returns>
-        public override byte[]? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            => Convert.FromBase64String(reader.GetNotEmptyString());
+        public override Encoding? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            => Encoding.GetEncoding(reader.GetNotEmptyString());
 
         /// <summary>
         /// 写入 JSON。
@@ -38,8 +38,8 @@ namespace Librame.Extensions.Core.Serialization
         /// <param name="writer">给定的 <see cref="Utf8JsonWriter"/>。</param>
         /// <param name="value">给定的 <see cref="Encoding"/>。</param>
         /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
-        public override void Write(Utf8JsonWriter writer, byte[] value, JsonSerializerOptions options)
-            => writer.WriteStringValue(Convert.ToBase64String(value));
+        public override void Write(Utf8JsonWriter writer, Encoding value, JsonSerializerOptions options)
+            => writer.WriteStringValue(value.BodyName);
 
     }
 }

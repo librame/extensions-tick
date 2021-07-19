@@ -47,6 +47,25 @@ namespace Librame.Extensions.Core.Cryptography
         public IExtensionBuilder ExtensionBuilder { get; private set; }
 
 
+        /// <summary>
+        /// 获取 AES 选项。
+        /// </summary>
+        /// <returns>返回 <see cref="KeyNonceOptions"/>。</returns>
+        protected abstract KeyNonceOptions GetAesOptions();
+
+        /// <summary>
+        /// 获取 AES-CCM 选项。
+        /// </summary>
+        /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
+        protected abstract KeyNonceTagOptions GetAesCcmOptions();
+
+        /// <summary>
+        /// 获取 AES-GCM 选项。
+        /// </summary>
+        /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
+        protected abstract KeyNonceTagOptions GetAesGcmOptions();
+
+
         #region AES
 
         /// <summary>
@@ -57,7 +76,8 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回经过加密的字节数组。</returns>
         public virtual byte[] EncryptAes(byte[] buffer, KeyNonceOptions? options = null)
         {
-            EnsureAesOptions(options);
+            if (options == null)
+                options = GetAesOptions();
 
             return AlgorithmExtensions.RunAes(aes =>
             {
@@ -74,29 +94,14 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回经过解密的字节数组。</returns>
         public virtual byte[] DecryptAes(byte[] buffer, KeyNonceOptions? options = null)
         {
-            EnsureAesOptions(options);
+            if (options == null)
+                options = GetAesOptions();
 
             return AlgorithmExtensions.RunAes(aes =>
             {
                 var transform = aes.CreateDecryptor();
                 return transform.TransformFinalBlock(buffer, 0, buffer.Length);
             });
-        }
-
-        /// <summary>
-        /// 确保 AES 选项。
-        /// </summary>
-        /// <param name="options">给定的 <see cref="KeyNonceOptions"/>。</param>
-        protected virtual void EnsureAesOptions(KeyNonceOptions? options)
-        {
-            if (options is null)
-                options = new KeyNonceOptions(ExtensionBuilder);
-
-            options.KeyMaxSize = 256;
-            options.NonceMaxSize = 128;
-
-            options.Key = ParameterGenerator.GenerateKey(options.KeyMaxSize);
-            options.Nonce = ParameterGenerator.GenerateNonce(options.NonceMaxSize, options.Key);
         }
 
         #endregion
@@ -112,16 +117,13 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回经过加密的字节数组。</returns>
         public virtual byte[] EncryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
-            EnsureAesCcmOptions(ref options);
+            if (options == null)
+                options = GetAesCcmOptions();
 
             var ciphertext = new byte[buffer.Length];
 
-#pragma warning disable CS8602 // 解引用可能出现空引用。
-#pragma warning disable CS8604 // 可能的 null 引用参数。
-            var aes = new AesCcm(options.Key);
-            aes.Encrypt(options.Nonce, buffer, ciphertext, options.Tag);
-#pragma warning restore CS8604 // 可能的 null 引用参数。
-#pragma warning restore CS8602 // 解引用可能出现空引用。
+            var aes = new AesCcm(options.Key!);
+            aes.Encrypt(options.Nonce!, buffer, ciphertext, options.Tag!);
 
             return ciphertext;
         }
@@ -134,37 +136,15 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回经过解密的字节数组。</returns>
         public virtual byte[] DecryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
-            EnsureAesCcmOptions(ref options);
+            if (options == null)
+                options = GetAesCcmOptions();
 
             var plaintext = new byte[buffer.Length];
 
-#pragma warning disable CS8602 // 解引用可能出现空引用。
-#pragma warning disable CS8604 // 可能的 null 引用参数。
-            var aes = new AesCcm(options.Key);
-            aes.Decrypt(options.Nonce, buffer, options.Tag, plaintext);
-#pragma warning restore CS8604 // 可能的 null 引用参数。
-#pragma warning restore CS8602 // 解引用可能出现空引用。
+            var aes = new AesCcm(options.Key!);
+            aes.Decrypt(options.Nonce!, buffer, options.Tag!, plaintext);
 
             return plaintext;
-        }
-
-        /// <summary>
-        /// 确保 AES-CCM 选项。
-        /// </summary>
-        /// <param name="options">给定的 <see cref="KeyNonceTagOptions"/>。</param>
-        protected virtual void EnsureAesCcmOptions(ref KeyNonceTagOptions? options)
-        {
-            if (options is null)
-                options = new KeyNonceTagOptions(ExtensionBuilder);
-
-            // 参数长度不能是 16、24 或 32 字节（128、192 或 256 位）
-            options.KeyMaxSize = 255;
-            options.NonceMaxSize = AesCcm.NonceByteSizes.MaxSize;
-            options.TagMaxSize = AesCcm.TagByteSizes.MaxSize;
-
-            options.Key = ParameterGenerator.GenerateKey(options.KeyMaxSize);
-            options.Nonce = ParameterGenerator.GenerateNonce(options.NonceMaxSize, options.Key);
-            options.Tag = ParameterGenerator.GenerateTag(options.TagMaxSize, options.Key);
         }
 
         #endregion
@@ -180,16 +160,13 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回经过加密的字节数组。</returns>
         public virtual byte[] EncryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
-            EnsureAesGcmOptions(ref options);
+            if (options == null)
+                options = GetAesGcmOptions();
 
             var ciphertext = new byte[buffer.Length];
 
-#pragma warning disable CS8602 // 解引用可能出现空引用。
-#pragma warning disable CS8604 // 可能的 null 引用参数。
-            var aes = new AesGcm(options.Key);
-            aes.Encrypt(options.Nonce, buffer, ciphertext, options.Tag);
-#pragma warning restore CS8604 // 可能的 null 引用参数。
-#pragma warning restore CS8602 // 解引用可能出现空引用。
+            var aes = new AesGcm(options.Key!);
+            aes.Encrypt(options.Nonce!, buffer, ciphertext, options.Tag!);
 
             return ciphertext;
         }
@@ -202,38 +179,15 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回经过解密的字节数组。</returns>
         public virtual byte[] DecryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
-            EnsureAesGcmOptions(ref options);
+            if (options == null)
+                options = GetAesGcmOptions();
 
             var plaintext = new byte[buffer.Length];
 
-#pragma warning disable CS8602 // 解引用可能出现空引用。
-#pragma warning disable CS8604 // 可能的 null 引用参数。
-            var aes = new AesGcm(options.Key);
-            aes.Decrypt(options.Nonce, buffer, options.Tag, plaintext);
-#pragma warning restore CS8604 // 可能的 null 引用参数。
-#pragma warning restore CS8602 // 解引用可能出现空引用。
+            var aes = new AesGcm(options.Key!);
+            aes.Decrypt(options.Nonce!, buffer, options.Tag!, plaintext);
 
             return plaintext;
-        }
-
-        /// <summary>
-        /// 确保 AES-GCM 选项。
-        /// </summary>
-        /// <param name="options">给定的 <see cref="KeyNonceTagOptions"/>。</param>
-        protected virtual void EnsureAesGcmOptions(ref KeyNonceTagOptions? options)
-        {
-            if (options is null)
-                options = new KeyNonceTagOptions(ExtensionBuilder);
-
-            // 参数长度不能是 16、24 或 32 字节（128、192 或 256 位）
-            options.KeyMaxSize = 255;
-
-            options.NonceMaxSize = AesGcm.NonceByteSizes.MaxSize;
-            options.TagMaxSize = AesGcm.TagByteSizes.MaxSize;
-
-            options.Key = ParameterGenerator.GenerateKey(options.KeyMaxSize);
-            options.Nonce = ParameterGenerator.GenerateNonce(options.NonceMaxSize, options.Key);
-            options.Tag = ParameterGenerator.GenerateTag(options.TagMaxSize, options.Key);
         }
 
         #endregion

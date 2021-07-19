@@ -40,7 +40,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 初始向量。
         /// </summary>
-        [JsonConverter(typeof(Base64JsonConverter))]
+        [JsonConverter(typeof(JsonStringBase64Converter))]
         public byte[]? Nonce
         {
             get => NotifyProperty.GetValue<byte[]?>(nameof(Nonce));
@@ -48,10 +48,10 @@ namespace Librame.Extensions.Core.Cryptography
         }
 
         /// <summary>
-        /// 设置初始向量工厂方法。
+        /// 设置初始向量方法。
         /// </summary>
         [JsonIgnore]
-        public Func<byte[]> SetNonceFactory
+        public Func<byte[]> SetNonceFunc
         {
             set => NotifyProperty.SetValue(nameof(Nonce), value);
         }

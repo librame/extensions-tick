@@ -12,8 +12,6 @@
 
 namespace Librame.Extensions.Data
 {
-    using Core.Identifiers;
-
     /// <summary>
     /// 对象发表标识符接口。
     /// </summary>

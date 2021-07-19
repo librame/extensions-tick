@@ -14,8 +14,6 @@ using System;
 
 namespace Librame.Extensions.Data
 {
-    using Core.Identifiers;
-
     /// <summary>
     /// 创建标识符接口。
     /// </summary>

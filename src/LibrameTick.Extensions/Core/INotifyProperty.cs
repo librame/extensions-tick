@@ -46,7 +46,7 @@ namespace Librame.Extensions.Core
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="defaultValue">给定的默认值（可选）。</param>
         /// <returns>返回属性值实例。</returns>
-        TValue? GetValue<TValue>(string propertyName, TValue defaultValue = default);
+        TValue? GetValue<TValue>(string propertyName, TValue? defaultValue = default);
 
         /// <summary>
         /// 获取属性值。

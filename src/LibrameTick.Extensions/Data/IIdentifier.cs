@@ -25,5 +25,14 @@ namespace Librame.Extensions.Data
         /// 标识。
         /// </summary>
         TId Id { get; set; }
+
+
+        /// <summary>
+        /// 转换为标识。
+        /// </summary>
+        /// <param name="id">给定的标识对象。</param>
+        /// <param name="paramName">给定的参数名称。</param>
+        /// <returns>返回 <typeparamref name="TId"/>。</returns>
+        TId ToId(object? id, string? paramName);
     }
 }

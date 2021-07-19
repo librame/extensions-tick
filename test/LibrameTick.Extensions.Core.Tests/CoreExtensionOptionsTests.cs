@@ -1,3 +1,4 @@
+using System.IO;
 using Xunit;
 
 namespace Librame.Extensions.Core
@@ -11,11 +12,12 @@ namespace Librame.Extensions.Core
         {
             _options = new CoreExtensionOptions();
 
-            //_options.PropertyChangedAction = (opts, e) =>
-            //{
-            //    var filePath = opts.SaveAsJson();
-            //    Assert.True(File.Exists(filePath));
-            //};
+            _options.PropertyChangedAction = (opts, e) =>
+            {
+                var filePath = opts.SaveAsJson();
+                Assert.True(File.Exists(filePath));
+                File.Delete(filePath);
+            };
         }
 
 
@@ -34,9 +36,8 @@ namespace Librame.Extensions.Core
             Assert.NotEmpty(_options.Directories.ReportDirectory);
             Assert.NotEmpty(_options.Directories.ResourceDirectory);
 
-            //Assert.Null(_options.Algorithms.Aes.Key);
-            //_options.Algorithms.Aes.Key = AlgorithmUtility.RunAes(aes => aes.Key);
-            //Assert.NotNull(_options.Algorithms.Aes.Key);
+            _options.Algorithms.Aes.Key = RandomExtensions.GenerateByteArray(_options.Algorithms.Aes.KeyMaxSize);
+            Assert.NotNull(_options.Algorithms.Aes.Key);
         }
 
     }

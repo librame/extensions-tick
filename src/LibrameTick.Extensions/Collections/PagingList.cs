@@ -23,6 +23,12 @@ namespace Librame.Extensions.Collections
     /// <typeparam name="T">指定的类型。</typeparam>
     public class PagingList<T> : IPagingList<T>
     {
+        /// <summary>
+        /// 空分页列表。
+        /// </summary>
+        public readonly static PagingList<T> Empty
+            = new PagingList<T>(Enumerable.Empty<T>());
+
         private readonly List<T>? _collection;
         private readonly PagingInfo _info;
 
@@ -65,7 +71,7 @@ namespace Librame.Extensions.Collections
 
 
         /// <summary>
-        /// 筛选列表。
+        /// 筛选列表（通常用于内存分页）。
         /// </summary>
         /// <param name="func">给定的筛选方法。</param>
         public void Filtrate(Func<IEnumerable<T>, IEnumerable<T>> func)
@@ -80,7 +86,7 @@ namespace Librame.Extensions.Collections
         }
 
         /// <summary>
-        /// 筛选列表。
+        /// 筛选列表（通常用于动态分页）。
         /// </summary>
         /// <param name="func">给定的筛选方法。</param>
         public void Filtrate(Func<IQueryable<T>, IQueryable<T>> func)

@@ -46,7 +46,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 密钥。
         /// </summary>
-        [JsonConverter(typeof(Base64JsonConverter))]
+        [JsonConverter(typeof(JsonStringBase64Converter))]
         public byte[]? Key
         {
             get => NotifyProperty.GetValue<byte[]?>(nameof(Key));
@@ -54,10 +54,10 @@ namespace Librame.Extensions.Core.Cryptography
         }
 
         /// <summary>
-        /// 设置密钥工厂方法。
+        /// 设置密钥方法。
         /// </summary>
         [JsonIgnore]
-        public Func<byte[]> SetKeyFactory
+        public Func<byte[]> SetKeyFunc
         {
             set => NotifyProperty.SetValue(nameof(Key), value);
         }

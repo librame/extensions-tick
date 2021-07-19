@@ -10,19 +10,20 @@
 
 #endregion
 
+using System;
+
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 发表时间周期数接口。
+    /// 发表时间接口。
     /// </summary>
-    /// <remarks>
-    /// 主要用于解决 <see cref="System.DateTimeOffset"/> 在不同数据库中 LINQ 查询的兼容性问题。
-    /// </remarks>
-    public interface IPublishedTimeTicks : ICreatedTimeTicks
+    /// <typeparam name="TPublishedTime">指定的发表时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
+    public interface IPublicationTime<TPublishedTime> : ICreationTime<TPublishedTime>, IObjectPublicationTime
+        where TPublishedTime : struct
     {
         /// <summary>
-        /// 发表时间周期数。
+        /// 发表时间。
         /// </summary>
-        long PublishedTimeTicks { get; set; }
+        TPublishedTime PublishedTime { get; set; }
     }
 }

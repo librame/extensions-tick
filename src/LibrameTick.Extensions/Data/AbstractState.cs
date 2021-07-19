@@ -29,7 +29,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 状态。
         /// </summary>
-        [Display(Name = nameof(Status), GroupName = "DataGroup", ResourceType = typeof(AbstractEntityResource))]
+        [Display(Name = nameof(Status), GroupName = nameof(DataResource.DataGroup), ResourceType = typeof(DataResource))]
         public virtual TStatus Status { get; set; }
 
 
@@ -38,6 +38,16 @@ namespace Librame.Extensions.Data
         /// </summary>
         public virtual Type StatusType
             => typeof(TStatus);
+
+
+        /// <summary>
+        /// 转换为状态。
+        /// </summary>
+        /// <param name="status">给定的状态对象。</param>
+        /// <param name="paramName">给定的参数名称。</param>
+        /// <returns>返回 <typeparamref name="TStatus"/>。</returns>
+        public virtual TStatus ToStatus(object? status, string? paramName)
+            => status.AsNotNull<TStatus>(paramName);
 
 
         /// <summary>
@@ -53,7 +63,7 @@ namespace Librame.Extensions.Data
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含状态（兼容不支持枚举类型的实体框架）的异步操作。</returns>
         public virtual ValueTask<object> GetObjectStatusAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunOrCancelValueAsync(() => (object)Status);
+            => cancellationToken.RunValueTask(GetObjectStatus);
 
 
         /// <summary>
@@ -63,7 +73,7 @@ namespace Librame.Extensions.Data
         /// <returns>返回状态（兼容不支持枚举类型的实体框架）。</returns>
         public virtual object SetObjectStatus(object newStatus)
         {
-            Status = newStatus.CastTo<object, TStatus>(nameof(newStatus));
+            Status = ToStatus(newStatus, nameof(newStatus));
             return newStatus;
         }
 
@@ -76,11 +86,11 @@ namespace Librame.Extensions.Data
         public virtual ValueTask<object> SetObjectStatusAsync(object newStatus,
             CancellationToken cancellationToken = default)
         {
-            var realNewStatus = newStatus.CastTo<object, TStatus>(nameof(newStatus));
+            var status = ToStatus(newStatus, nameof(newStatus));
 
-            return cancellationToken.RunOrCancelValueAsync(() =>
+            return cancellationToken.RunValueTask(() =>
             {
-                Status = realNewStatus;
+                Status = status;
                 return newStatus;
             });
         }

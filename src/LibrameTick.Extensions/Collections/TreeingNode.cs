@@ -13,7 +13,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -21,98 +20,89 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Collections
 {
-    using Core.Identifiers;
+    using Data;
 
     /// <summary>
     /// 树形节点。
     /// </summary>
-    /// <typeparam name="T">指定的树形元素类型。</typeparam>
-    /// <typeparam name="TId">指定的树形元素标识类型。</typeparam>
+    /// <typeparam name="TItem">指定实现 <see cref="IParentIdentifier{TId}"/>、<see cref="IEquatable{TItem}"/> 等接口的项类型。</typeparam>
+    /// <typeparam name="TId">指定的标识类型。</typeparam>
     [NotMapped]
-    public class TreeingNode<T, TId> : IParentIdentifier<TId>, IEquatable<TreeingNode<T, TId>>
-        where T : IParentIdentifier<TId>
+    public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>, IEquatable<TreeingNode<TItem, TId>>
+        where TItem : IParentIdentifier<TId>, IEquatable<TItem>
         where TId : IEquatable<TId>
     {
-        private IList<TreeingNode<T, TId>> _children;
+        private readonly List<TreeingNode<TItem, TId>> _children;
 
 
         /// <summary>
-        /// 构造一个 <see cref="TreeingNode{T, TId}"/>。
+        /// 构造一个泛型树形节点。
         /// </summary>
-        /// <param name="item">给定的项。</param>
-        /// <param name="depthLevel">给定的深度等级。</param>
-        /// <param name="children">给定的子节点列表。</param>
-        public TreeingNode(T item, int depthLevel = 0, IList<TreeingNode<T, TId>> children = null)
+        /// <param name="item">给定的 <typeparamref name="TItem"/>。</param>
+        /// <param name="children">给定的子节点列表（可选）。</param>
+        /// <param name="hierarchy">给定的节点层级（可选；默认为 0；常用于节点显示的层级符号标注）。</param>
+        public TreeingNode(TItem item, List<TreeingNode<TItem, TId>>? children = null, int hierarchy = 0)
         {
-            Item = item;
-            DepthLevel = depthLevel;
+            Item = item.NotNull(nameof(item));
+            Hierarchy = hierarchy;
+            _children = children ?? new List<TreeingNode<TItem, TId>>();
+        }
 
-            _children = children ?? new List<TreeingNode<T, TId>>();
+        /// <summary>
+        /// 构造一个泛型树形节点。
+        /// </summary>
+        /// <param name="item">给定的 <typeparamref name="TItem"/>。</param>
+        /// <param name="children">给定的子节点集合。</param>
+        /// <param name="hierarchy">给定的节点层级（可选；默认为 0；常用于节点显示的层级符号标注）。</param>
+        public TreeingNode(TItem item, IEnumerable<TreeingNode<TItem, TId>> children, int hierarchy = 0)
+            : this(item, new List<TreeingNode<TItem, TId>>(children), hierarchy)
+        {
         }
 
 
         /// <summary>
         /// 节点项。
         /// </summary>
-        public T Item { get; }
+        public TItem Item { get; private set; }
 
         /// <summary>
-        /// 深度等级。
+        /// 节点层级（常用于节点显示的层级符号标注）。
         /// </summary>
-        public int DepthLevel { get; }
-
+        public int Hierarchy { get; private set; }
 
         /// <summary>
         /// 子节点列表。
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public IList<TreeingNode<T, TId>> Children
-        {
-            get
-            {
-                return _children;
-            }
-            set
-            {
-                if (value.IsEmpty())
-                    value = new List<TreeingNode<T, TId>>();
+        public IReadOnlyList<TreeingNode<TItem, TId>> Children
+            => _children;
 
-                _children = value;
-            }
-        }
 
+        #region IParentIdentifier<TId>
 
         /// <summary>
-        /// 获取节点项的标识。
+        /// 获取或设置节点项标识。
         /// </summary>
-        public TId Id
+        public override TId Id
         {
-            get { return Item.Id; }
-            set { Item.Id = value; }
+            get => Item.Id;
+            set => Item.Id = value;
         }
 
         /// <summary>
-        /// 获取节点项的父标识。
+        /// 获取或设置节点项父标识。
         /// </summary>
-        public TId ParentId
+        public override TId ParentId
         {
-            get { return Item.ParentId; }
-            set { Item.ParentId = value; }
+            get => Item.ParentId;
+            set => Item.ParentId = value;
         }
-
-
-        /// <summary>
-        /// 标识类型。
-        /// </summary>
-        public Type IdType
-            => Item.IdType;
 
 
         /// <summary>
         /// 获取对象标识。
         /// </summary>
         /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-        public virtual object GetObjectId()
+        public override object GetObjectId()
             => Item.GetObjectId();
 
         /// <summary>
@@ -120,7 +110,7 @@ namespace Librame.Extensions.Collections
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-        public virtual ValueTask<object> GetObjectIdAsync(CancellationToken cancellationToken)
+        public override ValueTask<object> GetObjectIdAsync(CancellationToken cancellationToken)
             => Item.GetObjectIdAsync(cancellationToken);
 
 
@@ -128,7 +118,7 @@ namespace Librame.Extensions.Collections
         /// 获取对象标识。
         /// </summary>
         /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-        public virtual object GetObjectParentId()
+        public override object GetObjectParentId()
             => Item.GetObjectParentId();
 
         /// <summary>
@@ -136,7 +126,7 @@ namespace Librame.Extensions.Collections
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-        public virtual ValueTask<object> GetObjectParentIdAsync(CancellationToken cancellationToken)
+        public override ValueTask<object> GetObjectParentIdAsync(CancellationToken cancellationToken)
             => Item.GetObjectParentIdAsync(cancellationToken);
 
 
@@ -145,7 +135,7 @@ namespace Librame.Extensions.Collections
         /// </summary>
         /// <param name="newId">给定的新对象标识。</param>
         /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-        public virtual object SetObjectId(object newId)
+        public override object SetObjectId(object newId)
             => Item.SetObjectId(newId);
 
         /// <summary>
@@ -154,7 +144,7 @@ namespace Librame.Extensions.Collections
         /// <param name="newId">给定的新对象标识。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-        public virtual ValueTask<object> SetObjectIdAsync(object newId,
+        public override ValueTask<object> SetObjectIdAsync(object newId,
             CancellationToken cancellationToken = default)
             => Item.SetObjectIdAsync(newId, cancellationToken);
 
@@ -164,7 +154,7 @@ namespace Librame.Extensions.Collections
         /// </summary>
         /// <param name="newParentId">给定的新对象标识。</param>
         /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-        public virtual object SetObjectParentId(object newParentId)
+        public override object SetObjectParentId(object newParentId)
             => Item.SetObjectParentId(newParentId);
 
         /// <summary>
@@ -173,53 +163,55 @@ namespace Librame.Extensions.Collections
         /// <param name="newParentId">给定的新对象标识。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-        public virtual ValueTask<object> SetObjectParentIdAsync(object newParentId,
+        public override ValueTask<object> SetObjectParentIdAsync(object newParentId,
             CancellationToken cancellationToken = default)
             => Item.SetObjectParentIdAsync(newParentId, cancellationToken);
 
+        #endregion
+
 
         /// <summary>
-        /// 是否包含指定标识的子节点。
+        /// 包含指定的子节点标识。
         /// </summary>
-        /// <param name="childId">给定的子节点编号。</param>
+        /// <param name="childId">给定的子节点标识。</param>
         /// <returns>返回布尔值。</returns>
-        public virtual bool ContainsChild(TId childId)
-            => ContainsChild(childId, out _);
+        public virtual bool ContainsChildId(TId childId)
+            => ContainsChildId(childId, out _);
 
         /// <summary>
-        /// 是否包含指定标识的子节点。
+        /// 包含指定的子节点标识。
         /// </summary>
-        /// <param name="childId">给定的子节点信号。</param>
-        /// <param name="child">输出当前子节点。</param>
+        /// <param name="childId">给定的子节点标识。</param>
+        /// <param name="child">输出可能存在的子节点。</param>
         /// <returns>返回布尔值。</returns>
-        public virtual bool ContainsChild(TId childId, out TreeingNode<T, TId> child)
+        public virtual bool ContainsChildId(TId childId, out TreeingNode<TItem, TId>? child)
         {
             child = GetChild(childId);
-            return child.IsNotNull();
+            return child != null;
         }
 
 
         /// <summary>
-        /// 查找指定编号的子节点。
+        /// 获取指定标识的子节点。
         /// </summary>
         /// <param name="childId">给定的子节点编号。</param>
-        /// <returns>返回当前子节点。</returns>
-        public virtual TreeingNode<T, TId> GetChild(TId childId)
+        /// <returns>返回 <see cref="TreeingNode{TItem, TId}"/>。</returns>
+        public virtual TreeingNode<TItem, TId>? GetChild(TId childId)
         {
-            if (Children.IsEmpty())
+            if (Children.Count < 1)
                 return null;
 
-            return Children.FirstOrDefault(c => Id.Equals(childId));
+            return Children.FirstOrDefault(p => p.Id.Equals(childId));
         }
 
         /// <summary>
-        /// 查询指定父编号的子孙节点列表。
+        /// 获取指定父标识的子节点列表。
         /// </summary>
-        /// <param name="parentId">给定的父编号。</param>
-        /// <returns>返回树形节点列表。</returns>
-        public virtual IList<TreeingNode<T, TId>> GetParentChildren(TId parentId)
+        /// <param name="parentId">给定的子节点父编号。</param>
+        /// <returns>返回 <see cref="TreeingNode{TItem, TId}"/> 列表。</returns>
+        public virtual List<TreeingNode<TItem, TId>>? GetChildrenByParentId(TId parentId)
         {
-            if (Children.IsEmpty())
+            if (Children.Count < 1)
                 return null;
 
             return Children.Where(p => p.ParentId.Equals(parentId)).ToList();
@@ -227,24 +219,17 @@ namespace Librame.Extensions.Collections
 
 
         /// <summary>
-        /// 是否相等。
+        /// 比较相等。
         /// </summary>
-        /// <param name="other">给定的 <see cref="TreeingNode{T, TId}"/>。</param>
-        /// <returns>返回布尔值。</returns>
-        [SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
-        public virtual bool Equals(TreeingNode<T, TId> other)
+        /// <param name="other">给定的 <see cref="TreeingNode{TItem, TId}"/>。</param>
+        /// <returns>返回是否相等的布尔值。</returns>
+        public virtual bool Equals(TreeingNode<TItem, TId>? other)
         {
-            other.NotNull(nameof(other));
-            return Id.Equals(other.Id) && ParentId.Equals(other.ParentId);
-        }
+            if (ReferenceEquals(other, null))
+                return false;
 
-        /// <summary>
-        /// 是否相等。
-        /// </summary>
-        /// <param name="obj">给定的 <see cref="TreeingNode{T, TId}"/>。</param>
-        /// <returns>返回布尔值。</returns>
-        public override bool Equals(object obj)
-            => obj is TreeingNode<T, TId> other && Equals(other);
+            return Item.Equals(other.Item);
+        }
 
 
         /// <summary>
@@ -260,61 +245,30 @@ namespace Librame.Extensions.Collections
         /// </summary>
         /// <returns>返回字符串。</returns>
         public override string ToString()
-            => ToString(node => node.Item.ToString());
-
-        /// <summary>
-        /// 转换为字符串。
-        /// </summary>
-        /// <param name="toStringFactory">给定的转换方法。</param>
-        /// <returns>返回字符串。</returns>
-        [SuppressMessage("Microsoft.Design", "CA1062:ValidateArgumentsOfPublicMethods")]
-        public virtual string ToString(Func<TreeingNode<T, TId>, string> toStringFactory)
         {
-            if (Children.IsEmpty())
-                return string.Empty;
-
-            toStringFactory.NotNull(nameof(toStringFactory));
-
             var sb = new StringBuilder();
 
             // Current Node
-            sb.Append(toStringFactory.Invoke(this));
+            sb.Append(Item.ToString());
             sb.Append(';');
 
             // Children Nodes
-            int i = 0;
-            foreach (var child in Children)
+            if (Children.Count > 0)
             {
-                // 链式转换可能存在的子孙节点
-                sb.Append(child.ToString(toStringFactory));
+                int i = 0;
+                foreach (var child in Children)
+                {
+                    sb.Append(child.ToString());
 
-                if (i != Children.Count - 1)
-                    sb.Append(';');
+                    if (i != Children.Count - 1)
+                        sb.Append(';');
 
-                i++;
+                    i++;
+                }
             }
 
             return sb.ToString();
         }
-
-
-        /// <summary>
-        /// 是否相等。
-        /// </summary>
-        /// <param name="a">给定的 <see cref="TreeingNode{T, TId}"/>。</param>
-        /// <param name="b">给定的 <see cref="TreeingNode{T, TId}"/>。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool operator ==(TreeingNode<T, TId> a, TreeingNode<T, TId> b)
-            => (a?.Equals(b)).Value;
-
-        /// <summary>
-        /// 是否不等。
-        /// </summary>
-        /// <param name="a">给定的 <see cref="TreeingNode{T, TId}"/>。</param>
-        /// <param name="b">给定的 <see cref="TreeingNode{T, TId}"/>。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool operator !=(TreeingNode<T, TId> a, TreeingNode<T, TId> b)
-            => !(a?.Equals(b)).Value;
 
     }
 }

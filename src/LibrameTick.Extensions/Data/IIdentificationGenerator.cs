@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Services;
+    using Core;
 
     /// <summary>
     /// 标识生成器接口。
@@ -26,17 +26,17 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 生成标识。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>。</param>
         /// <returns>返回 <typeparamref name="TId"/>。</returns>
-        TId GenerateId(IClockService clock);
+        TId GenerateId(IClock clock);
 
         /// <summary>
         /// 异步生成标识。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClockService"/>。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <typeparamref name="TId"/> 的异步操作。</returns>
-        Task<TId> GenerateIdAsync(IClockService clock,
+        Task<TId> GenerateIdAsync(IClock clock,
             CancellationToken cancellationToken = default);
     }
 }

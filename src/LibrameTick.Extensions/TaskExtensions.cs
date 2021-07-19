@@ -10,7 +10,9 @@
 
 #endregion
 
+using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Librame.Extensions
@@ -22,6 +24,14 @@ namespace Librame.Extensions
     {
 
         /// <summary>
+        /// 转换为 <see cref="ValueTask"/>。
+        /// </summary>
+        /// <param name="task">给定的 <see cref="Task"/>。</param>
+        /// <returns>返回 <see cref="ValueTask"/>。</returns>
+        public static ValueTask AsValueTask(this Task task)
+            => new ValueTask(task);
+
+        /// <summary>
         /// 转换为 <see cref="ValueTask{TResult}"/>。
         /// </summary>
         /// <typeparam name="TResult">指定的结果类型。</typeparam>
@@ -29,6 +39,50 @@ namespace Librame.Extensions
         /// <returns>返回 <see cref="ValueTask{TResult}"/>。</returns>
         public static ValueTask<TResult> AsValueTask<TResult>(this Task<TResult> task)
             => new ValueTask<TResult>(task);
+
+
+        #region RunTask
+
+        /// <summary>
+        /// 运行一个异步任务。
+        /// </summary>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+        /// <param name="action">给定要执行的动作。</param>
+        /// <returns>返回 <see cref="Task"/>。</returns>
+        public static Task RunTask(this CancellationToken cancellationToken, Action action)
+            => Task.Run(action, cancellationToken);
+
+        /// <summary>
+        /// 运行一个包含结果的异步任务。
+        /// </summary>
+        /// <typeparam name="TResult">指定的结果类型。</typeparam>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+        /// <param name="func">给定要执行的函数。</param>
+        /// <returns>返回 <see cref="Task{TResult}"/>。</returns>
+        public static Task<TResult> RunTask<TResult>(this CancellationToken cancellationToken, Func<TResult> func)
+            => Task.Run(func, cancellationToken);
+
+
+        /// <summary>
+        /// 运行一个异步值任务。
+        /// </summary>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+        /// <param name="action">给定要执行的动作。</param>
+        /// <returns>返回 <see cref="ValueTask"/>。</returns>
+        public static ValueTask RunValueTask(this CancellationToken cancellationToken, Action action)
+            => Task.Run(action, cancellationToken).AsValueTask();
+
+        /// <summary>
+        /// 运行一个包含结果的异步值任务。
+        /// </summary>
+        /// <typeparam name="TResult">指定的结果类型。</typeparam>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+        /// <param name="func">给定要执行的函数。</param>
+        /// <returns>返回 <see cref="ValueTask{TResult}"/>。</returns>
+        public static ValueTask<TResult> RunValueTask<TResult>(this CancellationToken cancellationToken, Func<TResult> func)
+            => Task.Run(func, cancellationToken).AsValueTask();
+
+        #endregion
 
 
         #region ConfiguredTaskAwaitable

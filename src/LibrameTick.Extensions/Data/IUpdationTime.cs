@@ -10,19 +10,20 @@
 
 #endregion
 
+using System;
+
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 创建时间周期数接口。
+    /// 更新时间接口。
     /// </summary>
-    /// <remarks>
-    /// 主要用于解决 <see cref="System.DateTimeOffset"/> 在不同数据库中 LINQ 查询的兼容性问题。
-    /// </remarks>
-    public interface ICreatedTimeTicks
+    /// <typeparam name="TUpdatedTime">指定的更新时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
+    public interface IUpdationTime<TUpdatedTime> : ICreationTime<TUpdatedTime>, IObjectUpdationTime
+        where TUpdatedTime : struct
     {
         /// <summary>
-        /// 创建时间周期数。
+        /// 更新时间。
         /// </summary>
-        long CreatedTimeTicks { get; set; }
+        TUpdatedTime UpdatedTime { get; set; }
     }
 }
