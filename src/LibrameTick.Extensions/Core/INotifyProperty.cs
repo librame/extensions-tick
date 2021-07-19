@@ -24,18 +24,18 @@ namespace Librame.Extensions.Core
         /// 设置属性值（支持添加或更新）。
         /// </summary>
         /// <param name="propertyName">给定的属性名称。</param>
-        /// <param name="addOrUpdateValue">给定要添加或更新的属性值。</param>
+        /// <param name="addOrUpdateValue">给定要添加或更新的属性值对象。</param>
         /// <returns>返回属性值对象。</returns>
-        object SetValue(string propertyName, object? addOrUpdateValue);
+        object? SetValue(string propertyName, object? addOrUpdateValue);
 
         /// <summary>
         /// 设置属性值（支持添加或更新）。
         /// </summary>
         /// <param name="propertyName">给定的属性名称。</param>
-        /// <param name="addOrUpdateFactory">给定要添加或更新的属性工厂方法（默认初始会执行一次，以便支持事件参数集合调用）。</param>
-        /// <param name="isInitialize">是否初始化（如果使用初始化，则表示立即执行工厂方法，并将执行结果缓存；反之则在每次获取属性值时再执行工厂方法。可选；默认不初始化）。</param>
+        /// <param name="addOrUpdateFunc">给定要添加或更新的属性方法（默认初始会执行一次，以便支持事件参数集合调用）。</param>
+        /// <param name="isInitialize">是否初始化（如果使用初始化，则表示立即执行方法，并将执行结果缓存；反之则在每次获取属性值时再执行方法。可选；默认不初始化）。</param>
         /// <returns>返回属性值对象。</returns>
-        object SetValue(string propertyName, Func<object> addOrUpdateFactory,
+        object? SetValue(string propertyName, Func<object?> addOrUpdateFunc,
             bool isInitialize = false);
 
 

@@ -12,12 +12,12 @@
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    class DefaultSymmetricAlgorithm : AbstractSymmetricAlgorithm
+    class DefaultAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
     {
         private CoreExtensionOptions _options;
 
 
-        public DefaultSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        public DefaultAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
             CoreExtensionBuilder extensionBuilder)
             : base(parameterGenerator, extensionBuilder)
         {
@@ -25,14 +25,8 @@ namespace Librame.Extensions.Core.Cryptography
         }
 
 
-        protected override KeyNonceOptions DefaultAesOptions
-            => _options.Algorithms.Aes;
-
-        protected override KeyNonceTagOptions DefaultAesCcmOptions
-            => _options.Algorithms.AesCcm;
-
-        protected override KeyNonceTagOptions DefaultAesGcmOptions
-            => _options.Algorithms.AesGcm;
+        protected override SigningCredentialsOptions DefaultRsaOptions
+            => _options.Algorithms.Rsa;
 
     }
 }

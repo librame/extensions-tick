@@ -10,6 +10,8 @@
 
 #endregion
 
+using Microsoft.IdentityModel.Tokens;
+
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
@@ -28,6 +30,7 @@ namespace Librame.Extensions.Core.Cryptography
             Aes = InitializeAesOptions(notifyProperty);
             AesCcm = InitializeAesCcmOptions(notifyProperty);
             AesGcm = InitializeAesGcmOptions(notifyProperty);
+            Rsa = InitializeRsaOptions(notifyProperty);
         }
 
 
@@ -51,6 +54,11 @@ namespace Librame.Extensions.Core.Cryptography
         /// AES-GCM 选项。
         /// </summary>
         public KeyNonceTagOptions AesGcm { get; private set; }
+
+        /// <summary>
+        /// RSA 选项。
+        /// </summary>
+        public SigningCredentialsOptions Rsa { get; private set; }
 
 
         /// <summary>
@@ -109,6 +117,30 @@ namespace Librame.Extensions.Core.Cryptography
             options.Key = RandomExtensions.GenerateByteArray(options.KeyMaxSize);
             options.Nonce = RandomExtensions.GenerateByteArray(options.NonceMaxSize);
             options.Tag = RandomExtensions.GenerateByteArray(options.TagMaxSize);
+
+            return options;
+        }
+
+        /// <summary>
+        /// 初始化 RSA 选项。
+        /// </summary>
+        /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
+        /// <returns>返回 <see cref="SigningCredentialsOptions"/>。</returns>
+        public static SigningCredentialsOptions InitializeRsaOptions(INotifyProperty notifyProperty)
+        {
+            var options = new SigningCredentialsOptions(notifyProperty);
+
+            // 尝试加载 IdentityServer4 生成的临时密钥文件
+            if (!string.IsNullOrEmpty(options.CredentialsFile))
+            {
+                // 临时密钥文件必须存放在应用根目录
+                var filePath = options.CredentialsFile.SetBasePath();
+                if (filePath.FileExists())
+                {
+                    var rsaKey = TemporaryRsaKey.LoadFile(filePath).AsRsaKey();
+                    options.Credentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
+                }
+            }
 
             return options;
         }

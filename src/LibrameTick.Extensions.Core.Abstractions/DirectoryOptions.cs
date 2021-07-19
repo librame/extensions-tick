@@ -10,9 +10,6 @@
 
 #endregion
 
-using System;
-using System.IO;
-
 namespace Librame.Extensions.Core
 {
     /// <summary>
@@ -23,17 +20,17 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 构造一个 <see cref="DirectoryOptions"/>。
         /// </summary>
-        /// <param name="baseDirectory">给定的基础目录（可选；如果为空，则默认为 <see cref="Environment.CurrentDirectory"/>）。</param>
+        /// <param name="baseDirectory">给定的基础目录（可选；如果为空，则默认为 <see cref="PathExtensions.CurrentDirectoryWithoutDevelopmentRelativePath"/>）。</param>
         public DirectoryOptions(string? baseDirectory = null)
         {
             if (string.IsNullOrWhiteSpace(baseDirectory))
-                baseDirectory = Environment.CurrentDirectory.TrimDevelopmentRelativePath();
+                baseDirectory = PathExtensions.CurrentDirectoryWithoutDevelopmentRelativePath;
 
             BaseDirectory = baseDirectory;
 
-            ConfigDirectory = Path.Combine(BaseDirectory, "_configs");
-            ReportDirectory = Path.Combine(BaseDirectory, "_reports");
-            ResourceDirectory = Path.Combine(BaseDirectory, "_resources");
+            ConfigDirectory = BaseDirectory.CombinePath("_configs");
+            ReportDirectory = BaseDirectory.CombinePath("_reports");
+            ResourceDirectory = BaseDirectory.CombinePath("_resources");
         }
 
 

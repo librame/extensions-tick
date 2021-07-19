@@ -28,6 +28,12 @@ namespace Librame.Extensions
         public static readonly string CurrentDirectory
             = Directory.GetCurrentDirectory();
 
+        /// <summary>
+        /// 除去开发相对路径部分的 <see cref="Directory.GetCurrentDirectory()"/> 当前目录。
+        /// </summary>
+        public static string CurrentDirectoryWithoutDevelopmentRelativePath
+            => CurrentDirectory.TrimDevelopmentRelativePath();
+
 
         /// <summary>
         /// 创建目录。
@@ -36,6 +42,24 @@ namespace Librame.Extensions
         /// <returns>返回 <see cref="DirectoryInfo"/>。</returns>
         public static DirectoryInfo CreateDirectory(this string path)
             => Directory.CreateDirectory(path);
+
+
+        /// <summary>
+        /// 目录是否存在。
+        /// </summary>
+        /// <param name="path">给定的路径。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool DirectoryExists(this string path)
+            => Directory.Exists(path);
+
+        /// <summary>
+        /// 文件是否存在。
+        /// </summary>
+        /// <param name="path">给定的路径。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool FileExists(this string path)
+            => File.Exists(path);
+
 
         /// <summary>
         /// 设置基础路径。
@@ -51,7 +75,7 @@ namespace Librame.Extensions
             relativePath.NotEmpty(nameof(relativePath));
 
             if (basePath.IsEmpty())
-                basePath = CurrentDirectory.TrimDevelopmentRelativePath();
+                basePath = CurrentDirectoryWithoutDevelopmentRelativePath;
 
             if (relativePath.StartsWith("./") || !relativePath.StartsWith(basePath))
                 return Path.Combine(basePath, relativePath);
@@ -138,7 +162,7 @@ namespace Librame.Extensions
         }
 
         /// <summary>
-        /// 修剪路径中存在的开发相对路径（如：prefix/bin/[x64/]Debug => prefix）。
+        /// 修剪路径中存在的开发相对路径部分（如：prefix/bin/[x64/]Debug => prefix）。
         /// </summary>
         /// <param name="path">给定的路径。</param>
         /// <returns>返回修剪后的路径字符串。</returns>

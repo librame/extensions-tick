@@ -18,52 +18,40 @@ namespace Librame.Extensions.Core.Cryptography
     /// <summary>
     /// 抽象对称算法（抽象实现 <see cref="ISymmetricAlgorithm"/>）。
     /// </summary>
-    public abstract class AbstractSymmetricAlgorithm : ISymmetricAlgorithm
+    public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetricAlgorithm
     {
         /// <summary>
-        /// 构造一个 <see cref="AbstractAlgorithmParameterGenerator"/>。
+        /// 构造一个 <see cref="AbstractSymmetricAlgorithm"/>。
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="parameterGenerator"/> 为空。
+        /// <paramref name="parameterGenerator"/> or <paramref name="extensionBuilder"/> 为空。
         /// </exception>
         /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
         /// <param name="extensionBuilder">给定的 <see cref="IExtensionBuilder"/>。</param>
         public AbstractSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
             IExtensionBuilder extensionBuilder)
+            : base(parameterGenerator, extensionBuilder)
         {
-            ParameterGenerator = parameterGenerator.NotNull(nameof(parameterGenerator));
-            ExtensionBuilder = extensionBuilder.NotNull(nameof(extensionBuilder));
         }
 
 
         /// <summary>
-        /// 参数生成器。
-        /// </summary>
-        public IAlgorithmParameterGenerator ParameterGenerator { get; private set; }
-
-        /// <summary>
-        /// 扩展构建器。
-        /// </summary>
-        public IExtensionBuilder ExtensionBuilder { get; private set; }
-
-
-        /// <summary>
-        /// 获取 AES 选项。
+        /// 默认 AES 选项。
         /// </summary>
         /// <returns>返回 <see cref="KeyNonceOptions"/>。</returns>
-        protected abstract KeyNonceOptions GetAesOptions();
+        protected abstract KeyNonceOptions DefaultAesOptions { get; }
 
         /// <summary>
-        /// 获取 AES-CCM 选项。
+        /// 默认 AES-CCM 选项。
         /// </summary>
         /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
-        protected abstract KeyNonceTagOptions GetAesCcmOptions();
+        protected abstract KeyNonceTagOptions DefaultAesCcmOptions { get; }
 
         /// <summary>
-        /// 获取 AES-GCM 选项。
+        /// 默认 AES-GCM 选项。
         /// </summary>
         /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
-        protected abstract KeyNonceTagOptions GetAesGcmOptions();
+        protected abstract KeyNonceTagOptions DefaultAesGcmOptions { get; }
 
 
         #region AES
@@ -77,7 +65,7 @@ namespace Librame.Extensions.Core.Cryptography
         public virtual byte[] EncryptAes(byte[] buffer, KeyNonceOptions? options = null)
         {
             if (options == null)
-                options = GetAesOptions();
+                options = DefaultAesOptions;
 
             return AlgorithmExtensions.RunAes(aes =>
             {
@@ -95,7 +83,7 @@ namespace Librame.Extensions.Core.Cryptography
         public virtual byte[] DecryptAes(byte[] buffer, KeyNonceOptions? options = null)
         {
             if (options == null)
-                options = GetAesOptions();
+                options = DefaultAesOptions;
 
             return AlgorithmExtensions.RunAes(aes =>
             {
@@ -118,7 +106,7 @@ namespace Librame.Extensions.Core.Cryptography
         public virtual byte[] EncryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
             if (options == null)
-                options = GetAesCcmOptions();
+                options = DefaultAesCcmOptions;
 
             var ciphertext = new byte[buffer.Length];
 
@@ -137,7 +125,7 @@ namespace Librame.Extensions.Core.Cryptography
         public virtual byte[] DecryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
             if (options == null)
-                options = GetAesCcmOptions();
+                options = DefaultAesCcmOptions;
 
             var plaintext = new byte[buffer.Length];
 
@@ -161,7 +149,7 @@ namespace Librame.Extensions.Core.Cryptography
         public virtual byte[] EncryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
             if (options == null)
-                options = GetAesGcmOptions();
+                options = DefaultAesGcmOptions;
 
             var ciphertext = new byte[buffer.Length];
 
@@ -180,7 +168,7 @@ namespace Librame.Extensions.Core.Cryptography
         public virtual byte[] DecryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null)
         {
             if (options == null)
-                options = GetAesGcmOptions();
+                options = DefaultAesGcmOptions;
 
             var plaintext = new byte[buffer.Length];
 

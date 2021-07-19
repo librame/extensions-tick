@@ -47,13 +47,16 @@ namespace Librame.Extensions.Core.Cryptography
             set => NotifyProperty.SetValue(nameof(Nonce), value);
         }
 
+
         /// <summary>
         /// 设置初始向量方法。
         /// </summary>
-        [JsonIgnore]
-        public Func<byte[]> SetNonceFunc
+        /// <param name="nonceFunc">给定的初始向量方法。</param>
+        /// <returns>返回初始向量方法。</returns>
+        public Func<byte[]?> SetNonceFunc(Func<byte[]?> nonceFunc)
         {
-            set => NotifyProperty.SetValue(nameof(Nonce), value);
+            NotifyProperty.SetValue(nameof(Nonce), nonceFunc);
+            return nonceFunc;
         }
 
     }

@@ -21,20 +21,20 @@ namespace Librame.Extensions.Core
     /// </summary>
     public abstract class AbstractNotifyProperty : INotifyProperty
     {
-        private ConcurrentDictionary<string, object> _propertyValues;
-        private ConcurrentDictionary<string, Func<object>> _propertyFactories;
+        private ConcurrentDictionary<string, object?> _propertyValues;
+        private ConcurrentDictionary<string, Func<object?>> _propertyFuncs;
 
 
         /// <summary>
         /// 构造一个 <see cref="AbstractNotifyProperty"/>。
         /// </summary>
         /// <param name="propertyValues">给定的属性值字典集合。</param>
-        /// <param name="propertyFactories">给定的属性工厂字典集合。</param>
-        public AbstractNotifyProperty(ConcurrentDictionary<string, object>? propertyValues = null,
-            ConcurrentDictionary<string, Func<object>>? propertyFactories = null)
+        /// <param name="propertyFuncs">给定的属性方法字典集合。</param>
+        public AbstractNotifyProperty(ConcurrentDictionary<string, object?>? propertyValues = null,
+            ConcurrentDictionary<string, Func<object?>>? propertyFuncs = null)
         {
-            _propertyValues = propertyValues ?? new ConcurrentDictionary<string, object>();
-            _propertyFactories = propertyFactories ?? new ConcurrentDictionary<string, Func<object>>();
+            _propertyValues = propertyValues ?? new ConcurrentDictionary<string, object?>();
+            _propertyFuncs = propertyFuncs ?? new ConcurrentDictionary<string, Func<object?>>();
         }
 
 
@@ -53,9 +53,9 @@ namespace Librame.Extensions.Core
         /// 设置属性值（支持添加或更新）。
         /// </summary>
         /// <param name="propertyName">给定的属性名称。</param>
-        /// <param name="addOrUpdateValue">给定要添加或更新的属性值。</param>
+        /// <param name="addOrUpdateValue">给定要添加或更新的属性值对象。</param>
         /// <returns>返回属性值对象。</returns>
-        public virtual object SetValue(string propertyName, object? addOrUpdateValue)
+        public object? SetValue(string propertyName, object? addOrUpdateValue)
         {
             if (_propertyValues.ContainsKey(propertyName))
             {
@@ -65,9 +65,7 @@ namespace Librame.Extensions.Core
                 PropertyChanging?.Invoke(this,
                     new NotifyPropertyChangingEventArgs(propertyName, addOrUpdateValue, oldValue, isUpdate: true));
 
-#pragma warning disable CS8601 // 可能的 null 引用赋值。
                 _propertyValues[propertyName] = addOrUpdateValue;
-#pragma warning restore CS8601 // 可能的 null 引用赋值。
 
                 // 调用属性改变后事件处理程序
                 PropertyChanged?.Invoke(this,
@@ -79,45 +77,41 @@ namespace Librame.Extensions.Core
                 PropertyChanging?.Invoke(this,
                     new NotifyPropertyChangingEventArgs(propertyName, addOrUpdateValue, oldValue: null));
 
-#pragma warning disable CS8604 // 可能的 null 引用参数。
                 _propertyValues.TryAdd(propertyName, addOrUpdateValue);
-#pragma warning restore CS8604 // 可能的 null 引用参数。
 
                 // 调用属性改变后事件处理程序
                 PropertyChanged?.Invoke(this,
                     new NotifyPropertyChangedEventArgs(propertyName, addOrUpdateValue, oldValue: null));
             }
 
-#pragma warning disable CS8603 // 可能的 null 引用返回。
             return addOrUpdateValue;
-#pragma warning restore CS8603 // 可能的 null 引用返回。
         }
 
         /// <summary>
         /// 设置属性值（支持添加或更新）。
         /// </summary>
         /// <param name="propertyName">给定的属性名称。</param>
-        /// <param name="addOrUpdateFactory">给定要添加或更新的属性工厂方法（默认初始会执行一次，以便支持事件参数集合调用）。</param>
-        /// <param name="isInitialize">是否初始化（如果使用初始化，则表示立即执行工厂方法，并将执行结果缓存；反之则在每次获取属性值时再执行工厂方法。可选；默认不初始化）。</param>
+        /// <param name="addOrUpdateFunc">给定要添加或更新的属性方法（默认初始会执行一次，以便支持事件参数集合调用）。</param>
+        /// <param name="isInitialize">是否初始化（如果使用初始化，则表示立即执行方法，并将执行结果缓存；反之则在每次获取属性值时再执行方法。可选；默认不初始化）。</param>
         /// <returns>返回属性值对象。</returns>
-        public virtual object SetValue(string propertyName, Func<object> addOrUpdateFactory,
+        public virtual object? SetValue(string propertyName, Func<object?> addOrUpdateFunc,
             bool isInitialize = false)
         {
-            addOrUpdateFactory.NotNull(nameof(addOrUpdateFactory));
+            addOrUpdateFunc.NotNull(nameof(addOrUpdateFunc));
 
-            var addOrUpdateValue = addOrUpdateFactory.Invoke();
+            var addOrUpdateValue = addOrUpdateFunc.Invoke();
 
             if (!isInitialize)
             {
-                if (_propertyFactories.ContainsKey(propertyName))
+                if (_propertyFuncs.ContainsKey(propertyName))
                 {
-                    var oldValue = _propertyFactories[propertyName].Invoke();
+                    var oldValue = _propertyFuncs[propertyName].Invoke();
 
                     // 调用属性改变时事件处理程序
                     PropertyChanging?.Invoke(this,
                         new NotifyPropertyChangingEventArgs(propertyName, addOrUpdateValue, oldValue, isUpdate: true));
 
-                    _propertyFactories[propertyName] = addOrUpdateFactory;
+                    _propertyFuncs[propertyName] = addOrUpdateFunc;
 
                     // 调用属性改变后事件处理程序
                     PropertyChanged?.Invoke(this,
@@ -129,7 +123,7 @@ namespace Librame.Extensions.Core
                     PropertyChanging?.Invoke(this,
                         new NotifyPropertyChangingEventArgs(propertyName, addOrUpdateValue, oldValue: null));
 
-                    _propertyFactories.TryAdd(propertyName, addOrUpdateFactory);
+                    _propertyFuncs.TryAdd(propertyName, addOrUpdateFunc);
 
                     // 调用属性改变后事件处理程序
                     PropertyChanged?.Invoke(this,
@@ -153,10 +147,10 @@ namespace Librame.Extensions.Core
         public virtual TValue? GetValue<TValue>(string propertyName, TValue? defaultValue = default)
         {
             if (_propertyValues.ContainsKey(propertyName))
-                return (TValue)_propertyValues[propertyName];
+                return (TValue?)_propertyValues[propertyName];
 
-            if (_propertyFactories.ContainsKey(propertyName))
-                return (TValue)_propertyFactories[propertyName].Invoke();
+            if (_propertyFuncs.ContainsKey(propertyName))
+                return (TValue?)_propertyFuncs[propertyName].Invoke();
 
             return defaultValue;
         }
@@ -172,8 +166,8 @@ namespace Librame.Extensions.Core
             if (_propertyValues.ContainsKey(propertyName))
                 return _propertyValues[propertyName];
 
-            if (_propertyFactories.ContainsKey(propertyName))
-                return _propertyFactories[propertyName].Invoke();
+            if (_propertyFuncs.ContainsKey(propertyName))
+                return _propertyFuncs[propertyName].Invoke();
 
             return defaultValue;
         }
@@ -189,7 +183,7 @@ namespace Librame.Extensions.Core
         {
             if (!_propertyValues.TryRemove(propertyName, out value))
             {
-                if (_propertyFactories.TryRemove(propertyName, out var factory))
+                if (_propertyFuncs.TryRemove(propertyName, out var factory))
                 {
                     value = factory.Invoke();
                     return true;

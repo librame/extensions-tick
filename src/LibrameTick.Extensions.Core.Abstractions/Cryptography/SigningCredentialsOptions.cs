@@ -10,23 +10,22 @@
 
 #endregion
 
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    using Serialization;
-
     /// <summary>
-    /// 密钥选项。
+    /// 签名证书选项。
     /// </summary>
-    public class KeyOptions
+    public class SigningCredentialsOptions
     {
         /// <summary>
-        /// 构造一个 <see cref="KeyOptions"/>。
+        /// 构造一个 <see cref="SigningCredentialsOptions"/>。
         /// </summary>
         /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
-        public KeyOptions(INotifyProperty notifyProperty)
+        public SigningCredentialsOptions(INotifyProperty notifyProperty)
         {
             NotifyProperty = notifyProperty.NotNull(nameof(notifyProperty));
         }
@@ -39,30 +38,27 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         /// <summary>
-        /// 密钥最大大小。
+        /// 证书文件（默认兼容 IdentityServer4 生成的临时密钥文件）。
         /// </summary>
-        public int KeyMaxSize { get; set; }
+        public string? CredentialsFile { get; set; }
+            = "tempkey.rsa"; // 默认兼容 IdentityServer4 生成的临时密钥文件
 
         /// <summary>
-        /// 密钥。
+        /// 签名证书。
         /// </summary>
-        [JsonConverter(typeof(JsonStringBase64Converter))]
-        public byte[]? Key
-        {
-            get => NotifyProperty.GetValue<byte[]?>(nameof(Key));
-            set => NotifyProperty.SetValue(nameof(Key), value);
-        }
+        [JsonIgnore]
+        public SigningCredentials? Credentials { get; set; }
 
 
         /// <summary>
-        /// 设置密钥方法。
+        /// 设置签名证书方法。
         /// </summary>
-        /// <param name="keyFunc">给定的密钥方法。</param>
-        /// <returns>返回密钥方法。</returns>
-        public Func<byte[]?> SetKeyFunc(Func<byte[]?> keyFunc)
+        /// <param name="credentialsFunc">给定的签名证书方法。</param>
+        /// <returns>返回签名证书方法。</returns>
+        public Func<SigningCredentials?> SetCredentialsFunc(Func<SigningCredentials?> credentialsFunc)
         {
-            NotifyProperty.SetValue(nameof(Key), keyFunc);
-            return keyFunc;
+            NotifyProperty.SetValue(nameof(Credentials), credentialsFunc);
+            return credentialsFunc;
         }
 
     }

@@ -15,13 +15,8 @@ namespace Librame.Extensions.Core.Cryptography
     /// <summary>
     /// 对称算法接口。
     /// </summary>
-    public interface ISymmetricAlgorithm
+    public interface ISymmetricAlgorithm : IAlgorithm
     {
-        /// <summary>
-        /// 参数生成器。
-        /// </summary>
-        public IAlgorithmParameterGenerator ParameterGenerator { get; }
-
 
         #region AES
 
