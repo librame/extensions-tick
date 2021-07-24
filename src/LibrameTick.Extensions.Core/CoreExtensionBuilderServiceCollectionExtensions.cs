@@ -16,12 +16,13 @@ using System;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// <see cref="CoreExtensionBuilder"/> 的 <see cref="ServiceCollection"/> 静态扩展。
+    /// <see cref="CoreExtensionBuilder"/>、<see cref="ServiceCollection"/> 静态扩展。
     /// </summary>
     public static class CoreExtensionBuilderServiceCollectionExtensions
     {
+
         /// <summary>
-        /// 添加 Librame 扩展。
+        /// 添加 Librame 入口 <see cref="CoreExtensionBuilder"/>。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
         /// <param name="setupAction">给定的配置选项动作（可选）。</param>

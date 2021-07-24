@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 抽象算法参数生成器（抽象实现 <see cref="IAlgorithmParameterGenerator"/>）。
+    /// 抽象实现 <see cref="IAlgorithmParameterGenerator"/>。
     /// </summary>
     public abstract class AbstractAlgorithmParameterGenerator : IAlgorithmParameterGenerator
     {

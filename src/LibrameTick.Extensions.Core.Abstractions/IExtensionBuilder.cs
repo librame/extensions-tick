@@ -30,6 +30,11 @@ namespace Librame.Extensions.Core
         /// </summary>
         IExtensionOptions Options { get; }
 
+        /// <summary>
+        /// 父级构建器。
+        /// </summary>
+        IExtensionBuilder? ParentBuilder { get; }
+
 
         #region AddOrReplaceByCharacteristic
 

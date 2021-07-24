@@ -21,10 +21,10 @@ namespace Librame.Extensions.Core
     public interface IExtensionInfo : INotifyProperty
     {
         /// <summary>
-        /// 当前类型。
+        /// 信息类型。
         /// </summary>
         [JsonIgnore]
-        Type CurrentType { get; }
+        Type InfoType { get; }
 
         /// <summary>
         /// 名称。
@@ -33,9 +33,9 @@ namespace Librame.Extensions.Core
         string Name { get; }
 
         /// <summary>
-        /// 父级。
+        /// 父级信息。
         /// </summary>
         [JsonIgnore]
-        IExtensionInfo? Parent { get; }
+        IExtensionInfo? ParentInfo { get; }
     }
 }

@@ -30,7 +30,7 @@ namespace Librame.Extensions.Core
         /// </summary>
         /// <param name="propertyValues">给定的属性值字典集合。</param>
         /// <param name="propertyFuncs">给定的属性方法字典集合。</param>
-        public AbstractNotifyProperty(ConcurrentDictionary<string, object?>? propertyValues = null,
+        protected AbstractNotifyProperty(ConcurrentDictionary<string, object?>? propertyValues = null,
             ConcurrentDictionary<string, Func<object?>>? propertyFuncs = null)
         {
             _propertyValues = propertyValues ?? new ConcurrentDictionary<string, object?>();
@@ -55,7 +55,7 @@ namespace Librame.Extensions.Core
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="addOrUpdateValue">给定要添加或更新的属性值对象。</param>
         /// <returns>返回属性值对象。</returns>
-        public object? SetValue(string propertyName, object? addOrUpdateValue)
+        public virtual object? SetValue(string propertyName, object? addOrUpdateValue)
         {
             if (_propertyValues.ContainsKey(propertyName))
             {

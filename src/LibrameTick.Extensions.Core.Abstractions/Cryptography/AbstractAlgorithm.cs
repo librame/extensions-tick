@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 抽象算法。
+    /// 抽象实现 <see cref="IAlgorithm"/>。
     /// </summary>
     public abstract class AbstractAlgorithm : IAlgorithm
     {

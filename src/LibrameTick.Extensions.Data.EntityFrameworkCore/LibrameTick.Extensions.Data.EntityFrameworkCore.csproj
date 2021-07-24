@@ -12,8 +12,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.6.21352.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LibrameTick.Extensions.Core\LibrameTick.Extensions.Core.csproj" />
     <ProjectReference Include="..\LibrameTick.Extensions.Data.Abstractions\LibrameTick.Extensions.Data.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Specifications\" />
+    <Folder Include="Stores\" />
   </ItemGroup>
 
 </Project>

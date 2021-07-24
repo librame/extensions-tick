@@ -64,6 +64,6 @@ namespace Librame.Extensions.Data
         /// <returns>返回一个包含标识符对象的异步操作。</returns>
         public virtual async Task<object?> GenerateObjectIdAsync(IClock clock,
             CancellationToken cancellationToken = default)
-            => await GenerateIdAsync(clock, cancellationToken).ConfigureAwaitWithoutContext();
+            => await GenerateIdAsync(clock, cancellationToken).ConfigureAwait();
     }
 }

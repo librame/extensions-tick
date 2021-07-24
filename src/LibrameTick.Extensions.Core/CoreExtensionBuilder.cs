@@ -31,7 +31,7 @@ namespace Librame.Extensions.Core
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
         /// <param name="options">给定的 <see cref="CoreExtensionOptions"/>。</param>
         public CoreExtensionBuilder(IServiceCollection services, CoreExtensionOptions options)
-            : base(services, options, parent: null)
+            : base(services, options)
         {
             Services.AddSingleton(this);
 

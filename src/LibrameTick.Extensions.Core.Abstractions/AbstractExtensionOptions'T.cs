@@ -24,12 +24,12 @@ namespace Librame.Extensions.Core
         where TOptions : IExtensionOptions
     {
         /// <summary>
-        /// 构造一个 <see cref="AbstractExtensionOptions"/>。
+        /// 构造一个 <see cref="AbstractExtensionOptions{TOptions}"/>。
         /// </summary>
-        /// <param name="parent">给定的父级 <typeparamref name="TOptions"/>。</param>
-        /// <param name="directories">给定的 <see cref="DirectoryOptions"/>（可选）。</param>
-        public AbstractExtensionOptions(TOptions? parent, DirectoryOptions? directories = null)
-            : base(parent, directories)
+        /// <param name="parentOptions">给定的父级 <see cref="IExtensionOptions"/>（可空；为空则表示当前为父级扩展）。</param>
+        /// <param name="directories">给定的 <see cref="DirectoryOptions"/>（可选；默认尝试从父级扩展选项中获取，如果从父级获取到的实例为空，则新建此实例）。</param>
+        protected AbstractExtensionOptions(IExtensionOptions? parentOptions, DirectoryOptions? directories = null)
+            : base(parentOptions, directories)
         {
             PropertyChanging += AbstractExtensionOptions_PropertyChanging;
             PropertyChanged += AbstractExtensionOptions_PropertyChanged;

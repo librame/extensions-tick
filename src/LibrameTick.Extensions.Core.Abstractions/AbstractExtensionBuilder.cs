@@ -22,19 +22,33 @@ namespace Librame.Extensions.Core
     public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensionBuilder
     {
         /// <summary>
-        /// 构造一个 <see cref="AbstractExtensionBuilder"/>。
+        /// 构造一个父级 <see cref="AbstractExtensionBuilder"/>。
         /// </summary>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="services"/> 或 <paramref name="options"/> 为空。
         /// </exception>
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
         /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-        /// <param name="parent">给定的可空 <see cref="IExtensionBuilder"/>。</param>
-        public AbstractExtensionBuilder(IServiceCollection services, IExtensionOptions options,
-            IExtensionBuilder? parent)
-            : base(parent)
+        protected AbstractExtensionBuilder(IServiceCollection services, IExtensionOptions options)
+            : base(parentInfo: null)
         {
             Services = services.NotNull(nameof(services));
+            Options = options.NotNull(nameof(options));
+        }
+
+        /// <summary>
+        /// 构造一个子级 <see cref="AbstractExtensionBuilder"/>。
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="parentBuilder"/> 或 <paramref name="options"/> 为空。
+        /// </exception>
+        /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
+        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+        protected AbstractExtensionBuilder(IExtensionBuilder parentBuilder, IExtensionOptions options)
+            : base(parentBuilder)
+        {
+            ParentBuilder = parentBuilder.NotNull(nameof(parentBuilder));
+            Services = parentBuilder.Services;
             Options = options.NotNull(nameof(options));
         }
 
@@ -42,12 +56,17 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 服务集合。
         /// </summary>
-        public IServiceCollection Services { get; private set; }
+        public IServiceCollection Services { get; init; }
 
         /// <summary>
         /// 扩展选项。
         /// </summary>
-        public IExtensionOptions Options { get; private set; }
+        public IExtensionOptions Options { get; init; }
+
+        /// <summary>
+        /// 父级构建器。
+        /// </summary>
+        public IExtensionBuilder? ParentBuilder { get; init; }
 
 
         #region AddOrReplaceByCharacteristic

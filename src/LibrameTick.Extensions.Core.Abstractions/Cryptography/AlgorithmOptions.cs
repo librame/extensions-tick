@@ -37,28 +37,28 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 通知属性。
         /// </summary>
-        protected INotifyProperty NotifyProperty { get; }
+        protected INotifyProperty NotifyProperty { get; init; }
 
 
         /// <summary>
         /// AES 选项。
         /// </summary>
-        public KeyNonceOptions Aes { get; private set; }
+        public KeyNonceOptions Aes { get; init; }
 
         /// <summary>
         /// AES-CCM 选项。
         /// </summary>
-        public KeyNonceTagOptions AesCcm { get; private set; }
+        public KeyNonceTagOptions AesCcm { get; init; }
 
         /// <summary>
         /// AES-GCM 选项。
         /// </summary>
-        public KeyNonceTagOptions AesGcm { get; private set; }
+        public KeyNonceTagOptions AesGcm { get; init; }
 
         /// <summary>
         /// RSA 选项。
         /// </summary>
-        public SigningCredentialsOptions Rsa { get; private set; }
+        public SigningCredentialsOptions Rsa { get; init; }
 
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Librame.Extensions.Core.Cryptography
             // 尝试加载 IdentityServer4 生成的临时密钥文件
             if (!string.IsNullOrEmpty(options.CredentialsFile))
             {
-                // 临时密钥文件必须存放在应用根目录
+                // 临时密钥文件通常存放在应用根目录
                 var filePath = options.CredentialsFile.SetBasePath();
                 if (filePath.FileExists())
                 {

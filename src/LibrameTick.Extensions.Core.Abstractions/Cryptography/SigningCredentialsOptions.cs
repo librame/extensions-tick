@@ -34,7 +34,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 通知属性。
         /// </summary>
-        protected INotifyProperty NotifyProperty { get; }
+        protected INotifyProperty NotifyProperty { get; init; }
 
 
         /// <summary>

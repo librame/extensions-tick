@@ -37,5 +37,11 @@ namespace Librame.Extensions.Core
         /// </summary>
         [JsonIgnore]
         ServiceCharacteristicCollection ServiceCharacteristics { get; }
+
+        /// <summary>
+        /// 父级选项。
+        /// </summary>
+        [JsonIgnore]
+        IExtensionOptions? ParentOptions { get; }
     }
 }

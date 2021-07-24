@@ -92,7 +92,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="awaitable">给定的 <see cref="ConfiguredTaskAwaitable" />。</param>
         public static void Await(this ConfiguredTaskAwaitable awaitable)
-            => awaitable.NotNull(nameof(awaitable)).GetAwaiter().GetResult();
+            => awaitable.GetAwaiter().GetResult();
 
         /// <summary>
         /// 结束对已完成任务的等待，并返回执行结果。
@@ -101,7 +101,25 @@ namespace Librame.Extensions
         /// <param name="awaitable">给定的 <see cref="ConfiguredTaskAwaitable" />。</param>
         /// <returns>返回 <typeparamref name="TResult"/>。</returns>
         public static TResult AwaitResult<TResult>(this ConfiguredTaskAwaitable<TResult> awaitable)
-            => awaitable.NotNull(nameof(awaitable)).GetAwaiter().GetResult();
+            => awaitable.GetAwaiter().GetResult();
+
+
+        /// <summary>
+        /// 禁用捕获上下文配置可等待任务。
+        /// </summary>
+        /// <param name="task">给定的 <see cref="Task"/>。</param>
+        /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
+        public static ConfiguredTaskAwaitable ConfigureAwait(this Task task)
+            => task.NotNull(nameof(task)).ConfigureAwait(false);
+
+        /// <summary>
+        /// 禁用捕获上下文配置可等待任务。
+        /// </summary>
+        /// <typeparam name="TResult">指定的结果类型。</typeparam>
+        /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
+        /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
+        public static ConfiguredTaskAwaitable<TResult> ConfigureAwait<TResult>(this Task<TResult> task)
+            => task.NotNull(nameof(task)).ConfigureAwait(false);
 
 
         /// <summary>
@@ -120,24 +138,6 @@ namespace Librame.Extensions
         /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
         public static ConfiguredTaskAwaitable<TResult> ConfigureAwaitWithContext<TResult>(this Task<TResult> task)
             => task.NotNull(nameof(task)).ConfigureAwait(true);
-
-
-        /// <summary>
-        /// 禁用捕获上下文配置可等待任务。
-        /// </summary>
-        /// <param name="task">给定的 <see cref="Task"/>。</param>
-        /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
-        public static ConfiguredTaskAwaitable ConfigureAwaitWithoutContext(this Task task)
-            => task.NotNull(nameof(task)).ConfigureAwait(false);
-
-        /// <summary>
-        /// 禁用捕获上下文配置可等待任务。
-        /// </summary>
-        /// <typeparam name="TResult">指定的结果类型。</typeparam>
-        /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
-        /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
-        public static ConfiguredTaskAwaitable<TResult> ConfigureAwaitWithoutContext<TResult>(this Task<TResult> task)
-            => task.NotNull(nameof(task)).ConfigureAwait(false);
 
         #endregion
 

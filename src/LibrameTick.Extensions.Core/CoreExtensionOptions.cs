@@ -27,12 +27,13 @@ namespace Librame.Extensions.Core
         /// 构造一个 <see cref="CoreExtensionOptions"/>。
         /// </summary>
         public CoreExtensionOptions()
-            : base(parent: null)
+            : base(parentOptions: null)
         {
             Encoding = Encoding.UTF8;
 
             Algorithms = new AlgorithmOptions(this);
 
+            // Cryptography
             ServiceCharacteristics.AddSingleton<IAlgorithmParameterGenerator>();
             ServiceCharacteristics.AddSingleton<ISymmetricAlgorithm>();
         }
@@ -48,6 +49,6 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 算法选项。
         /// </summary>
-        public AlgorithmOptions Algorithms { get; private set; }
+        public AlgorithmOptions Algorithms { get; init; }
     }
 }

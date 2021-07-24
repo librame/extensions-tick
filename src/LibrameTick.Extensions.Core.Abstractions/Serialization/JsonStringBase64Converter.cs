@@ -30,7 +30,7 @@ namespace Librame.Extensions.Core.Serialization
         /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
         /// <returns>返回 <see cref="Encoding"/>。</returns>
         public override byte[]? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            => Convert.FromBase64String(reader.GetNotEmptyString());
+            => Convert.FromBase64String(reader.GetRequiredString());
 
         /// <summary>
         /// 写入 JSON。

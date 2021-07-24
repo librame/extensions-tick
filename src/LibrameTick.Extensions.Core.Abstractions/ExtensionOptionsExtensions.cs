@@ -36,7 +36,7 @@ namespace Librame.Extensions.Core
 
             jsonOptions.WriteIndented = true;
             jsonOptions.Converters.Add(new JsonStringEnumConverter());
-
+            
             return options.SaveAsJson(jsonOptions, filePath);
         }
 

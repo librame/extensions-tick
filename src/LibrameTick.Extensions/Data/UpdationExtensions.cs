@@ -59,7 +59,7 @@ namespace Librame.Extensions.Data
             where TUpdatedBy : IEquatable<TUpdatedBy>
         {
             await updation.PopulateCreationAsync<TUpdatedBy>(newUpdatedBy, newUpdatedTime, cancellationToken)
-                .ConfigureAwaitWithoutContext();
+                .ConfigureAwait();
 
             updation.UpdatedTime = newUpdatedTime;
             updation.UpdatedTimeTicks = updation.UpdatedTime.Ticks;
@@ -115,7 +115,7 @@ namespace Librame.Extensions.Data
             where TUpdation : IObjectUpdation
         {
             await updation.PopulateCreationAsync(newUpdatedBy, newUpdatedTime)
-                .ConfigureAwaitWithoutContext();
+                .ConfigureAwait();
 
             if (newUpdatedTime.IsNotNull())
             {

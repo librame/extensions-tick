@@ -7,8 +7,8 @@ namespace Librame.Extensions.Core
         [Fact]
         public void AbstractTest()
         {
-            Assert.NotNull(CoreExtensionBuilderHelper.CurrentBuilder.CurrentType);
-            Assert.Null(CoreExtensionBuilderHelper.CurrentBuilder.Parent);
+            Assert.NotNull(CoreExtensionBuilderHelper.CurrentBuilder.InfoType);
+            Assert.Null(CoreExtensionBuilderHelper.CurrentBuilder.ParentInfo);
             Assert.NotEmpty(CoreExtensionBuilderHelper.CurrentBuilder.Name);
 
             Assert.NotNull(CoreExtensionBuilderHelper.CurrentBuilder.Services);

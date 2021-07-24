@@ -19,7 +19,7 @@ namespace Librame.Extensions.Core
 
             if (_services is null)
             {
-                _services = _builder.BuildServiceProvider();
+                _services = _builder.Services.BuildServiceProvider();
             }
         }
 

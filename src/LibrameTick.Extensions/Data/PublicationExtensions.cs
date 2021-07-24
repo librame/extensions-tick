@@ -59,7 +59,7 @@ namespace Librame.Extensions.Data
             where TPublishedBy : IEquatable<TPublishedBy>
         {
             await publication.PopulateCreationAsync<TPublishedBy>(newPublishedBy, newPublishedTime, cancellationToken)
-                .ConfigureAwaitWithoutContext();
+                .ConfigureAwait();
 
             publication.PublishedTime = newPublishedTime;
             publication.PublishedTimeTicks = publication.PublishedTime.Ticks;
@@ -115,7 +115,7 @@ namespace Librame.Extensions.Data
             where TPublication : IObjectPublication
         {
             await publication.PopulateCreationAsync(newPublishedBy, newPublishedTime)
-                .ConfigureAwaitWithoutContext();
+                .ConfigureAwait();
 
             if (newPublishedTime.IsNotNull())
             {

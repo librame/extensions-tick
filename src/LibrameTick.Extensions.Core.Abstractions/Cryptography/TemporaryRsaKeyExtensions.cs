@@ -24,9 +24,9 @@ namespace Librame.Extensions.Core.Cryptography
         /// 转换为 <see cref="RsaSecurityKey"/>。
         /// </summary>
         /// <param name="tempKey">给定的 <see cref="TemporaryRsaKey"/>。</param>
-        /// <param name="requirePrivateKey">是否需要私钥（可选；默认需要）。</param>
+        /// <param name="requiredPrivateKey">必需存在私钥（可选；默认需要）。</param>
         /// <returns>返回 <see cref="RsaSecurityKey"/>。</returns>
-        public static RsaSecurityKey AsRsaKey(this TemporaryRsaKey? tempKey, bool requirePrivateKey = true)
+        public static RsaSecurityKey AsRsaKey(this TemporaryRsaKey? tempKey, bool requiredPrivateKey = true)
         {
             tempKey.NotNull(nameof(tempKey));
 
@@ -35,7 +35,7 @@ namespace Librame.Extensions.Core.Cryptography
                 KeyId = tempKey.KeyId
             };
 
-            if (requirePrivateKey && rsaKey.PrivateKeyStatus == PrivateKeyStatus.DoesNotExist)
+            if (requiredPrivateKey && rsaKey.PrivateKeyStatus == PrivateKeyStatus.DoesNotExist)
                 throw new NotSupportedException($"The temporary rsa key does not have a private key.");
 
             return rsaKey;

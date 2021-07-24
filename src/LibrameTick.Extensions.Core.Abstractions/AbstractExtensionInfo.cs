@@ -23,19 +23,19 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 抽象一个 <see cref="AbstractExtensionInfo"/>。
         /// </summary>
-        /// <param name="parent">给定的父级 <see cref="IExtensionInfo"/>。</param>
-        public AbstractExtensionInfo(IExtensionInfo? parent)
+        /// <param name="parentInfo">给定的父级 <see cref="IExtensionInfo"/>（可空；为空则表示当前为父级扩展）。</param>
+        protected AbstractExtensionInfo(IExtensionInfo? parentInfo)
             : base()
         {
-            Parent = parent;
+            ParentInfo = parentInfo;
         }
 
 
         /// <summary>
-        /// 当前类型。
+        /// 信息类型。
         /// </summary>
         [JsonIgnore]
-        public virtual Type CurrentType
+        public virtual Type InfoType
             => GetType();
 
         /// <summary>
@@ -43,12 +43,12 @@ namespace Librame.Extensions.Core
         /// </summary>
         [JsonIgnore]
         public virtual string Name
-            => CurrentType.Name;
+            => InfoType.Name;
 
         /// <summary>
-        /// 父级。
+        /// 父级信息。
         /// </summary>
         [JsonIgnore]
-        public virtual IExtensionInfo? Parent { get; private set; }
+        public virtual IExtensionInfo? ParentInfo { get; init; }
     }
 }

@@ -24,9 +24,9 @@ namespace Librame.Extensions.Core
         [Fact]
         public void AbstractTest()
         {
-            Assert.NotNull(_options.CurrentType);
+            Assert.NotNull(_options.InfoType);
             Assert.NotEmpty(_options.Name);
-            Assert.Null(_options.Parent);
+            Assert.Null(_options.ParentOptions);
 
             Assert.NotNull(_options.Encoding);
             Assert.NotNull(_options.Algorithms);

@@ -16,7 +16,7 @@ using System.Security.Cryptography;
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 抽象非对称算法（抽象实现 <see cref="IAsymmetricAlgorithm"/>）。
+    /// 抽象实现 <see cref="IAsymmetricAlgorithm"/>。
     /// </summary>
     public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetricAlgorithm
     {

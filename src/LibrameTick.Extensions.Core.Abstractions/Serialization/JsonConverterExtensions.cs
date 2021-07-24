@@ -12,17 +12,21 @@
 
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core.Serialization
 {
-    static class JsonConverterExtensions
+    /// <summary>
+    /// <see cref="JsonConverter"/> 静态扩展。
+    /// </summary>
+    public static class JsonConverterExtensions
     {
         /// <summary>
-        /// 获取不为空的字符串。
+        /// 获取必需的字符串。
         /// </summary>
         /// <param name="reader">给定的 <see cref="Utf8JsonReader"/>。</param>
         /// <returns>返回字符串。</returns>
-        public static string GetNotEmptyString(this Utf8JsonReader reader)
+        public static string GetRequiredString(this Utf8JsonReader reader)
         {
             var str = reader.GetString();
 
