@@ -6,28 +6,30 @@ namespace Librame.Extensions.Data.Accessors
 {
     using Core;
 
-    public class DbContextAccessorTest
+    public class TestAccessorTests
     {
+
         [Fact]
-        public void SqlServerTest()
+        public void AllTest()
         {
             var services = new ServiceCollection();
 
-            services.AddDbContext<DbContextAccessor>(opts =>
+            services.AddDbContext<TestReadAccessor>(opts =>
             {
-                opts.UseSqlServer("server=.;database=cms;integrated security=true;");
-                opts.UseAccessor();
+                opts.UseSqlite("Data Source=librame_extensions.db");
+                opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Read));
             });
 
-            services.AddDbContextPool<TestDbContextAccessor>(opts =>
+            services.AddDbContextPool<TestWriteAccessor>(opts =>
             {
-                opts.UseSqlServer("server=.;database=cms;integrated security=true;");
-                opts.UseAccessor(b => b.WithPool().WithInteraction(AccessorInteraction.Read));
+                opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;");
+                opts.UseAccessor(b => b.WithPool().WithInteraction(AccessorInteraction.Write));
             });
 
             services.AddLibrame().AddData();
 
-            var provider = services.BuildServiceProvider();
+            var provider = services.BuildServiceProvider()
+                .InitializePopulators(typeof(TestAccessorTests).Assembly);
 
             var manager = provider.GetService<IAccessorManager>();
             Assert.NotNull(manager);

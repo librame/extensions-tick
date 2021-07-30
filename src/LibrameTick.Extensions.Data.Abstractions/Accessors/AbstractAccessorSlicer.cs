@@ -17,7 +17,7 @@ using System.Linq;
 namespace Librame.Extensions.Data.Accessors
 {
     /// <summary>
-    /// 抽象实现 <see cref="IAccessorAggregator"/>
+    /// 抽象实现 <see cref="IAccessorAggregator"/>。
     /// </summary>
     /// <typeparam name="TAccessor">指定实现 <see cref="IAccessor"/> 的访问器类型。</typeparam>
     public abstract class AbstractAccessorSlicer<TAccessor> : IAccessorSlicer

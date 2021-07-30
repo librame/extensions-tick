@@ -10,15 +10,9 @@
 
 #endregion
 
-using System.Collections.Generic;
-
-namespace Librame.Extensions.Data.Accessors
+namespace Librame.Extensions.Data.Stores
 {
-    class AccessorAggregator : AbstractAccessorAggregator<IAccessor>
+    class StoreExtensions
     {
-        protected override IAccessor CreateChain(IEnumerable<IAccessor> accessors,
-            AccessorInteraction interaction)
-            => new CompositeAccessor(accessors, interaction);
-
     }
 }

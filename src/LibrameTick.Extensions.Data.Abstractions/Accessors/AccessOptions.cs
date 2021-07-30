@@ -38,14 +38,20 @@ namespace Librame.Extensions.Data.Accessors
 
 
         /// <summary>
+        /// 默认切片方法（当多访问器访问关系设定为 <see cref="AccessorsRelationship.Slicing"/> 访问时有效，详情参见 <see cref="IAccessorManager.CustomSliceFunc"/>）。
+        /// </summary>
+        public Func<IAccessor, bool>? DefaultSliceFunc { get; set; }
+
+        /// <summary>
         /// 多访问器访问关系（默认使用 <see cref="AccessorsRelationship.Slicing"/>）。
         /// </summary>
         public AccessorsRelationship Relationship { get; set; }
             = AccessorsRelationship.Slicing;
 
         /// <summary>
-        /// 默认切片方法（当多访问器访问关系设定为 <see cref="AccessorsRelationship.Slicing"/> 访问时有效，详情参见 <see cref="IAccessorManager.CustomSliceFunc"/>）。
+        /// 初始化数据库（默认初始化）。
         /// </summary>
-        public Func<IAccessor, bool>? DefaultSliceFunc { get; set; }
+        public bool InitializeDatabase { get; set; }
+            = true;
     }
 }

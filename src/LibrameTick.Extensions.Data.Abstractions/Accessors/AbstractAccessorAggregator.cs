@@ -17,7 +17,7 @@ using System.Linq;
 namespace Librame.Extensions.Data.Accessors
 {
     /// <summary>
-    /// 抽象实现 <see cref="IAccessorAggregator"/>
+    /// 抽象实现 <see cref="IAccessorAggregator"/>。
     /// </summary>
     /// <typeparam name="TAccessor">指定实现 <see cref="IAccessor"/> 的访问器类型。</typeparam>
     public abstract class AbstractAccessorAggregator<TAccessor> : IAccessorAggregator
@@ -34,8 +34,10 @@ namespace Librame.Extensions.Data.Accessors
         /// 创建访问器集合链。
         /// </summary>
         /// <param name="accessors">给定的 <see cref="IEnumerable{TAccessor}"/>。</param>
+        /// <param name="interaction">给定的 <see cref="AccessorInteraction"/>。</param>
         /// <returns>返回 <typeparamref name="TAccessor"/>。</returns>
-        protected abstract TAccessor CreateChain(IEnumerable<TAccessor> accessors);
+        protected abstract TAccessor CreateChain(IEnumerable<TAccessor> accessors,
+            AccessorInteraction interaction);
 
 
         /// <summary>
@@ -58,7 +60,7 @@ namespace Librame.Extensions.Data.Accessors
             {
                 var accessors = descriptors.SelectAccessors(interaction).OfType<TAccessor>();
 
-                return CreateChain(accessors);
+                return CreateChain(accessors, interaction);
             }
             else
             {

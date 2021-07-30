@@ -19,7 +19,7 @@ namespace Librame.Extensions
             var name = expression.AsPropertyName();
             Assert.Equal(orignalName, name);
 
-            var value = EncodingExtensions.UTF8Encoding.AsPropertyValue(expression);
+            var value = expression.AsPropertyValue(EncodingExtensions.UTF8Encoding);
             Assert.Equal("utf-8", value);
 
             // p => p.BodyName

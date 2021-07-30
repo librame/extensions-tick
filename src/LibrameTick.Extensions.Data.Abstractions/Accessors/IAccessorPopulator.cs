@@ -14,30 +14,27 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data.Accessors
 {
     /// <summary>
-    /// 对象标识生成器接口。
+    /// 定义 <see cref="IAccessor"/> 填充器接口。
     /// </summary>
-    public interface IObjectIdentificationGenerator
+    public interface IAccessorPopulator
     {
         /// <summary>
-        /// 标识类型。
+        /// 填充访问器。
         /// </summary>
-        Type IdType { get; }
-
-
-        /// <summary>
-        /// 生成对象标识。
-        /// </summary>
-        /// <returns>返回标识符对象。</returns>
-        object? GenerateObjectId();
+        /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
+        /// <returns>返回受影响的行数。</returns>
+        int Populate(IServiceProvider services);
 
         /// <summary>
-        /// 异步生成对象标识。
+        /// 异步填充访问器。
         /// </summary>
+        /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含标识符对象的异步操作。</returns>
-        Task<object?> GenerateObjectIdAsync(CancellationToken cancellationToken = default);
+        /// <returns>返回一个包含受影响行数的异步操作。</returns>
+        Task<int> PopulateAsync(IServiceProvider services,
+            CancellationToken cancellationToken = default);
     }
 }

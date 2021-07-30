@@ -37,7 +37,7 @@ namespace Librame.Extensions.Collections
         /// <returns>返回一个包含 <see cref="PagingList{T}"/> 的异步操作。</returns>
         public static Task<PagingList<T>> PageAsync<T>(this IEnumerable<T> collection, Action<PagingList<T>> action,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => collection.Page(action), cancellationToken);
+            => cancellationToken.RunTask(() => collection.Page(action));
 
         /// <summary>
         /// 可查询分页。
@@ -52,7 +52,7 @@ namespace Librame.Extensions.Collections
         /// <returns>返回一个包含 <see cref="PagingList{T}"/> 的异步操作。</returns>
         public static Task<PagingList<T>> PageAsync<T>(this IOrderedQueryable<T> queryable, Action<PagingList<T>> action,
             CancellationToken cancellationToken = default)
-            => Task.Run(() => queryable.Page(action), cancellationToken);
+            => cancellationToken.RunTask(() => queryable.Page(action));
 
 
         /// <summary>

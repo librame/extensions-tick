@@ -21,8 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Specifications\" />
-    <Folder Include="Stores\" />
+    <Folder Include="Cryptography\" />
   </ItemGroup>
 
 </Project>

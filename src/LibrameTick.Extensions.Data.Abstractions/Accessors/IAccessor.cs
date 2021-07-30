@@ -11,17 +11,371 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Accessors
 {
+    using Extensions.Collections;
+    using Extensions.Data.Specifications;
+
     /// <summary>
     /// 定义表示数据访问的访问器接口（主要用于适配数据实现层的访问对象；如 EFCore 实现层的 DbContext 对象）。
     /// </summary>
-    public interface IAccessor : ISortable
+    public interface IAccessor : ISortable, IDisposable, IAsyncDisposable
     {
         /// <summary>
         /// 访问器类型。
         /// </summary>
         Type AccessorType { get; }
+
+
+        /// <summary>
+        /// 是否存在指定断定方法的实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="predicate">给定的断定方法。</param>
+        /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
+        /// <returns>返回布尔值。</returns>
+        bool Exists<TEntity>(Func<TEntity, bool> predicate,
+            bool checkLocal = true)
+            where TEntity : class;
+
+
+        #region Find
+
+        /// <summary>
+        /// 查找与指定键值对集合匹配的实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="keyValues">给定的键值对集合。</param>
+        /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+        TEntity? Find<TEntity>(params object?[]? keyValues)
+            where TEntity : class;
+
+        /// <summary>
+        /// 查找与指定键值对集合匹配的实体对象。
+        /// </summary>
+        /// <param name="entityType">给定的实体类型。</param>
+        /// <param name="keyValues">给定的键值对集合。</param>
+        /// <returns>返回实体对象。</returns>
+        object? Find(Type entityType, params object?[]? keyValues);
+
+        /// <summary>
+        /// 异步查找与指定键值对集合匹配的实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="keyValues">给定的键值对集合。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+        /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的 <see cref="ValueTask"/>。</returns>
+        ValueTask<TEntity?> FindAsync<TEntity>(object?[]? keyValues, CancellationToken cancellationToken)
+            where TEntity : class;
+
+        /// <summary>
+        /// 异步查找与指定键值对集合匹配的实体对象。
+        /// </summary>
+        /// <param name="entityType">给定的实体类型。</param>
+        /// <param name="keyValues">给定的键值对集合。</param>
+        /// <returns>返回一个包含实体对象的 <see cref="ValueTask"/>。</returns>
+        ValueTask<object?> FindAsync(Type entityType, params object?[]? keyValues);
+
+        /// <summary>
+        /// 异步查找与指定键值对集合匹配的实体对象。
+        /// </summary>
+        /// <param name="entityType">给定的实体类型。</param>
+        /// <param name="keyValues">给定的键值对集合。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+        /// <returns>返回一个包含实体对象的 <see cref="ValueTask"/>。</returns>
+        ValueTask<object?> FindAsync(Type entityType, object?[]? keyValues, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// 异步查找与指定键值对集合匹配的实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="keyValues">给定的键值对集合。</param>
+        /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的 <see cref="ValueTask"/>。</returns>
+        ValueTask<TEntity?> FindAsync<TEntity>(params object?[]? keyValues)
+            where TEntity : class;
+
+
+        /// <summary>
+        /// 查找带有规约的实体集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+        /// <returns>返回 <see cref="List{TEntity}"/>。</returns>
+        List<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+            where TEntity : class;
+
+        /// <summary>
+        /// 异步查找带有规约的实体集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+        /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
+        Task<List<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
+            ISpecification<TEntity>? specification = null)
+            where TEntity : class;
+
+
+        /// <summary>
+        /// 查找带有规约的实体分页集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+        /// <returns>返回 <see cref="PagingList{TEntity}"/>。</returns>
+        PagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<PagingList<TEntity>> pageAction,
+            ISpecification<TEntity>? specification = null)
+            where TEntity : class;
+
+        /// <summary>
+        /// 异步查找带有规约的实体分页集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+        /// <returns>返回一个包含 <see cref="PagingList{TEntity}"/> 的异步操作。</returns>
+        Task<PagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<PagingList<TEntity>> pageAction,
+            CancellationToken cancellationToken = default, ISpecification<TEntity>? specification = null)
+            where TEntity : class;
+
+        #endregion
+
+
+        #region GetQueryable
+
+        /// <summary>
+        /// 从表达式建立指定结果的可查询接口。
+        /// </summary>
+        /// <typeparam name="TResult">指定的结果类型。</typeparam>
+        /// <param name="expression">给定的 <see cref="IQueryable{TResult}"/> 表达式。</param>
+        /// <returns>返回 <see cref="IQueryable{TResult}"/>。</returns>
+        IQueryable<TResult> FromExpression<TResult>(Expression<Func<IQueryable<TResult>>> expression);
+
+
+        /// <summary>
+        /// 获取指定实体的可查询接口。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
+        IQueryable<TEntity> GetQueryable<TEntity>()
+            where TEntity : class;
+
+        /// <summary>
+        /// 获取指定实体的可查询接口。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="name">要使用的共享类型实体类型的名称。</param>
+        /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
+        IQueryable<TEntity> GetQueryable<TEntity>(string name)
+            where TEntity : class;
+
+        #endregion
+
+
+        #region Add
+
+        /// <summary>
+        /// 添加不存在指定断定方法的实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="entity">给定要添加的实体。</param>
+        /// <param name="predicate">给定的断定方法。</param>
+        /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
+        /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+        TEntity AddIfNotExists<TEntity>(TEntity entity,
+            Func<TEntity, bool> predicate, bool checkLocal = true)
+            where TEntity : class;
+
+        /// <summary>
+        /// 添加实体对象。
+        /// </summary>
+        /// <param name="entity">给定要添加的实体对象。</param>
+        /// <returns>返回实体对象。</returns>
+        object Add(object entity);
+
+        /// <summary>
+        /// 添加实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="entity">给定要添加的实体。</param>
+        /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+        TEntity Add<TEntity>(TEntity entity)
+            where TEntity : class;
+
+
+        /// <summary>
+        /// 添加实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要添加的实体对象集合。</param>
+        void AddRange(IEnumerable<object> entities);
+
+        /// <summary>
+        /// 添加实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要添加的实体对象集合。</param>
+        void AddRange(params object[] entities);
+
+        /// <summary>
+        /// 异步添加实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要添加的实体对象集合。</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>返回 <see cref="Task"/>。</returns>
+        Task AddRangeAsync(IEnumerable<object> entities,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 异步添加实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要添加的实体对象集合。</param>
+        /// <returns>返回 <see cref="Task"/>。</returns>
+        Task AddRangeAsync(params object[] entities);
+
+        #endregion
+
+
+        #region Attach
+
+        /// <summary>
+        /// 附加实体对象。
+        /// </summary>
+        /// <param name="entity">给定要附加的实体对象。</param>
+        /// <returns>返回实体对象。</returns>
+        object Attach(object entity);
+
+        /// <summary>
+        /// 附加实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="entity">给定要附加的实体。</param>
+        /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+        TEntity Attach<TEntity>(TEntity entity)
+            where TEntity : class;
+
+
+        /// <summary>
+        /// 附加实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要附加的实体对象集合。</param>
+        void AttachRange(params object[] entities);
+
+        /// <summary>
+        /// 附加实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要附加的实体对象集合。</param>
+        void AttachRange(IEnumerable<object> entities);
+
+        #endregion
+
+
+        #region Remove
+
+        /// <summary>
+        /// 移除实体对象。
+        /// </summary>
+        /// <param name="entity">给定要移除的实体对象。</param>
+        /// <returns>返回实体对象。</returns>
+        object Remove(object entity);
+
+        /// <summary>
+        /// 移除实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体。</typeparam>
+        /// <param name="entity">给定要移除的实体。</param>
+        /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+        TEntity Remove<TEntity>(TEntity entity)
+            where TEntity : class;
+
+
+        /// <summary>
+        /// 移除实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要移除的实体对象集合。</param>
+        void RemoveRange(params object[] entities);
+
+        /// <summary>
+        /// 移除实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要移除的实体对象集合。</param>
+        void RemoveRange(IEnumerable<object> entities);
+
+        #endregion
+
+
+        #region Update
+
+        /// <summary>
+        /// 更新实体对象。
+        /// </summary>
+        /// <param name="entity">给定要更新的实体对象。</param>
+        /// <returns>返回实体对象。</returns>
+        object Update(object entity);
+
+        /// <summary>
+        /// 更新实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="entity">给定要更新的实体。</param>
+        /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+        TEntity Update<TEntity>(TEntity entity)
+            where TEntity : class;
+
+
+        /// <summary>
+        /// 更新实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要更新的实体对象集合。</param>
+        void UpdateRange(params object[] entities);
+
+        /// <summary>
+        /// 更新实体范围集合。
+        /// </summary>
+        /// <param name="entities">给定要更新的实体对象集合。</param>
+        void UpdateRange(IEnumerable<object> entities);
+
+        #endregion
+
+
+        #region SaveChanges
+
+        /// <summary>
+        /// 保存更改。
+        /// </summary>
+        /// <returns>返回受影响的行数。</returns>
+        int SaveChanges();
+
+        /// <summary>
+        /// 保存更改。
+        /// </summary>
+        /// <param name="acceptAllChangesOnSuccess">指示是否在更改已成功发送到数据库之后调用。</param>
+        /// <returns>返回受影响的行数。</returns>
+        int SaveChanges(bool acceptAllChangesOnSuccess);
+
+
+        /// <summary>
+        /// 异步保存更改。
+        /// </summary>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含受影响行数的异步操作。</returns>
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 异步保存更改。
+        /// </summary>
+        /// <param name="acceptAllChangesOnSuccess">指示是否在更改已成功发送到数据库之后调用。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含受影响行数的异步操作。</returns>
+        Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = default);
+
+        #endregion
+
     }
 }
