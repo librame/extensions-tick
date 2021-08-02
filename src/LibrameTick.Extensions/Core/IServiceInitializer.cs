@@ -14,27 +14,25 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Librame.Extensions.Data.Accessors
+namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义 <see cref="IAccessor"/> 填充器接口。
+    /// 定义服务初始化器接口。
     /// </summary>
-    public interface IAccessorPopulator
+    public interface IServiceInitializer
     {
         /// <summary>
-        /// 填充访问器。
+        /// 初始化服务。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-        /// <returns>返回受影响的行数。</returns>
-        int Populate(IServiceProvider services);
+        void Initialize(IServiceProvider services);
 
         /// <summary>
-        /// 异步填充访问器。
+        /// 异步初始化服务。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含受影响行数的异步操作。</returns>
-        Task<int> PopulateAsync(IServiceProvider services,
-            CancellationToken cancellationToken = default);
+        /// <returns>返回一个异步操作。</returns>
+        Task InitializeAsync(IServiceProvider services, CancellationToken cancellationToken = default);
     }
 }

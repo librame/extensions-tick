@@ -12,17 +12,23 @@
 
 using System.Collections.Generic;
 
-namespace Librame.Extensions.Data.Accessors
+namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义 <see cref="IAccessor"/> 解析器接口。
+    /// 定义程序集加载选项。
     /// </summary>
-    public interface IAccessorResolver
+    public class AssemblyLoadingOptions
     {
         /// <summary>
-        /// 解析访问器描述符列表。
+        /// 程序集筛选方式（默认无筛选）。
         /// </summary>
-        /// <returns>返回 <see cref="IReadOnlyList{AccessorDescriptor}"/>。</returns>
-        IReadOnlyList<AccessorDescriptor> ResolveDescriptors();
+        public AssemblyFiltration Filtration { get; set; }
+            = AssemblyFiltration.None;
+
+        /// <summary>
+        /// 程序集过滤字符串列表。
+        /// </summary>
+        public List<string> Filters { get; init; }
+            = new List<string>();
     }
 }

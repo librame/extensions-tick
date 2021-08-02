@@ -35,7 +35,7 @@ namespace Librame.Extensions.Data.Accessors
             _aggregator = aggregator.NotNull(nameof(aggregator));
             _slicer = slicer.NotNull(nameof(slicer));
 
-            _descriptors = resolver.GetDescriptors();
+            _descriptors = resolver.ResolveDescriptors();
             if (_descriptors.Count < 1)
                 throw new ArgumentNullException("The accessor descriptor not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
 

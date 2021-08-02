@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text;
 using Xunit;
@@ -7,49 +8,71 @@ namespace Librame.Extensions
 {
     public class ExpressionExtensionsTests
     {
-
         [Fact]
-        public void PropertyExpressionTest()
+        public void PropertyTest()
         {
-            var orignalName = nameof(Encoding.BodyName);
-            var orignalPage = nameof(Encoding.CodePage);
+            var bodyName = nameof(Encoding.BodyName);
 
             Expression<Func<Encoding, string>> expression = p => p.BodyName;
 
-            var name = expression.AsPropertyName();
-            Assert.Equal(orignalName, name);
+            var propertyName = expression.AsPropertyName();
+            Assert.Equal(bodyName, propertyName);
 
-            var value = expression.AsPropertyValue(EncodingExtensions.UTF8Encoding);
-            Assert.Equal("utf-8", value);
+            var utf8Name = expression.AsPropertyValue(EncodingExtensions.UTF8Encoding);
+            Assert.Equal("utf-8", utf8Name);
 
             // p => p.BodyName
-            var autoExpression = orignalName.AsPropertyExpression<Encoding, string>();
-            Assert.Equal(expression.ToString(), autoExpression.ToString());
+            var createExpression = bodyName.CreatePropertyExpression<Encoding>();
+            Assert.Equal(expression.ToString(), createExpression.ToString());
+        }
 
-            // p => p.PropertyName > 3
-            var greaterThanExpression = orignalPage.AsGreaterThanPropertyExpression<Encoding, int>(3);
-            var greaterThanExpression1 = orignalPage.AsGreaterThanPropertyExpression<Encoding>(typeof(int), 3);
-            Assert.Equal(greaterThanExpression.ToString(), greaterThanExpression1.ToString());
+        [Fact]
+        public void CreatePropertyExpressionTest()
+        {
+            Expression<Func<Encoding, int>> expression = p => p.CodePage;
 
-            // p => p.PropertyName >= 3
-            var greaterThanOrEqualExpression = orignalPage.AsGreaterThanOrEqualPropertyExpression<Encoding, int>(3);
-            var greaterThanOrEqualExpression1 = orignalPage.AsGreaterThanOrEqualPropertyExpression<Encoding>(typeof(int), 3);
-            Assert.Equal(greaterThanOrEqualExpression.ToString(), greaterThanOrEqualExpression1.ToString());
+            var codePageName = nameof(Encoding.CodePage);
 
-            // p => p.PropertyName < 3
-            var lessThanExpression = orignalPage.AsGreaterThanPropertyExpression<Encoding, int>(3);
-            var lessThanExpression1 = orignalPage.AsGreaterThanPropertyExpression<Encoding>(typeof(int), 3);
-            Assert.Equal(lessThanExpression.ToString(), lessThanExpression1.ToString());
+            var codePage = expression.AsPropertyValue(EncodingExtensions.UTF8Encoding);
+            var orginalCodePage = 65001;
 
-            // p => p.PropertyName <= 3
-            var lessThanOrEqualExpression = orignalPage.AsGreaterThanOrEqualPropertyExpression<Encoding, int>(3);
-            var lessThanOrEqualExpression1 = orignalPage.AsGreaterThanOrEqualPropertyExpression<Encoding>(typeof(int), 3);
-            Assert.Equal(lessThanOrEqualExpression.ToString(), lessThanOrEqualExpression1.ToString());
+            // p => p.CodePage > orginalCodePage
+            var greaterThanExpression = codePageName.CreateGreaterThanPropertyExpression<Encoding>(orginalCodePage);
+            Assert.False(greaterThanExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
 
-            // p => p.PropertyName != 3
-            var notEqualExpression = orignalPage.AsNotEqualPropertyExpression<Encoding, int>(3);
-            var notEqualExpression1 = orignalPage.AsNotEqualPropertyExpression<Encoding>(typeof(int), 3);
-            Assert.Equal(notEqualExpression.ToString(), notEqualExpression1.ToString());
+            // p => p.CodePage >= orginalCodePage
+            var greaterThanOrEqualExpression = codePageName.CreateGreaterThanOrEqualPropertyExpression<Encoding>(orginalCodePage);
+            Assert.True(greaterThanOrEqualExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+
+            // p => p.CodePage < orginalCodePage
+            var lessThanExpression = codePageName.CreateLessThanPropertyExpression<Encoding>(orginalCodePage);
+            Assert.False(lessThanExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+
+            // p => p.CodePage <= orginalCodePage
+            var lessThanOrEqualExpression = codePageName.CreateLessThanOrEqualPropertyExpression<Encoding>(orginalCodePage);
+            Assert.True(lessThanOrEqualExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+
+            // p => p.CodePage != orginalCodePage
+            var notEqualExpression = codePageName.CreateNotEqualPropertyExpression<Encoding>(orginalCodePage);
+            Assert.False(notEqualExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+
+            // p => p.CodePage == orginalCodePage
+            var equalExpression = codePageName.CreateEqualPropertyExpression<Encoding>(orginalCodePage);
+            Assert.True(equalExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+        }
+
+        [Fact]
+        public void NewTest()
+        {
+            var list = ExpressionExtensions.New<List<string>>();
+            Assert.NotNull(list);
+
+            var guid = Guid.NewGuid();
+            var bytesGuid = ExpressionExtensions.New<Guid>(guid.ToByteArray());
+            Assert.Equal(guid, bytesGuid);
+
+            var stringGuid = (Guid)typeof(Guid).NewByExpression(guid.ToString());
+            Assert.Equal(guid, stringGuid);
         }
 
     }

@@ -42,7 +42,7 @@ namespace Librame.Extensions.Data.Accessors
         }
 
 
-        public IReadOnlyList<AccessorDescriptor> GetDescriptors()
+        public IReadOnlyList<AccessorDescriptor> ResolveDescriptors()
         {
             var descriptors = new List<AccessorDescriptor>();
 

@@ -58,14 +58,13 @@ namespace Librame.Extensions
         /// <paramref name="assemblies"/> is null or empty.
         /// </exception>
         /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
-        /// <param name="filterTypes">给定的类型过滤工厂方法（可选）。</param>
+        /// <param name="filterTypeFunc">给定的过滤类型方法（可选）。</param>
         /// <param name="exceptionAction">给定的异常处理动作（可选）。</param>
         /// <returns>返回 <see cref="IReadOnlyList{Type}"/>。</returns>
         public static List<Type> ExportedTypes(this IEnumerable<Assembly> assemblies,
-            Func<IEnumerable<Type>, IEnumerable<Type>>? filterTypes = null,
-            Action<Exception>? exceptionAction = null)
+            Func<Type, bool>? filterTypeFunc = null, Action<Exception>? exceptionAction = null)
         {
-            assemblies.NotEmpty(nameof(assemblies));
+            assemblies.NotNull(nameof(assemblies));
 
             var allTypes = new List<Type>();
 
@@ -87,8 +86,8 @@ namespace Librame.Extensions
                 }
             }
 
-            if (filterTypes is not null)
-                allTypes = filterTypes.Invoke(allTypes).ToList();
+            if (filterTypeFunc is not null)
+                allTypes = allTypes.Where(filterTypeFunc).ToList();
 
             return allTypes;
         }
@@ -98,25 +97,25 @@ namespace Librame.Extensions
         /// 调用类型集合。
         /// </summary>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="assembly"/> or <paramref name="action"/> is null.
+        /// <paramref name="assembly"/> or <paramref name="invokeAction"/> is null.
         /// </exception>
         /// <param name="assembly">给定的 <see cref="Assembly"/>。</param>
-        /// <param name="action">给定的注册动作。</param>
-        /// <param name="filterTypes">给定的类型过滤工厂方法（可选）。</param>
+        /// <param name="invokeAction">给定的调用动作。</param>
+        /// <param name="filterTypeFunc">给定的过滤类型方法（可选）。</param>
         /// <returns>返回已调用的类型集合数。</returns>
-        public static int InvokeTypes(this Assembly assembly, Action<Type> action,
-            Func<IEnumerable<Type>, IEnumerable<Type>>? filterTypes = null)
+        public static int InvokeTypes(this Assembly assembly, Action<Type> invokeAction,
+            Func<Type, bool>? filterTypeFunc = null)
         {
             assembly.NotNull(nameof(assembly));
-            action.NotNull(nameof(action));
+            invokeAction.NotNull(nameof(invokeAction));
 
             IEnumerable<Type> allTypes = assembly.GetExportedTypes();
 
-            if (filterTypes is not null)
-                allTypes = filterTypes.Invoke(allTypes);
+            if (filterTypeFunc is not null)
+                allTypes = allTypes.Where(filterTypeFunc);
 
             foreach (var type in allTypes)
-                action.Invoke(type);
+                invokeAction.Invoke(type);
 
             return allTypes.Count();
         }
@@ -128,23 +127,22 @@ namespace Librame.Extensions
         /// <paramref name="assemblies"/> is null or empty.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="action"/> is null.
+        /// <paramref name="invokeAction"/> is null.
         /// </exception>
         /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
-        /// <param name="action">给定的注册动作。</param>
-        /// <param name="filterTypes">给定的类型过滤工厂方法（可选）。</param>
+        /// <param name="invokeAction">给定的调用动作。</param>
+        /// <param name="filterTypeFunc">给定的过滤类型方法（可选）。</param>
         /// <param name="exceptionAction">给定的异常处理动作（可选）。</param>
         /// <returns>返回已调用的类型集合数。</returns>
-        public static int InvokeTypes(this IEnumerable<Assembly> assemblies, Action<Type> action,
-            Func<IEnumerable<Type>, IEnumerable<Type>>? filterTypes = null,
-            Action<Exception>? exceptionAction = null)
+        public static int InvokeTypes(this IEnumerable<Assembly> assemblies, Action<Type> invokeAction,
+            Func<Type, bool>? filterTypeFunc = null, Action<Exception>? exceptionAction = null)
         {
-            action.NotNull(nameof(action));
+            invokeAction.NotNull(nameof(invokeAction));
 
-            var allTypes = assemblies.ExportedTypes(filterTypes, exceptionAction);
+            var allTypes = assemblies.ExportedTypes(filterTypeFunc, exceptionAction);
 
             foreach (var type in allTypes)
-                action.Invoke(type);
+                invokeAction.Invoke(type);
 
             return allTypes.Count;
         }

@@ -18,17 +18,17 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data.Accessors
 {
     /// <summary>
-    /// 抽象 <see cref="IAccessorPopulator"/> 实现。
+    /// 抽象 <see cref="IAccessorInitializer"/> 实现。
     /// </summary>
     /// <typeparam name="TAccessor">指定已实现 <see cref="AbstractAccessor"/> 的访问器类型。</typeparam>
-    public abstract class AbstractAccessorPopulator<TAccessor> : IAccessorPopulator
+    public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitializer
         where TAccessor : AbstractAccessor
     {
         /// <summary>
-        /// 使用数据库上下文构造一个 <see cref="AbstractAccessorPopulator{TAccessor}"/>。
+        /// 使用数据库上下文构造一个 <see cref="AbstractAccessorInitializer{TAccessor}"/>。
         /// </summary>
         /// <param name="accessor">给定的 <typeparamref name="TAccessor"/>。</param>
-        protected AbstractAccessorPopulator(TAccessor accessor)
+        protected AbstractAccessorInitializer(TAccessor accessor)
         {
             Accessor = accessor.NotNull(nameof(accessor));
         }
@@ -41,50 +41,48 @@ namespace Librame.Extensions.Data.Accessors
 
 
         /// <summary>
-        /// 填充访问器。
+        /// 初始化访问器。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-        /// <returns>返回受影响的行数。</returns>
-        public virtual int Populate(IServiceProvider services)
+        public virtual void Initialize(IServiceProvider services)
         {
             var builder = services.GetRequiredService<DataExtensionBuilder>();
             if (builder.Options.Access.InitializeDatabase)
                 Accessor.Database.EnsureCreated();
 
-            return PopulateCore(services);
+            Populate(services);
         }
 
         /// <summary>
-        /// 异步填充访问器。
+        /// 异步初始化访问器。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含受影响行数的异步操作。</returns>
-        public virtual async Task<int> PopulateAsync(IServiceProvider services,
+        /// <returns>返回一个异步操作。</returns>
+        public virtual async Task InitializeAsync(IServiceProvider services,
             CancellationToken cancellationToken = default)
         {
             var builder = services.GetRequiredService<DataExtensionBuilder>();
             if (builder.Options.Access.InitializeDatabase)
                 await Accessor.Database.EnsureCreatedAsync();
 
-            return await PopulateCoreAsync(services, cancellationToken);
+            await PopulateAsync(services, cancellationToken);
         }
 
 
         /// <summary>
-        /// 填充核心访问器。
+        /// 填充访问器。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-        /// <returns>返回受影响的行数。</returns>
-        protected abstract int PopulateCore(IServiceProvider services);
+        protected abstract void Populate(IServiceProvider services);
 
         /// <summary>
-        /// 异步填充核心访问器。
+        /// 异步填充访问器。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含受影响行数的异步操作。</returns>
-        protected abstract Task<int> PopulateCoreAsync(IServiceProvider services,
+        /// <returns>返回一个异步操作。</returns>
+        protected abstract Task PopulateAsync(IServiceProvider services,
             CancellationToken cancellationToken = default);
     }
 }

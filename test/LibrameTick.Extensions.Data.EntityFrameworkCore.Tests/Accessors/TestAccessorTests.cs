@@ -28,11 +28,16 @@ namespace Librame.Extensions.Data.Accessors
 
             services.AddLibrame().AddData();
 
-            var provider = services.BuildServiceProvider()
-                .InitializePopulators(typeof(TestAccessorTests).Assembly);
+            var provider = services.BuildServiceProvider();
+
+            provider.UseServiceInitializer(setup =>
+            {
+                setup.ActivateAccessor();
+            });
 
             var manager = provider.GetService<IAccessorManager>();
             Assert.NotNull(manager);
+
             //var options = provider.GetRequiredService<DbContextOptions<DbContextAccessor>>();
             //var accessorOptions = options.FindExtension<AccessorOptionsExtension>();
             //Assert.NotNull(accessorOptions);

@@ -10,19 +10,26 @@
 
 #endregion
 
-using System.Collections.Generic;
-
-namespace Librame.Extensions.Data.Accessors
+namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义 <see cref="IAccessor"/> 解析器接口。
+    /// 定义程序集筛选方式。
     /// </summary>
-    public interface IAccessorResolver
+    public enum AssemblyFiltration
     {
         /// <summary>
-        /// 解析访问器描述符列表。
+        /// 表示无筛选。
         /// </summary>
-        /// <returns>返回 <see cref="IReadOnlyList{AccessorDescriptor}"/>。</returns>
-        IReadOnlyList<AccessorDescriptor> ResolveDescriptors();
+        None,
+
+        /// <summary>
+        /// 表示排除此程序集。
+        /// </summary>
+        Exclusive,
+
+        /// <summary>
+        /// 表示包含此程序集。
+        /// </summary>
+        Inclusive
     }
 }

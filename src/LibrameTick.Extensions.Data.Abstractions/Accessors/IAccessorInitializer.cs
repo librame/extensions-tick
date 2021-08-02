@@ -10,19 +10,14 @@
 
 #endregion
 
-using System.Collections.Generic;
-
 namespace Librame.Extensions.Data.Accessors
 {
+    using Core;
+
     /// <summary>
-    /// 定义 <see cref="IAccessor"/> 解析器接口。
+    /// 定义 <see cref="IAccessor"/> 初始化器接口。
     /// </summary>
-    public interface IAccessorResolver
+    public interface IAccessorInitializer : IServiceInitializer
     {
-        /// <summary>
-        /// 解析访问器描述符列表。
-        /// </summary>
-        /// <returns>返回 <see cref="IReadOnlyList{AccessorDescriptor}"/>。</returns>
-        IReadOnlyList<AccessorDescriptor> ResolveDescriptors();
     }
 }

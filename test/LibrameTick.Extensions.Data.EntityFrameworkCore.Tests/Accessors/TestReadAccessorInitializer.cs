@@ -4,20 +4,20 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Accessors
 {
-    class TestReadAccessorPopulator : AbstractAccessorPopulator<TestReadAccessor>
+    class TestReadAccessorInitializer : AbstractAccessorInitializer<TestReadAccessor>
     {
-        public TestReadAccessorPopulator(TestReadAccessor accessor)
+        public TestReadAccessorInitializer(TestReadAccessor accessor)
             : base(accessor)
         {
         }
 
 
-        protected override int PopulateCore(IServiceProvider services)
+        protected override void Populate(IServiceProvider services)
         {
             throw new NotImplementedException();
         }
 
-        protected override Task<int> PopulateCoreAsync(IServiceProvider services,
+        protected override Task PopulateAsync(IServiceProvider services,
             CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
