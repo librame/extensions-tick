@@ -10,12 +10,11 @@
 
 #endregion
 
+using Librame.Extensions.Core;
 using System;
 
 namespace Librame.Extensions.Data
 {
-    using Core;
-
     /// <summary>
     /// <see cref="DataExtensionBuilder"/> 静态扩展。
     /// </summary>

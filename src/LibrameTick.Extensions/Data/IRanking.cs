@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 排名接口。
+    /// 定义泛型排名接口。
     /// </summary>
     /// <typeparam name="TRank">指定的排序类型（兼容整数、单双精度等结构体的排序字段）。</typeparam>
     public interface IRanking<TRank> : IObjectRanking

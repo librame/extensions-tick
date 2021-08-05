@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace Librame.Extensions.Data.Accessors
 {
-    class AccessorManager : IAccessorManager
+    class DefaultAccessorManager : IAccessorManager
     {
         private IAccessorAggregator _aggregator;
         private IAccessorSlicer _slicer;
@@ -26,14 +26,11 @@ namespace Librame.Extensions.Data.Accessors
         private IAccessor? _writeAccessor;
 
 
-        public AccessorManager(DataExtensionBuilder builder, IAccessorResolver resolver,
+        public DefaultAccessorManager(DataExtensionBuilder builder, IAccessorResolver resolver,
             IAccessorAggregator aggregator, IAccessorSlicer slicer)
         {
-            builder.NotNull(nameof(builder));
-            resolver.NotNull(nameof(resolver));
-
-            _aggregator = aggregator.NotNull(nameof(aggregator));
-            _slicer = slicer.NotNull(nameof(slicer));
+            _aggregator = aggregator;
+            _slicer = slicer;
 
             _descriptors = resolver.ResolveDescriptors();
             if (_descriptors.Count < 1)

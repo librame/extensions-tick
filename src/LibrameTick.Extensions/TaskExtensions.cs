@@ -110,7 +110,7 @@ namespace Librame.Extensions
         /// <param name="task">给定的 <see cref="Task"/>。</param>
         /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
         public static ConfiguredTaskAwaitable ConfigureAwait(this Task task)
-            => task.NotNull(nameof(task)).ConfigureAwait(false);
+            => task.ConfigureAwait(false);
 
         /// <summary>
         /// 禁用捕获上下文配置可等待任务。
@@ -119,7 +119,7 @@ namespace Librame.Extensions
         /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
         /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
         public static ConfiguredTaskAwaitable<TResult> ConfigureAwait<TResult>(this Task<TResult> task)
-            => task.NotNull(nameof(task)).ConfigureAwait(false);
+            => task.ConfigureAwait(false);
 
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Librame.Extensions
         /// <param name="task">给定的 <see cref="Task"/>。</param>
         /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
         public static ConfiguredTaskAwaitable ConfigureAwaitWithContext(this Task task)
-            => task.NotNull(nameof(task)).ConfigureAwait(true);
+            => task.ConfigureAwait(true);
 
         /// <summary>
         /// 使用捕获上下文配置可等待任务。
@@ -137,7 +137,7 @@ namespace Librame.Extensions
         /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
         /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
         public static ConfiguredTaskAwaitable<TResult> ConfigureAwaitWithContext<TResult>(this Task<TResult> task)
-            => task.NotNull(nameof(task)).ConfigureAwait(true);
+            => task.ConfigureAwait(true);
 
         #endregion
 

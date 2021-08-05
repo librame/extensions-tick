@@ -23,7 +23,7 @@ namespace Librame.Extensions
     public static class RandomExtensions
     {
         private readonly static char[] _digitLetters
-            = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+            = (StringExtensions.Digits + StringExtensions.UppercaseLetters).ToCharArray();
 
         private static int _location
             = Environment.TickCount;
@@ -64,7 +64,7 @@ namespace Librame.Extensions
         public static string[] GenerateStringArray(this int count, int length = 8,
             char[]? generatingChars = null)
         {
-            if (generatingChars.IsEmpty())
+            if (generatingChars == null)
                 generatingChars = _digitLetters;
 
             var array = new string[count];
@@ -107,7 +107,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="action">给定的动作。</param>
         public static void Run(this Action<Random> action)
-            => action?.Invoke(_random.Value!);
+            => action.Invoke(_random.Value!);
 
         /// <summary>
         /// 运行伪随机数生成器，并返回值。
@@ -116,7 +116,7 @@ namespace Librame.Extensions
         /// <param name="func">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
         public static TValue Run<TValue>(this Func<Random, TValue> func)
-            => func.NotNull(nameof(func)).Invoke(_random.Value!);
+            => func.Invoke(_random.Value!);
 
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="action">给定的动作。</param>
         public static void RunSecurity(this Action<RandomNumberGenerator> action)
-            => action.NotNull(nameof(action)).Invoke(_generator.Value!);
+            => action.Invoke(_generator.Value!);
 
         /// <summary>
         /// 运行更具安全性的随机数生成器，并返回值。
@@ -133,7 +133,7 @@ namespace Librame.Extensions
         /// <param name="func">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
         public static TValue RunSecurity<TValue>(this Func<RandomNumberGenerator, TValue> func)
-            => func.NotNull(nameof(func)).Invoke(_generator.Value!);
+            => func.Invoke(_generator.Value!);
 
     }
 }

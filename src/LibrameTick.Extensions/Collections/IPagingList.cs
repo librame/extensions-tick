@@ -17,7 +17,7 @@ using System.Linq;
 namespace Librame.Extensions.Collections
 {
     /// <summary>
-    /// 定义一个分页列表接口。
+    /// 定义分页列表接口。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     public interface IPagingList<T> : IEnumerable<T>

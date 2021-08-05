@@ -33,12 +33,7 @@ namespace Librame.Extensions.Data
         public static ValueTask<TId> SetIdAsync<TId>(this IIdentifier<TId> identifier,
             Func<TId, TId> newIdFactory, CancellationToken cancellationToken = default)
             where TId : IEquatable<TId>
-        {
-            identifier.NotNull(nameof(identifier));
-            newIdFactory.NotNull(nameof(newIdFactory));
-
-            return cancellationToken.RunValueTask(() => identifier.Id = newIdFactory.Invoke(identifier.Id));
-        }
+            => cancellationToken.RunValueTask(() => identifier.Id = newIdFactory.Invoke(identifier.Id));
 
 
         /// <summary>
@@ -51,9 +46,6 @@ namespace Librame.Extensions.Data
         public static async ValueTask<object> SetObjectIdAsync(this IObjectIdentifier identifier,
             Func<object, object> newIdFactory, CancellationToken cancellationToken = default)
         {
-            identifier.NotNull(nameof(identifier));
-            newIdFactory.NotNull(nameof(newIdFactory));
-
             var currentId = await identifier.GetObjectIdAsync(cancellationToken).ConfigureAwaitWithoutContext();
 
             return await identifier.SetObjectIdAsync(newIdFactory.Invoke(currentId), cancellationToken)

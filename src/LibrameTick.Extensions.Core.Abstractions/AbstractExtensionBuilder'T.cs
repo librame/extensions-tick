@@ -16,7 +16,7 @@ using System;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 抽象扩展构建器（抽象实现 <see cref="IExtensionBuilder{TOptions}"/>）。
+    /// 定义抽象实现 <see cref="IExtensionBuilder{TOptions}"/>。
     /// </summary>
     /// <typeparam name="TOptions">指定的扩展选项类型。</typeparam>
     public abstract class AbstractExtensionBuilder<TOptions> : AbstractExtensionBuilder, IExtensionBuilder<TOptions>

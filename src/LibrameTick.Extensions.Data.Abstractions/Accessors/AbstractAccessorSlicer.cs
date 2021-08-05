@@ -48,8 +48,6 @@ namespace Librame.Extensions.Data.Accessors
         public virtual IAccessor? SliceAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
             AccessorInteraction interaction, Func<IAccessor, bool>? customSliceFunc = null)
         {
-            descriptors.NotNull(nameof(descriptors));
-
             if (descriptors.Count == 1)
             {
                 // 只有单个访问器时不进行切片

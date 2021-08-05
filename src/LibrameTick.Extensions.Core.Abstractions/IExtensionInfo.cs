@@ -16,7 +16,7 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 扩展信息接口（<see cref="IExtensionOptions"/>、<see cref="IExtensionBuilder"/> 的公共基础扩展接口）。
+    /// 定义扩展信息接口（<see cref="IExtensionOptions"/>、<see cref="IExtensionBuilder"/> 的公共基础扩展接口）。
     /// </summary>
     public interface IExtensionInfo : INotifyProperty
     {

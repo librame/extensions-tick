@@ -33,8 +33,6 @@ namespace Librame.Extensions.Data
             TExtension? extension = null)
             where TExtension : class, IDbContextOptionsExtension, new()
         {
-            builder.NotNull(nameof(builder));
-
             if (extension == null)
                 extension = builder.Options.GetOrDefault<TExtension>();
 
@@ -54,8 +52,6 @@ namespace Librame.Extensions.Data
             Func<TExtension, TExtension> configureFunc)
             where TExtension : class, IDbContextOptionsExtension, new()
         {
-            builder.NotNull(nameof(builder));
-
             var extension = configureFunc.Invoke(builder.Options.GetOrDefault<TExtension>());
 
             ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);

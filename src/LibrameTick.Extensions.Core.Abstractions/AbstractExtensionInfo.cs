@@ -16,7 +16,7 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 抽象扩展信息（抽象实现 <see cref="IExtensionInfo"/>）。
+    /// 定义抽象实现 <see cref="IExtensionInfo"/>。
     /// </summary>
     public abstract class AbstractExtensionInfo : AbstractNotifyProperty, IExtensionInfo
     {

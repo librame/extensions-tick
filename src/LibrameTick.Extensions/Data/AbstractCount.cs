@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 抽象计数。
+    /// 定义抽象实现 <see cref="ICount{TValue}"/>。
     /// </summary>
     /// <typeparam name="TValue">指定的数值类型。</typeparam>
     public abstract class AbstractCount<TValue> : ICount<TValue>

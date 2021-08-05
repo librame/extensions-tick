@@ -1,11 +1,11 @@
+using Librame.Extensions.Core;
+using Librame.Extensions.Data.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Librame.Extensions.Data.Accessors
 {
-    using Core;
-
     public class TestAccessorTests
     {
 
@@ -19,32 +19,29 @@ namespace Librame.Extensions.Data.Accessors
                 opts.UseSqlite("Data Source=librame_extensions.db");
                 opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Read));
             });
-
+            
             services.AddDbContextPool<TestWriteAccessor>(opts =>
             {
                 opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;");
-                opts.UseAccessor(b => b.WithPool().WithInteraction(AccessorInteraction.Write));
+                opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPool());
             });
 
-            services.AddLibrame().AddData();
+            services.AddLibrame()
+                .AddData()
+                .AddTest();
 
             var provider = services.BuildServiceProvider();
 
             provider.UseServiceInitializer(setup =>
             {
-                setup.ActivateAccessor();
+                setup.Activate<IAccessorInitializer>();
             });
 
-            var manager = provider.GetService<IAccessorManager>();
-            Assert.NotNull(manager);
+            var store = provider.GetRequiredService<IStore<User>>();
+            Assert.NotNull(store);
 
-            //var options = provider.GetRequiredService<DbContextOptions<DbContextAccessor>>();
-            //var accessorOptions = options.FindExtension<AccessorOptionsExtension>();
-            //Assert.NotNull(accessorOptions);
-
-            //var testOptions = provider.GetRequiredService<DbContextOptions<TestDbContextAccessor>>();
-            //accessorOptions = testOptions.FindExtension<AccessorOptionsExtension>();
-            //Assert.NotNull(accessorOptions);
+            var users = store.FindPaging(p => p.PageByIndex(index: 1, size: 5));
+            Assert.NotEmpty(users);
         }
 
     }

@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Resources;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,10 +19,8 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Resources;
-
     /// <summary>
-    /// 抽象发表。
+    /// 定义抽象实现 <see cref="IPublication{TPublishedBy}"/>。
     /// </summary>
     /// <typeparam name="TPublishedBy">指定的发表者类型。</typeparam>
     [NotMapped]
@@ -130,7 +129,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 抽象发表（继承自抽象创建）。
+    /// 定义抽象实现 <see cref="IPublication{TPublishedBy, TPublishedTime}"/>。
     /// </summary>
     /// <typeparam name="TPublishedBy">指定的发表者。</typeparam>
     /// <typeparam name="TPublishedTime">指定的发表时间类型（提供对 DateTime 或 DateTimeOffset 的支持）。</typeparam>

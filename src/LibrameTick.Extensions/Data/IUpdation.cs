@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 更新接口（已集成创建接口）。
+    /// 定义泛型更新接口（已集成创建接口）。
     /// </summary>
     /// <typeparam name="TUpdatedBy">指定的更新者。</typeparam>
     public interface IUpdation<TUpdatedBy> : IUpdation<TUpdatedBy, DateTimeOffset>,
@@ -26,7 +26,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 更新接口（已集成创建接口）。
+    /// 定义泛型更新接口（已集成创建接口）。
     /// </summary>
     /// <typeparam name="TUpdatedBy">指定的更新者。</typeparam>
     /// <typeparam name="TUpdatedTime">指定的更新时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>

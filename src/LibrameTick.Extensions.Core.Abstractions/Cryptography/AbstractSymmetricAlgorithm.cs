@@ -66,7 +66,7 @@ namespace Librame.Extensions.Core.Cryptography
         {
             if (options == null)
                 options = DefaultAesOptions;
-
+            
             return AlgorithmExtensions.RunAes(aes =>
             {
                 var transform = aes.CreateEncryptor();

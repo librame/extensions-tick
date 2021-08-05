@@ -10,9 +10,11 @@
 
 #endregion
 
+using Librame.Extensions.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -20,8 +22,6 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Collections
 {
-    using Data;
-
     /// <summary>
     /// 树形节点。
     /// </summary>
@@ -43,7 +43,7 @@ namespace Librame.Extensions.Collections
         /// <param name="hierarchy">给定的节点层级（可选；默认为 0；常用于节点显示的层级符号标注）。</param>
         public TreeingNode(TItem item, List<TreeingNode<TItem, TId>>? children = null, int hierarchy = 0)
         {
-            Item = item.NotNull(nameof(item));
+            Item = item;
             Hierarchy = hierarchy;
             _children = children ?? new List<TreeingNode<TItem, TId>>();
         }
@@ -63,12 +63,12 @@ namespace Librame.Extensions.Collections
         /// <summary>
         /// 节点项。
         /// </summary>
-        public TItem Item { get; private set; }
+        public TItem Item { get; init; }
 
         /// <summary>
         /// 节点层级（常用于节点显示的层级符号标注）。
         /// </summary>
-        public int Hierarchy { get; private set; }
+        public int Hierarchy { get; init; }
 
         /// <summary>
         /// 子节点列表。
@@ -184,7 +184,7 @@ namespace Librame.Extensions.Collections
         /// <param name="childId">给定的子节点标识。</param>
         /// <param name="child">输出可能存在的子节点。</param>
         /// <returns>返回布尔值。</returns>
-        public virtual bool ContainsChildId(TId childId, out TreeingNode<TItem, TId>? child)
+        public virtual bool ContainsChildId(TId childId, [MaybeNullWhen(false)] out TreeingNode<TItem, TId> child)
         {
             child = GetChild(childId);
             return child != null;

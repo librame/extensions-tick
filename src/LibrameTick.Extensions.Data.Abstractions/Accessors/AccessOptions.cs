@@ -10,12 +10,12 @@
 
 #endregion
 
+using Librame.Extensions.Core;
 using System;
+using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Data.Accessors
 {
-    using Core;
-
     /// <summary>
     /// 访问选项。
     /// </summary>
@@ -40,6 +40,7 @@ namespace Librame.Extensions.Data.Accessors
         /// <summary>
         /// 默认切片方法（当多访问器访问关系设定为 <see cref="AccessorsRelationship.Slicing"/> 访问时有效，详情参见 <see cref="IAccessorManager.CustomSliceFunc"/>）。
         /// </summary>
+        [JsonIgnore]
         public Func<IAccessor, bool>? DefaultSliceFunc { get; set; }
 
         /// <summary>

@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 算法接口。
+    /// 定义算法接口。
     /// </summary>
     public interface IAlgorithm
     {

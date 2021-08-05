@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 创建时间接口。
+    /// 定义泛型创建时间接口。
     /// </summary>
     /// <typeparam name="TCreatedTime">指定的创建时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
     public interface ICreationTime<TCreatedTime> : IObjectCreationTime

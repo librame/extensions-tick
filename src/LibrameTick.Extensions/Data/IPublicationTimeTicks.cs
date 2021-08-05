@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 发表时间周期数接口。
+    /// 定义发表时间周期数接口。
     /// </summary>
     /// <remarks>
     /// 主要用于解决 <see cref="DateTimeOffset"/> 在不同数据库中 LINQ 查询的兼容性问题。

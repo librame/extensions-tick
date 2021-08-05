@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 更新静态扩展。
+    /// <see cref="IUpdation{TUpdatedBy, TUpdatedTime}"/> 静态扩展。
     /// </summary>
     public static class UpdationExtensions
     {
@@ -71,63 +71,63 @@ namespace Librame.Extensions.Data
         #endregion
 
 
-        #region IObjectUpdation
+        #region IObjectUpdation (与泛型产生二义性)
 
-        /// <summary>
-        /// 填充创建属性（支持日期时间为可空类型）。
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="updation"/> is null.
-        /// </exception>
-        /// <typeparam name="TUpdation">指定的创建类型。</typeparam>
-        /// <param name="updation">给定的 <typeparamref name="TUpdation"/>。</param>
-        /// <param name="newUpdatedTime">给定的新创建日期对象（可选）。</param>
-        /// <param name="newUpdatedBy">给定的新创建者对象。</param>
-        /// <returns>返回 <typeparamref name="TUpdation"/>。</returns>
-        public static TUpdation PopulateUpdation<TUpdation>(this TUpdation updation,
-            object newUpdatedBy, object? newUpdatedTime = null)
-            where TUpdation : IObjectUpdation
-        {
-            updation.PopulateCreation(newUpdatedBy, newUpdatedTime);
+        ///// <summary>
+        ///// 填充创建属性（支持日期时间为可空类型）。
+        ///// </summary>
+        ///// <exception cref="ArgumentNullException">
+        ///// <paramref name="updation"/> is null.
+        ///// </exception>
+        ///// <typeparam name="TUpdation">指定的创建类型。</typeparam>
+        ///// <param name="updation">给定的 <typeparamref name="TUpdation"/>。</param>
+        ///// <param name="newUpdatedTime">给定的新创建日期对象（可选）。</param>
+        ///// <param name="newUpdatedBy">给定的新创建者对象。</param>
+        ///// <returns>返回 <typeparamref name="TUpdation"/>。</returns>
+        //public static TUpdation PopulateUpdation<TUpdation>(this TUpdation updation,
+        //    object newUpdatedBy, object? newUpdatedTime = null)
+        //    where TUpdation : IObjectUpdation
+        //{
+        //    updation.PopulateCreation(newUpdatedBy, newUpdatedTime);
 
-            if (newUpdatedTime.IsNotNull())
-                updation.SetObjectUpdatedTime(newUpdatedTime);
+        //    if (newUpdatedTime.IsNotNull())
+        //        updation.SetObjectUpdatedTime(newUpdatedTime);
 
-            updation.SetObjectUpdatedBy(newUpdatedBy);
+        //    updation.SetObjectUpdatedBy(newUpdatedBy);
 
-            return updation;
-        }
+        //    return updation;
+        //}
 
-        /// <summary>
-        /// 异步填充创建属性（支持日期时间为可空类型）。
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="updation"/> is null.
-        /// </exception>
-        /// <typeparam name="TUpdation">指定的创建类型。</typeparam>
-        /// <param name="updation">给定的 <typeparamref name="TUpdation"/>。</param>
-        /// <param name="newUpdatedBy">给定的新创建者对象。</param>
-        /// <param name="newUpdatedTime">给定的新创建日期对象（可选）。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含 <typeparamref name="TUpdation"/> 的异步操作。</returns>
-        public static async Task<TUpdation> PopulateUpdationAsync<TUpdation>(this TUpdation updation,
-            object? newUpdatedBy, object? newUpdatedTime = null, CancellationToken cancellationToken = default)
-            where TUpdation : IObjectUpdation
-        {
-            await updation.PopulateCreationAsync(newUpdatedBy, newUpdatedTime)
-                .ConfigureAwait();
+        ///// <summary>
+        ///// 异步填充创建属性（支持日期时间为可空类型）。
+        ///// </summary>
+        ///// <exception cref="ArgumentNullException">
+        ///// <paramref name="updation"/> is null.
+        ///// </exception>
+        ///// <typeparam name="TUpdation">指定的创建类型。</typeparam>
+        ///// <param name="updation">给定的 <typeparamref name="TUpdation"/>。</param>
+        ///// <param name="newUpdatedBy">给定的新创建者对象。</param>
+        ///// <param name="newUpdatedTime">给定的新创建日期对象（可选）。</param>
+        ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        ///// <returns>返回一个包含 <typeparamref name="TUpdation"/> 的异步操作。</returns>
+        //public static async Task<TUpdation> PopulateUpdationAsync<TUpdation>(this TUpdation updation,
+        //    object? newUpdatedBy, object? newUpdatedTime = null, CancellationToken cancellationToken = default)
+        //    where TUpdation : IObjectUpdation
+        //{
+        //    await updation.PopulateCreationAsync(newUpdatedBy, newUpdatedTime)
+        //        .ConfigureAwait();
 
-            if (newUpdatedTime.IsNotNull())
-            {
-                await updation.SetObjectUpdatedTimeAsync(newUpdatedTime, cancellationToken)
-                    .ConfigureAwaitWithoutContext();
-            }
+        //    if (newUpdatedTime.IsNotNull())
+        //    {
+        //        await updation.SetObjectUpdatedTimeAsync(newUpdatedTime, cancellationToken)
+        //            .ConfigureAwaitWithoutContext();
+        //    }
 
-            await updation.SetObjectUpdatedByAsync(newUpdatedBy, cancellationToken)
-                .ConfigureAwaitWithoutContext();
+        //    await updation.SetObjectUpdatedByAsync(newUpdatedBy, cancellationToken)
+        //        .ConfigureAwaitWithoutContext();
 
-            return updation;
-        }
+        //    return updation;
+        //}
 
         #endregion
 
@@ -208,81 +208,81 @@ namespace Librame.Extensions.Data
         #endregion
 
 
-        #region IObjectUpdator
+        #region IObjectUpdator (与泛型产生二义性)
 
-        /// <summary>
-        /// 设置对象创建者。
-        /// </summary>
-        /// <param name="updator">给定的 <see cref="IObjectUpdator"/>。</param>
-        /// <param name="newUpdatedByFactory">给定的新对象创建者工厂方法。</param>
-        /// <returns>返回创建者（兼容标识或字符串）。</returns>
-        public static object? SetObjectUpdatedBy(this IObjectUpdator updator,
-            Func<object?, object?> newUpdatedByFactory)
-        {
-            updator.SetObjectCreatedBy(newUpdatedByFactory);
+        ///// <summary>
+        ///// 设置对象创建者。
+        ///// </summary>
+        ///// <param name="updator">给定的 <see cref="IObjectUpdator"/>。</param>
+        ///// <param name="newUpdatedByFactory">给定的新对象创建者工厂方法。</param>
+        ///// <returns>返回创建者（兼容标识或字符串）。</returns>
+        //public static object? SetObjectUpdatedBy(this IObjectUpdator updator,
+        //    Func<object?, object?> newUpdatedByFactory)
+        //{
+        //    updator.SetObjectCreatedBy(newUpdatedByFactory);
 
-            var currentUpdatedBy = updator.GetObjectCreatedBy();
+        //    var currentUpdatedBy = updator.GetObjectCreatedBy();
 
-            return updator.SetObjectUpdatedBy(newUpdatedByFactory.Invoke(currentUpdatedBy));
-        }
+        //    return updator.SetObjectUpdatedBy(newUpdatedByFactory.Invoke(currentUpdatedBy));
+        //}
 
-        /// <summary>
-        /// 异步设置对象创建者。
-        /// </summary>
-        /// <param name="updator">给定的 <see cref="IObjectUpdator"/>。</param>
-        /// <param name="newUpdatedByFactory">给定的新对象创建者工厂方法。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
-        public static async ValueTask<object?> SetObjectUpdatedByAsync(this IObjectUpdator updator,
-            Func<object?, object?> newUpdatedByFactory, CancellationToken cancellationToken = default)
-        {
-            await updator.SetObjectCreatedByAsync(newUpdatedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
+        ///// <summary>
+        ///// 异步设置对象创建者。
+        ///// </summary>
+        ///// <param name="updator">给定的 <see cref="IObjectUpdator"/>。</param>
+        ///// <param name="newUpdatedByFactory">给定的新对象创建者工厂方法。</param>
+        ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        ///// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
+        //public static async ValueTask<object?> SetObjectUpdatedByAsync(this IObjectUpdator updator,
+        //    Func<object?, object?> newUpdatedByFactory, CancellationToken cancellationToken = default)
+        //{
+        //    await updator.SetObjectCreatedByAsync(newUpdatedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
 
-            var currentUpdatedBy = await updator.GetObjectUpdatedByAsync(cancellationToken)
-                .ConfigureAwaitWithoutContext();
+        //    var currentUpdatedBy = await updator.GetObjectUpdatedByAsync(cancellationToken)
+        //        .ConfigureAwaitWithoutContext();
 
-            return await updator.SetObjectUpdatedByAsync(newUpdatedByFactory.Invoke(currentUpdatedBy), cancellationToken)
-                .ConfigureAwaitWithoutContext();
-        }
+        //    return await updator.SetObjectUpdatedByAsync(newUpdatedByFactory.Invoke(currentUpdatedBy), cancellationToken)
+        //        .ConfigureAwaitWithoutContext();
+        //}
 
         #endregion
 
 
-        #region IObjectUpdationTime
+        #region IObjectUpdationTime (与泛型产生二义性)
 
-        /// <summary>
-        /// 设置对象创建时间。
-        /// </summary>
-        /// <param name="updationTime">给定的 <see cref="IObjectUpdationTime"/>。</param>
-        /// <param name="newUpdatedTimeFactory">给定的新对象创建时间工厂方法。</param>
-        /// <returns>返回创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
-        public static object SetObjectUpdatedTime(this IObjectUpdationTime updationTime,
-            Func<object, object> newUpdatedTimeFactory)
-        {
-            updationTime.SetObjectCreatedTime(newUpdatedTimeFactory);
+        ///// <summary>
+        ///// 设置对象创建时间。
+        ///// </summary>
+        ///// <param name="updationTime">给定的 <see cref="IObjectUpdationTime"/>。</param>
+        ///// <param name="newUpdatedTimeFactory">给定的新对象创建时间工厂方法。</param>
+        ///// <returns>返回创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
+        //public static object SetObjectUpdatedTime(this IObjectUpdationTime updationTime,
+        //    Func<object, object> newUpdatedTimeFactory)
+        //{
+        //    updationTime.SetObjectCreatedTime(newUpdatedTimeFactory);
 
-            var currentUpdatedTime = updationTime.GetObjectUpdatedTime();
-            return updationTime.SetObjectUpdatedTime(newUpdatedTimeFactory.Invoke(currentUpdatedTime));
-        }
+        //    var currentUpdatedTime = updationTime.GetObjectUpdatedTime();
+        //    return updationTime.SetObjectUpdatedTime(newUpdatedTimeFactory.Invoke(currentUpdatedTime));
+        //}
 
-        /// <summary>
-        /// 异步设置对象创建时间。
-        /// </summary>
-        /// <param name="updationTime">给定的 <see cref="IObjectUpdationTime"/>。</param>
-        /// <param name="newUpdatedTimeFactory">给定的新对象创建时间工厂方法。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-        public static async ValueTask<object> SetObjectUpdatedTimeAsync(this IObjectUpdationTime updationTime,
-            Func<object, object> newUpdatedTimeFactory, CancellationToken cancellationToken = default)
-        {
-            await updationTime.SetObjectCreatedTimeAsync(newUpdatedTimeFactory, cancellationToken);
+        ///// <summary>
+        ///// 异步设置对象创建时间。
+        ///// </summary>
+        ///// <param name="updationTime">给定的 <see cref="IObjectUpdationTime"/>。</param>
+        ///// <param name="newUpdatedTimeFactory">给定的新对象创建时间工厂方法。</param>
+        ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        ///// <returns>返回一个包含创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
+        //public static async ValueTask<object> SetObjectUpdatedTimeAsync(this IObjectUpdationTime updationTime,
+        //    Func<object, object> newUpdatedTimeFactory, CancellationToken cancellationToken = default)
+        //{
+        //    await updationTime.SetObjectCreatedTimeAsync(newUpdatedTimeFactory, cancellationToken);
 
-            var currentUpdatedTime = await updationTime.GetObjectUpdatedTimeAsync(cancellationToken)
-                .ConfigureAwaitWithoutContext();
+        //    var currentUpdatedTime = await updationTime.GetObjectUpdatedTimeAsync(cancellationToken)
+        //        .ConfigureAwaitWithoutContext();
 
-            return await updationTime.SetObjectUpdatedTimeAsync(newUpdatedTimeFactory.Invoke(currentUpdatedTime), cancellationToken)
-                .ConfigureAwaitWithoutContext();
-        }
+        //    return await updationTime.SetObjectUpdatedTimeAsync(newUpdatedTimeFactory.Invoke(currentUpdatedTime), cancellationToken)
+        //        .ConfigureAwaitWithoutContext();
+        //}
 
         #endregion
 

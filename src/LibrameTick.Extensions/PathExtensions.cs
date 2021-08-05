@@ -72,9 +72,7 @@ namespace Librame.Extensions
         /// <returns>返回路径字符串。</returns>
         public static string SetBasePath(this string relativePath, string? basePath = null)
         {
-            relativePath.NotEmpty(nameof(relativePath));
-
-            if (basePath.IsEmpty())
+            if (string.IsNullOrEmpty(basePath))
                 basePath = CurrentDirectoryWithoutDevelopmentRelativePath;
 
             if (relativePath.StartsWith("./") || !relativePath.StartsWith(basePath))

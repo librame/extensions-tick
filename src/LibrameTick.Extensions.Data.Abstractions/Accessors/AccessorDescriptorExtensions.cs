@@ -30,8 +30,6 @@ namespace Librame.Extensions.Data.Accessors
         public static IEnumerable<IAccessor> SelectAccessors(this IEnumerable<AccessorDescriptor> descriptors,
             AccessorInteraction interaction)
         {
-            descriptors.NotNull(nameof(descriptors));
-
             // 支持交互形式的位与运算
             return descriptors.Where(p => (interaction & p.Interaction) == p.Interaction)
                 .Select(s => s.Accessor);

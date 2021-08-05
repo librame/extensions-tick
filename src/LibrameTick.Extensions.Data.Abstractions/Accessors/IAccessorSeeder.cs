@@ -10,15 +10,16 @@
 
 #endregion
 
-using System.Collections.Generic;
-
 namespace Librame.Extensions.Data.Accessors
 {
-    class AccessorAggregator : AbstractAccessorAggregator<IAccessor>
+    /// <summary>
+    /// 定义 <see cref="IAccessor"/> 种子机。
+    /// </summary>
+    public interface IAccessorSeeder
     {
-        protected override IAccessor CreateChain(IEnumerable<IAccessor> accessors,
-            AccessorInteraction interaction)
-            => new CompositeAccessor(accessors, interaction);
-
+        /// <summary>
+        /// 标识生成器工厂。
+        /// </summary>
+        IIdentificationGeneratorFactory IdGeneratorFactory { get; }
     }
 }

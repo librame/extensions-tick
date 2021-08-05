@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 可排序接口。
+    /// 定义可排序接口。
     /// </summary>
     public interface ISortable : IComparable<ISortable>
     {

@@ -42,8 +42,21 @@ namespace Librame.Extensions.Core.Cryptography
         /// </summary>
         /// <param name="keyFile">给定的密钥文件。</param>
         /// <returns>返回 <see cref="TemporaryRsaKey"/>。</returns>
-        public static TemporaryRsaKey? LoadFile(string keyFile)
-            => keyFile.ReadJson<TemporaryRsaKey>();
+        public static TemporaryRsaKey LoadFile(string keyFile)
+        {
+            var key = keyFile.ReadJson<TemporaryRsaKey>();
+            if (key == null)
+            {
+                key = new TemporaryRsaKey
+                {
+                    KeyId = GenerateKeyId(),
+                    Parameters = RSA.Create().ExportParameters(true)
+                };
+                keyFile.WriteJson(key);
+            }
+
+            return key;
+        }
 
     }
 }

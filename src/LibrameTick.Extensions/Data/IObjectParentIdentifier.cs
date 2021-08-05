@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象父标识符接口。
+    /// 定义对象父标识符接口。
     /// </summary>
     public interface IObjectParentIdentifier : IObjectIdentifier
     {

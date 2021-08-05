@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象更新者接口。
+    /// 定义对象更新者接口。
     /// </summary>
     public interface IObjectUpdator : IObjectCreator
     {

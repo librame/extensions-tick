@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 算法参数生成器接口。
+    /// 定义算法参数生成器接口。
     /// </summary>
     public interface IAlgorithmParameterGenerator
     {

@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Collections;
+using Librame.Extensions.Data.Specifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +21,6 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Accessors
 {
-    using Extensions.Collections;
-    using Extensions.Data.Specifications;
-
     /// <summary>
     /// 定义表示数据访问的访问器接口（主要用于适配数据实现层的访问对象；如 EFCore 实现层的 DbContext 对象）。
     /// </summary>
@@ -33,16 +32,32 @@ namespace Librame.Extensions.Data.Accessors
         Type AccessorType { get; }
 
 
+        #region Exists
+
         /// <summary>
-        /// 是否存在指定断定方法的实体。
+        /// 在本地缓存或数据库中是否存在指定断定方法的实体。
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-        /// <param name="predicate">给定的断定方法。</param>
+        /// <param name="predicate">给定的断定方法表达式。</param>
         /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
         /// <returns>返回布尔值。</returns>
-        bool Exists<TEntity>(Func<TEntity, bool> predicate,
+        bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
             bool checkLocal = true)
             where TEntity : class;
+
+        /// <summary>
+        /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="predicate">给定的断定方法表达式。</param>
+        /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含布尔值的异步操作。</returns>
+        Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
+            bool checkLocal = true, CancellationToken cancellationToken = default)
+            where TEntity : class;
+
+        #endregion
 
 
         #region Find
@@ -106,8 +121,8 @@ namespace Librame.Extensions.Data.Accessors
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回 <see cref="List{TEntity}"/>。</returns>
-        List<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+        /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
+        IList<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
             where TEntity : class;
 
         /// <summary>
@@ -116,9 +131,30 @@ namespace Librame.Extensions.Data.Accessors
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
-        Task<List<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
+        /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
+        Task<IList<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
             ISpecification<TEntity>? specification = null)
+            where TEntity : class;
+
+
+        /// <summary>
+        /// 查找实体分页集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
+        IPagingList<TEntity> FindPaging<TEntity>(Action<IPagingList<TEntity>> pageAction)
+            where TEntity : class;
+
+        /// <summary>
+        /// 异步查找实体分页集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
+        Task<IPagingList<TEntity>> FindPagingAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+            CancellationToken cancellationToken = default)
             where TEntity : class;
 
 
@@ -128,8 +164,8 @@ namespace Librame.Extensions.Data.Accessors
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回 <see cref="PagingList{TEntity}"/>。</returns>
-        PagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<PagingList<TEntity>> pageAction,
+        /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
+        IPagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
             ISpecification<TEntity>? specification = null)
             where TEntity : class;
 
@@ -140,8 +176,8 @@ namespace Librame.Extensions.Data.Accessors
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回一个包含 <see cref="PagingList{TEntity}"/> 的异步操作。</returns>
-        Task<PagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<PagingList<TEntity>> pageAction,
+        /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
+        Task<IPagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
             CancellationToken cancellationToken = default, ISpecification<TEntity>? specification = null)
             where TEntity : class;
 
@@ -186,11 +222,11 @@ namespace Librame.Extensions.Data.Accessors
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="entity">给定要添加的实体。</param>
-        /// <param name="predicate">给定的断定方法。</param>
+        /// <param name="predicate">给定的断定方法表达式。</param>
         /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
         /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
         TEntity AddIfNotExists<TEntity>(TEntity entity,
-            Func<TEntity, bool> predicate, bool checkLocal = true)
+            Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
             where TEntity : class;
 
         /// <summary>

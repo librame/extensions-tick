@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 锁定期静态扩展。
+    /// <see cref="ILockout{TLockoutTime}"/> 静态扩展。
     /// </summary>
     public static class LockoutExtensions
     {
@@ -32,12 +32,7 @@ namespace Librame.Extensions.Data
         public static TLockoutTime? SetLockoutEnd<TLockoutTime>(this ILockout<TLockoutTime> lockout,
             Func<TLockoutTime?, TLockoutTime?> newLockoutFactory)
             where TLockoutTime : struct
-        {
-            lockout.NotNull(nameof(lockout));
-            newLockoutFactory.NotNull(nameof(newLockoutFactory));
-
-            return lockout.LockoutEnd = newLockoutFactory.Invoke(lockout.LockoutEnd);
-        }
+            => lockout.LockoutEnd = newLockoutFactory.Invoke(lockout.LockoutEnd);
 
         /// <summary>
         /// 异步设置锁定期结束时间。
@@ -50,12 +45,7 @@ namespace Librame.Extensions.Data
         public static ValueTask<TLockoutTime?> SetLockoutEndAsync<TLockoutTime>(this ILockout<TLockoutTime> lockout,
             Func<TLockoutTime?, TLockoutTime?> newLockoutFactory, CancellationToken cancellationToken = default)
             where TLockoutTime : struct
-        {
-            lockout.NotNull(nameof(lockout));
-            newLockoutFactory.NotNull(nameof(newLockoutFactory));
-
-            return cancellationToken.RunValueTask(() => lockout.LockoutEnd = newLockoutFactory.Invoke(lockout.LockoutEnd));
-        }
+            => cancellationToken.RunValueTask(() => lockout.LockoutEnd = newLockoutFactory.Invoke(lockout.LockoutEnd));
 
 
         /// <summary>
@@ -67,9 +57,6 @@ namespace Librame.Extensions.Data
         public static object SetObjectLockoutEnd(this IObjectLockout lockout,
             Func<object, object> newLockoutEndFactory)
         {
-            lockout.NotNull(nameof(lockout));
-            newLockoutEndFactory.NotNull(nameof(newLockoutEndFactory));
-
             var currentLockoutEnd = lockout.GetObjectLockoutEnd();
             return lockout.SetObjectLockoutEnd(newLockoutEndFactory.Invoke(currentLockoutEnd));
         }
@@ -84,9 +71,6 @@ namespace Librame.Extensions.Data
         public static async ValueTask<object> SetObjectLockoutEndAsync(this IObjectLockout lockout,
             Func<object, object> newLockoutEndFactory, CancellationToken cancellationToken = default)
         {
-            lockout.NotNull(nameof(lockout));
-            newLockoutEndFactory.NotNull(nameof(newLockoutEndFactory));
-
             var currentLockoutEnd = await lockout.GetObjectLockoutEndAsync(cancellationToken).ConfigureAwaitWithoutContext();
             return await lockout.SetObjectLockoutEndAsync(newLockoutEndFactory.Invoke(currentLockoutEnd), cancellationToken)
                 .ConfigureAwaitWithoutContext();

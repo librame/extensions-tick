@@ -11,7 +11,6 @@
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Librame.Extensions
@@ -30,77 +29,6 @@ namespace Librame.Extensions
         /// <returns>返回布尔值。</returns>
         public static bool IsMultiples(this int value, int multiples)
             => 0 == value % multiples;
-
-
-        #region Compare
-
-        /// <summary>
-        /// 是否大于或大于等于对比值。
-        /// </summary>
-        /// <typeparam name="T">指定的类型。</typeparam>
-        /// <param name="value">给定的值。</param>
-        /// <param name="compare">给定的比较值。</param>
-        /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsGreater<T>([NotNullWhen(false)] this T? value, T compare, bool equals = false)
-            where T : IComparable<T>
-        {
-            value.NotNull(nameof(value));
-
-            return equals ? value.CompareTo(compare) >= 0 : value.CompareTo(compare) > 0;
-        }
-
-        /// <summary>
-        /// 是否小于或小于等于对比值。
-        /// </summary>
-        /// <typeparam name="T">指定的类型。</typeparam>
-        /// <param name="value">给定的值。</param>
-        /// <param name="compare">给定的比较值。</param>
-        /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
-        /// <returns>返回布尔值。</returns>
-        public static bool IsLesser<T>([NotNullWhen(false)] this T? value, T compare, bool equals = false)
-            where T : IComparable<T>
-        {
-            value.NotNull(nameof(value));
-
-            return equals ? value.CompareTo(compare) <= 0 : value.CompareTo(compare) < 0;
-        }
-
-
-        /// <summary>
-        /// 是否不超出范围对比值。
-        /// </summary>
-        /// <typeparam name="T">指定的类型。</typeparam>
-        /// <param name="value">给定的值。</param>
-        /// <param name="compareMinimum">给定的最小比较值。</param>
-        /// <param name="compareMaximum">给定的最大比较值。</param>
-        /// <param name="equalMinimum">是否比较等于最小值（可选；默认不比较）。</param>
-        /// <param name="equalMaximum">是否比较等于最大值（可选；默认不比较）。</param>
-        public static bool IsNotOutOfRange<T>([NotNullWhen(false)] this T? value, T compareMinimum, T compareMaximum,
-            bool equalMinimum = false, bool equalMaximum = false)
-            where T : IComparable<T>
-            => !value.IsOutOfRange(compareMinimum, compareMaximum, equalMinimum, equalMaximum);
-
-        /// <summary>
-        /// 是否超出范围对比值。
-        /// </summary>
-        /// <typeparam name="T">指定的类型。</typeparam>
-        /// <param name="value">给定的值。</param>
-        /// <param name="compareMinimum">给定的最小比较值。</param>
-        /// <param name="compareMaximum">给定的最大比较值。</param>
-        /// <param name="equalMinimum">是否比较等于最小值（可选；默认不比较）。</param>
-        /// <param name="equalMaximum">是否比较等于最大值（可选；默认不比较）。</param>
-        public static bool IsOutOfRange<T>([NotNullWhen(false)] this T? value, T compareMinimum, T compareMaximum,
-            bool equalMinimum = false, bool equalMaximum = false)
-            where T : IComparable<T>
-        {
-            if (value.IsLesser(compareMinimum, equalMinimum))
-                return true;
-
-            return value.IsGreater(compareMaximum, equalMaximum);
-        }
-
-        #endregion
 
 
         #region Digit and Letter
@@ -233,6 +161,140 @@ namespace Librame.Extensions
         /// <returns>返回布尔值。</returns>
         public static bool IsLetter(this char value)
             => value.IsLower() || value.IsUpper();
+
+        #endregion
+
+
+        #region IsCompare
+
+        /// <summary>
+        /// 是否大于或大于等于对比值。
+        /// </summary>
+        /// <typeparam name="T">指定的类型。</typeparam>
+        /// <param name="value">给定的值。</param>
+        /// <param name="compare">给定的比较值。</param>
+        /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool IsGreater<T>(this T value, T compare, bool equals = false)
+            where T : IComparable<T>
+            => equals ? value.CompareTo(compare) >= 0 : value.CompareTo(compare) > 0;
+
+        /// <summary>
+        /// 是否小于或小于等于对比值。
+        /// </summary>
+        /// <typeparam name="T">指定的类型。</typeparam>
+        /// <param name="value">给定的值。</param>
+        /// <param name="compare">给定的比较值。</param>
+        /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool IsLesser<T>(this T value, T compare, bool equals = false)
+            where T : IComparable<T>
+            => equals ? value.CompareTo(compare) <= 0 : value.CompareTo(compare) < 0;
+
+
+        /// <summary>
+        /// 是否不超出范围对比值。
+        /// </summary>
+        /// <typeparam name="T">指定的类型。</typeparam>
+        /// <param name="value">给定的值。</param>
+        /// <param name="compareMinimum">给定的最小比较值。</param>
+        /// <param name="compareMaximum">给定的最大比较值。</param>
+        /// <param name="equalMinimum">是否比较等于最小值（可选；默认不比较）。</param>
+        /// <param name="equalMaximum">是否比较等于最大值（可选；默认不比较）。</param>
+        public static bool IsNotOutOfRange<T>(this T value, T compareMinimum, T compareMaximum,
+            bool equalMinimum = false, bool equalMaximum = false)
+            where T : IComparable<T>
+            => !value.IsOutOfRange(compareMinimum, compareMaximum, equalMinimum, equalMaximum);
+
+        /// <summary>
+        /// 是否超出范围对比值。
+        /// </summary>
+        /// <typeparam name="T">指定的类型。</typeparam>
+        /// <param name="value">给定的值。</param>
+        /// <param name="compareMinimum">给定的最小比较值。</param>
+        /// <param name="compareMaximum">给定的最大比较值。</param>
+        /// <param name="equalMinimum">是否比较等于最小值（可选；默认不比较）。</param>
+        /// <param name="equalMaximum">是否比较等于最大值（可选；默认不比较）。</param>
+        public static bool IsOutOfRange<T>(this T value, T compareMinimum, T compareMaximum,
+            bool equalMinimum = false, bool equalMaximum = false)
+            where T : IComparable<T>
+        {
+            if (value.IsLesser(compareMinimum, equalMinimum))
+                return true;
+
+            return value.IsGreater(compareMaximum, equalMaximum);
+        }
+
+        #endregion
+
+
+        #region NotCompare
+
+        /// <summary>
+        /// 得到不大于（等于）对比值。
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The '{0}' value '{1}' is (equal or) greater than '{2}'.
+        /// </exception>
+        /// <typeparam name="T">指定的类型。</typeparam>
+        /// <param name="value">给定的值。</param>
+        /// <param name="compare">给定的比较值。</param>
+        /// <param name="paramName">给定的参数名。</param>
+        /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
+        /// <returns>返回值或抛出异常。</returns>
+        public static T NotGreater<T>(this T value, T compare, string paramName, bool equals = false)
+            where T : IComparable<T>
+        {
+            if (value.IsGreater(compare, equals))
+                throw new ArgumentException($"The param name '{paramName}' value '{value}' is (equal or) greater than '{compare}'.");
+
+            return value;
+        }
+
+        /// <summary>
+        /// 得到不小于（等于）的值。
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The '{0}' value '{1}' is (equal or) lesser than '{2}'.
+        /// </exception>
+        /// <typeparam name="T">指定的类型。</typeparam>
+        /// <param name="value">给定的值。</param>
+        /// <param name="compare">给定的比较值。</param>
+        /// <param name="paramName">给定的参数名。</param>
+        /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
+        /// <returns>返回值或抛出异常。</returns>
+        public static T NotLesser<T>(this T value, T compare, string paramName, bool equals = false)
+            where T : IComparable<T>
+        {
+            if (value.IsLesser(compare, equals))
+                throw new ArgumentException($"The param name '{paramName}' value '{value}' is (equal or) lesser than '{compare}'.");
+
+            return value;
+        }
+
+        /// <summary>
+        /// 得到不超出范围的值。
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The '{0}' value '{1}' is out of range (min: '{2}', max: '{3}').
+        /// </exception>
+        /// <typeparam name="T">指定的类型。</typeparam>
+        /// <param name="value">给定的值。</param>
+        /// <param name="compareMinimum">给定的最小比较值。</param>
+        /// <param name="compareMaximum">给定的最大比较值。</param>
+        /// <param name="paramName">给定的参数名。</param>
+        /// <param name="equalMinimum">是否比较等于最小值（可选；默认不比较）。</param>
+        /// <param name="equalMaximum">是否比较等于最大值（可选；默认不比较）。</param>
+        /// <returns>返回值或抛出异常。</returns>
+        public static T NotOutOfRange<T>(this T value, T compareMinimum, T compareMaximum, string paramName,
+            bool equalMinimum = false, bool equalMaximum = false)
+            where T : IComparable<T>
+        {
+            if (value.IsOutOfRange(compareMinimum, compareMaximum, equalMinimum, equalMaximum))
+                throw new ArgumentOutOfRangeException($"The param name '{paramName}' value '{value}' is out of range (min: '{compareMinimum}', max: '{compareMaximum}').");
+
+            return value;
+        }
 
         #endregion
 

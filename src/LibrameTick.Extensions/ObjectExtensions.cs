@@ -22,7 +22,7 @@ namespace Librame.Extensions
     {
 
         /// <summary>
-        /// 将不为空的对象转换为类型值。
+        /// 将不为空的对象转换为类型值（如果对象为空，则抛出异常）。
         /// </summary>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="obj"/> 为空。
@@ -36,34 +36,24 @@ namespace Librame.Extensions
 
 
         /// <summary>
-        /// 将对象转换或默认为类型值。
+        /// 将对象转换或默认为类型值（如果对象为空）。
         /// </summary>
         /// <typeparam name="TValue">指定的值类型。</typeparam>
         /// <param name="obj">给定的对象。</param>
-        /// <param name="defaultValue">给定的默认值（可选）。</param>
+        /// <param name="defaultValue">给定的默认值。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-        public static TValue? AsOrDefaultIfNull<TValue>(this object? obj, TValue? defaultValue = default)
-        {
-            if (obj is null)
-                return defaultValue;
-
-            return (TValue)obj;
-        }
+        public static TValue AsOrDefault<TValue>([NotNullWhen(true)] this object? obj, TValue defaultValue)
+            => obj is null ? defaultValue : (TValue)obj;
 
         /// <summary>
-        /// 将对象转换或默认为类型值。
+        /// 将对象转换或默认为类型值（如果对象为空）。
         /// </summary>
         /// <typeparam name="TValue">指定的值类型。</typeparam>
         /// <param name="obj">给定的对象。</param>
         /// <param name="defaultValueFunc">给定的默认值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-        public static TValue AsOrDefaultIfNull<TValue>([NotNullWhen(true)] this object? obj, Func<TValue> defaultValueFunc)
-        {
-            if (obj is null)
-                return defaultValueFunc.NotNull(nameof(defaultValueFunc)).Invoke();
-
-            return (TValue)obj;
-        }
+        public static TValue AsOrDefault<TValue>([NotNullWhen(true)] this object? obj, Func<TValue> defaultValueFunc)
+            => obj is null ? defaultValueFunc.Invoke() : (TValue)obj;
 
     }
 }

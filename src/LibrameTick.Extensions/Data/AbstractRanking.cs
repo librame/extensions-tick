@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Resources;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,10 +19,8 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Resources;
-
     /// <summary>
-    /// 抽象排名。
+    /// 定义抽象 <see cref="IRanking{TRank}"/>。
     /// </summary>
     /// <typeparam name="TRank">指定的排名类型（兼容整数、单双精度等结构体的排名字段）。</typeparam>
     public abstract class AbstractRanking<TRank> : IRanking<TRank>

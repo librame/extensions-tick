@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 生成式标识符接口。
+    /// 定义泛型生成式标识符接口。
     /// </summary>
     /// <typeparam name="TGenId">指定的生成式标识类型（如：<see cref="Guid"/>、<see cref="long"/>、<see cref="string"/> 等类型）。</typeparam>
     public interface IGenerativeIdentifier<TGenId> : IIdentifier<TGenId>

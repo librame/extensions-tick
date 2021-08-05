@@ -30,8 +30,8 @@ namespace Librame.Extensions.Core.Cryptography
         public AbstractAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
             IExtensionBuilder extensionBuilder)
         {
-            ParameterGenerator = parameterGenerator.NotNull(nameof(parameterGenerator));
-            ExtensionBuilder = extensionBuilder.NotNull(nameof(extensionBuilder));
+            ParameterGenerator = parameterGenerator;
+            ExtensionBuilder = extensionBuilder;
         }
 
 

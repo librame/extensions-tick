@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象发表接口。
+    /// 定义对象发表接口。
     /// </summary>
     public interface IObjectPublication : IObjectPublisher, IObjectPublicationTime, IObjectCreation
     {

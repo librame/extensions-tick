@@ -26,7 +26,7 @@ namespace Librame.Extensions
         #region Base and Hex
 
         private readonly static char[] _base32Chars
-            = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".ToCharArray();
+            = (StringExtensions.UppercaseLetters + "234567").ToCharArray();
 
 
         /// <summary>
@@ -39,8 +39,6 @@ namespace Librame.Extensions
         /// <returns>返回字符串。</returns>
         public static string AsBase32String(this byte[] bytes)
         {
-            bytes.NotEmpty(nameof(bytes));
-
             var chars = _base32Chars;
 
             var sb = new StringBuilder();
@@ -62,7 +60,7 @@ namespace Librame.Extensions
             return sb.ToString();
 
             // 获取下一组字节
-            int GetNextGroup(byte[] buffer, ref int offset,
+            static int GetNextGroup(byte[] buffer, ref int offset,
                 out byte a, out byte b, out byte c, out byte d, out byte e, out byte f, out byte g, out byte h)
             {
                 uint b1, b2, b3, b4, b5;
@@ -106,8 +104,6 @@ namespace Librame.Extensions
         /// <returns>返回字节数组。</returns>
         public static byte[] FromBase32String(this string base32String)
         {
-            base32String.NotEmpty(nameof(base32String));
-
             base32String = base32String.TrimEnd('=');
             if (base32String.Length == 0)
                 return Array.Empty<byte>();
@@ -190,8 +186,6 @@ namespace Librame.Extensions
         /// <returns>返回字节数组。</returns>
         public static byte[] FromHexString(this string hexString)
         {
-            hexString.NotEmpty(nameof(hexString));
-
             if (!hexString.Length.IsMultiples(2))
                 throw new ArgumentException($"Invalid hex string '{hexString}'.");
 
@@ -210,6 +204,9 @@ namespace Librame.Extensions
 
         #region Hash
 
+        private static readonly Lazy<MD5> _md5 =
+            new Lazy<MD5>(MD5.Create());
+
         private static readonly Lazy<SHA256> _sha256 =
             new Lazy<SHA256>(SHA256.Create());
 
@@ -221,13 +218,22 @@ namespace Librame.Extensions
 
 
         /// <summary>
+        /// 计算 MD5 哈希值，并返回 BASE64 字符串形式。
+        /// </summary>
+        /// <param name="plaintext">给定的明文。</param>
+        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+        /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
+        public static string AsMD5Base64String(this string plaintext, Encoding? encoding = null)
+            => plaintext.FromEncodingString(encoding).AsMD5().AsBase64String();
+
+        /// <summary>
         /// 计算 SHA256 哈希值，并返回 BASE64 字符串形式。
         /// </summary>
         /// <param name="plaintext">给定的明文。</param>
         /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-        public static string AsSha256Base64String(this string plaintext, Encoding? encoding = null)
-            => plaintext.FromEncodingString(encoding).AsSha256().AsBase64String();
+        public static string AsSHA256Base64String(this string plaintext, Encoding? encoding = null)
+            => plaintext.FromEncodingString(encoding).AsSHA256().AsBase64String();
 
         /// <summary>
         /// 计算 SHA384 哈希值，并返回 BASE64 字符串形式。
@@ -235,8 +241,8 @@ namespace Librame.Extensions
         /// <param name="plaintext">给定的明文。</param>
         /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-        public static string AsSha384Base64String(this string plaintext, Encoding? encoding = null)
-            => plaintext.FromEncodingString(encoding).AsSha384().AsBase64String();
+        public static string AsSHA384Base64String(this string plaintext, Encoding? encoding = null)
+            => plaintext.FromEncodingString(encoding).AsSHA384().AsBase64String();
 
         /// <summary>
         /// 计算 SHA512 哈希值，并返回 BASE64 字符串形式。
@@ -244,16 +250,24 @@ namespace Librame.Extensions
         /// <param name="plaintext">给定的明文。</param>
         /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-        public static string AsSha512Base64String(this string plaintext, Encoding? encoding = null)
-            => plaintext.FromEncodingString(encoding).AsSha512().AsBase64String();
+        public static string AsSHA512Base64String(this string plaintext, Encoding? encoding = null)
+            => plaintext.FromEncodingString(encoding).AsSHA512().AsBase64String();
 
+
+        /// <summary>
+        /// 计算 MD5 哈希值。
+        /// </summary>
+        /// <param name="buffer">给定要计算的字节数组。</param>
+        /// <returns>返回经过计算的字节数组。</returns>
+        public static byte[] AsMD5(this byte[] buffer)
+            => _md5.Value.ComputeHash(buffer);
 
         /// <summary>
         /// 计算 SHA256 哈希值。
         /// </summary>
         /// <param name="buffer">给定要计算的字节数组。</param>
         /// <returns>返回经过计算的字节数组。</returns>
-        public static byte[] AsSha256(this byte[] buffer)
+        public static byte[] AsSHA256(this byte[] buffer)
             => _sha256.Value.ComputeHash(buffer);
 
         /// <summary>
@@ -261,7 +275,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="buffer">给定要计算的字节数组。</param>
         /// <returns>返回经过计算的字节数组。</returns>
-        public static byte[] AsSha384(this byte[] buffer)
+        public static byte[] AsSHA384(this byte[] buffer)
             => _sha384.Value.ComputeHash(buffer);
 
         /// <summary>
@@ -269,7 +283,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="buffer">给定要计算的字节数组。</param>
         /// <returns>返回经过计算的字节数组。</returns>
-        public static byte[] AsSha512(this byte[] buffer)
+        public static byte[] AsSHA512(this byte[] buffer)
             => _sha512.Value.ComputeHash(buffer);
 
         #endregion
@@ -277,15 +291,29 @@ namespace Librame.Extensions
 
         #region HMAC Hash
 
-        private static readonly Lazy<HMAC?> _hmacSha256 =
-            new Lazy<HMAC?>(HMAC.Create(nameof(HMACSHA256)));
+        private static readonly Lazy<HMAC> _hmacmd5 =
+            new Lazy<HMAC>(HMAC.Create(nameof(HMACMD5))!);
 
-        private static readonly Lazy<HMAC?> _hmacSha384 =
-            new Lazy<HMAC?>(HMAC.Create(nameof(HMACSHA384)));
+        private static readonly Lazy<HMAC> _hmacsha256 =
+            new Lazy<HMAC>(HMAC.Create(nameof(HMACSHA256))!);
 
-        private static readonly Lazy<HMAC?> _hmacSha512 =
-            new Lazy<HMAC?>(HMAC.Create(nameof(HMACSHA512)));
+        private static readonly Lazy<HMAC> _hmacsha384 =
+            new Lazy<HMAC>(HMAC.Create(nameof(HMACSHA384))!);
 
+        private static readonly Lazy<HMAC> _hmacsha512 =
+            new Lazy<HMAC>(HMAC.Create(nameof(HMACSHA512))!);
+
+
+        /// <summary>
+        /// 计算 HMACMD5 哈希值，并返回 BASE64 字符串形式。
+        /// </summary>
+        /// <param name="plaintext">给定的明文。</param>
+        /// <param name="key">给定的密钥（可选）。</param>
+        /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+        /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
+        public static string AsHMACMD5Base64String(this string plaintext,
+            byte[]? key = null, Encoding? encoding = null)
+            => plaintext.FromEncodingString(encoding).AsHMACMD5(key).AsBase64String();
 
         /// <summary>
         /// 计算 HMACSHA256 哈希值，并返回 BASE64 字符串形式。
@@ -294,9 +322,9 @@ namespace Librame.Extensions
         /// <param name="key">给定的密钥（可选）。</param>
         /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-        public static string AsHmacSha256Base64String(this string plaintext,
+        public static string AsHMACSHA256Base64String(this string plaintext,
             byte[]? key = null, Encoding? encoding = null)
-            => plaintext.FromEncodingString(encoding).AsHmacSha256(key).AsBase64String();
+            => plaintext.FromEncodingString(encoding).AsHMACSHA256(key).AsBase64String();
 
         /// <summary>
         /// 计算 HMACSHA384 哈希值，并返回 BASE64 字符串形式。
@@ -305,9 +333,9 @@ namespace Librame.Extensions
         /// <param name="key">给定的密钥（可选）。</param>
         /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-        public static string AsHmacSha384Base64String(this string plaintext,
+        public static string AsHMACSHA384Base64String(this string plaintext,
             byte[]? key = null, Encoding? encoding = null)
-            => plaintext.FromEncodingString(encoding).AsHmacSha384(key).AsBase64String();
+            => plaintext.FromEncodingString(encoding).AsHMACSHA384(key).AsBase64String();
 
         /// <summary>
         /// 计算 HMACSHA512 哈希值，并返回 BASE64 字符串形式。
@@ -316,10 +344,27 @@ namespace Librame.Extensions
         /// <param name="key">给定的密钥（可选）。</param>
         /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
         /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-        public static string AsHmacSha512Base64String(this string plaintext,
+        public static string AsHMACSHA512Base64String(this string plaintext,
             byte[]? key = null, Encoding? encoding = null)
-            => plaintext.FromEncodingString(encoding).AsHmacSha512(key).AsBase64String();
+            => plaintext.FromEncodingString(encoding).AsHMACSHA512(key).AsBase64String();
 
+
+        /// <summary>
+        /// 计算 HMACMD5 哈希值。
+        /// </summary>
+        /// <param name="buffer">给定要计算的字节数组。</param>
+        /// <param name="key">给定的密钥（可选）。</param>
+        /// <returns>返回经过计算的字节数组。</returns>
+        public static byte[] AsHMACMD5(this byte[] buffer, byte[]? key = null)
+        {
+            return RunHMACMD5(hmac =>
+            {
+                if (key != null)
+                    hmac.Key = key;
+
+                return hmac.ComputeHash(buffer);
+            });
+        }
 
         /// <summary>
         /// 计算 HMACSHA256 哈希值。
@@ -327,11 +372,11 @@ namespace Librame.Extensions
         /// <param name="buffer">给定要计算的字节数组。</param>
         /// <param name="key">给定的密钥（可选）。</param>
         /// <returns>返回经过计算的字节数组。</returns>
-        public static byte[] AsHmacSha256(this byte[] buffer, byte[]? key = null)
+        public static byte[] AsHMACSHA256(this byte[] buffer, byte[]? key = null)
         {
-            return RunHmacSha256(hmac =>
+            return RunHMACSHA256(hmac =>
             {
-                if (key.IsNotEmpty())
+                if (key != null)
                     hmac.Key = key;
 
                 return hmac.ComputeHash(buffer);
@@ -344,11 +389,11 @@ namespace Librame.Extensions
         /// <param name="buffer">给定要计算的字节数组。</param>
         /// <param name="key">给定的密钥（可选）。</param>
         /// <returns>返回经过计算的字节数组。</returns>
-        public static byte[] AsHmacSha384(this byte[] buffer, byte[]? key = null)
+        public static byte[] AsHMACSHA384(this byte[] buffer, byte[]? key = null)
         {
-            return RunHmacSha384(hmac =>
+            return RunHMACSHA384(hmac =>
             {
-                if (key.IsNotEmpty())
+                if (key != null)
                     hmac.Key = key;
 
                 return hmac.ComputeHash(buffer);
@@ -361,11 +406,11 @@ namespace Librame.Extensions
         /// <param name="buffer">给定要计算的字节数组。</param>
         /// <param name="key">给定的密钥（可选）。</param>
         /// <returns>返回经过计算的字节数组。</returns>
-        public static byte[] AsHmacSha512(this byte[] buffer, byte[]? key = null)
+        public static byte[] AsHMACSHA512(this byte[] buffer, byte[]? key = null)
         {
-            return RunHmacSha512(hmac =>
+            return RunHMACSHA512(hmac =>
             {
-                if (key.IsNotEmpty())
+                if (key != null)
                     hmac.Key = key;
 
                 return hmac.ComputeHash(buffer);
@@ -374,25 +419,55 @@ namespace Librame.Extensions
 
 
         /// <summary>
+        /// 获取 HMACMD5 哈希密钥。
+        /// </summary>
+        /// <returns>返回包含密钥和向量的元组。</returns>
+        public static byte[] GetHMACMD5Key()
+            => RunHMACMD5(hmac => hmac.Key);
+
+        /// <summary>
         /// 获取 HMACSHA256 哈希密钥。
         /// </summary>
         /// <returns>返回包含密钥和向量的元组。</returns>
-        public static byte[] GetHmacSha256Key()
-            => RunHmacSha256(hmac => hmac.Key);
+        public static byte[] GetHMACSHA256Key()
+            => RunHMACSHA256(hmac => hmac.Key);
 
         /// <summary>
         /// 获取 HMACSHA384 哈希密钥。
         /// </summary>
         /// <returns>返回包含密钥和向量的元组。</returns>
-        public static byte[] GetHmacSha384Key()
-            => RunHmacSha384(hmac => hmac.Key);
+        public static byte[] GetHMACSHA384Key()
+            => RunHMACSHA384(hmac => hmac.Key);
 
         /// <summary>
         /// 获取 HMACSHA512 哈希密钥。
         /// </summary>
         /// <returns>返回包含密钥和向量的元组。</returns>
-        public static byte[] GetHmacSha512Key()
-            => RunHmacSha512(hmac => hmac.Key);
+        public static byte[] GetHMACSHA512Key()
+            => RunHMACSHA512(hmac => hmac.Key);
+
+
+        /// <summary>
+        /// 运行 HMACMD5 哈希。
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="action"/> is null.
+        /// </exception>
+        /// <param name="action">给定的动作。</param>
+        public static void RunHMACMD5(this Action<HMAC> action)
+            => action.Invoke(GetHMAC(nameof(HashAlgorithmName.MD5)));
+
+        /// <summary>
+        /// 运行 HMACMD5 哈希，并返回值。
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueFunc"/> is null.
+        /// </exception>
+        /// <typeparam name="TValue">指定的值类型。</typeparam>
+        /// <param name="valueFunc">给定的值方法。</param>
+        /// <returns>返回 <typeparamref name="TValue"/>。</returns>
+        public static TValue RunHMACMD5<TValue>(this Func<HMAC, TValue> valueFunc)
+            => valueFunc.Invoke(GetHMAC(nameof(HashAlgorithmName.MD5)));
 
 
         /// <summary>
@@ -402,8 +477,8 @@ namespace Librame.Extensions
         /// <paramref name="action"/> is null.
         /// </exception>
         /// <param name="action">给定的动作。</param>
-        public static void RunHmacSha256(this Action<HMAC> action)
-            => action.NotNull(nameof(action)).Invoke(GetHmacHash(nameof(HashAlgorithmName.SHA256)));
+        public static void RunHMACSHA256(this Action<HMAC> action)
+            => action.Invoke(GetHMAC(nameof(HashAlgorithmName.SHA256)));
 
         /// <summary>
         /// 运行 HMACSHA256 哈希，并返回值。
@@ -414,8 +489,8 @@ namespace Librame.Extensions
         /// <typeparam name="TValue">指定的值类型。</typeparam>
         /// <param name="valueFunc">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-        public static TValue RunHmacSha256<TValue>(this Func<HMAC, TValue> valueFunc)
-            => valueFunc.NotNull(nameof(valueFunc)).Invoke(GetHmacHash(nameof(HashAlgorithmName.SHA256)));
+        public static TValue RunHMACSHA256<TValue>(this Func<HMAC, TValue> valueFunc)
+            => valueFunc.Invoke(GetHMAC(nameof(HashAlgorithmName.SHA256)));
 
 
         /// <summary>
@@ -425,8 +500,8 @@ namespace Librame.Extensions
         /// <paramref name="action"/> is null.
         /// </exception>
         /// <param name="action">给定的动作。</param>
-        public static void RunHmacSha384(this Action<HMAC> action)
-            => action.NotNull(nameof(action)).Invoke(GetHmacHash(nameof(HashAlgorithmName.SHA384)));
+        public static void RunHMACSHA384(this Action<HMAC> action)
+            => action.Invoke(GetHMAC(nameof(HashAlgorithmName.SHA384)));
 
         /// <summary>
         /// 运行 HMACSHA384 哈希，并返回值。
@@ -437,8 +512,8 @@ namespace Librame.Extensions
         /// <typeparam name="TValue">指定的值类型。</typeparam>
         /// <param name="valueFunc">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-        public static TValue RunHmacSha384<TValue>(this Func<HMAC, TValue> valueFunc)
-            => valueFunc.NotNull(nameof(valueFunc)).Invoke(GetHmacHash(nameof(HashAlgorithmName.SHA384)));
+        public static TValue RunHMACSHA384<TValue>(this Func<HMAC, TValue> valueFunc)
+            => valueFunc.Invoke(GetHMAC(nameof(HashAlgorithmName.SHA384)));
 
 
         /// <summary>
@@ -448,8 +523,8 @@ namespace Librame.Extensions
         /// <paramref name="action"/> is null.
         /// </exception>
         /// <param name="action">给定的动作。</param>
-        public static void RunHmacSha512(this Action<HMAC> action)
-            => action.NotNull(nameof(action)).Invoke(GetHmacHash(nameof(HashAlgorithmName.SHA512)));
+        public static void RunHMACSHA512(this Action<HMAC> action)
+            => action.Invoke(GetHMAC(nameof(HashAlgorithmName.SHA512)));
 
         /// <summary>
         /// 运行 HMACSHA512 哈希，并返回值。
@@ -460,17 +535,18 @@ namespace Librame.Extensions
         /// <typeparam name="TValue">指定的值类型。</typeparam>
         /// <param name="valueFunc">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-        public static TValue RunHmacSha512<TValue>(this Func<HMAC, TValue> valueFunc)
-            => valueFunc.NotNull(nameof(valueFunc)).Invoke(GetHmacHash(nameof(HashAlgorithmName.SHA512)));
+        public static TValue RunHMACSHA512<TValue>(this Func<HMAC, TValue> valueFunc)
+            => valueFunc.Invoke(GetHMAC(nameof(HashAlgorithmName.SHA512)));
 
 
-        private static HMAC GetHmacHash(string hashName)
+        private static HMAC GetHMAC(string hashName)
         {
             return hashName switch
             {
-                nameof(HashAlgorithmName.SHA256) => _hmacSha256.Value!,
-                nameof(HashAlgorithmName.SHA384) => _hmacSha384.Value!,
-                nameof(HashAlgorithmName.SHA512) => _hmacSha512.Value!,
+                nameof(HashAlgorithmName.MD5) => _hmacmd5.Value!,
+                nameof(HashAlgorithmName.SHA256) => _hmacsha256.Value!,
+                nameof(HashAlgorithmName.SHA384) => _hmacsha384.Value!,
+                nameof(HashAlgorithmName.SHA512) => _hmacsha512.Value!,
                 _ => throw new NotSupportedException($"Not supported algorithm name '{hashName}'")
             };
         }
@@ -520,10 +596,10 @@ namespace Librame.Extensions
         {
             return RunAes(aes =>
             {
-                if (key.IsNotEmpty())
+                if (key != null)
                     aes.Key = key;
 
-                if (iv.IsNotEmpty())
+                if (iv != null)
                     aes.IV = iv;
 
                 var transform = aes.CreateEncryptor();
@@ -542,10 +618,10 @@ namespace Librame.Extensions
         {
             return RunAes(aes =>
             {
-                if (key.IsNotEmpty())
+                if (key != null)
                     aes.Key = key;
 
-                if (iv.IsNotEmpty())
+                if (iv != null)
                     aes.IV = iv;
 
                 var transform = aes.CreateDecryptor();
@@ -567,7 +643,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="action">给定的动作。</param>
         public static void RunAes(this Action<Aes> action)
-            => action.NotNull(nameof(action)).Invoke(_aes.Value);
+            => action.Invoke(_aes.Value);
 
         /// <summary>
         /// 运行 AES，并返回值。
@@ -576,7 +652,7 @@ namespace Librame.Extensions
         /// <param name="valueFunc">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
         public static TValue RunAes<TValue>(this Func<Aes, TValue> valueFunc)
-            => valueFunc.NotNull(nameof(valueFunc)).Invoke(_aes.Value);
+            => valueFunc.Invoke(_aes.Value);
 
         #endregion
 

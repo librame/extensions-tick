@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Librame.Extensions.Core;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Librame.Extensions.Data
 {
-    using Core;
-
     public static class DataExtensionBuilderHelper
     {
         private static DataExtensionBuilder _builder;

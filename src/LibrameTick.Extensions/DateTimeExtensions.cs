@@ -46,11 +46,11 @@ namespace Librame.Extensions
             var unixEpochOffset = DateTimeOffset.UnixEpoch;
 
             return (long)TimeSpan.FromTicks(dateTimeOffset.Ticks - unixEpochOffset.Ticks)
-                .TotalMilliseconds - GetUtcOffset();
+                .TotalMilliseconds - GetUtcOffset(dateTimeOffset.Offset.Hours);
 
             // GetUtcOffset
-            int GetUtcOffset()
-                => dateTimeOffset.Offset.Hours * 60 * 60 * 1000;
+            static int GetUtcOffset(int hours)
+                => hours * 60 * 60 * 1000;
         }
 
 

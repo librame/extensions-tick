@@ -27,11 +27,11 @@ namespace Librame.Extensions.Data.Accessors
         /// <param name="isPooled">访问器是否已池化。</param>
         /// <param name="priority">给定的访问器优先级。</param>
         /// <param name="accessor">给定的访问器。</param>
-        public AccessorDescriptor(Type? serviceType, AccessorInteraction interaction,
-            bool isPooled, float priority, IAccessor? accessor)
+        public AccessorDescriptor(Type serviceType, AccessorInteraction interaction,
+            bool isPooled, float priority, IAccessor accessor)
         {
-            Accessor = accessor.NotNull(nameof(serviceType));
-            ServiceType = serviceType.NotNull(nameof(serviceType));
+            Accessor = accessor;
+            ServiceType = serviceType;
             Interaction = interaction;
             IsPooled = isPooled;
             Priority = priority;
@@ -62,6 +62,11 @@ namespace Librame.Extensions.Data.Accessors
         /// 访问器。
         /// </summary>
         public IAccessor Accessor { get; init; }
+
+        ///// <summary>
+        ///// <see cref="Guid"/> 标识生成器。
+        ///// </summary>
+        //public IIdentificationGenerator<Guid>? GuidGenerator { get; init; }
 
 
         /// <summary>

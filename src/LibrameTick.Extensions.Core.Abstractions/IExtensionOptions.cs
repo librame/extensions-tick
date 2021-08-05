@@ -17,7 +17,7 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 扩展选项接口。
+    /// 定义实现 <see cref="IExtensionInfo"/> 的扩展选项接口。
     /// </summary>
     public interface IExtensionOptions : IExtensionInfo
     {

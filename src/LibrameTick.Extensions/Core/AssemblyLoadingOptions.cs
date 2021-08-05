@@ -11,6 +11,8 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core
 {
@@ -30,5 +32,12 @@ namespace Librame.Extensions.Core
         /// </summary>
         public List<string> Filters { get; init; }
             = new List<string>();
+
+        /// <summary>
+        /// 要加载的第三方程序集列表。
+        /// </summary>
+        [JsonIgnore]
+        public List<Assembly> Others { get; init; }
+            = new List<Assembly>();
     }
 }

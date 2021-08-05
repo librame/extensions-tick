@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 更新者接口。
+    /// 定义泛型更新者接口。
     /// </summary>
     /// <typeparam name="TUpdatedBy">指定的更新者类型（提供对整数、字符串、GUID 等类型的支持）。</typeparam>
     public interface IUpdator<TUpdatedBy> : ICreator<TUpdatedBy>, IObjectUpdator

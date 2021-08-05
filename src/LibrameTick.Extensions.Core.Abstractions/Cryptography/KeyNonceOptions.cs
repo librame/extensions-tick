@@ -44,7 +44,7 @@ namespace Librame.Extensions.Core.Cryptography
         public byte[]? Nonce
         {
             get => NotifyProperty.GetValue<byte[]?>(nameof(Nonce));
-            set => NotifyProperty.SetValue(nameof(Nonce), value);
+            set => NotifyProperty.SetValue(nameof(Nonce), value.NotNull(nameof(Nonce)));
         }
 
 
@@ -53,7 +53,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// </summary>
         /// <param name="nonceFunc">给定的初始向量方法。</param>
         /// <returns>返回初始向量方法。</returns>
-        public Func<byte[]?> SetNonceFunc(Func<byte[]?> nonceFunc)
+        public Func<byte[]> SetNonceFunc(Func<byte[]> nonceFunc)
         {
             NotifyProperty.SetValue(nameof(Nonce), nonceFunc);
             return nonceFunc;

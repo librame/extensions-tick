@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Librame.Extensions.Core
@@ -26,8 +27,6 @@ namespace Librame.Extensions.Core
         private static Func<ServiceDescriptor, bool> GetPredicateDescriptor(Type serviceType,
             Type? implementationType = null)
         {
-            serviceType.NotNull(nameof(serviceType));
-
             if (implementationType == null)
                 return p => p.ServiceType == serviceType;
             else
@@ -50,8 +49,6 @@ namespace Librame.Extensions.Core
             Type serviceType, Func<IServiceProvider, TImplementation> factory, ServiceCharacteristic characteristic)
             where TImplementation : class
         {
-            services.NotNull(nameof(services));
-            
             var descriptor = new ServiceDescriptor(serviceType, factory, characteristic.Lifetime);
             return services.AddByCharacteristics(descriptor, characteristic);
         }
@@ -67,8 +64,6 @@ namespace Librame.Extensions.Core
         public static IServiceCollection AddByCharacteristics(this IServiceCollection services,
             Type serviceType, Func<IServiceProvider, object> factory, ServiceCharacteristic characteristic)
         {
-            services.NotNull(nameof(services));
-
             var descriptor = new ServiceDescriptor(serviceType, factory, characteristic.Lifetime);
             return services.AddByCharacteristics(descriptor, characteristic);
         }
@@ -84,8 +79,6 @@ namespace Librame.Extensions.Core
         public static IServiceCollection AddByCharacteristics(this IServiceCollection services,
             Type serviceType, Type implementationType, ServiceCharacteristic characteristic)
         {
-            services.NotNull(nameof(services));
-            
             var descriptor = new ServiceDescriptor(serviceType, implementationType, characteristic.Lifetime);
             return services.AddByCharacteristics(descriptor, characteristic);
         }
@@ -101,8 +94,6 @@ namespace Librame.Extensions.Core
         public static IServiceCollection AddByCharacteristics(this IServiceCollection services,
             Type serviceType, IEnumerable<Type> implementationTypes, ServiceCharacteristic characteristic)
         {
-            services.NotNull(nameof(services));
-
             foreach (var implType in implementationTypes)
             {
                 var descriptor = new ServiceDescriptor(serviceType, implType, characteristic.Lifetime);
@@ -156,8 +147,6 @@ namespace Librame.Extensions.Core
             Type serviceType, IEnumerable<Type> implementationTypes,
             ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
-            implementationTypes.NotEmpty(nameof(implementationTypes));
-
             services.TryAddEnumerable(ToDescriptors());
 
             // ToDescriptors
@@ -181,7 +170,7 @@ namespace Librame.Extensions.Core
         /// <param name="descriptors">输出 <see cref="IReadOnlyList{ServiceDescriptor}"/>。</param>
         /// <returns>返回是否成功获取的布尔值。</returns>
         public static bool TryGetAll<TService>(this IServiceCollection services,
-            out IReadOnlyList<ServiceDescriptor> descriptors)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> descriptors)
             where TService : class
             => services.TryGetAll(typeof(TService), out descriptors);
 
@@ -194,7 +183,7 @@ namespace Librame.Extensions.Core
         /// <param name="descriptors">输出 <see cref="IReadOnlyList{ServiceDescriptor}"/>。</param>
         /// <returns>返回是否成功获取的布尔值。</returns>
         public static bool TryGetAll<TService, TImplementation>(this IServiceCollection services,
-            out IReadOnlyList<ServiceDescriptor> descriptors)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> descriptors)
             where TService : class
             where TImplementation : class, TService
             => services.TryGetAll(typeof(TService), out descriptors, typeof(TImplementation));
@@ -208,14 +197,10 @@ namespace Librame.Extensions.Core
         /// <param name="implementationType">给定的实现类型（可选）。</param>
         /// <returns>返回是否成功获取的布尔值。</returns>
         public static bool TryGetAll(this IServiceCollection services, Type serviceType,
-            out IReadOnlyList<ServiceDescriptor> descriptors, Type? implementationType = null)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> descriptors, Type? implementationType = null)
         {
-            services.NotNull(nameof(services));
-
             // 存在多个相同服务与实现类型的服务集合
-            descriptors = services.Where(GetPredicateDescriptor(serviceType, implementationType))
-                .AsReadOnlyList();
-
+            descriptors = services.Where(GetPredicateDescriptor(serviceType, implementationType)).AsReadOnlyList();
             return descriptors.Count > 0;
         }
 
@@ -229,7 +214,7 @@ namespace Librame.Extensions.Core
         /// <param name="implementationType">给定的服务实现类型（可选）。</param>
         /// <returns>返回是否成功获取的布尔值。</returns>
         public static bool TryGetSingle<TService>(this IServiceCollection services,
-            out ServiceDescriptor? descriptor, Type? implementationType = null)
+            [MaybeNullWhen(false)] out ServiceDescriptor descriptor, Type? implementationType = null)
             => services.TryGetSingle(typeof(TService), out descriptor, implementationType);
 
         /// <summary>
@@ -241,12 +226,9 @@ namespace Librame.Extensions.Core
         /// <param name="implementationType">给定的服务实现类型（可选）。</param>
         /// <returns>返回是否成功获取的布尔值。</returns>
         public static bool TryGetSingle(this IServiceCollection services, Type serviceType,
-            out ServiceDescriptor? descriptor, Type? implementationType = null)
+            [MaybeNullWhen(false)] out ServiceDescriptor descriptor, Type? implementationType = null)
         {
-            services.NotNull(nameof(services));
-
             descriptor = services.SingleOrDefault(GetPredicateDescriptor(serviceType, implementationType));
-
             return descriptor != null;
         }
 
@@ -275,7 +257,7 @@ namespace Librame.Extensions.Core
             if (!services.TryGetSingle(serviceType, out var descriptor, implementationType))
                 throw new ArgumentException($"The service type '{serviceType}' were not found.");
 
-            return descriptor!;
+            return descriptor;
         }
 
         #endregion
@@ -331,7 +313,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功移除的布尔值。</returns>
         public static bool TryRemoveAll<TService>(this IServiceCollection services,
-            out IReadOnlyList<ServiceDescriptor> descriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> descriptors, bool throwIfNotFound = true)
             where TService : class
             => services.TryRemoveAll(typeof(TService), out descriptors, implementationType: null, throwIfNotFound);
 
@@ -345,7 +327,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功移除的布尔值。</returns>
         public static bool TryRemoveAll<TService, TImplementation>(this IServiceCollection services,
-            out IReadOnlyList<ServiceDescriptor> descriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> descriptors, bool throwIfNotFound = true)
             where TService : class
             where TImplementation : class, TService
             => services.TryRemoveAll(typeof(TService), out descriptors, typeof(TImplementation), throwIfNotFound);
@@ -360,7 +342,8 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功移除的布尔值。</returns>
         public static bool TryRemoveAll(this IServiceCollection services, Type serviceType,
-            out IReadOnlyList<ServiceDescriptor> descriptors, Type? implementationType = null, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> descriptors,
+            Type? implementationType = null, bool throwIfNotFound = true)
         {
             if (!services.TryGetAll(serviceType, out descriptors, implementationType))
             {
@@ -415,7 +398,8 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功移除的布尔值。</returns>
         public static bool TryRemoveSingle<TService>(this IServiceCollection services,
-            out ServiceDescriptor? descriptor, Type? implementationType = null, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out ServiceDescriptor descriptor, Type? implementationType = null,
+            bool throwIfNotFound = true)
             => services.TryRemoveSingle(typeof(TService), out descriptor, implementationType, throwIfNotFound);
 
         /// <summary>
@@ -428,7 +412,8 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功移除的布尔值。</returns>
         public static bool TryRemoveSingle(this IServiceCollection services, Type serviceType,
-            out ServiceDescriptor? descriptor, Type? implementationType = null, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out ServiceDescriptor descriptor, Type? implementationType = null,
+            bool throwIfNotFound = true)
         {
             if (!services.TryGetSingle(serviceType, out descriptor, implementationType))
             {
@@ -511,7 +496,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService>(this IServiceCollection services,
-            out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             => services.TryReplaceAll<TService, TService>(out oldDescriptors, throwIfNotFound);
 
@@ -525,7 +510,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService, TNewImplementation>(this IServiceCollection services,
-            out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             where TNewImplementation : class, TService
             => services.TryReplaceAll(typeof(TService), typeof(TNewImplementation), out oldDescriptors,
@@ -542,7 +527,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService, TOldImplementation, TNewImplementation>(this IServiceCollection services,
-            out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             where TOldImplementation : class, TService
             where TNewImplementation : class, TService
@@ -560,7 +545,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll(this IServiceCollection services, Type serviceType,
-            Type newImplementationType, out IReadOnlyList<ServiceDescriptor> oldDescriptors,
+            Type newImplementationType, [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors,
             Type? oldImplementationType = null, bool throwIfNotFound = true)
         {
             if (services.TryGetAll(serviceType, out oldDescriptors, oldImplementationType))
@@ -614,8 +599,6 @@ namespace Librame.Extensions.Core
             Func<ServiceDescriptor, ServiceDescriptor> newDescriptorFunc,
             Type? implementationType = null, bool throwIfNotFound = true)
         {
-            newDescriptorFunc.NotNull(nameof(newDescriptorFunc));
-
             if (services.TryGetSingle(serviceType, out var oldDescriptor, implementationType))
             {
                 var newDescriptor = newDescriptorFunc.Invoke(oldDescriptor!);
@@ -710,7 +693,7 @@ namespace Librame.Extensions.Core
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService>(this IServiceCollection services,
             Func<IServiceProvider, TService> newImplementationFunc,
-            out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             => services.TryReplaceAll<TService, TService>(newImplementationFunc, out oldDescriptors,
                 throwIfNotFound);
@@ -727,7 +710,7 @@ namespace Librame.Extensions.Core
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService, TNewImplementation>(this IServiceCollection services,
             Func<IServiceProvider, TNewImplementation> newImplementationFunc,
-            out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             where TNewImplementation : class, TService
             => services.TryReplaceAll(typeof(TService), newImplementationFunc, out oldDescriptors,
@@ -746,7 +729,7 @@ namespace Librame.Extensions.Core
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService, TOldImplementation, TNewImplementation>(this IServiceCollection services,
             Func<IServiceProvider, TNewImplementation> newImplementationFunc,
-            out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             where TOldImplementation : class, TService
             where TNewImplementation : class, TService
@@ -765,7 +748,7 @@ namespace Librame.Extensions.Core
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll(this IServiceCollection services, Type serviceType,
             Func<IServiceProvider, object> newImplementationFunc,
-            out IReadOnlyList<ServiceDescriptor> oldDescriptors,
+            [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors,
             Type? oldImplementationType = null, bool throwIfNotFound = true)
         {
             if (services.TryGetAll(serviceType, out oldDescriptors, oldImplementationType))
@@ -864,7 +847,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService>(this IServiceCollection services,
-            TService newInstance, out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            TService newInstance, [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             => services.TryReplaceAll<TService, TService>(newInstance, out oldDescriptors, throwIfNotFound);
 
@@ -879,7 +862,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService, TNewImplementation>(this IServiceCollection services,
-            TNewImplementation newInstance, out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            TNewImplementation newInstance, [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             where TNewImplementation : class, TService
             => services.TryReplaceAll(typeof(TService), newInstance, out oldDescriptors,
@@ -897,7 +880,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll<TService, TOldImplementation, TNewImplementation>(this IServiceCollection services,
-            TNewImplementation newInstance, out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
+            TNewImplementation newInstance, [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors, bool throwIfNotFound = true)
             where TService : class
             where TOldImplementation : class, TService
             where TNewImplementation : class, TService
@@ -915,7 +898,7 @@ namespace Librame.Extensions.Core
         /// <param name="throwIfNotFound">未找到服务类型时抛出异常（可选；默认启用）。</param>
         /// <returns>返回是否成功替换的布尔值。</returns>
         public static bool TryReplaceAll(this IServiceCollection services, Type serviceType,
-            object newInstance, out IReadOnlyList<ServiceDescriptor> oldDescriptors,
+            object newInstance, [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> oldDescriptors,
             Type? oldImplementationType = null, bool throwIfNotFound = true)
         {
             if (services.TryGetAll(serviceType, out oldDescriptors, oldImplementationType))

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 状态静态扩展。
+    /// <see cref="IState{TStatus}"/> 静态扩展。
     /// </summary>
     public static class StateExtensions
     {
@@ -32,12 +32,7 @@ namespace Librame.Extensions.Data
         public static TStatus SetStatus<TStatus>(this IState<TStatus> state,
             Func<TStatus, TStatus> newStatusFactory)
             where TStatus : struct
-        {
-            state.NotNull(nameof(state));
-            newStatusFactory.NotNull(nameof(newStatusFactory));
-
-            return state.Status = newStatusFactory.Invoke(state.Status);
-        }
+            => state.Status = newStatusFactory.Invoke(state.Status);
 
         /// <summary>
         /// 异步设置状态。
@@ -50,12 +45,7 @@ namespace Librame.Extensions.Data
         public static ValueTask<TStatus> SetStatusAsync<TStatus>(this IState<TStatus> state,
             Func<TStatus, TStatus> newStatusFactory, CancellationToken cancellationToken = default)
             where TStatus : struct
-        {
-            state.NotNull(nameof(state));
-            newStatusFactory.NotNull(nameof(newStatusFactory));
-
-            return cancellationToken.RunValueTask(() => state.Status = newStatusFactory.Invoke(state.Status));
-        }
+            => cancellationToken.RunValueTask(() => state.Status = newStatusFactory.Invoke(state.Status));
 
 
         /// <summary>
@@ -67,9 +57,6 @@ namespace Librame.Extensions.Data
         public static object SetObjectStatusAsync(this IObjectState state,
             Func<object, object> newStatusFactory)
         {
-            state.NotNull(nameof(state));
-            newStatusFactory.NotNull(nameof(newStatusFactory));
-
             var currentStatus = state.GetObjectStatus();
             return state.SetObjectStatus(newStatusFactory.Invoke(currentStatus));
         }
@@ -84,9 +71,6 @@ namespace Librame.Extensions.Data
         public static async ValueTask<object> SetObjectStatusAsync(this IObjectState state,
             Func<object, object> newStatusFactory, CancellationToken cancellationToken = default)
         {
-            state.NotNull(nameof(state));
-            newStatusFactory.NotNull(nameof(newStatusFactory));
-
             var currentStatus = await state.GetObjectStatusAsync(cancellationToken).ConfigureAwaitWithoutContext();
             return await state.SetObjectStatusAsync(newStatusFactory.Invoke(currentStatus), cancellationToken)
                 .ConfigureAwaitWithoutContext();

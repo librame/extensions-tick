@@ -32,8 +32,6 @@ namespace Librame.Extensions
         /// <param name="action">给定的动作。</param>
         public static void Run(this Action<Stopwatch> action)
         {
-            action.NotNull(nameof(action));
-
             if (!_stopwatch.Value!.IsRunning)
                 _stopwatch.Value.Restart();
 
@@ -50,8 +48,6 @@ namespace Librame.Extensions
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
         public static TValue Run<TValue>(this Func<Stopwatch, TValue> func)
         {
-            func.NotNull(nameof(func));
-
             if (!_stopwatch.Value!.IsRunning)
                 _stopwatch.Value.Restart();
 

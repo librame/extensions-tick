@@ -31,7 +31,7 @@ namespace Librame.Extensions
         /// <param name="encoding">给定的字符编码。</param>
         /// <returns>返回代码页名称。</returns>
         public static string AsEncodingName(this Encoding encoding)
-            => encoding.NotNull(nameof(encoding)).WebName;
+            => encoding.WebName;
 
         /// <summary>
         /// 从名称的字符串形式还原字符编码。

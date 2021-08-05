@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 创建标识符接口。
+    /// 定义泛型创建标识符接口。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>
@@ -28,7 +28,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 创建标识符接口。
+    /// 定义泛型创建标识符接口。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>

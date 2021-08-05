@@ -30,8 +30,6 @@ namespace Librame.Extensions.Data.Accessors
         public CompositeAccessor(IEnumerable<IAccessor> accessors,
             AccessorInteraction interaction)
         {
-            accessors.NotNull(nameof(accessors));
-
             _accessors = accessors.ToArray();
             _interaction = interaction;
         }
@@ -121,10 +119,19 @@ namespace Librame.Extensions.Data.Accessors
             => typeof(CompositeAccessor);
 
 
-        public bool Exists<TEntity>(Func<TEntity, bool> predicate,
+        #region Exists
+
+        public bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
             bool checkLocal = true)
             where TEntity : class
             => ChainingAccessorsByException(a => a.Exists(predicate));
+
+        public Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
+            bool checkLocal = true, CancellationToken cancellationToken = default)
+            where TEntity : class
+            => ChainingAccessorsByException(a => a.ExistsAsync(predicate, checkLocal, cancellationToken));
+
+        #endregion
 
 
         #region Find
@@ -151,21 +158,32 @@ namespace Librame.Extensions.Data.Accessors
             => ChainingAccessorsByException(a => a.FindAsync<TEntity>(keyValues));
 
 
-        public List<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+        public IList<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
             where TEntity : class
             => ChainingAccessorsByException(a => a.FindWithSpecification(specification));
 
-        public Task<List<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
+        public Task<IList<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
             ISpecification<TEntity>? specification = null)
             where TEntity : class
             => ChainingAccessorsByException(a => a.FindWithSpecificationAsync(cancellationToken, specification));
 
-        public PagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<PagingList<TEntity>> pageAction,
+
+        public IPagingList<TEntity> FindPaging<TEntity>(Action<IPagingList<TEntity>> pageAction)
+            where TEntity : class
+            => ChainingAccessorsByException(a => a.FindPaging(pageAction));
+
+        public Task<IPagingList<TEntity>> FindPagingAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+            CancellationToken cancellationToken = default)
+            where TEntity : class
+            => ChainingAccessorsByException(a => a.FindPagingAsync(pageAction, cancellationToken));
+
+
+        public IPagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
             ISpecification<TEntity>? specification = null)
             where TEntity : class
             => ChainingAccessorsByException(a => a.FindPagingWithSpecification(pageAction, specification));
 
-        public Task<PagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<PagingList<TEntity>> pageAction,
+        public Task<IPagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
             CancellationToken cancellationToken = default, ISpecification<TEntity>? specification = null)
             where TEntity : class
             => ChainingAccessorsByException(a => a.FindPagingWithSpecificationAsync(pageAction, cancellationToken, specification));
@@ -193,7 +211,7 @@ namespace Librame.Extensions.Data.Accessors
         #region Add
 
         public TEntity AddIfNotExists<TEntity>(TEntity entity,
-            Func<TEntity, bool> predicate, bool checkLocal = true)
+            Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
             where TEntity : class
             => BatchingAccessors(a => a.AddIfNotExists(entity, predicate, checkLocal))!;
         

@@ -4,33 +4,23 @@ namespace Librame.Extensions.Data.Accessors
 {
     public class TestReadAccessor : AbstractAccessor<TestReadAccessor>, ITestAccessor
     {
+
+#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
         public TestReadAccessor(DbContextOptions<TestReadAccessor> options)
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
             : base(options)
         {
         }
 
 
-        public DbSet<User>? Users { get; set; }
+        public DbSet<User> Users { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>(b =>
-            {
-                //b.ToTable();
-
-                b.HasKey(k => k.Id);
-
-                b.HasIndex(i => i.Name);
-
-                b.Property(p => p.Id).ValueGeneratedNever();
-
-                b.Property(p => p.Name).HasMaxLength(50);
-                b.Property(p => p.Passwd).HasMaxLength(50);
-                b.Property(p => p.CreatedTime).HasMaxLength(50);
-            });
+            modelBuilder.CreateUserModel();
         }
 
     }

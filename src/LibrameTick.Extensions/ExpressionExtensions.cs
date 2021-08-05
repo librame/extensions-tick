@@ -35,8 +35,6 @@ namespace Librame.Extensions
         /// <returns>返回字符串。</returns>
         public static string AsPropertyName<T, TProperty>(this Expression<Func<T, TProperty>> propertyExpression)
         {
-            propertyExpression.NotNull(nameof(propertyExpression));
-
             return propertyExpression.Body switch
             {
                 // 一元运算符
@@ -60,8 +58,6 @@ namespace Librame.Extensions
         /// <returns>返回属性值。</returns>
         public static TValue? AsPropertyValue<T, TValue>(this Expression<Func<T, TValue>> propertyExpression, T source)
         {
-            source.NotNull(nameof(source));
-
             var name = propertyExpression.AsPropertyName();
 
             try
@@ -170,8 +166,6 @@ namespace Librame.Extensions
             Type propertyType, object? value, Func<MemberExpression, ConstantExpression, TExpression> compareToFunc)
             where TExpression : Expression
         {
-            compareToFunc.NotNull(nameof(compareToFunc));
-
             var p = Expression.Parameter(typeof(T), "p");
             var property = Expression.Property(p, propertyName);
             var constant = Expression.Constant(value, propertyType);
@@ -202,12 +196,11 @@ namespace Librame.Extensions
             var constant = Expression.Constant(value, propertyType);
 
             var propertyInfo = type.GetRuntimeProperty(propertyName);
-            if (propertyInfo.IsNull())
+            if (propertyInfo == null)
                 throw new ArgumentException($"The property '{type}' with the specified name '{propertyName}' was not found.");
 
-            var method = propertyInfo.PropertyType.GetRuntimeMethod(callMethodName,
-                new Type[] { propertyType });
-            if (method.IsNull())
+            var method = propertyInfo.PropertyType.GetRuntimeMethod(callMethodName, new Type[] { propertyType });
+            if (method == null)
                 throw new ArgumentException($"The method '{type}' with the specified name '{propertyName}' was not found.");
 
             var body = Expression.Call(property, method, constant);

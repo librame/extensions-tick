@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions;
 using Librame.Extensions.Data;
 using Librame.Extensions.Data.Accessors;
 using System;
@@ -32,11 +31,9 @@ namespace Microsoft.EntityFrameworkCore
         public static DbContextOptionsBuilder UseAccessor(this DbContextOptionsBuilder builder,
             Action<AccessorDbContextOptionsBuilder>? optionsAction = null)
         {
-            builder.NotNull(nameof(builder));
-
             var builderType = builder.GetType();
             if (!builderType.IsGenericType || builderType.GenericTypeArguments.Length != 1)
-                throw new NotSupportedException("This method only supports the generic DBContextOptionsBuilder<TContext> parameter.");
+                throw new NotSupportedException($"This method only supports the generic ${nameof(DbContextOptionsBuilder)}<TContext> parameter.");
 
             return builder.UseAccessor(builderType.GenericTypeArguments[0], optionsAction);
         }

@@ -27,7 +27,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
         public SigningCredentialsOptions(INotifyProperty notifyProperty)
         {
-            NotifyProperty = notifyProperty.NotNull(nameof(notifyProperty));
+            NotifyProperty = notifyProperty;
         }
 
 
@@ -55,7 +55,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// </summary>
         /// <param name="credentialsFunc">给定的签名证书方法。</param>
         /// <returns>返回签名证书方法。</returns>
-        public Func<SigningCredentials?> SetCredentialsFunc(Func<SigningCredentials?> credentialsFunc)
+        public Func<SigningCredentials> SetCredentialsFunc(Func<SigningCredentials> credentialsFunc)
         {
             NotifyProperty.SetValue(nameof(Credentials), credentialsFunc);
             return credentialsFunc;

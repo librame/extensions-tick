@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Resources;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
@@ -17,10 +18,8 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Resources;
-
     /// <summary>
-    /// 抽象状态。
+    /// 定义抽象实现 <see cref="IState{TStatus}"/>。
     /// </summary>
     /// <typeparam name="TStatus">指定的状态类型（兼容不支持枚举类型的实体框架）。</typeparam>
     public abstract class AbstractState<TStatus> : IState<TStatus>

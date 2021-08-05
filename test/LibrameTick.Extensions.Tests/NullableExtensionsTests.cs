@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -13,40 +12,40 @@ namespace Librame.Extensions
         public void UnwrapTest()
         {
             Guid? g = null;
-            Assert.Equal(Guid.Empty, g.Unwrap());
-            Assert.NotEqual(Guid.Empty, g.Unwrap(Guid.NewGuid()));
+            Assert.Equal(Guid.Empty, g.UnwrapOrDefault());
+            Assert.NotEqual(Guid.Empty, g.UnwrapOrDefault(Guid.NewGuid()));
         }
 
 
         #region IsNull and IsEmpty
 
-        [Fact]
-        public void IsNullAndIsNotNullTest()
-        {
-            NullableExtensionsTests? value = null;
-            Assert.True(value.IsNull());
+        //[Fact]
+        //public void IsNullAndIsNotNullTest()
+        //{
+        //    NullableExtensionsTests? value = null;
+        //    Assert.True(value.IsNull());
 
-            value = new NullableExtensionsTests();
-            Assert.True(value.IsNotNull());
-        }
+        //    value = new NullableExtensionsTests();
+        //    Assert.True(value.IsNotNull());
+        //}
 
-        [Fact]
-        public void IsEmptyAndIsNotEmptyTest()
-        {
-            // IEnumerable
-            IEnumerable? enumerable = Enumerable.Empty<int>();
-            Assert.True(enumerable.IsEmpty());
+        //[Fact]
+        //public void IsEmptyAndIsNotEmptyTest()
+        //{
+        //    // IEnumerable
+        //    IEnumerable? enumerable = Enumerable.Empty<int>();
+        //    Assert.True(enumerable.IsEmpty());
 
-            enumerable = Enumerable.Range(1, 5);
-            Assert.True(enumerable.IsNotEmpty());
+        //    enumerable = Enumerable.Range(1, 5);
+        //    Assert.True(enumerable.IsNotEmpty());
 
-            // String
-            var value = string.Empty;
-            Assert.True(value.IsEmpty());
+        //    // String
+        //    var value = string.Empty;
+        //    Assert.True(value.IsEmpty());
 
-            value = "123";
-            Assert.True(value.IsNotEmpty());
-        }
+        //    value = "123";
+        //    Assert.True(value.IsNotEmpty());
+        //}
 
         #endregion
 
@@ -66,14 +65,8 @@ namespace Librame.Extensions
             g = string.Empty;
             Assert.NotNull(g.NotNull(nameof(g)));
 
-            // IEnumerable
-            IEnumerable<int>? enumerable = Enumerable.Empty<int>();
-            Assert.Throws<ArgumentException>(() =>
-            {
-                enumerable.NotEmpty(nameof(enumerable));
-            });
-
-            enumerable = Enumerable.Range(1, 5);
+            // ICollection
+            ICollection<int>? enumerable = Enumerable.Range(1, 5).ToArray();
             Assert.NotNull(enumerable.NotEmpty(nameof(enumerable)));
 
             // String

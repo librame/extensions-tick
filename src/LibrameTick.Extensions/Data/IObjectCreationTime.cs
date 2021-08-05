@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象创建时间接口。
+    /// 定义对象创建时间接口。
     /// </summary>
     public interface IObjectCreationTime
     {

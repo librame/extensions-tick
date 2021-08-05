@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 发表时间接口。
+    /// 定义泛型发表时间接口。
     /// </summary>
     /// <typeparam name="TPublishedTime">指定的发表时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
     public interface IPublicationTime<TPublishedTime> : ICreationTime<TPublishedTime>, IObjectPublicationTime

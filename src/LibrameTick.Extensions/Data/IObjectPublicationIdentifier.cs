@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象发表标识符接口。
+    /// 定义对象发表标识符接口。
     /// </summary>
     public interface IObjectPublicationIdentifier : IObjectPublication, IObjectIdentifier
     {

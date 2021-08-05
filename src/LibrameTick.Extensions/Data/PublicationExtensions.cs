@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 发表静态扩展。
+    /// <see cref="IPublication{TPublishedBy, TPublishedTime}"/> 静态扩展。
     /// </summary>
     public static class PublicationExtensions
     {
@@ -71,63 +71,63 @@ namespace Librame.Extensions.Data
         #endregion
 
 
-        #region IObjectPublication
+        #region IObjectPublication (与泛型产生二义性)
 
-        /// <summary>
-        /// 填充创建属性（支持日期时间为可空类型）。
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="publication"/> is null.
-        /// </exception>
-        /// <typeparam name="TPublication">指定的创建类型。</typeparam>
-        /// <param name="publication">给定的 <typeparamref name="TPublication"/>。</param>
-        /// <param name="newPublishedTime">给定的新创建日期对象（可选）。</param>
-        /// <param name="newPublishedBy">给定的新创建者对象。</param>
-        /// <returns>返回 <typeparamref name="TPublication"/>。</returns>
-        public static TPublication PopulatePublication<TPublication>(this TPublication publication,
-            object newPublishedBy, object? newPublishedTime = null)
-            where TPublication : IObjectPublication
-        {
-            publication.PopulateCreation(newPublishedBy, newPublishedTime);
+        ///// <summary>
+        ///// 填充创建属性（支持日期时间为可空类型）。
+        ///// </summary>
+        ///// <exception cref="ArgumentNullException">
+        ///// <paramref name="publication"/> is null.
+        ///// </exception>
+        ///// <typeparam name="TPublication">指定的创建类型。</typeparam>
+        ///// <param name="publication">给定的 <typeparamref name="TPublication"/>。</param>
+        ///// <param name="newPublishedTime">给定的新创建日期对象（可选）。</param>
+        ///// <param name="newPublishedBy">给定的新创建者对象。</param>
+        ///// <returns>返回 <typeparamref name="TPublication"/>。</returns>
+        //public static TPublication PopulatePublication<TPublication>(this TPublication publication,
+        //    object newPublishedBy, object? newPublishedTime = null)
+        //    where TPublication : IObjectPublication
+        //{
+        //    publication.PopulateCreation(newPublishedBy, newPublishedTime);
 
-            if (newPublishedTime.IsNotNull())
-                publication.SetObjectPublishedTime(newPublishedTime);
+        //    if (newPublishedTime.IsNotNull())
+        //        publication.SetObjectPublishedTime(newPublishedTime);
 
-            publication.SetObjectPublishedBy(newPublishedBy);
+        //    publication.SetObjectPublishedBy(newPublishedBy);
 
-            return publication;
-        }
+        //    return publication;
+        //}
 
-        /// <summary>
-        /// 异步填充创建属性（支持日期时间为可空类型）。
-        /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="publication"/> is null.
-        /// </exception>
-        /// <typeparam name="TPublication">指定的创建类型。</typeparam>
-        /// <param name="publication">给定的 <typeparamref name="TPublication"/>。</param>
-        /// <param name="newPublishedBy">给定的新创建者对象。</param>
-        /// <param name="newPublishedTime">给定的新创建日期对象（可选）。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含 <typeparamref name="TPublication"/> 的异步操作。</returns>
-        public static async Task<TPublication> PopulatePublicationAsync<TPublication>(this TPublication publication,
-            object? newPublishedBy, object? newPublishedTime = null, CancellationToken cancellationToken = default)
-            where TPublication : IObjectPublication
-        {
-            await publication.PopulateCreationAsync(newPublishedBy, newPublishedTime)
-                .ConfigureAwait();
+        ///// <summary>
+        ///// 异步填充创建属性（支持日期时间为可空类型）。
+        ///// </summary>
+        ///// <exception cref="ArgumentNullException">
+        ///// <paramref name="publication"/> is null.
+        ///// </exception>
+        ///// <typeparam name="TPublication">指定的创建类型。</typeparam>
+        ///// <param name="publication">给定的 <typeparamref name="TPublication"/>。</param>
+        ///// <param name="newPublishedBy">给定的新创建者对象。</param>
+        ///// <param name="newPublishedTime">给定的新创建日期对象（可选）。</param>
+        ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        ///// <returns>返回一个包含 <typeparamref name="TPublication"/> 的异步操作。</returns>
+        //public static async Task<TPublication> PopulatePublicationAsync<TPublication>(this TPublication publication,
+        //    object? newPublishedBy, object? newPublishedTime = null, CancellationToken cancellationToken = default)
+        //    where TPublication : IObjectPublication
+        //{
+        //    await publication.PopulateCreationAsync(newPublishedBy, newPublishedTime)
+        //        .ConfigureAwait();
 
-            if (newPublishedTime.IsNotNull())
-            {
-                await publication.SetObjectPublishedTimeAsync(newPublishedTime, cancellationToken)
-                    .ConfigureAwaitWithoutContext();
-            }
+        //    if (newPublishedTime.IsNotNull())
+        //    {
+        //        await publication.SetObjectPublishedTimeAsync(newPublishedTime, cancellationToken)
+        //            .ConfigureAwaitWithoutContext();
+        //    }
 
-            await publication.SetObjectPublishedByAsync(newPublishedBy, cancellationToken)
-                .ConfigureAwaitWithoutContext();
+        //    await publication.SetObjectPublishedByAsync(newPublishedBy, cancellationToken)
+        //        .ConfigureAwaitWithoutContext();
 
-            return publication;
-        }
+        //    return publication;
+        //}
 
         #endregion
 
@@ -208,7 +208,7 @@ namespace Librame.Extensions.Data
         #endregion
 
 
-        #region IObjectPublisher
+        #region IObjectPublisher (与泛型产生二义性)
 
         /// <summary>
         /// 设置对象创建者。
@@ -248,7 +248,7 @@ namespace Librame.Extensions.Data
         #endregion
 
 
-        #region IObjectPublicationTime
+        #region IObjectPublicationTime (与泛型产生二义性)
 
         /// <summary>
         /// 设置对象创建时间。

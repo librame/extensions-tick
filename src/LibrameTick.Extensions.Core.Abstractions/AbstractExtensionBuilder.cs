@@ -17,7 +17,7 @@ using System;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 抽象扩展构建器（抽象实现 <see cref="IExtensionBuilder"/>）。
+    /// 定义抽象实现 <see cref="IExtensionBuilder"/>。
     /// </summary>
     public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensionBuilder
     {
@@ -32,8 +32,8 @@ namespace Librame.Extensions.Core
         protected AbstractExtensionBuilder(IServiceCollection services, IExtensionOptions options)
             : base(parentInfo: null)
         {
-            Services = services.NotNull(nameof(services));
-            Options = options.NotNull(nameof(options));
+            Services = services;
+            Options = options;
         }
 
         /// <summary>
@@ -47,9 +47,9 @@ namespace Librame.Extensions.Core
         protected AbstractExtensionBuilder(IExtensionBuilder parentBuilder, IExtensionOptions options)
             : base(parentBuilder)
         {
-            ParentBuilder = parentBuilder.NotNull(nameof(parentBuilder));
+            ParentBuilder = parentBuilder;
             Services = parentBuilder.Services;
-            Options = options.NotNull(nameof(options));
+            Options = options;
         }
 
 
@@ -70,6 +70,18 @@ namespace Librame.Extensions.Core
 
 
         #region AddOrReplaceByCharacteristic
+
+        /// <summary>
+        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
+        public virtual IExtensionBuilder AddOrReplaceByCharacteristic<TService>()
+            where TService : class
+        {
+            var serviceType = typeof(TService);
+            return AddOrReplaceByCharacteristic(serviceType, serviceType);
+        }
 
         /// <summary>
         /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。

@@ -50,13 +50,13 @@ namespace Librame.Extensions
         [Fact]
         public void AsHashBase64StringTest()
         {
-            var sha256 = nameof(AlgorithmExtensionsTests).AsSha256Base64String();
+            var sha256 = nameof(AlgorithmExtensionsTests).AsSHA256Base64String();
             Assert.NotEmpty(sha256);
 
-            var sha384 = nameof(AlgorithmExtensionsTests).AsSha384Base64String();
+            var sha384 = nameof(AlgorithmExtensionsTests).AsSHA384Base64String();
             Assert.True(sha384.Length > sha256.Length);
 
-            var sha512 = nameof(AlgorithmExtensionsTests).AsSha512Base64String();
+            var sha512 = nameof(AlgorithmExtensionsTests).AsSHA512Base64String();
             Assert.True(sha512.Length > sha384.Length);
         }
 
@@ -68,13 +68,13 @@ namespace Librame.Extensions
         [Fact]
         public void AsHmacHashBase64StringTest()
         {
-            var hmacSha256 = nameof(AlgorithmExtensionsTests).AsHmacSha256Base64String();
+            var hmacSha256 = nameof(AlgorithmExtensionsTests).AsHMACSHA256Base64String();
             Assert.NotEmpty(hmacSha256);
 
-            var hmacSha384 = nameof(AlgorithmExtensionsTests).AsHmacSha384Base64String();
+            var hmacSha384 = nameof(AlgorithmExtensionsTests).AsHMACSHA384Base64String();
             Assert.True(hmacSha384.Length > hmacSha256.Length);
 
-            var hmacSha512 = nameof(AlgorithmExtensionsTests).AsHmacSha512Base64String();
+            var hmacSha512 = nameof(AlgorithmExtensionsTests).AsHMACSHA512Base64String();
             Assert.True(hmacSha512.Length > hmacSha384.Length);
         }
 

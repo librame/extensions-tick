@@ -49,8 +49,6 @@ namespace Librame.Extensions.Data.Accessors
         public virtual IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
             AccessorInteraction interaction)
         {
-            descriptors.NotNull(nameof(descriptors));
-
             if (descriptors.Count == 1)
             {
                 // 只有单个访问器时不进行过滤

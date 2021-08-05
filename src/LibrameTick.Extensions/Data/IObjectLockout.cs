@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象锁定接口。
+    /// 定义对象锁定接口。
     /// </summary>
     public interface IObjectLockout
     {

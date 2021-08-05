@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义一个实现 <see cref="IDisposable"/> 的抽象可处置资源类。
+    /// 定义抽象实现 <see cref="IDisposable"/> 的抽象可处置资源类。
     /// </summary>
     public abstract class AbstractDisposable : IDisposable
     {
@@ -43,8 +43,6 @@ namespace Librame.Extensions.Core
         /// <param name="action">给定未释放资源时，要执行的动作。</param>
         public void NotDisposed(Action action)
         {
-            action.NotNull(nameof(action));
-
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 
@@ -59,8 +57,6 @@ namespace Librame.Extensions.Core
         /// <returns>返回值。</returns>
         public TValue NotDisposed<TValue>(Func<TValue> func)
         {
-            func.NotNull(nameof(func));
-
             if (_disposed)
                 throw new ObjectDisposedException(GetType().Name);
 

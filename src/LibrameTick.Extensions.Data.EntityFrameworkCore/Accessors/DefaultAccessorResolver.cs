@@ -18,7 +18,7 @@ using System.Linq;
 
 namespace Librame.Extensions.Data.Accessors
 {
-    class AccessorResolver : IAccessorResolver
+    class DefaultAccessorResolver : IAccessorResolver
     {
         private static readonly Type _accessorType
             = typeof(IAccessor);
@@ -35,10 +35,10 @@ namespace Librame.Extensions.Data.Accessors
         private readonly IServiceProvider _provider;
 
 
-        public AccessorResolver(DataExtensionBuilder builder, IServiceProvider provider)
+        public DefaultAccessorResolver(DataExtensionBuilder builder, IServiceProvider provider)
         {
-            _builder = builder.NotNull(nameof(builder));
-            _provider = provider.NotNull(nameof(provider));
+            _builder = builder;
+            _provider = provider;
         }
 
 
@@ -56,7 +56,7 @@ namespace Librame.Extensions.Data.Accessors
                     // 默认使用访问器定义的优先级属性值
                     var priority = extension.Priority < 0 ? accessor.Priority : extension.Priority;
 
-                    descriptors.Add(new AccessorDescriptor(extension.ServiceType, extension.Interaction,
+                    descriptors.Add(new AccessorDescriptor(extension.ServiceType!, extension.Interaction,
                         extension.IsPooled, priority, accessor));
                 }
             }

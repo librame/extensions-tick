@@ -11,6 +11,7 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 
 namespace Librame.Extensions.Core
@@ -37,8 +38,18 @@ namespace Librame.Extensions.Core
 
             // Cryptography
             AddOrReplaceByCharacteristic<IAlgorithmParameterGenerator, DefaultAlgorithmParameterGenerator>();
+            AddOrReplaceByCharacteristic<IAsymmetricAlgorithm, DefaultAsymmetricAlgorithm>();
             AddOrReplaceByCharacteristic<ISymmetricAlgorithm, DefaultSymmetricAlgorithm>();
+
+            InitializerActivator = new ServiceInitializerActivator(options.AssemblyLoading);
+            InitializerActivator.Register(type => services.TryAddScoped(type));
         }
+
+
+        /// <summary>
+        /// <see cref="IServiceInitializer"/> 激活器。
+        /// </summary>
+        public ServiceInitializerActivator InitializerActivator { get; init; }
 
     }
 }

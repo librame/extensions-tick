@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 是默认值接口。
+    /// 定义是默认值接口。
     /// </summary>
     public interface IIsDefaultValue
     {

@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 创建接口。
+    /// 定义泛型创建接口。
     /// </summary>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>
     public interface ICreation<TCreatedBy> : ICreation<TCreatedBy, DateTimeOffset>,
@@ -26,7 +26,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 创建接口。
+    /// 定义泛型创建接口。
     /// </summary>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>
     /// <typeparam name="TCreatedTime">指定的创建时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>

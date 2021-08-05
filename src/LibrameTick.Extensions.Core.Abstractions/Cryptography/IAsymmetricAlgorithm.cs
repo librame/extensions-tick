@@ -15,7 +15,7 @@ using System.Security.Cryptography;
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 非对称算法接口。
+    /// 定义非对称算法接口。
     /// </summary>
     public interface IAsymmetricAlgorithm : IAlgorithm
     {

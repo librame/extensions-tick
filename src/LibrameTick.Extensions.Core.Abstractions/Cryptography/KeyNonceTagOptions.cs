@@ -44,7 +44,7 @@ namespace Librame.Extensions.Core.Cryptography
         public byte[]? Tag
         {
             get => NotifyProperty.GetValue<byte[]?>(nameof(Tag));
-            set => NotifyProperty.SetValue(nameof(Tag), value);
+            set => NotifyProperty.SetValue(nameof(Tag), value.NotNull(nameof(Tag)));
         }
 
 
@@ -53,7 +53,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// </summary>
         /// <param name="tagFunc">给定的验证标记方法。</param>
         /// <returns>返回验证标记方法。</returns>
-        public Func<byte[]?> SetTagFunc(Func<byte[]?> tagFunc)
+        public Func<byte[]> SetTagFunc(Func<byte[]> tagFunc)
         {
             NotifyProperty.SetValue(nameof(Tag), tagFunc);
             return tagFunc;

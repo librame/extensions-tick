@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 发表者接口。
+    /// 定义泛型发表者接口。
     /// </summary>
     /// <typeparam name="TPublishedBy">指定的发表者类型（提供对整数、字符串、GUID 等类型的支持）。</typeparam>
     public interface IPublisher<TPublishedBy> : ICreator<TPublishedBy>, IObjectPublisher

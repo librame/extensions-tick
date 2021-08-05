@@ -26,7 +26,7 @@ namespace Librame.Extensions.Collections
         /// <summary>
         /// 空分页列表。
         /// </summary>
-        public readonly static PagingList<T> Empty
+        public readonly static IPagingList<T> Empty
             = new PagingList<T>(Enumerable.Empty<T>());
 
         private readonly List<T>? _collection;
@@ -55,10 +55,10 @@ namespace Librame.Extensions.Collections
         /// <exception cref="ArgumentNullException">
         /// <paramref name="queryable"/> is null.
         /// </exception>
-        /// <param name="queryable">给定的 <see cref="IOrderedQueryable{T}"/>。</param>
-        public PagingList(IOrderedQueryable<T> queryable)
+        /// <param name="queryable">给定的 <see cref="IQueryable{T}"/>。</param>
+        public PagingList(IQueryable<T> queryable)
         {
-            _queryable = queryable.NotNull(nameof(queryable));
+            _queryable = queryable;
             _info = new PagingInfo(queryable.Count());
         }
 
@@ -82,7 +82,7 @@ namespace Librame.Extensions.Collections
                 return;
             }
 
-            _current = func.Invoke(_collection.NotNull(nameof(_collection)));
+            _current = func.Invoke(_collection!);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Librame.Extensions.Collections
         /// <param name="func">给定的筛选方法。</param>
         public void Filtrate(Func<IQueryable<T>, IQueryable<T>> func)
         {
-            _queryable = func.Invoke(_queryable.NotNull(nameof(_queryable)));
+            _queryable = func.Invoke(_queryable!);
         }
 
 
@@ -171,7 +171,7 @@ namespace Librame.Extensions.Collections
         public IEnumerator<T> GetEnumerator()
         {
             if (_current is null)
-                throw new InvalidOperationException("You need to run the “PageByIndex()” or “PageBySkip()” method first.");
+                throw new InvalidOperationException($"You need to run the '${nameof(PageByIndex)}()' or '${nameof(PageBySkip)}()' method first.");
 
             return _current.GetEnumerator();
         }

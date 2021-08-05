@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 父标识符接口。
+    /// 定义泛型父标识符接口。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型（兼容各种引用与值类型标识）。</typeparam>
     public interface IParentIdentifier<TId> : IIdentifier<TId>, IObjectParentIdentifier

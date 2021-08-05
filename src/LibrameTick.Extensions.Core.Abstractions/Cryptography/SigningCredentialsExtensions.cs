@@ -47,8 +47,6 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回 <see cref="RSA"/>。</returns>
         public static RSA AsRsa(this SigningCredentials credentials)
         {
-            credentials.NotNull(nameof(credentials));
-
             if (credentials.Key is X509SecurityKey x509Key)
                 return (RSA)x509Key.PrivateKey;
 
@@ -75,8 +73,6 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回 <see cref="X509Certificate2"/>。</returns>
         public static X509Certificate2 AsCertificate(this SigningCredentials credentials)
         {
-            credentials.NotNull(nameof(credentials));
-
             if (credentials.Key is X509SecurityKey x509Key)
                 return x509Key.Certificate;
 

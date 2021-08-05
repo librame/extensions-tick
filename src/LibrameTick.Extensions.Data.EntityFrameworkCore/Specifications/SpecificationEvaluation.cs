@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Collections;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,6 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Specifications
 {
-    using Collections;
-
     /// <summary>
     /// <see cref="ISpecification{T}"/> 求值。
     /// </summary>
@@ -36,12 +35,10 @@ namespace Librame.Extensions.Data.Specifications
         /// <param name="queryable">给定的 <see cref="IQueryable{T}"/>。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
         /// <returns>返回 <see cref="List{T}"/>。</returns>
-        public static List<T> EvaluateList<T>(IQueryable<T> queryable,
+        public static IList<T> EvaluateList<T>(IQueryable<T> queryable,
             ISpecification<T>? specification = null)
             where T : class
         {
-            queryable.NotNull(nameof(queryable));
-
             if (specification == null)
                 return queryable.ToList();
 
@@ -56,16 +53,14 @@ namespace Librame.Extensions.Data.Specifications
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
         /// <returns>返回一个包含 <see cref="List{T}"/> 的异步操作。</returns>
-        public static Task<List<T>> EvaluateListAsync<T>(IQueryable<T> queryable,
+        public static async Task<IList<T>> EvaluateListAsync<T>(IQueryable<T> queryable,
             CancellationToken cancellationToken = default, ISpecification<T>? specification = null)
             where T : class
         {
-            queryable.NotNull(nameof(queryable));
-
             if (specification == null)
-                return queryable.ToListAsync(cancellationToken);
+                return await queryable.ToListAsync(cancellationToken);
 
-            return CombineQueryable(queryable, specification).ToListAsync(cancellationToken);
+            return await CombineQueryable(queryable, specification).ToListAsync(cancellationToken);
         }
 
         #endregion
@@ -80,13 +75,13 @@ namespace Librame.Extensions.Data.Specifications
         /// <param name="queryable">给定的 <see cref="IQueryable{T}"/>。</param>
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
-        /// <returns>返回 <see cref="PagingList{T}"/>。</returns>
-        public static PagingList<T> EvaluatePagingList<T>(IQueryable<T> queryable,
-            Action<PagingList<T>> pageAction,
+        /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
+        public static IPagingList<T> EvaluatePagingList<T>(IQueryable<T> queryable,
+            Action<IPagingList<T>> pageAction,
             ISpecification<T>? specification = null)
             where T : class
         {
-            var list = new PagingList<T>(queryable);
+            IPagingList<T> list = new PagingList<T>(queryable);
 
             if (specification != null)
                 list.Filtrate(query => CombineQueryable(query, specification));
@@ -105,12 +100,12 @@ namespace Librame.Extensions.Data.Specifications
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
         /// <returns>返回一个包含 <see cref="PagingList{T}"/> 的异步操作。</returns>
-        public static Task<PagingList<T>> EvaluatePagingListAsync<T>(IQueryable<T> queryable,
-            Action<PagingList<T>> pageAction, CancellationToken cancellationToken = default,
+        public static Task<IPagingList<T>> EvaluatePagingListAsync<T>(IQueryable<T> queryable,
+            Action<IPagingList<T>> pageAction, CancellationToken cancellationToken = default,
             ISpecification<T>? specification = null)
             where T : class
         {
-            var list = new PagingList<T>(queryable);
+            IPagingList<T> list = new PagingList<T>(queryable);
 
             if (specification != null)
                 list.Filtrate(query => CombineQueryable(query, specification));

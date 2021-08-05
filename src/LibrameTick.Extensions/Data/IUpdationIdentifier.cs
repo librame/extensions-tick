@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 更新标识符接口。
+    /// 定义泛型更新标识符接口。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <typeparam name="TUpdatedBy">指定的更新者类型。</typeparam>
@@ -28,7 +28,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 更新标识符接口。
+    /// 定义泛型更新标识符接口。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <typeparam name="TUpdatedBy">指定的更新者类型。</typeparam>

@@ -26,7 +26,7 @@ namespace Librame.Extensions.Data.Accessors
         /// <param name="parentBuilder">给定的 <see cref="DbContextOptionsBuilder"/>。</param>
         public AccessorDbContextOptionsBuilder(DbContextOptionsBuilder parentBuilder)
         {
-            ParentBuilder = parentBuilder.NotNull(nameof(parentBuilder));
+            ParentBuilder = parentBuilder;
         }
 
 
@@ -35,6 +35,14 @@ namespace Librame.Extensions.Data.Accessors
         /// </summary>
         protected virtual DbContextOptionsBuilder ParentBuilder { get; }
 
+
+        ///// <summary>
+        ///// 配置 <see cref="Guid"/> 标识生成器方式。
+        ///// </summary>
+        ///// <param name="guidGenerator">给定的 <see cref="IIdentificationGenerator{Guid}"/>。</param>
+        ///// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+        //public virtual AccessorDbContextOptionsBuilder WithGuidGenerator(IIdentificationGenerator<Guid> guidGenerator)
+        //    => WithOption(e => e.WithGuidGenerator(guidGenerator));
 
         /// <summary>
         /// 配置访问器交互方式（默认为读/写；如果不需要改变，可不调用此方法）。

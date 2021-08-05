@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 并发标记接口。
+    /// 定义并发标记接口。
     /// </summary>
     public interface IConcurrencyStamp
     {

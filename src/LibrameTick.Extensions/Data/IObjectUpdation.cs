@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象更新接口。
+    /// 定义对象更新接口。
     /// </summary>
     public interface IObjectUpdation : IObjectUpdator, IObjectUpdationTime, IObjectCreation
     {

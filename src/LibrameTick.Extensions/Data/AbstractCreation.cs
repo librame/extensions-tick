@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Resources;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,10 +19,8 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Resources;
-
     /// <summary>
-    /// 抽象创建。
+    /// 定义抽象实现 <see cref="ICreation{TCreatedBy}"/>。
     /// </summary>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>
     [NotMapped]
@@ -91,7 +90,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 抽象创建。
+    /// 定义抽象实现 <see cref="ICreation{TCreatedBy, TCreatedTime}"/>。
     /// </summary>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>
     /// <typeparam name="TCreatedTime">指定的创建时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>

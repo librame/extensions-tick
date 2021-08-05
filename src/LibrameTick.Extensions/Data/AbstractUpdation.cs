@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Resources;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,10 +19,8 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Resources;
-
     /// <summary>
-    /// 抽象更新标识符（继承自抽象创建）。
+    /// 定义抽象实现 <see cref="IUpdation{TUpdatedBy}"/>。
     /// </summary>
     /// <typeparam name="TUpdatedBy">指定的更新者。</typeparam>
     [NotMapped]
@@ -130,7 +129,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 抽象更新标识符（继承自抽象创建）。
+    /// 定义抽象实现 <see cref="IUpdation{TUpdatedBy, TUpdatedTime}"/>。
     /// </summary>
     /// <typeparam name="TUpdatedBy">指定的更新者。</typeparam>
     /// <typeparam name="TUpdatedTime">指定的更新时间类型（提供对 DateTime 或 DateTimeOffset 的支持）。</typeparam>

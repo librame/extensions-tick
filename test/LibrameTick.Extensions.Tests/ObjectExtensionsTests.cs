@@ -7,16 +7,21 @@ namespace Librame.Extensions
     {
 
         [Fact]
-        public void AsTest()
+        public void AsNotNullTest()
         {
-            object? obj = 1;
-            Assert.Equal(1, obj.AsOrDefaultIfNull<int>());
-
-            obj = null;
+            object? obj = null;
             Assert.Throws<ArgumentNullException>(() =>
             {
                 obj!.AsNotNull<int>(nameof(obj));
             });
+        }
+
+        [Fact]
+        public void AsOrDefaultTest()
+        {
+            object? obj = null;
+            Assert.Equal(1, obj.AsOrDefault(1));
+            Assert.Equal(3, obj.AsOrDefault(() => 3));
         }
 
     }

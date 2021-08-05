@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Collections
 {
     /// <summary>
-    /// 分页信息接口。
+    /// 定义分页信息接口。
     /// </summary>
     public interface IPagingInfo
     {

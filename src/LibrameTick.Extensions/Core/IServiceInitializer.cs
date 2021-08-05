@@ -22,6 +22,12 @@ namespace Librame.Extensions.Core
     public interface IServiceInitializer
     {
         /// <summary>
+        /// 是否已初始化。
+        /// </summary>
+        bool IsInitialized { get; }
+
+
+        /// <summary>
         /// 初始化服务。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>

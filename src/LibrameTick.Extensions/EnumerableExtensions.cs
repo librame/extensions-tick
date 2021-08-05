@@ -57,8 +57,6 @@ namespace Librame.Extensions
         /// <returns>返回 <see cref="IAsyncEnumerable{T}"/>。</returns>
         public static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(this IEnumerable<Task<T>> enumerable)
         {
-            enumerable.NotNull(nameof(enumerable));
-
             foreach (var task in enumerable)
                 yield return await task;
         }
@@ -75,11 +73,7 @@ namespace Librame.Extensions
         /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
         /// <returns>返回 <see cref="ReadOnlyCollection{T}"/>。</returns>
         public static ReadOnlyCollection<T> AsReadOnlyList<T>(this IEnumerable<T> enumerable)
-        {
-            enumerable.NotNull(nameof(enumerable));
-
-            return enumerable.ToList().AsReadOnly();
-        }
+            => enumerable.ToList().AsReadOnly();
 
         /// <summary>
         /// 转换为只读列表集合。
@@ -107,11 +101,10 @@ namespace Librame.Extensions
         /// <returns>返回一个异步操作。</returns>
         public static async Task ForEachAsync<T>(this IAsyncEnumerable<T> items, Action<T> action)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-
             await foreach (var item in items)
+            {
                 action.Invoke(item);
+            }
         }
 
         /// <summary>
@@ -128,10 +121,6 @@ namespace Librame.Extensions
         public static async Task ForEachAsync<T>(this IAsyncEnumerable<T> items, Action<T> action,
             Func<T, bool> breakFunc)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-            breakFunc.NotNull(nameof(breakFunc));
-
             await foreach (var item in items)
             {
                 action.Invoke(item);
@@ -154,9 +143,6 @@ namespace Librame.Extensions
         /// <returns>返回一个异步操作。</returns>
         public static async Task ForEachAsync<T>(this IAsyncEnumerable<T> items, Action<T, int> action)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-
             var i = 0;
             await foreach (var item in items)
             {
@@ -179,10 +165,6 @@ namespace Librame.Extensions
         public static async Task ForEachAsync<T>(this IAsyncEnumerable<T> items,
             Action<T, int> action, Func<T, int, bool> breakFunc)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-            breakFunc.NotNull(nameof(breakFunc));
-
             var i = 0;
             await foreach (var item in items)
             {
@@ -207,9 +189,6 @@ namespace Librame.Extensions
         /// <param name="action">给定的遍历动作。</param>
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-
             foreach (var item in items)
                 action.Invoke(item);
         }
@@ -227,10 +206,6 @@ namespace Librame.Extensions
         public static void ForEach<T>(this IEnumerable<T> items, Action<T> action,
             Func<T, bool> breakFunc)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-            breakFunc.NotNull(nameof(breakFunc));
-
             foreach (var item in items)
             {
                 action.Invoke(item);
@@ -252,9 +227,6 @@ namespace Librame.Extensions
         /// <param name="action">给定的遍历动作。</param>
         public static void ForEach<T>(this IEnumerable<T> items, Action<T, int> action)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-
             var i = 0;
             foreach (var item in items)
             {
@@ -276,10 +248,6 @@ namespace Librame.Extensions
         public static void ForEach<T>(this IEnumerable<T> items, Action<T, int> action,
             Func<T, int, bool> breakFunc)
         {
-            items.NotNull(nameof(items));
-            action.NotNull(nameof(action));
-            breakFunc.NotNull(nameof(breakFunc));
-
             var i = 0;
             foreach (var item in items)
             {
@@ -375,32 +343,23 @@ namespace Librame.Extensions
         public static IEnumerable<T> TrimFirst<T>(this IEnumerable<T> enumerable,
             Func<T, bool> isFirstFunc, bool isLoops = true)
         {
-            enumerable.NotNull(nameof(enumerable));
-            isFirstFunc.NotNull(nameof(isFirstFunc));
-
-            return TrimCore(enumerable);
-
-            // 修剪核心方法
-            IEnumerable<T> TrimCore(IEnumerable<T> items)
+            var count = enumerable.Count();
+            if (count > 0 && isFirstFunc.Invoke(enumerable.First()))
             {
-                var count = items.Count();
-                if (count > 0 && isFirstFunc.Invoke(items.First()))
-                {
-                    // 修剪初始项
-                    count--;
+                // 修剪初始项
+                count--;
 
-                    if (count < 1)
-                        return Enumerable.Empty<T>();
+                if (count < 1)
+                    return Enumerable.Empty<T>();
 
-                    // 单次修剪一个（即跳过首个）元素
-                    items = items.Skip(1);
+                // 单次修剪一个（即跳过首个）元素
+                enumerable = enumerable.Skip(1);
 
-                    if (isLoops) // 循环修剪
-                        items = TrimCore(items);
-                }
-
-                return items;
+                if (isLoops) // 链式修剪
+                    enumerable = enumerable.TrimFirst(isFirstFunc, isLoops);
             }
+
+            return enumerable;
         }
 
         /// <summary>
@@ -417,32 +376,23 @@ namespace Librame.Extensions
         public static IEnumerable<T> TrimLast<T>(this IEnumerable<T> enumerable,
             Func<T, bool> isLastFunc, bool isLoops = true)
         {
-            enumerable.NotNull(nameof(enumerable));
-            isLastFunc.NotNull(nameof(isLastFunc));
-
-            return TrimCore(enumerable);
-
-            // 修剪核心方法
-            IEnumerable<T> TrimCore(IEnumerable<T> items)
+            var count = enumerable.Count();
+            if (count > 0 && isLastFunc.Invoke(enumerable.Last()))
             {
-                var count = items.Count();
-                if (count > 0 && isLastFunc.Invoke(items.Last()))
-                {
-                    // 修剪末尾项
-                    count--;
+                // 修剪末尾项
+                count--;
 
-                    if (count < 1)
-                        return Enumerable.Empty<T>();
+                if (count < 1)
+                    return Enumerable.Empty<T>();
 
-                    // 单次修剪一个（即取得前 COUNT-1）元素
-                    items = items.Take(count);
+                // 单次修剪一个（即取得前 COUNT-1）元素
+                enumerable = enumerable.Take(count);
 
-                    if (isLoops) // 循环修剪
-                        items = TrimCore(items);
-                }
-
-                return items;
+                if (isLoops) // 链式修剪
+                    enumerable = enumerable.TrimLast(isLastFunc, isLoops);
             }
+
+            return enumerable;
         }
 
         #endregion

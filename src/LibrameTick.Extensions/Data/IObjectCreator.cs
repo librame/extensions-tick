@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象创建者接口。
+    /// 定义对象创建者接口。
     /// </summary>
     public interface IObjectCreator
     {

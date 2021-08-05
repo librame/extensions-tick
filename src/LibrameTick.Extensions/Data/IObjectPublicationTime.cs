@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象发表时间接口。
+    /// 定义对象发表时间接口。
     /// </summary>
     public interface IObjectPublicationTime : IObjectCreationTime
     {

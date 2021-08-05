@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 计数接口。
+    /// 定义泛型计数接口。
     /// </summary>
     /// <typeparam name="TValue">指定的数值类型。</typeparam>
     public interface ICount<TValue> : IObjectCount

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 抽象标识生成器接口。
+    /// 定义抽象实现 <see cref="IIdentificationGenerator{TId}"/>。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     public abstract class AbstractIdentificationGenerator<TId> : IIdentificationGenerator<TId>

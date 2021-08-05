@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 标识生成器接口。
+    /// 定义泛型标识生成器接口。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     public interface IIdentificationGenerator<TId> : IObjectIdentificationGenerator

@@ -13,16 +13,17 @@
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 抽象通知属性（实现 <see cref="INotifyProperty"/>）。
+    /// 定义抽象实现 <see cref="INotifyProperty"/>。
     /// </summary>
     public abstract class AbstractNotifyProperty : INotifyProperty
     {
-        private ConcurrentDictionary<string, object?> _propertyValues;
-        private ConcurrentDictionary<string, Func<object?>> _propertyFuncs;
+        private ConcurrentDictionary<string, object> _propertyValues;
+        private ConcurrentDictionary<string, Func<object>> _propertyFuncs;
 
 
         /// <summary>
@@ -30,11 +31,11 @@ namespace Librame.Extensions.Core
         /// </summary>
         /// <param name="propertyValues">给定的属性值字典集合。</param>
         /// <param name="propertyFuncs">给定的属性方法字典集合。</param>
-        protected AbstractNotifyProperty(ConcurrentDictionary<string, object?>? propertyValues = null,
-            ConcurrentDictionary<string, Func<object?>>? propertyFuncs = null)
+        protected AbstractNotifyProperty(ConcurrentDictionary<string, object>? propertyValues = null,
+            ConcurrentDictionary<string, Func<object>>? propertyFuncs = null)
         {
-            _propertyValues = propertyValues ?? new ConcurrentDictionary<string, object?>();
-            _propertyFuncs = propertyFuncs ?? new ConcurrentDictionary<string, Func<object?>>();
+            _propertyValues = propertyValues ?? new ConcurrentDictionary<string, object>();
+            _propertyFuncs = propertyFuncs ?? new ConcurrentDictionary<string, Func<object>>();
         }
 
 
@@ -55,7 +56,7 @@ namespace Librame.Extensions.Core
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="addOrUpdateValue">给定要添加或更新的属性值对象。</param>
         /// <returns>返回属性值对象。</returns>
-        public virtual object? SetValue(string propertyName, object? addOrUpdateValue)
+        public virtual object SetValue(string propertyName, object addOrUpdateValue)
         {
             if (_propertyValues.ContainsKey(propertyName))
             {
@@ -94,11 +95,9 @@ namespace Librame.Extensions.Core
         /// <param name="addOrUpdateFunc">给定要添加或更新的属性方法（默认初始会执行一次，以便支持事件参数集合调用）。</param>
         /// <param name="isInitialize">是否初始化（如果使用初始化，则表示立即执行方法，并将执行结果缓存；反之则在每次获取属性值时再执行方法。可选；默认不初始化）。</param>
         /// <returns>返回属性值对象。</returns>
-        public virtual object? SetValue(string propertyName, Func<object?> addOrUpdateFunc,
+        public virtual object SetValue(string propertyName, Func<object> addOrUpdateFunc,
             bool isInitialize = false)
         {
-            addOrUpdateFunc.NotNull(nameof(addOrUpdateFunc));
-
             var addOrUpdateValue = addOrUpdateFunc.Invoke();
 
             if (!isInitialize)
@@ -147,10 +146,10 @@ namespace Librame.Extensions.Core
         public virtual TValue? GetValue<TValue>(string propertyName, TValue? defaultValue = default)
         {
             if (_propertyValues.ContainsKey(propertyName))
-                return (TValue?)_propertyValues[propertyName];
+                return (TValue)_propertyValues[propertyName];
 
             if (_propertyFuncs.ContainsKey(propertyName))
-                return (TValue?)_propertyFuncs[propertyName].Invoke();
+                return (TValue)_propertyFuncs[propertyName].Invoke();
 
             return defaultValue;
         }
@@ -179,20 +178,18 @@ namespace Librame.Extensions.Core
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="value">输出可能存在的属性值。</param>
         /// <returns>返回是否已移除的布尔值。</returns>
-        public virtual bool TryRemoveValue(string propertyName, out object? value)
+        public virtual bool TryRemoveValue(string propertyName, [MaybeNullWhen(false)] out object value)
         {
-            if (!_propertyValues.TryRemove(propertyName, out value))
-            {
-                if (_propertyFuncs.TryRemove(propertyName, out var factory))
-                {
-                    value = factory.Invoke();
-                    return true;
-                }
+            if (_propertyValues.TryRemove(propertyName, out value))
+                return true;
 
-                return false;
+            if (_propertyFuncs.TryRemove(propertyName, out var factory))
+            {
+                value = factory.Invoke();
+                return true;
             }
 
-            return true;
+            return false;
         }
 
     }

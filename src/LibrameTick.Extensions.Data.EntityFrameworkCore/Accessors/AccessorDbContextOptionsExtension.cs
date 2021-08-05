@@ -24,6 +24,8 @@ namespace Librame.Extensions.Data.Accessors
     /// </summary>
     public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     {
+        // 异构数据源数据同步功能的标识必须使用统一的生成方案
+        //private IIdentificationGenerator<Guid>? _guidGenerator;
         private AccessorInteraction _interaction = AccessorInteraction.ReadWrite;
         private bool _isPooled = false;
         private float _priority = -1; // 默认使用访问器定义的优先级属性值
@@ -45,12 +47,19 @@ namespace Librame.Extensions.Data.Accessors
         /// <param name="copyFrom">给定要克隆的 <see cref="AccessorDbContextOptionsExtension"/>。</param>
         protected AccessorDbContextOptionsExtension(AccessorDbContextOptionsExtension copyFrom)
         {
+            //_guidGenerator = copyFrom.GuidGenerator;
             _interaction = copyFrom.Interaction;
             _isPooled = copyFrom.IsPooled;
             _priority = copyFrom.Priority;
             _serviceType = copyFrom.ServiceType;
         }
 
+
+        ///// <summary>
+        ///// <see cref="Guid"/> 标识生成器。
+        ///// </summary>
+        //public virtual IIdentificationGenerator<Guid>? GuidGenerator
+        //    => _guidGenerator;
 
         /// <summary>
         /// 访问器交互方式。
@@ -91,6 +100,20 @@ namespace Librame.Extensions.Data.Accessors
         protected virtual AccessorDbContextOptionsExtension Clone()
             => new(this);
 
+
+        ///// <summary>
+        ///// 使用指定的 <see cref="Guid"/> 标识生成器创建一个选项扩展实例副本。
+        ///// </summary>
+        ///// <param name="guidGenerator">给定的 <see cref="IIdentificationGenerator{Guid}"/>。</param>
+        ///// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+        //public virtual AccessorDbContextOptionsExtension WithGuidGenerator(IIdentificationGenerator<Guid> guidGenerator)
+        //{
+        //    var clone = Clone();
+
+        //    clone._guidGenerator = guidGenerator;
+
+        //    return clone;
+        //}
 
         /// <summary>
         /// 使用指定的访问器交互方式创建一个选项扩展实例副本。
@@ -191,6 +214,13 @@ namespace Librame.Extensions.Data.Accessors
                     {
                         var builder = new StringBuilder();
 
+                        //if (Extension.GuidGenerator != null)
+                        //{
+                        //    builder.Append(nameof(Extension.GuidGenerator));
+                        //    builder.Append(": ");
+                        //    builder.Append(Extension.GuidGenerator.GetType()).Append(' ');
+                        //}
+
                         builder.Append(nameof(Extension.Interaction));
                         builder.Append(": ");
                         builder.Append(Extension.Interaction).Append(' ');
@@ -217,14 +247,18 @@ namespace Librame.Extensions.Data.Accessors
 
             public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
             {
-                debugInfo.NotNull(nameof(debugInfo));
+                //debugInfo["Accessor:" + nameof(Extension.GuidGenerator)] =
+                //    (Extension.GuidGenerator?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
 
                 debugInfo["Accessor:" + nameof(Extension.Interaction)] =
                     Extension.Interaction.GetHashCode().ToString(CultureInfo.InvariantCulture);
+
                 debugInfo["Accessor:" + nameof(Extension.IsPooled)] =
                     Extension.IsPooled.GetHashCode().ToString(CultureInfo.InvariantCulture);
+
                 debugInfo["Accessor:" + nameof(Extension.Priority)] =
                     Extension.Priority.GetHashCode().ToString(CultureInfo.InvariantCulture);
+
                 debugInfo["Accessor:" + nameof(Extension.ServiceType)] =
                     (Extension.ServiceType?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
             }

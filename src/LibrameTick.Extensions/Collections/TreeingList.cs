@@ -10,16 +10,16 @@
 
 #endregion
 
+using Librame.Extensions.Data;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Librame.Extensions.Collections
 {
-    using Data;
-
     /// <summary>
     /// 定义一个树形列表。
     /// </summary>
@@ -145,7 +145,7 @@ namespace Librame.Extensions.Collections
         /// <param name="id">给定的标识。</param>
         /// <param name="node">输出可能存在的树形节点。</param>
         /// <returns>返回布尔值。</returns>
-        public bool ContainsId(TId id, out TreeingNode<TItem, TId>? node)
+        public bool ContainsId(TId id, [MaybeNullWhen(false)] out TreeingNode<TItem, TId> node)
         {
             node = GetNode(id);
             return node != null;

@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Resources;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,10 +19,8 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {
-    using Resources;
-
     /// <summary>
-    /// 抽象创建标识符。
+    /// 定义抽象实现 <see cref="ICreationIdentifier{TId, TCreatedBy}"/>。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>
@@ -94,7 +93,7 @@ namespace Librame.Extensions.Data
 
 
     /// <summary>
-    /// 抽象创建标识符。
+    /// 定义抽象实现 <see cref="ICreationIdentifier{TId, TCreatedBy, TCreatedTime}"/>。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <typeparam name="TCreatedBy">指定的创建者类型。</typeparam>

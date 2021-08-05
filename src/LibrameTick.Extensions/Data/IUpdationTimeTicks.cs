@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 更新时间周期数接口。
+    /// 定义更新时间周期数接口。
     /// </summary>
     /// <remarks>
     /// 主要用于解决 <see cref="System.DateTimeOffset"/> 在不同数据库中 LINQ 查询的兼容性问题。

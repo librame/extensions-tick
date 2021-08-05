@@ -10,18 +10,18 @@
 
 #endregion
 
+using Librame.Extensions.Collections;
+using Librame.Extensions.Data.Specifications;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Accessors
 {
-    using Extensions.Collections;
-    using Extensions.Data.Specifications;
-
     /// <summary>
     /// 抽象 <see cref="AbstractAccessor"/> 的泛型实现。
     /// </summary>
@@ -73,24 +73,34 @@ namespace Librame.Extensions.Data.Accessors
             => GetType();
 
 
+        #region Exists
+
         /// <summary>
-        /// 是否存在指定断定方法的实体。
+        /// 在本地缓存或数据库中是否存在指定断定方法的实体。
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-        /// <param name="predicate">给定的断定方法。</param>
+        /// <param name="predicate">给定的断定方法表达式。</param>
         /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
         /// <returns>返回布尔值。</returns>
-        public virtual bool Exists<TEntity>(Func<TEntity, bool> predicate,
+        public virtual bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
             bool checkLocal = true)
             where TEntity : class
-        {
-            var dbSet = base.Set<TEntity>();
+            => base.Set<TEntity>().LocalOrDbAny(predicate, checkLocal);
 
-            if (checkLocal)
-                return dbSet.Local.Any(predicate) || dbSet.Any(predicate);
+        /// <summary>
+        /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="predicate">给定的断定方法表达式。</param>
+        /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含布尔值的异步操作。</returns>
+        public virtual Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
+            bool checkLocal = true, CancellationToken cancellationToken = default)
+            where TEntity : class
+            => base.Set<TEntity>().LocalOrDbAnyAsync(predicate, checkLocal, cancellationToken);
 
-            return dbSet.Any(predicate);
-        }
+        #endregion
 
 
         #region Find
@@ -100,8 +110,8 @@ namespace Librame.Extensions.Data.Accessors
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回 <see cref="List{TEntity}"/>。</returns>
-        public virtual List<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+        /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
+        public virtual IList<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
             where TEntity : class
             => SpecificationEvaluation.EvaluateList(GetQueryable<TEntity>(), specification);
 
@@ -111,11 +121,48 @@ namespace Librame.Extensions.Data.Accessors
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
-        public virtual Task<List<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
+        /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
+        public virtual Task<IList<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
             ISpecification<TEntity>? specification = null)
             where TEntity : class
             => SpecificationEvaluation.EvaluateListAsync(GetQueryable<TEntity>(), cancellationToken, specification);
+
+
+        /// <summary>
+        /// 查找实体分页集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
+        public virtual IPagingList<TEntity> FindPaging<TEntity>(Action<IPagingList<TEntity>> pageAction)
+            where TEntity : class
+        {
+            var list = new PagingList<TEntity>(GetQueryable<TEntity>());
+            pageAction.Invoke(list);
+
+            return list;
+        }
+
+        /// <summary>
+        /// 异步查找实体分页集合。
+        /// </summary>
+        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
+        public virtual Task<IPagingList<TEntity>> FindPagingAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+            CancellationToken cancellationToken = default)
+            where TEntity : class
+        {
+            IPagingList<TEntity> list = new PagingList<TEntity>(GetQueryable<TEntity>());
+
+            return cancellationToken.RunTask(() =>
+            {
+                pageAction.Invoke(list);
+
+                return list;
+            });
+        }
 
 
         /// <summary>
@@ -124,8 +171,8 @@ namespace Librame.Extensions.Data.Accessors
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回 <see cref="PagingList{TEntity}"/>。</returns>
-        public virtual PagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<PagingList<TEntity>> pageAction,
+        /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
+        public virtual IPagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
             ISpecification<TEntity>? specification = null)
             where TEntity : class
             => SpecificationEvaluation.EvaluatePagingList(GetQueryable<TEntity>(), pageAction, specification);
@@ -137,8 +184,8 @@ namespace Librame.Extensions.Data.Accessors
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回一个包含 <see cref="PagingList{TEntity}"/> 的异步操作。</returns>
-        public virtual Task<PagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<PagingList<TEntity>> pageAction,
+        /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
+        public virtual Task<IPagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
             CancellationToken cancellationToken = default, ISpecification<TEntity>? specification = null)
             where TEntity : class
             => SpecificationEvaluation.EvaluatePagingListAsync(GetQueryable<TEntity>(), pageAction, cancellationToken, specification);
@@ -177,11 +224,11 @@ namespace Librame.Extensions.Data.Accessors
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="entity">给定要添加的实体。</param>
-        /// <param name="predicate">给定的断定方法。</param>
+        /// <param name="predicate">给定的断定方法表达式。</param>
         /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
         /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
         public virtual TEntity AddIfNotExists<TEntity>(TEntity entity,
-            Func<TEntity, bool> predicate, bool checkLocal = true)
+            Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
             where TEntity : class
         {
             if (!Exists(predicate, checkLocal))

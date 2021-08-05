@@ -25,19 +25,18 @@ namespace Librame.Extensions.Core
         /// 使用服务初始化器。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-        /// <param name="setupAction">给定的激活器安装动作。</param>
-        /// <param name="loadingOptions">给定的 <see cref="AssemblyLoadingOptions"/>（可选）。</param>
+        /// <param name="activateAction">给定的激活动作。</param>
         /// <returns>返回 <see cref="IServiceProvider"/>。</returns>
         public static IServiceProvider UseServiceInitializer(this IServiceProvider services,
-            Action<ServiceInitializerActivator> setupAction,
-            AssemblyLoadingOptions? loadingOptions = null)
+            Action<ServiceInitializerActivator> activateAction)
         {
-            services.NotNull(nameof(services));
+            var activator = services.GetRequiredService<CoreExtensionBuilder>().InitializerActivator;
 
             using (var scope = services.CreateScope())
             {
-                var supplier = new ServiceInitializerActivator(scope.ServiceProvider, loadingOptions);
-                setupAction.Invoke(supplier);
+                activator.ApplyServiceProvider(scope.ServiceProvider);
+
+                activateAction.Invoke(activator);
             }
 
             return services;

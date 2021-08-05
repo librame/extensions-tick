@@ -10,30 +10,27 @@ namespace Librame.Extensions
     {
 
         [Fact]
+        public void IsConcreteTypeTest()
+        {
+            Assert.True(typeof(HMACMD5).IsConcreteType());
+            Assert.False(typeof(MD5).IsConcreteType());
+            Assert.False(typeof(ICryptoTransform).IsConcreteType());
+        }
+
+        [Fact]
+        public void IsNullableTypeTest()
+        {
+            Assert.True(typeof(bool?).IsNullableType());
+            Assert.False(typeof(bool).IsNullableType());
+        }
+
+
+        [Fact]
         public void GetBaseTypesTest()
         {
             var baseTypes = typeof(HMACMD5).GetBaseTypes();
             Assert.NotEmpty(baseTypes);
         }
-
-
-        #region InvokeTypes and ExportedTypes
-
-        [Fact]
-        public void InvokeTypesTest()
-        {
-            var assembly = typeof(TypeExtensionsTests).Assembly;
-
-            var count = assembly.InvokeTypes(type =>
-            {
-                Assert.NotNull(type);
-            });
-            Assert.True(count > 0);
-
-            Assert.Equal(count, assembly.ExportedTypes.Count());
-        }
-
-        #endregion
 
 
         #region IsAssignableType
@@ -83,26 +80,6 @@ namespace Librame.Extensions
 
             Assert.True(type.IsImplementedType<HashAlgorithm>(out Type? resultType));
             Assert.Equal(typeof(HashAlgorithm), resultType);
-        }
-
-        #endregion
-
-
-        #region IsType
-
-        [Fact]
-        public void IsConcreteTypeTest()
-        {
-            Assert.True(typeof(HMACMD5).IsConcreteType());
-            Assert.False(typeof(MD5).IsConcreteType());
-            Assert.False(typeof(ICryptoTransform).IsConcreteType());
-        }
-
-        [Fact]
-        public void IsNullableTypeTest()
-        {
-            Assert.True(typeof(bool?).IsNullableType());
-            Assert.False(typeof(bool).IsNullableType());
         }
 
         #endregion

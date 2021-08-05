@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 创建者接口。
+    /// 定义泛型创建者接口。
     /// </summary>
     /// <typeparam name="TCreatedBy">指定的创建者类型（提供对整数、字符串、GUID 等类型的支持）。</typeparam>
     public interface ICreator<TCreatedBy> : IObjectCreator

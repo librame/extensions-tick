@@ -10,18 +10,18 @@
 
 #endregion
 
+using Librame.Extensions.Collections;
+using Librame.Extensions.Data.Accessors;
+using Librame.Extensions.Data.Specifications;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Threading;
 
 namespace Librame.Extensions.Data.Stores
 {
-    using Extensions.Collections;
-    using Extensions.Data.Accessors;
-    using Extensions.Data.Specifications;
-
     /// <summary>
     /// 实现 <see cref="IStore{T}"/> 的泛型商店。
     /// </summary>
@@ -35,7 +35,7 @@ namespace Librame.Extensions.Data.Stores
         /// <param name="accessorManager">给定的 <see cref="IAccessorManager"/>。</param>
         public Store(IAccessorManager accessorManager)
         {
-            AccessorManager = accessorManager.NotNull(nameof(accessorManager));
+            AccessorManager = accessorManager;
         }
 
 
@@ -76,51 +76,62 @@ namespace Librame.Extensions.Data.Stores
 
 
         /// <summary>
-        /// 查找带有规约的实体集合。
+        /// 查找带有规约的类型实例集合。
         /// </summary>
-        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回 <see cref="List{TEntity}"/>。</returns>
-        public virtual List<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
-            where TEntity : class
+        /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
+        /// <returns>返回 <see cref="IList{T}"/>。</returns>
+        public virtual IList<T> FindWithSpecification(ISpecification<T>? specification = null)
             => ReadAccessor.FindWithSpecification(specification);
 
         /// <summary>
-        /// 异步查找带有规约的实体集合。
+        /// 异步查找带有规约的类型实例集合。
         /// </summary>
-        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
-        public virtual Task<List<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
-            ISpecification<TEntity>? specification = null)
-            where TEntity : class
+        /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
+        /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
+        public virtual Task<IList<T>> FindWithSpecificationAsync(CancellationToken cancellationToken = default,
+            ISpecification<T>? specification = null)
             => ReadAccessor.FindWithSpecificationAsync(cancellationToken, specification);
 
 
         /// <summary>
-        /// 查找带有规约的实体分页集合。
+        /// 查找类型实例分页集合。
         /// </summary>
-        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="pageAction">给定的分页动作。</param>
-        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回 <see cref="PagingList{TEntity}"/>。</returns>
-        public virtual PagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<PagingList<TEntity>> pageAction,
-            ISpecification<TEntity>? specification = null)
-            where TEntity : class
+        /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
+        public virtual IPagingList<T> FindPaging(Action<IPagingList<T>> pageAction)
+            => ReadAccessor.FindPaging(pageAction);
+
+        /// <summary>
+        /// 异步查找类型实例分页集合。
+        /// </summary>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
+        public virtual Task<IPagingList<T>> FindPagingAsync(Action<IPagingList<T>> pageAction,
+            CancellationToken cancellationToken = default)
+            => ReadAccessor.FindPagingAsync(pageAction, cancellationToken);
+
+
+        /// <summary>
+        /// 查找带有规约的类型实例分页集合。
+        /// </summary>
+        /// <param name="pageAction">给定的分页动作。</param>
+        /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
+        /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
+        public virtual IPagingList<T> FindPagingWithSpecification(Action<IPagingList<T>> pageAction,
+            ISpecification<T>? specification = null)
             => ReadAccessor.FindPagingWithSpecification(pageAction, specification);
 
         /// <summary>
-        /// 异步查找带有规约的实体分页集合。
+        /// 异步查找带有规约的类型实例分页集合。
         /// </summary>
-        /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-        /// <returns>返回一个包含 <see cref="PagingList{TEntity}"/> 的异步操作。</returns>
-        public virtual Task<PagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<PagingList<TEntity>> pageAction,
-            CancellationToken cancellationToken = default, ISpecification<TEntity>? specification = null)
-            where TEntity : class
+        /// <param name="specification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
+        /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
+        public virtual Task<IPagingList<T>> FindPagingWithSpecificationAsync(Action<IPagingList<T>> pageAction,
+            CancellationToken cancellationToken = default, ISpecification<T>? specification = null)
             => ReadAccessor.FindPagingWithSpecificationAsync(pageAction, cancellationToken, specification);
 
         #endregion
@@ -133,7 +144,7 @@ namespace Librame.Extensions.Data.Stores
         /// </summary>
         /// <param name="item">给定要添加的类型实例。</param>
         /// <param name="predicate">给定用于判定是否存在的工厂方法。</param>
-        public virtual void AddIfNotExists(T item, Func<T, bool> predicate)
+        public virtual void AddIfNotExists(T item, Expression<Func<T, bool>> predicate)
             => WriteAccessor.AddIfNotExists(item, predicate);
 
         /// <summary>

@@ -21,14 +21,27 @@ namespace Librame.Extensions.Core
     /// </summary>
     public class LocalClock : IClock
     {
+        /// <summary>
+        /// 默认本地 <see cref="IClock"/> 实例。
+        /// </summary>
+        public static readonly IClock Default = new LocalClock();
+
         private readonly TimeSpan _refluxOffsetMilliseconds;
 
 
         /// <summary>
-        /// 构造一个 <see cref="LocalClock"/>。
+        /// 使用默认为 100 的时钟回流偏移量构造一个 <see cref="LocalClock"/>。
         /// </summary>
-        /// <param name="refluxOffsetMilliseconds">给定用于解决时钟回流的偏移量（可选；默认 100 毫秒）。</param>
-        public LocalClock(double refluxOffsetMilliseconds = 100)
+        public LocalClock()
+        {
+            _refluxOffsetMilliseconds = TimeSpan.FromMilliseconds(100);
+        }
+
+        /// <summary>
+        /// 使用指定时钟回流偏移量构造一个 <see cref="LocalClock"/>。
+        /// </summary>
+        /// <param name="refluxOffsetMilliseconds">给定用于解决时钟回流的偏移量。</param>
+        public LocalClock(double refluxOffsetMilliseconds)
         {
             _refluxOffsetMilliseconds = TimeSpan.FromMilliseconds(refluxOffsetMilliseconds);
         }

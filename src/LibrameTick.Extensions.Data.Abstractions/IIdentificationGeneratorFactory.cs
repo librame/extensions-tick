@@ -15,7 +15,7 @@ using System;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 标识生成器工厂接口。
+    /// 定义标识生成器工厂接口。
     /// </summary>
     public interface IIdentificationGeneratorFactory
     {

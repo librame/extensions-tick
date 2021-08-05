@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,8 +19,6 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Collections
 {
-    using Data;
-
     /// <summary>
     /// <see cref="TreeingList{TItem, TId}"/> 静态扩展。
     /// </summary>
@@ -37,8 +36,6 @@ namespace Librame.Extensions.Collections
             where TItem : IParentIdentifier<TId>, IEquatable<TItem>
             where TId : IEquatable<TId>
         {
-            items.NotNull(nameof(items));
-
             // 提取根父标识
             var rootParentId = items.Select(s => s.ParentId).Min();
 

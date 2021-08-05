@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 时钟接口。
+    /// 定义时钟接口。
     /// </summary>
     public interface IClock
     {

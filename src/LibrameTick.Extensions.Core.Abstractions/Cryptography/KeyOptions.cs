@@ -10,13 +10,12 @@
 
 #endregion
 
+using Librame.Extensions.Core.Serialization;
 using System;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    using Serialization;
-
     /// <summary>
     /// 密钥选项。
     /// </summary>
@@ -28,7 +27,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
         public KeyOptions(INotifyProperty notifyProperty)
         {
-            NotifyProperty = notifyProperty.NotNull(nameof(notifyProperty));
+            NotifyProperty = notifyProperty;
         }
 
 
@@ -49,8 +48,8 @@ namespace Librame.Extensions.Core.Cryptography
         [JsonConverter(typeof(JsonStringBase64Converter))]
         public byte[]? Key
         {
-            get => NotifyProperty.GetValue<byte[]?>(nameof(Key));
-            set => NotifyProperty.SetValue(nameof(Key), value);
+            get => NotifyProperty.GetValue<byte[]>(nameof(Key));
+            set => NotifyProperty.SetValue(nameof(Key), value.NotNull(nameof(Key)));
         }
 
 
@@ -59,7 +58,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// </summary>
         /// <param name="keyFunc">给定的密钥方法。</param>
         /// <returns>返回密钥方法。</returns>
-        public Func<byte[]?> SetKeyFunc(Func<byte[]?> keyFunc)
+        public Func<byte[]> SetKeyFunc(Func<byte[]> keyFunc)
         {
             NotifyProperty.SetValue(nameof(Key), keyFunc);
             return keyFunc;

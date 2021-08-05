@@ -17,7 +17,7 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 抽象扩展选项（抽象实现 <see cref="IExtensionOptions"/>）。
+    /// 定义抽象实现 <see cref="IExtensionOptions"/>。
     /// </summary>
     public abstract class AbstractExtensionOptions : AbstractExtensionInfo, IExtensionOptions
     {

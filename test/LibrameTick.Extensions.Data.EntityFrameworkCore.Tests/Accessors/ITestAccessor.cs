@@ -7,6 +7,6 @@ namespace Librame.Extensions.Data.Accessors
         /// <summary>
         /// 用户数据集。
         /// </summary>
-        DbSet<User>? Users { get; set; }
+        DbSet<User> Users { get; set; }
     }
 }

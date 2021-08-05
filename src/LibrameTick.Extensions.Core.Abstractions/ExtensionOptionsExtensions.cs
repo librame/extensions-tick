@@ -10,6 +10,7 @@
 
 #endregion
 
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -21,6 +22,43 @@ namespace Librame.Extensions.Core
     /// </summary>
     public static class ExtensionOptionsExtensions
     {
+
+        /// <summary>
+        /// 查找指定目标扩展选项（支持链式查找父级扩展选项）。
+        /// </summary>
+        /// <typeparam name="TTargetOptions">指定的目标扩展选项类型。</typeparam>
+        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+        /// <returns>返回 <typeparamref name="TTargetOptions"/>。</returns>
+        public static TTargetOptions? FindOptions<TTargetOptions>(this IExtensionOptions options)
+            where TTargetOptions : IExtensionOptions
+        {
+            if (!(options is TTargetOptions targetOptions))
+            {
+                if (options.ParentOptions != null)
+                    return FindOptions<TTargetOptions>(options.ParentOptions);
+
+                return default;
+            }
+
+            return targetOptions;
+        }
+
+        /// <summary>
+        /// 获取必需的目标扩展选项（通过 <see cref="FindOptions{TTargetOptions}(IExtensionOptions)"/> 实现，如果未找到则抛出异常）。
+        /// </summary>
+        /// <typeparam name="TTargetOptions">指定的目标扩展选项类型。</typeparam>
+        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+        /// <returns>返回 <typeparamref name="TTargetOptions"/>。</returns>
+        public static TTargetOptions GetRequiredOptions<TTargetOptions>(this IExtensionOptions options)
+            where TTargetOptions : IExtensionOptions
+        {
+            var targetOptions = options.FindOptions<TTargetOptions>();
+            if (targetOptions == null)
+                throw new ArgumentException($"Target options instance '{typeof(TTargetOptions)}' not found from current options '{options.GetType()}'.");
+
+            return targetOptions;
+        }
+
 
         /// <summary>
         /// 另存为 JSON 文件。
@@ -51,8 +89,6 @@ namespace Librame.Extensions.Core
         public static string SaveAsJson<TOptions>(this TOptions options, JsonSerializerOptions jsonOptions, string? filePath = null)
             where TOptions : IExtensionOptions
         {
-            options.NotNull(nameof(options));
-
             if (string.IsNullOrWhiteSpace(filePath))
             {
                 // 尝试创建配置目录

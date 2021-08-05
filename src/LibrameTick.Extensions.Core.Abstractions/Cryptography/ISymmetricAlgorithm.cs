@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 对称算法接口。
+    /// 定义对称算法接口。
     /// </summary>
     public interface ISymmetricAlgorithm : IAlgorithm
     {

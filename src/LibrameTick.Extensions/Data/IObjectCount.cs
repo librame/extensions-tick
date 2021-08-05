@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 对象计数接口。
+    /// 定义对象计数接口。
     /// </summary>
     public interface IObjectCount
     {

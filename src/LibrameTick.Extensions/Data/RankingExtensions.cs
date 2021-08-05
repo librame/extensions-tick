@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 排名静态扩展。
+    /// <see cref="IRanking{TRank}"/> 静态扩展。
     /// </summary>
     public static class RankingExtensions
     {
@@ -32,12 +32,7 @@ namespace Librame.Extensions.Data
         public static TRank SetRank<TRank>(this IRanking<TRank> ranking,
             Func<TRank, TRank> newRankFactory)
             where TRank : struct
-        {
-            ranking.NotNull(nameof(ranking));
-            newRankFactory.NotNull(nameof(newRankFactory));
-
-            return ranking.Rank = newRankFactory.Invoke(ranking.Rank);
-        }
+            => ranking.Rank = newRankFactory.Invoke(ranking.Rank);
 
         /// <summary>
         /// 异步设置排名。
@@ -50,12 +45,7 @@ namespace Librame.Extensions.Data
         public static ValueTask<TRank> SetRankAsync<TRank>(this IRanking<TRank> ranking,
             Func<TRank, TRank> newRankFactory, CancellationToken cancellationToken = default)
             where TRank : struct
-        {
-            ranking.NotNull(nameof(ranking));
-            newRankFactory.NotNull(nameof(newRankFactory));
-
-            return cancellationToken.RunValueTask(() => ranking.Rank = newRankFactory.Invoke(ranking.Rank));
-        }
+            => cancellationToken.RunValueTask(() => ranking.Rank = newRankFactory.Invoke(ranking.Rank));
 
 
         /// <summary>
@@ -67,9 +57,6 @@ namespace Librame.Extensions.Data
         public static object SetObjectRank(this IObjectRanking ranking,
             Func<object, object> newRankFactory)
         {
-            ranking.NotNull(nameof(ranking));
-            newRankFactory.NotNull(nameof(newRankFactory));
-
             var currentRank = ranking.GetObjectRank();
             return ranking.SetObjectRank(newRankFactory.Invoke(currentRank));
         }
@@ -84,9 +71,6 @@ namespace Librame.Extensions.Data
         public static async ValueTask<object> SetObjectRankAsync(this IObjectRanking ranking,
             Func<object, object> newRankFactory, CancellationToken cancellationToken = default)
         {
-            ranking.NotNull(nameof(ranking));
-            newRankFactory.NotNull(nameof(newRankFactory));
-
             var currentRank = await ranking.GetObjectRankAsync(cancellationToken)
                 .ConfigureAwaitWithoutContext();
 

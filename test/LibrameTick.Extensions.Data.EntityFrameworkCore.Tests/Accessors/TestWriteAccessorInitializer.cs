@@ -6,21 +6,39 @@ namespace Librame.Extensions.Data.Accessors
 {
     class TestWriteAccessorInitializer : AbstractAccessorInitializer<TestWriteAccessor>
     {
-        public TestWriteAccessorInitializer(TestWriteAccessor accessor)
+        private TestAccessorSeeder _seeder;
+
+
+        public TestWriteAccessorInitializer(TestWriteAccessor accessor, TestAccessorSeeder seeder)
             : base(accessor)
         {
+            _seeder = seeder;
         }
 
 
-        protected override void Populate(IServiceProvider services)
+        protected override void Populate(IServiceProvider services, DataExtensionOptions options)
         {
-            throw new NotImplementedException();
+            if (!Accessor.Users.LocalOrDbAny())
+            {
+                var users = _seeder.GetUsers();
+
+                Accessor.Users.AddRange(users);
+
+                Accessor.SaveChanges();
+            }
         }
 
-        protected override Task PopulateAsync(IServiceProvider services,
+        protected override async Task PopulateAsync(IServiceProvider services, DataExtensionOptions options,
             CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (!await Accessor.Users.LocalOrDbAnyAsync(cancellationToken: cancellationToken))
+            {
+                var users = await _seeder.GetUsersAsync(cancellationToken);
+
+                await Accessor.Users.AddRangeAsync(users, cancellationToken);
+
+                await Accessor.SaveChangesAsync();
+            }
         }
 
     }

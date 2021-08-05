@@ -10,14 +10,14 @@
 
 #endregion
 
+using Librame.Extensions.Core;
+using Librame.Extensions.Data.Accessors;
+using Librame.Extensions.Data.Stores;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Librame.Extensions.Data
 {
-    using Core;
-    using Data.Accessors;
-
     /// <summary>
     /// 数据扩展构建器。
     /// </summary>
@@ -36,11 +36,16 @@ namespace Librame.Extensions.Data
         {
             Services.AddSingleton(this);
 
+            AddOrReplaceByCharacteristic<IIdentificationGeneratorFactory, DefaultIdentificationGeneratorFactory>();
+
             // Accessors
-            AddOrReplaceByCharacteristic<IAccessorAggregator, AccessorAggregator>();
-            AddOrReplaceByCharacteristic<IAccessorManager, AccessorManager>();
-            AddOrReplaceByCharacteristic<IAccessorResolver, AccessorResolver>();
-            AddOrReplaceByCharacteristic<IAccessorSlicer, AccessorSlicer>();
+            AddOrReplaceByCharacteristic<IAccessorAggregator, DefaultAccessorAggregator>();
+            AddOrReplaceByCharacteristic<IAccessorManager, DefaultAccessorManager>();
+            AddOrReplaceByCharacteristic<IAccessorResolver, DefaultAccessorResolver>();
+            AddOrReplaceByCharacteristic<IAccessorSlicer, DefaultAccessorSlicer>();
+
+            // Stores
+            AddOrReplaceByCharacteristic(typeof(IStore<>), typeof(Store<>));
         }
 
     }

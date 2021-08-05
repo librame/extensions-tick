@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 父标识符静态扩展。
+    /// <see cref="IParentIdentifier{TId}"/> 静态扩展。
     /// </summary>
     public static class ParentIdentifierExtensions
     {
@@ -33,13 +33,7 @@ namespace Librame.Extensions.Data
         public static ValueTask<TParentId> SetParentIdAsync<TParentId>(this IParentIdentifier<TParentId> parentIdentifier,
             Func<TParentId, TParentId> newParentIdFactory, CancellationToken cancellationToken = default)
             where TParentId : IEquatable<TParentId>
-        {
-            parentIdentifier.NotNull(nameof(parentIdentifier));
-            newParentIdFactory.NotNull(nameof(newParentIdFactory));
-
-            return cancellationToken.RunValueTask(()
-                => parentIdentifier.ParentId = newParentIdFactory.Invoke(parentIdentifier.ParentId));
-        }
+            => cancellationToken.RunValueTask(() => parentIdentifier.ParentId = newParentIdFactory.Invoke(parentIdentifier.ParentId));
 
 
         /// <summary>
@@ -52,9 +46,6 @@ namespace Librame.Extensions.Data
         public static async ValueTask<object> SetObjectParentIdAsync(this IObjectParentIdentifier parentIdentifier,
             Func<object, object> newParentIdFactory, CancellationToken cancellationToken = default)
         {
-            parentIdentifier.NotNull(nameof(parentIdentifier));
-            newParentIdFactory.NotNull(nameof(newParentIdFactory));
-
             var currentParentId = await parentIdentifier.GetObjectParentIdAsync(cancellationToken).ConfigureAwaitWithoutContext();
 
             return await parentIdentifier.SetObjectParentIdAsync(newParentIdFactory.Invoke(currentParentId), cancellationToken)
