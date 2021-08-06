@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
@@ -22,7 +21,7 @@ namespace Librame.Extensions.Data.Accessors
     /// 抽象 <see cref="IAccessorInitializer"/> 实现。
     /// </summary>
     /// <typeparam name="TAccessor">指定已实现 <see cref="AbstractAccessor"/> 的访问器类型。</typeparam>
-    public abstract class AbstractAccessorInitializer<TAccessor> : AbstractServiceInitializer, IAccessorInitializer
+    public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitializer
         where TAccessor : AbstractAccessor
     {
         /// <summary>
@@ -45,7 +44,7 @@ namespace Librame.Extensions.Data.Accessors
         /// 初始化访问器。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-        protected override void OnInitialize(IServiceProvider services)
+        public virtual void Initialize(IServiceProvider services)
         {
             var builder = services.GetRequiredService<DataExtensionBuilder>();
             if (builder.Options.Access.InitializeDatabase)
@@ -60,7 +59,7 @@ namespace Librame.Extensions.Data.Accessors
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个异步操作。</returns>
-        protected override async Task OnInitializeAsync(IServiceProvider services,
+        public virtual async Task InitializeAsync(IServiceProvider services,
             CancellationToken cancellationToken = default)
         {
             var builder = services.GetRequiredService<DataExtensionBuilder>();

@@ -30,8 +30,6 @@ namespace Librame.Extensions.Core
         {
             Encoding = Encoding.UTF8;
             Clock = LocalClock.Default;
-            DataCenterId = 0;
-            MachineId = 0;
 
             Algorithms = new AlgorithmOptions(this);
             AssemblyLoading = new AssemblyLoadingOptions();
@@ -64,6 +62,11 @@ namespace Librame.Extensions.Core
         /// 机器标识。
         /// </summary>
         public long MachineId { get; set; }
+
+        /// <summary>
+        /// 启用 <see cref="IAutoloader"/> 激活器。
+        /// </summary>
+        public bool EnableAutoloaderActivator { get; set; }
 
 
         /// <summary>

@@ -2,11 +2,13 @@
 
 namespace Librame.Extensions.Data.Accessors
 {
-    static class TestAccessorExtensions
+    static class ModelBuilderTestAccessorExtensions
     {
 
         public static ModelBuilder CreateUserModel(this ModelBuilder modelBuilder)
         {
+            modelBuilder.UseEncryption();
+
             modelBuilder.Entity<User>(b =>
             {
                 b.ToTableByPluralize();

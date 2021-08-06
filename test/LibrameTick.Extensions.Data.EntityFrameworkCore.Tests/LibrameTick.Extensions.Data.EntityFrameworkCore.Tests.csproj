@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\shared\LibrameTick.Extensions.Data.Models\LibrameTick.Extensions.Data.Models.csproj" />
     <ProjectReference Include="..\..\src\LibrameTick.Extensions.Data.EntityFrameworkCore\LibrameTick.Extensions.Data.EntityFrameworkCore.csproj" />
   </ItemGroup>
 

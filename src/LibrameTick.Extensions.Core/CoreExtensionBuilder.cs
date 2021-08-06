@@ -10,18 +10,17 @@
 
 #endregion
 
+using Librame.Extensions.Core.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 
 namespace Librame.Extensions.Core
 {
-    using Cryptography;
-
     /// <summary>
     /// 核心扩展构建器。
     /// </summary>
-    public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionOptions>
+    public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionOptions, CoreExtensionBuilder>
     {
         /// <summary>
         /// 构造一个 <see cref="CoreExtensionBuilder"/>。
@@ -34,22 +33,22 @@ namespace Librame.Extensions.Core
         public CoreExtensionBuilder(IServiceCollection services, CoreExtensionOptions options)
             : base(services, options)
         {
-            Services.AddSingleton(this);
-
             // Cryptography
-            TryAddOrReplace<IAlgorithmParameterGenerator, DefaultAlgorithmParameterGenerator>();
-            TryAddOrReplace<IAsymmetricAlgorithm, DefaultAsymmetricAlgorithm>();
-            TryAddOrReplace<ISymmetricAlgorithm, DefaultSymmetricAlgorithm>();
+            TryAddOrReplaceService<IAlgorithmParameterGenerator, DefaultAlgorithmParameterGenerator>();
+            TryAddOrReplaceService<IAsymmetricAlgorithm, DefaultAsymmetricAlgorithm>();
+            TryAddOrReplaceService<ISymmetricAlgorithm, DefaultSymmetricAlgorithm>();
 
-            InitializerActivator = new ServiceInitializerActivator(options.AssemblyLoading);
-            InitializerActivator.Register(type => services.TryAddScoped(type));
+            if (options.EnableAutoloaderActivator)
+            {
+                AutoloaderActivator = new AssemblyAutoloaderActivator(options.AssemblyLoading);
+                AutoloaderActivator.RegisterContainer(type => services.TryAddScoped(type));
+            }
         }
 
 
         /// <summary>
-        /// <see cref="IServiceInitializer"/> 激活器。
+        /// <see cref="IAutoloader"/> 激活器。
         /// </summary>
-        public ServiceInitializerActivator InitializerActivator { get; init; }
-
+        public AssemblyAutoloaderActivator? AutoloaderActivator { get; init; }
     }
 }

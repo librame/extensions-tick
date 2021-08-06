@@ -10,34 +10,28 @@
 
 #endregion
 
+using Librame.Extensions.Data.Accessors;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 
-namespace Librame.Extensions.Core
+namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// <see cref="IServiceProvider"/> 静态扩展。
+    /// <see cref="IServiceProvider"/> 与 <see cref="IAccessorInitializer"/> 静态扩展。
     /// </summary>
-    public static class ServiceProviderExtensions
+    public static class ServiceProviderAccessorInitializerExtensions
     {
 
         /// <summary>
-        /// 使用服务初始化器。
+        /// 使用 <see cref="IAccessorInitializer"/>。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-        /// <param name="activateAction">给定的激活动作。</param>
         /// <returns>返回 <see cref="IServiceProvider"/>。</returns>
-        public static IServiceProvider UseServiceInitializer(this IServiceProvider services,
-            Action<ServiceInitializerActivator> activateAction)
+        public static IServiceProvider UseAccessorInitializer(this IServiceProvider services)
         {
-            var activator = services.GetRequiredService<CoreExtensionBuilder>().InitializerActivator;
-
-            using (var scope = services.CreateScope())
-            {
-                activator.ApplyServiceProvider(scope.ServiceProvider);
-
-                activateAction.Invoke(activator);
-            }
+            var initializers = services.GetRequiredService<IEnumerable<IAccessorInitializer>>();
+            initializers.ForEach(a => a.Initialize(services));
 
             return services;
         }

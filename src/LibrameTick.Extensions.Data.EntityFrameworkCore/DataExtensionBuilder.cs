@@ -13,7 +13,6 @@
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessors;
 using Librame.Extensions.Data.Stores;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Librame.Extensions.Data
@@ -21,11 +20,8 @@ namespace Librame.Extensions.Data
     /// <summary>
     /// 数据扩展构建器。
     /// </summary>
-    public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionOptions>
+    public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionOptions, DataExtensionBuilder>
     {
-        private ServiceCharacteristic? _initializerCharacteristic;
-
-
         /// <summary>
         /// 构造一个 <see cref="DataExtensionBuilder"/>。
         /// </summary>
@@ -37,33 +33,18 @@ namespace Librame.Extensions.Data
         public DataExtensionBuilder(IExtensionBuilder parentBuilder, DataExtensionOptions options)
             : base(parentBuilder, options)
         {
-            Services.AddSingleton(this);
-
-            TryAddOrReplace<IIdentificationGeneratorFactory, DefaultIdentificationGeneratorFactory>();
+            TryAddOrReplaceService<IIdentificationGeneratorFactory, DefaultIdentificationGeneratorFactory>();
 
             // Accessors
-            TryAddOrReplace<IAccessorAggregator, DefaultAccessorAggregator>();
-            TryAddOrReplace<IAccessorManager, DefaultAccessorManager>();
-            TryAddOrReplace<IAccessorResolver, DefaultAccessorResolver>();
-            TryAddOrReplace<IAccessorSlicer, DefaultAccessorSlicer>();
+            TryAddOrReplaceService<IAccessorAggregator, DefaultAccessorAggregator>();
+            TryAddOrReplaceService<IAccessorManager, DefaultAccessorManager>();
+            TryAddOrReplaceService<IAccessorResolver, DefaultAccessorResolver>();
+            TryAddOrReplaceService<IAccessorSlicer, DefaultAccessorSlicer>();
 
             // Stores
-            TryAddOrReplace(typeof(IStore<>), typeof(Store<>));
+            TryAddOrReplaceService(typeof(IStore<>), typeof(Store<>));
         }
 
-
-        /// <summary>
-        /// 添加 <see cref="IAccessorSeeder"/>。
-        /// </summary>
-        /// <typeparam name="TSeeder">指定的种子机类型。</typeparam>
-        /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-        public DataExtensionBuilder AddSeeder<TSeeder>()
-            where TSeeder : class, IAccessorSeeder
-        {
-            
-            TryAddOrReplace<IAccessorSeeder, TSeeder>();
-            return this;
-        }
 
         /// <summary>
         /// 添加 <see cref="IAccessorInitializer"/>。
@@ -73,10 +54,32 @@ namespace Librame.Extensions.Data
         public DataExtensionBuilder AddInitializer<TInitializer>()
             where TInitializer : class, IAccessorInitializer
         {
-            if (_initializerCharacteristic == null)
-                _initializerCharacteristic = Options.ServiceCharacteristics[typeof(IAccessorInitializer)];
+            TryAddEnumerableServices<IAccessorInitializer, TInitializer>();
+            return this;
+        }
 
-            Services.Add(new ServiceDescriptor(_initializerCharacteristic, typeof(TInitializer), _initializerCharacteristic.Lifetime));
+        /// <summary>
+        /// 添加 <typeparamref name="TMigrator"/>。
+        /// </summary>
+        /// <typeparam name="TMigrator">指定的移植器类型。</typeparam>
+        /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+        public DataExtensionBuilder AddMigrator<TMigrator>()
+            where TMigrator : class, IAccessorMigrator
+        {
+            TryAddOrReplaceService<IAccessorMigrator, TMigrator>();
+            return this;
+        }
+
+        /// <summary>
+        /// 添加 <typeparamref name="TSeeder"/>（仅注册种子机类型，种子机接口仅用于匹配特征）。
+        /// </summary>
+        /// <typeparam name="TSeeder">指定的种子机类型。</typeparam>
+        /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+        public DataExtensionBuilder AddSeeder<TSeeder>()
+            where TSeeder : class, IAccessorSeeder
+        {
+            // 仅注册种子机类型，种子机接口仅用于匹配特征
+            TryAddOrReplaceServiceByCharacteristic<IAccessorSeeder, TSeeder>();
             return this;
         }
 

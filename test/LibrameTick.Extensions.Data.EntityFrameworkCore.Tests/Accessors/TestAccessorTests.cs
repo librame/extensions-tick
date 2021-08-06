@@ -16,27 +16,29 @@ namespace Librame.Extensions.Data.Accessors
 
             services.AddDbContext<TestReadAccessor>(opts =>
             {
-                opts.UseSqlite("Data Source=librame_extensions.db");
+                opts.UseSqlite("Data Source=librame_extensions.db",
+                    a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
+
                 opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Read));
             });
             
             services.AddDbContextPool<TestWriteAccessor>(opts =>
             {
-                opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;");
+                opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;",
+                    a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
+
                 opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPool());
             });
 
             services.AddLibrame()
                 .AddData().AddSeeder<TestAccessorSeeder>()
+                    .AddMigrator<TestAccessorMigrator>()
                     .AddInitializer<TestReadAccessorInitializer>()
                     .AddInitializer<TestWriteAccessorInitializer>();
 
             var provider = services.BuildServiceProvider();
 
-            provider.UseServiceInitializer(setup =>
-            {
-                setup.Activate<IAccessorInitializer>();
-            });
+            provider.UseAccessorInitializer();
 
             var store = provider.GetRequiredService<IStore<User>>();
             Assert.NotNull(store);
