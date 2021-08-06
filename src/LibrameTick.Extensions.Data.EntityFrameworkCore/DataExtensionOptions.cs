@@ -54,6 +54,10 @@ namespace Librame.Extensions.Data
             ServiceCharacteristics.AddScope<IAccessorResolver>();
             ServiceCharacteristics.AddScope<IAccessorSlicer>();
 
+            ServiceCharacteristics.AddScope<IAccessorMigrator>();
+            ServiceCharacteristics.AddScope<IAccessorSeeder>();
+            ServiceCharacteristics.AddScope<IAccessorInitializer>();
+
             // Stores
             ServiceCharacteristics.AddScope(typeof(IStore<>));
         }

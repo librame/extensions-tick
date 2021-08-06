@@ -37,9 +37,9 @@ namespace Librame.Extensions.Core
             Services.AddSingleton(this);
 
             // Cryptography
-            AddOrReplaceByCharacteristic<IAlgorithmParameterGenerator, DefaultAlgorithmParameterGenerator>();
-            AddOrReplaceByCharacteristic<IAsymmetricAlgorithm, DefaultAsymmetricAlgorithm>();
-            AddOrReplaceByCharacteristic<ISymmetricAlgorithm, DefaultSymmetricAlgorithm>();
+            TryAddOrReplace<IAlgorithmParameterGenerator, DefaultAlgorithmParameterGenerator>();
+            TryAddOrReplace<IAsymmetricAlgorithm, DefaultAsymmetricAlgorithm>();
+            TryAddOrReplace<ISymmetricAlgorithm, DefaultSymmetricAlgorithm>();
 
             InitializerActivator = new ServiceInitializerActivator(options.AssemblyLoading);
             InitializerActivator.Register(type => services.TryAddScoped(type));

@@ -54,5 +54,11 @@ namespace Librame.Extensions.Data.Accessors
         /// </summary>
         public bool InitializeDatabase { get; set; }
             = true;
+
+        /// <summary>
+        /// 自动迁移数据库（默认自动迁移）。
+        /// </summary>
+        public bool AutomaticMigration { get; set; }
+            = true;
     }
 }

@@ -23,6 +23,9 @@ namespace Librame.Extensions.Data
     /// </summary>
     public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionOptions>
     {
+        private ServiceCharacteristic? _initializerCharacteristic;
+
+
         /// <summary>
         /// 构造一个 <see cref="DataExtensionBuilder"/>。
         /// </summary>
@@ -36,16 +39,45 @@ namespace Librame.Extensions.Data
         {
             Services.AddSingleton(this);
 
-            AddOrReplaceByCharacteristic<IIdentificationGeneratorFactory, DefaultIdentificationGeneratorFactory>();
+            TryAddOrReplace<IIdentificationGeneratorFactory, DefaultIdentificationGeneratorFactory>();
 
             // Accessors
-            AddOrReplaceByCharacteristic<IAccessorAggregator, DefaultAccessorAggregator>();
-            AddOrReplaceByCharacteristic<IAccessorManager, DefaultAccessorManager>();
-            AddOrReplaceByCharacteristic<IAccessorResolver, DefaultAccessorResolver>();
-            AddOrReplaceByCharacteristic<IAccessorSlicer, DefaultAccessorSlicer>();
+            TryAddOrReplace<IAccessorAggregator, DefaultAccessorAggregator>();
+            TryAddOrReplace<IAccessorManager, DefaultAccessorManager>();
+            TryAddOrReplace<IAccessorResolver, DefaultAccessorResolver>();
+            TryAddOrReplace<IAccessorSlicer, DefaultAccessorSlicer>();
 
             // Stores
-            AddOrReplaceByCharacteristic(typeof(IStore<>), typeof(Store<>));
+            TryAddOrReplace(typeof(IStore<>), typeof(Store<>));
+        }
+
+
+        /// <summary>
+        /// 添加 <see cref="IAccessorSeeder"/>。
+        /// </summary>
+        /// <typeparam name="TSeeder">指定的种子机类型。</typeparam>
+        /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+        public DataExtensionBuilder AddSeeder<TSeeder>()
+            where TSeeder : class, IAccessorSeeder
+        {
+            
+            TryAddOrReplace<IAccessorSeeder, TSeeder>();
+            return this;
+        }
+
+        /// <summary>
+        /// 添加 <see cref="IAccessorInitializer"/>。
+        /// </summary>
+        /// <typeparam name="TInitializer">指定的初始化器类型。</typeparam>
+        /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+        public DataExtensionBuilder AddInitializer<TInitializer>()
+            where TInitializer : class, IAccessorInitializer
+        {
+            if (_initializerCharacteristic == null)
+                _initializerCharacteristic = Options.ServiceCharacteristics[typeof(IAccessorInitializer)];
+
+            Services.Add(new ServiceDescriptor(_initializerCharacteristic, typeof(TInitializer), _initializerCharacteristic.Lifetime));
+            return this;
         }
 
     }

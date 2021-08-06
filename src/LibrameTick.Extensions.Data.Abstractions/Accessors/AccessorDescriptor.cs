@@ -63,11 +63,6 @@ namespace Librame.Extensions.Data.Accessors
         /// </summary>
         public IAccessor Accessor { get; init; }
 
-        ///// <summary>
-        ///// <see cref="Guid"/> 标识生成器。
-        ///// </summary>
-        //public IIdentificationGenerator<Guid>? GuidGenerator { get; init; }
-
 
         /// <summary>
         /// 比较访问器描述符的服务类型相等。

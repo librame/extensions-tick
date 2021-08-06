@@ -11,6 +11,7 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Librame.Extensions.Core
 {
@@ -22,49 +23,59 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 构造一个 <see cref="ServiceCharacteristic"/>。
         /// </summary>
-        /// <param name="lifetime">给定的 <see cref="ServiceLifetime"/>（可选；默认使用 <see cref="ServiceLifetime.Singleton"/>）。</param>
+        /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
-        public ServiceCharacteristic(ServiceLifetime lifetime = ServiceLifetime.Singleton,
-            bool replaceIfExists = false)
+        /// <param name="lifetime">给定的 <see cref="ServiceLifetime"/>（可选；默认使用 <see cref="ServiceLifetime.Singleton"/>）。</param>
+        public ServiceCharacteristic(Type serviceType, bool replaceIfExists = false,
+            ServiceLifetime lifetime = ServiceLifetime.Singleton)
         {
+            ServiceType = serviceType;
             Lifetime = lifetime;
             ReplaceIfExists = replaceIfExists;
         }
 
 
         /// <summary>
-        /// 服务的生命周期。
+        /// 服务类型。
         /// </summary>
-        public ServiceLifetime Lifetime{ get; init; }
+        public Type ServiceType { get; init; }
 
         /// <summary>
         /// 是否替换已存在的服务。
         /// </summary>
-        public bool ReplaceIfExists{ get; init; }
+        public bool ReplaceIfExists { get; init; }
+
+        /// <summary>
+        /// 服务的生命周期。
+        /// </summary>
+        public ServiceLifetime Lifetime{ get; init; }
 
 
         /// <summary>
         /// 单例服务。
         /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
         /// <returns>返回 <see cref="ServiceCharacteristic"/>。</returns>
-        public static ServiceCharacteristic Singleton(bool replaceIfExists = false)
-            => new ServiceCharacteristic(replaceIfExists: replaceIfExists);
+        public static ServiceCharacteristic Singleton(Type serviceType, bool replaceIfExists = false)
+            => new ServiceCharacteristic(serviceType, replaceIfExists: replaceIfExists);
 
         /// <summary>
         /// 域例服务。
         /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
         /// <returns>返回 <see cref="ServiceCharacteristic"/>。</returns>
-        public static ServiceCharacteristic Scope(bool replaceIfExists = false)
-            => new ServiceCharacteristic(ServiceLifetime.Scoped, replaceIfExists);
+        public static ServiceCharacteristic Scope(Type serviceType, bool replaceIfExists = false)
+            => new ServiceCharacteristic(serviceType, replaceIfExists, ServiceLifetime.Scoped);
 
         /// <summary>
         /// 瞬例服务。
         /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
         /// <returns>返回 <see cref="ServiceCharacteristic"/>。</returns>
-        public static ServiceCharacteristic Transient(bool replaceIfExists = false)
-            => new ServiceCharacteristic(ServiceLifetime.Transient, replaceIfExists);
+        public static ServiceCharacteristic Transient(Type serviceType, bool replaceIfExists = false)
+            => new ServiceCharacteristic(serviceType, replaceIfExists, ServiceLifetime.Transient);
     }
 }

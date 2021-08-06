@@ -65,7 +65,7 @@ namespace Librame.Extensions.Core
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddSingleton(Type serviceType, bool replaceIfExists = false)
         {
-            Add(serviceType, ServiceCharacteristic.Singleton(replaceIfExists));
+            Add(ServiceCharacteristic.Singleton(serviceType, replaceIfExists));
             return this;
         }
 
@@ -88,7 +88,7 @@ namespace Librame.Extensions.Core
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddScope(Type serviceType, bool replaceIfExists = false)
         {
-            Add(serviceType, ServiceCharacteristic.Scope(replaceIfExists));
+            Add(ServiceCharacteristic.Scope(serviceType, replaceIfExists));
             return this;
         }
 
@@ -111,7 +111,7 @@ namespace Librame.Extensions.Core
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddTransient(Type serviceType, bool replaceIfExists = false)
         {
-            Add(serviceType, ServiceCharacteristic.Transient(replaceIfExists));
+            Add(ServiceCharacteristic.Transient(serviceType, replaceIfExists));
             return this;
         }
 
@@ -119,13 +119,11 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 添加服务特征。
         /// </summary>
-        /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="characteristic">给定的 <see cref="ServiceCharacteristic"/>。</param>
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
-        public ServiceCharacteristicCollection Add<TService>(ServiceCharacteristic characteristic)
-            where TService : class
+        public ServiceCharacteristicCollection Add(ServiceCharacteristic characteristic)
         {
-            Add(typeof(TService), characteristic);
+            Add(characteristic.ServiceType, characteristic);
             return this;
         }
 

@@ -11,6 +11,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 namespace Librame.Extensions.Data.Accessors
 {
@@ -20,21 +21,23 @@ namespace Librame.Extensions.Data.Accessors
     public interface IAccessorManager
     {
         /// <summary>
-        /// 自定义访问器切片方法（可选；仅在 <see cref="AccessOptions.Relationship"/> 设定为 <see cref="AccessorsRelationship.Slicing"/> 时有效）。
+        /// 已注册的描述器列表。
         /// </summary>
-        Func<IAccessor, bool>? CustomSliceFunc { get; set; }
+        IReadOnlyList<AccessorDescriptor> Descriptors { get; }
 
 
         /// <summary>
         /// 获取读取访问器。
         /// </summary>
+        /// <param name="customSliceFunc">给定的自定义访问器切片方法（可选；仅在 <see cref="AccessOptions.Relationship"/> 设定为 <see cref="AccessorsRelationship.Slicing"/> 时有效）。</param>
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
-        IAccessor GetReadAccessor();
+        IAccessor GetReadAccessor(Func<IAccessor, bool>? customSliceFunc = null);
 
         /// <summary>
         /// 获取写入访问器。
         /// </summary>
+        /// <param name="customSliceFunc">给定的自定义访问器切片方法（可选；仅在 <see cref="AccessOptions.Relationship"/> 设定为 <see cref="AccessorsRelationship.Slicing"/> 时有效）。</param>
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
-        IAccessor GetWriteAccessor();
+        IAccessor GetWriteAccessor(Func<IAccessor, bool>? customSliceFunc = null);
     }
 }

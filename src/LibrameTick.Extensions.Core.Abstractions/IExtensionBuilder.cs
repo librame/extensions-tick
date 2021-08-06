@@ -44,7 +44,7 @@ namespace Librame.Extensions.Core
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        IExtensionBuilder AddOrReplaceByCharacteristic<TService, TImplementation>()
+        IExtensionBuilder TryAddOrReplace<TService, TImplementation>()
             where TService : class
             where TImplementation : class, TService;
 
@@ -54,7 +54,7 @@ namespace Librame.Extensions.Core
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="implementationType">给定的实现类型。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        IExtensionBuilder AddOrReplaceByCharacteristic<TService>(Type implementationType)
+        IExtensionBuilder TryAddOrReplace<TService>(Type implementationType)
             where TService : class;
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Librame.Extensions.Core
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="implementationType">给定的实现类型。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        IExtensionBuilder AddOrReplaceByCharacteristic(Type serviceType, Type implementationType);
+        IExtensionBuilder TryAddOrReplace(Type serviceType, Type implementationType);
 
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Librame.Extensions.Core
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="factory">给定的服务方法。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        IExtensionBuilder AddOrReplaceByCharacteristic<TService>(Func<IServiceProvider, TService> factory)
+        IExtensionBuilder TryAddOrReplace<TService>(Func<IServiceProvider, TService> factory)
             where TService : class;
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Librame.Extensions.Core
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="factory">给定的服务方法。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        IExtensionBuilder AddOrReplaceByCharacteristic(Type serviceType, Func<IServiceProvider, object> factory);
+        IExtensionBuilder TryAddOrReplace(Type serviceType, Func<IServiceProvider, object> factory);
 
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Librame.Extensions.Core
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="instance">给定的服务实例。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        IExtensionBuilder AddOrReplaceByCharacteristic<TService>(TService instance)
+        IExtensionBuilder TryAddOrReplace<TService>(TService instance)
             where TService : class;
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Librame.Extensions.Core
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="instance">给定的服务实例。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        IExtensionBuilder AddOrReplaceByCharacteristic(Type serviceType, object instance);
+        IExtensionBuilder TryAddOrReplace(Type serviceType, object instance);
 
         #endregion
 

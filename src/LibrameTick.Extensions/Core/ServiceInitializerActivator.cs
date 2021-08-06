@@ -55,15 +55,14 @@ namespace Librame.Extensions.Core
         {
             if (InitializerTypes != null)
             {
-                if (_serviceProvider == null)
-                    throw new ArgumentException($"{nameof(_serviceProvider)} is null. You may need to call the {nameof(ApplyServiceProvider)}() method.");
+                VerifyServiceProvider();
 
                 var initializerType = typeof(TInitializer);
                 var activateTypes = InitializerTypes.Where(p => p.IsAssignableToBaseType(initializerType));
 
                 foreach (var type in activateTypes)
                 {
-                    var initializer = (TInitializer?)_serviceProvider.GetService(type);
+                    var initializer = (TInitializer?)_serviceProvider!.GetService(type);
                     initializer?.Initialize(_serviceProvider);
                 }
             }
@@ -82,21 +81,27 @@ namespace Librame.Extensions.Core
         {
             if (InitializerTypes != null)
             {
-                if (_serviceProvider == null)
-                    throw new ArgumentException($"{nameof(_serviceProvider)} is null. You may need to call the {nameof(ApplyServiceProvider)}() method.");
+                VerifyServiceProvider();
 
                 var initializerType = typeof(TInitializer);
                 var activateTypes = InitializerTypes.Where(p => p.IsAssignableToBaseType(initializerType));
 
                 foreach (var type in activateTypes)
                 {
-                    var initializer = (TInitializer?)_serviceProvider.GetService(type);
+                    var initializer = (TInitializer?)_serviceProvider!.GetService(type);
                     if (initializer != null)
                         await initializer.InitializeAsync(_serviceProvider, cancellationToken);
                 }
             }
 
             return this;
+        }
+
+
+        private void VerifyServiceProvider()
+        {
+            if (_serviceProvider == null)
+                throw new ArgumentException($"{nameof(_serviceProvider)} is null. You may need to call the {nameof(ApplyServiceProvider)}() method.");
         }
 
 

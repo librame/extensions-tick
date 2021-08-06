@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data.Accessors
 {
     /// <summary>
-    /// 定义多访问器的访问关系。
+    /// 定义访问器集合的访问关系。
     /// </summary>
     public enum AccessorsRelationship
     {

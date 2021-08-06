@@ -11,8 +11,8 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using System.Collections.Generic;
 
 namespace Librame.Extensions.Core
 {
@@ -74,52 +74,54 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
-        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <typeparam name="TService">指定的服务类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现）。</typeparam>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic<TService>()
+        public virtual IExtensionBuilder TryAddOrReplace<TService>()
             where TService : class
         {
             var serviceType = typeof(TService);
-            return AddOrReplaceByCharacteristic(serviceType, serviceType);
+            return TryAddOrReplace(serviceType, serviceType);
         }
 
         /// <summary>
         /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
-        /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
+        /// <typeparam name="TImplementation">指定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现）。</typeparam>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic<TService, TImplementation>()
+        public virtual IExtensionBuilder TryAddOrReplace<TService, TImplementation>()
             where TService : class
             where TImplementation : class, TService
-            => AddOrReplaceByCharacteristic(typeof(TService), typeof(TImplementation));
+            => TryAddOrReplace(typeof(TService), typeof(TImplementation));
 
         /// <summary>
         /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
-        /// <param name="implementationType">给定的实现类型。</param>
+        /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现）。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic<TService>(Type implementationType)
+        public virtual IExtensionBuilder TryAddOrReplace<TService>(Type implementationType)
             where TService : class
-            => AddOrReplaceByCharacteristic(typeof(TService), implementationType);
+            => TryAddOrReplace(typeof(TService), implementationType);
 
         /// <summary>
         /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
-        /// <param name="implementationType">给定的实现类型。</param>
+        /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现）。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic(Type serviceType, Type implementationType)
+        public virtual IExtensionBuilder TryAddOrReplace(Type serviceType, Type implementationType)
         {
             if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-                characteristic = ServiceCharacteristic.Singleton();
+                characteristic = ServiceCharacteristic.Singleton(serviceType);
 
             if (Options.ReplacedServices.TryGetValue(serviceType, out var replacedType))
                 implementationType = replacedType;
 
             var descriptor = ServiceDescriptor.Describe(serviceType, implementationType, characteristic.Lifetime);
-            return AddOrReplaceByCharacteristic(descriptor, characteristic);
+            Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
+
+            return this;
         }
 
 
@@ -129,9 +131,9 @@ namespace Librame.Extensions.Core
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="factory">给定的服务方法。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic<TService>(Func<IServiceProvider, TService> factory)
+        public virtual IExtensionBuilder TryAddOrReplace<TService>(Func<IServiceProvider, TService> factory)
             where TService : class
-            => AddOrReplaceByCharacteristic(typeof(TService), factory);
+            => TryAddOrReplace(typeof(TService), factory);
 
         /// <summary>
         /// 通过服务特征实现添加或替换服务。
@@ -139,13 +141,15 @@ namespace Librame.Extensions.Core
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="factory">给定的服务方法。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic(Type serviceType, Func<IServiceProvider, object> factory)
+        public virtual IExtensionBuilder TryAddOrReplace(Type serviceType, Func<IServiceProvider, object> factory)
         {
             if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-                characteristic = ServiceCharacteristic.Singleton();
+                characteristic = ServiceCharacteristic.Singleton(serviceType);
 
-            var descriptor = ServiceDescriptor.Describe(serviceType, factory, characteristic.Lifetime);
-            return AddOrReplaceByCharacteristic(descriptor, characteristic);
+            var descriptor = ServiceDescriptor.Singleton(serviceType, factory);
+            Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
+
+            return this;
         }
 
 
@@ -155,9 +159,9 @@ namespace Librame.Extensions.Core
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="instance">给定的服务实例。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic<TService>(TService instance)
+        public virtual IExtensionBuilder TryAddOrReplace<TService>(TService instance)
             where TService : class
-            => AddOrReplaceByCharacteristic(typeof(TService), instance);
+            => TryAddOrReplace(typeof(TService), instance);
 
         /// <summary>
         /// 通过服务特征实现添加或替换服务。
@@ -165,32 +169,84 @@ namespace Librame.Extensions.Core
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="instance">给定的服务实例。</param>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder AddOrReplaceByCharacteristic(Type serviceType, object instance)
+        public virtual IExtensionBuilder TryAddOrReplace(Type serviceType, object instance)
         {
             // 虽然对象服务实例都是单例，但此处需要使用服务特征的是否替换功能
             if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-                characteristic = ServiceCharacteristic.Singleton();
+                characteristic = ServiceCharacteristic.Singleton(serviceType);
 
             var descriptor = ServiceDescriptor.Singleton(serviceType, instance);
-            return AddOrReplaceByCharacteristic(descriptor, characteristic);
+            Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
+
+            return this;
+        }
+
+        #endregion
+
+
+        #region TryAddEnumerable
+
+        /// <summary>
+        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
+        /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+        public IExtensionBuilder TryAddEnumerable<TService, TImplementation>()
+            where TService : class
+            where TImplementation : TService
+            => TryAddEnumerable(typeof(TService), typeof(TImplementation));
+
+        /// <summary>
+        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <param name="implementationType">给定的实现类型。</param>
+        /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+        public IExtensionBuilder TryAddEnumerable<TService>(Type implementationType)
+            where TService : class
+            => TryAddEnumerable(typeof(TService), implementationType);
+
+        /// <summary>
+        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <param name="implementationType">给定的实现类型。</param>
+        /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+        public IExtensionBuilder TryAddEnumerable(Type serviceType, Type implementationType)
+        {
+            if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
+                characteristic = ServiceCharacteristic.Singleton(serviceType);
+
+            Services.TryAddEnumerableByCharacteristic(characteristic, implementationType);
+
+            return this;
         }
 
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
         /// </summary>
-        /// <param name="descriptor">给定的 <see cref="ServiceDescriptor"/>。</param>
-        /// <param name="characteristic">给定的 <see cref="ServiceCharacteristic"/>。</param>
-        /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        protected virtual IExtensionBuilder AddOrReplaceByCharacteristic(ServiceDescriptor descriptor,
-            ServiceCharacteristic characteristic)
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <param name="implementationTypes">给定的实现类型集合。</param>
+        /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+        public IExtensionBuilder TryAddEnumerable<TService>(IEnumerable<Type> implementationTypes)
+            where TService : class
+            => TryAddEnumerable(typeof(TService), implementationTypes);
+
+        /// <summary>
+        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <param name="implementationTypes">给定的实现类型集合。</param>
+        /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+        public IExtensionBuilder TryAddEnumerable(Type serviceType, IEnumerable<Type> implementationTypes)
         {
-            // 如果需要替换已存在的服务
-            if (characteristic.ReplaceIfExists)
-                Services.Replace(descriptor);
-            else
-                Services.TryAdd(descriptor);
-            
+            if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
+                characteristic = ServiceCharacteristic.Singleton(serviceType);
+
+            Services.TryAddEnumerableByCharacteristic(characteristic, implementationTypes);
+
             return this;
         }
 

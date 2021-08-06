@@ -27,8 +27,9 @@ namespace Librame.Extensions.Data.Accessors
             });
 
             services.AddLibrame()
-                .AddData()
-                .AddTest();
+                .AddData().AddSeeder<TestAccessorSeeder>()
+                    .AddInitializer<TestReadAccessorInitializer>()
+                    .AddInitializer<TestWriteAccessorInitializer>();
 
             var provider = services.BuildServiceProvider();
 

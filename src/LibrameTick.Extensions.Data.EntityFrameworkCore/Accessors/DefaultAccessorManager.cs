@@ -19,53 +19,64 @@ namespace Librame.Extensions.Data.Accessors
     {
         private IAccessorAggregator _aggregator;
         private IAccessorSlicer _slicer;
-        private AccessorsRelationship _managementPattern;
-        private IReadOnlyList<AccessorDescriptor> _descriptors;
+        private IAccessorMigrator _migrator;
+        private AccessOptions _options;
 
         private IAccessor? _readAccessor;
         private IAccessor? _writeAccessor;
 
 
-        public DefaultAccessorManager(DataExtensionBuilder builder, IAccessorResolver resolver,
-            IAccessorAggregator aggregator, IAccessorSlicer slicer)
+        public DefaultAccessorManager(DataExtensionBuilder builder,
+            IAccessorResolver resolver, IAccessorAggregator aggregator,
+            IAccessorSlicer slicer, IAccessorMigrator migrator)
         {
             _aggregator = aggregator;
             _slicer = slicer;
+            _migrator = migrator;
+            _options = builder.Options.Access;
 
-            _descriptors = resolver.ResolveDescriptors();
-            if (_descriptors.Count < 1)
-                throw new ArgumentNullException("The accessor descriptor not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
-
-            _managementPattern = builder.Options.Access.Relationship;
-            CustomSliceFunc = builder.Options.Access.DefaultSliceFunc;
+            Descriptors = resolver.ResolveDescriptors();
+            if (Descriptors.Count < 1)
+                throw new ArgumentNullException($"The accessor descriptor not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
         }
 
 
-        public Func<IAccessor, bool>? CustomSliceFunc { get; set; }
+        public IReadOnlyList<AccessorDescriptor> Descriptors { get; init; }
 
 
-        public IAccessor GetReadAccessor()
+        public IAccessor GetReadAccessor(Func<IAccessor, bool>? customSliceFunc = null)
         {
+            OnAutomaticMigration();
+
             if (_readAccessor == null)
             {
-                _readAccessor = _managementPattern == AccessorsRelationship.Aggregation
-                    ? _aggregator.AggregateReadAccessors(_descriptors)
-                    : _slicer.SliceReadAccessors(_descriptors, CustomSliceFunc);
+                _readAccessor = _options.Relationship == AccessorsRelationship.Aggregation
+                    ? _aggregator.AggregateReadAccessors(Descriptors)
+                    : _slicer.SliceReadAccessors(Descriptors, customSliceFunc ?? _options.DefaultSliceFunc);
             }
             
             return _readAccessor!;
         }
 
-        public IAccessor GetWriteAccessor()
+        public IAccessor GetWriteAccessor(Func<IAccessor, bool>? customSliceFunc = null)
         {
+            OnAutomaticMigration();
+
             if (_writeAccessor == null)
             {
-                _writeAccessor = _managementPattern == AccessorsRelationship.Aggregation
-                    ? _aggregator.AggregateWriteAccessors(_descriptors)
-                    : _slicer.SliceWriteAccessors(_descriptors, CustomSliceFunc);
+                _writeAccessor = _options.Relationship == AccessorsRelationship.Aggregation
+                    ? _aggregator.AggregateWriteAccessors(Descriptors)
+                    : _slicer.SliceWriteAccessors(Descriptors, customSliceFunc ?? _options.DefaultSliceFunc);
             }
 
             return _writeAccessor!;
+        }
+
+
+        private void OnAutomaticMigration()
+        {
+            if (_options.AutomaticMigration)
+                _migrator.Migrate(Descriptors);
         }
 
     }
