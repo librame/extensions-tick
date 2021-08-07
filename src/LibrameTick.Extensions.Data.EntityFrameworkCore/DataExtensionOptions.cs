@@ -11,8 +11,9 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Data.Accessors;
-using Librame.Extensions.Data.Stores;
+using Librame.Extensions.Data.Access;
+using Librame.Extensions.Data.Store;
+using Librame.Extensions.Data.ValueConversion;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -39,7 +40,7 @@ namespace Librame.Extensions.Data
 
             Access = new AccessOptions(this);
 
-            // IdGenerators
+            // Base: IdentificationGenerator
             AddIdGenerator(new MongoIdentificationGenerator(CoreOptions.Clock));
             AddIdGenerator(new SnowflakeIdentificationGenerator(CoreOptions.MachineId,
                 CoreOptions.DataCenterId, CoreOptions.Clock));
@@ -48,7 +49,7 @@ namespace Librame.Extensions.Data
 
             ServiceCharacteristics.AddSingleton<IIdentificationGeneratorFactory>();
 
-            // Accessors
+            // Access
             ServiceCharacteristics.AddScope<IAccessorAggregator>();
             ServiceCharacteristics.AddScope<IAccessorManager>();
             ServiceCharacteristics.AddScope<IAccessorResolver>();
@@ -58,8 +59,11 @@ namespace Librame.Extensions.Data
             ServiceCharacteristics.AddScope<IAccessorSeeder>();
             ServiceCharacteristics.AddScope<IAccessorInitializer>();
 
-            // Stores
+            // Store
             ServiceCharacteristics.AddScope(typeof(IStore<>));
+
+            // ValueConversion
+            ServiceCharacteristics.AddScope<IEncryptionConverterFactory>();
         }
 
 

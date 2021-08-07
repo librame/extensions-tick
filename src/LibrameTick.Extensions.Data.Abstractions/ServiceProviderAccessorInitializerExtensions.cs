@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Data.Accessors;
+using Librame.Extensions.Data.Access;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;

@@ -20,8 +20,4 @@
     <ProjectReference Include="..\LibrameTick.Extensions.Data.Abstractions\LibrameTick.Extensions.Data.Abstractions.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Cryptography\" />
-  </ItemGroup>
-
 </Project>

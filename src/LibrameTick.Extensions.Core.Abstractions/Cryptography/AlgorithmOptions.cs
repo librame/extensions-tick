@@ -20,7 +20,15 @@ namespace Librame.Extensions.Core.Cryptography
     public class AlgorithmOptions
     {
         /// <summary>
-        /// 构造一个 <see cref="AlgorithmOptions"/>。
+        /// 使用 <see cref="DefaultNotifyProperty.Current"/> 构造一个 <see cref="AlgorithmOptions"/>（此构造函数适用于独立使用 <see cref="AlgorithmOptions"/> 的情况）。
+        /// </summary>
+        public AlgorithmOptions()
+            : this(DefaultNotifyProperty.Current)
+        {
+        }
+
+        /// <summary>
+        /// 使用给定的 <see cref="INotifyProperty"/> 构造一个 <see cref="AlgorithmOptions"/>（此构造函数适用于集成在 <see cref="AbstractExtensionOptions"/> 中配合使用，以实现扩展选项整体对属性值变化及时作出响应）。
         /// </summary>
         /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
         public AlgorithmOptions(INotifyProperty notifyProperty)
@@ -59,6 +67,21 @@ namespace Librame.Extensions.Core.Cryptography
         /// RSA 选项。
         /// </summary>
         public SigningCredentialsOptions Rsa { get; init; }
+
+
+        /// <summary>
+        /// 获取哈希码。
+        /// </summary>
+        /// <returns>返回 32 位整数。</returns>
+        public override int GetHashCode()
+            => ToString().GetHashCode();
+
+        /// <summary>
+        /// 转换为字符串。
+        /// </summary>
+        /// <returns>返回字符串。</returns>
+        public override string ToString()
+            => $"{Aes};{AesCcm};{AesGcm};{Rsa}";
 
 
         /// <summary>

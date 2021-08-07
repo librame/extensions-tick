@@ -11,8 +11,9 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Data.Accessors;
-using Librame.Extensions.Data.Stores;
+using Librame.Extensions.Data.Access;
+using Librame.Extensions.Data.Store;
+using Librame.Extensions.Data.ValueConversion;
 using System;
 
 namespace Librame.Extensions.Data
@@ -33,16 +34,20 @@ namespace Librame.Extensions.Data
         public DataExtensionBuilder(IExtensionBuilder parentBuilder, DataExtensionOptions options)
             : base(parentBuilder, options)
         {
+            // Base: IdentificationGenerator
             TryAddOrReplaceService<IIdentificationGeneratorFactory, DefaultIdentificationGeneratorFactory>();
 
-            // Accessors
+            // Access
             TryAddOrReplaceService<IAccessorAggregator, DefaultAccessorAggregator>();
             TryAddOrReplaceService<IAccessorManager, DefaultAccessorManager>();
             TryAddOrReplaceService<IAccessorResolver, DefaultAccessorResolver>();
             TryAddOrReplaceService<IAccessorSlicer, DefaultAccessorSlicer>();
 
-            // Stores
-            TryAddOrReplaceService(typeof(IStore<>), typeof(Store<>));
+            // Store
+            TryAddOrReplaceService(typeof(IStore<>), typeof(BaseStore<>));
+
+            // ValueConversion
+            TryAddOrReplaceService<IEncryptionConverterFactory, DefaultEncryptionConverterFactory>();
         }
 
 

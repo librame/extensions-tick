@@ -64,5 +64,20 @@ namespace Librame.Extensions.Core.Cryptography
             return keyFunc;
         }
 
+
+        /// <summary>
+        /// 获取哈希码。
+        /// </summary>
+        /// <returns>返回 32 位整数。</returns>
+        public override int GetHashCode()
+            => ToString().GetHashCode();
+
+        /// <summary>
+        /// 转换为字符串。
+        /// </summary>
+        /// <returns>返回字符串。</returns>
+        public override string ToString()
+            => $"{nameof(KeyMaxSize)}={KeyMaxSize},{nameof(Key)}={Key}";
+
     }
 }

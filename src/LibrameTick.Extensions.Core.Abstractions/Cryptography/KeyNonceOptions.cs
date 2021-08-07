@@ -10,13 +10,12 @@
 
 #endregion
 
+using Librame.Extensions.Core.Serialization;
 using System;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    using Serialization;
-
     /// <summary>
     /// 密钥、初始向量（IV）选项。
     /// </summary>
@@ -58,6 +57,21 @@ namespace Librame.Extensions.Core.Cryptography
             NotifyProperty.SetValue(nameof(Nonce), nonceFunc);
             return nonceFunc;
         }
+
+
+        /// <summary>
+        /// 获取哈希码。
+        /// </summary>
+        /// <returns>返回 32 位整数。</returns>
+        public override int GetHashCode()
+            => ToString().GetHashCode();
+
+        /// <summary>
+        /// 转换为字符串。
+        /// </summary>
+        /// <returns>返回字符串。</returns>
+        public override string ToString()
+            => $"{nameof(NonceMaxSize)}={NonceMaxSize},{nameof(Nonce)}={Nonce};{base.ToString()}";
 
     }
 }

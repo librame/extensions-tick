@@ -61,5 +61,20 @@ namespace Librame.Extensions.Core.Cryptography
             return credentialsFunc;
         }
 
+
+        /// <summary>
+        /// 获取哈希码。
+        /// </summary>
+        /// <returns>返回 32 位整数。</returns>
+        public override int GetHashCode()
+            => ToString().GetHashCode();
+
+        /// <summary>
+        /// 转换为字符串。
+        /// </summary>
+        /// <returns>返回字符串。</returns>
+        public override string ToString()
+            => $"{nameof(CredentialsFile)}={CredentialsFile},{nameof(Credentials.Key.KeySize)}={Credentials?.Key.KeySize},{nameof(Credentials.Key.KeyId)}={Credentials?.Key.KeyId}";
+
     }
 }
