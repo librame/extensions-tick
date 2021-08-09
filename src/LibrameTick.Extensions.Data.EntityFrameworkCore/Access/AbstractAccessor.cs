@@ -111,7 +111,7 @@ namespace Librame.Extensions.Data.Access
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
         /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-        public virtual IList<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+        public virtual IList<TEntity> FindListWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
             where TEntity : class
             => SpecificationEvaluator.EvaluateList(GetQueryable<TEntity>(), specification);
 
@@ -119,13 +119,13 @@ namespace Librame.Extensions.Data.Access
         /// 异步查找带有规约的实体集合。
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
-        public virtual Task<IList<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
-            ISpecification<TEntity>? specification = null)
+        public virtual Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(ISpecification<TEntity>? specification = null,
+            CancellationToken cancellationToken = default)
             where TEntity : class
-            => SpecificationEvaluator.EvaluateListAsync(GetQueryable<TEntity>(), cancellationToken, specification);
+            => SpecificationEvaluator.EvaluateListAsync(GetQueryable<TEntity>(), specification, cancellationToken);
 
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Librame.Extensions.Data.Access
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="pageAction">给定的分页动作。</param>
         /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
-        public virtual IPagingList<TEntity> FindPaging<TEntity>(Action<IPagingList<TEntity>> pageAction)
+        public virtual IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
             where TEntity : class
         {
             var list = new PagingList<TEntity>(GetQueryable<TEntity>());
@@ -150,7 +150,7 @@ namespace Librame.Extensions.Data.Access
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
-        public virtual Task<IPagingList<TEntity>> FindPagingAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+        public virtual Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
             CancellationToken cancellationToken = default)
             where TEntity : class
         {
@@ -172,7 +172,7 @@ namespace Librame.Extensions.Data.Access
         /// <param name="pageAction">给定的分页动作。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
         /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
-        public virtual IPagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
+        public virtual IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
             ISpecification<TEntity>? specification = null)
             where TEntity : class
             => SpecificationEvaluator.EvaluatePagingList(GetQueryable<TEntity>(), pageAction, specification);
@@ -182,13 +182,13 @@ namespace Librame.Extensions.Data.Access
         /// </summary>
         /// <typeparam name="TEntity">指定的实体类型。</typeparam>
         /// <param name="pageAction">给定的分页动作。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
-        public virtual Task<IPagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
-            CancellationToken cancellationToken = default, ISpecification<TEntity>? specification = null)
+        public virtual Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+            ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
             where TEntity : class
-            => SpecificationEvaluator.EvaluatePagingListAsync(GetQueryable<TEntity>(), pageAction, cancellationToken, specification);
+            => SpecificationEvaluator.EvaluatePagingListAsync(GetQueryable<TEntity>(), pageAction, specification, cancellationToken);
 
         #endregion
 

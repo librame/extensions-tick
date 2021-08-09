@@ -4,12 +4,13 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Access
 {
-    class TestReadAccessorInitializer : AbstractAccessorInitializer<TestReadAccessor>
+    class TestAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor>
+        where TAccessor : AbstractAccessor, ITestAccessor
     {
         private TestAccessorSeeder _seeder;
 
 
-        public TestReadAccessorInitializer(TestReadAccessor accessor, TestAccessorSeeder seeder)
+        public TestAccessorInitializer(TAccessor accessor, TestAccessorSeeder seeder)
             : base(accessor)
         {
             _seeder = seeder;

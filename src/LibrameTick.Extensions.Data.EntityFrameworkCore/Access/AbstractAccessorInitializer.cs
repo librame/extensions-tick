@@ -47,7 +47,11 @@ namespace Librame.Extensions.Data.Access
         public virtual void Initialize(IServiceProvider services)
         {
             var builder = services.GetRequiredService<DataExtensionBuilder>();
-            if (builder.Options.Access.InitializeDatabase)
+
+            if (builder.Options.Access.EnsureDatabaseDeleted)
+                Accessor.Database.EnsureDeleted();
+
+            if (builder.Options.Access.EnsureDatabaseCreated)
                 Accessor.Database.EnsureCreated();
 
             Populate(services, builder.Options);
@@ -63,7 +67,11 @@ namespace Librame.Extensions.Data.Access
             CancellationToken cancellationToken = default)
         {
             var builder = services.GetRequiredService<DataExtensionBuilder>();
-            if (builder.Options.Access.InitializeDatabase)
+
+            if (builder.Options.Access.EnsureDatabaseDeleted)
+                await Accessor.Database.EnsureDeletedAsync(cancellationToken);
+
+            if (builder.Options.Access.EnsureDatabaseCreated)
                 await Accessor.Database.EnsureCreatedAsync(cancellationToken);
 
             await PopulateAsync(services, builder.Options, cancellationToken);

@@ -12,71 +12,92 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Librame.Extensions.Data.Access
 {
     class DefaultAccessorManager : IAccessorManager
     {
         private IAccessorAggregator _aggregator;
-        private IAccessorSlicer _slicer;
+        //private IAccessorSlicer _slicer;
         private IAccessorMigrator _migrator;
         private AccessOptions _options;
 
         private IAccessor? _readAccessor;
         private IAccessor? _writeAccessor;
 
+        private readonly Dictionary<int, IAccessor?> _readGroupAccessors
+            = new Dictionary<int, IAccessor?>();
+
+        private readonly Dictionary<int, IAccessor?> _writeGroupAccessors
+            = new Dictionary<int, IAccessor?>();
+
 
         public DefaultAccessorManager(DataExtensionBuilder builder,
             IAccessorResolver resolver, IAccessorAggregator aggregator,
-            IAccessorSlicer slicer, IAccessorMigrator migrator)
+            IAccessorMigrator migrator)
         {
             _aggregator = aggregator;
-            _slicer = slicer;
             _migrator = migrator;
             _options = builder.Options.Access;
 
             Descriptors = resolver.ResolveDescriptors();
             if (Descriptors.Count < 1)
                 throw new ArgumentNullException($"The accessor descriptor not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
+
+            InitializeAccessors();
         }
 
 
         public IReadOnlyList<AccessorDescriptor> Descriptors { get; init; }
 
 
-        public IAccessor GetReadAccessor(Func<IAccessor, bool>? customSliceFunc = null)
+        private void InitializeAccessors()
         {
-            OnAutomaticMigration();
-
-            if (_readAccessor == null)
+            if (Descriptors.Count == 1)
             {
-                _readAccessor = _options.Relationship == AccessorsRelationship.Aggregation
-                    ? _aggregator.AggregateReadAccessors(Descriptors)
-                    : _slicer.SliceReadAccessors(Descriptors, customSliceFunc ?? _options.DefaultSliceFunc);
+                _readAccessor = _writeAccessor = Descriptors[0].Accessor;
             }
-            
-            return _readAccessor!;
-        }
-
-        public IAccessor GetWriteAccessor(Func<IAccessor, bool>? customSliceFunc = null)
-        {
-            OnAutomaticMigration();
-
-            if (_writeAccessor == null)
+            else
             {
-                _writeAccessor = _options.Relationship == AccessorsRelationship.Aggregation
-                    ? _aggregator.AggregateWriteAccessors(Descriptors)
-                    : _slicer.SliceWriteAccessors(Descriptors, customSliceFunc ?? _options.DefaultSliceFunc);
+                foreach (var group in Descriptors.GroupBy(descr => descr.Group))
+                {
+                    var groupList = group.ToList();
+
+                    _readGroupAccessors.Add(group.Key, _aggregator.AggregateReadAccessors(groupList));
+                    _writeGroupAccessors.Add(group.Key, _aggregator.AggregateWriteAccessors(groupList));
+                }
+
+                _readAccessor = _readGroupAccessors.FirstOrDefault().Value ?? Descriptors[0].Accessor;
+                _writeAccessor = _writeGroupAccessors.FirstOrDefault().Value ?? Descriptors[0].Accessor;
             }
-
-            return _writeAccessor!;
         }
-
 
         private void OnAutomaticMigration()
         {
             if (_options.AutomaticMigration)
                 _migrator.Migrate(Descriptors);
+        }
+
+
+        public IAccessor GetReadAccessor(int? group = null)
+        {
+            OnAutomaticMigration();
+
+            if (group.HasValue && _readGroupAccessors.TryGetValue(group.Value, out var accessor))
+                return accessor ?? _readAccessor!;
+
+            return _readAccessor!;
+        }
+
+        public IAccessor GetWriteAccessor(int? group = null)
+        {
+            OnAutomaticMigration();
+
+            if (group.HasValue && _writeGroupAccessors.TryGetValue(group.Value, out var accessor))
+                return accessor ?? _writeAccessor!;
+
+            return _writeAccessor!;
         }
 
     }

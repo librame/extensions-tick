@@ -158,35 +158,35 @@ namespace Librame.Extensions.Data.Access
             => ChainingAccessorsByException(a => a.FindAsync<TEntity>(keyValues));
 
 
-        public IList<TEntity> FindWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+        public IList<TEntity> FindListWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
             where TEntity : class
-            => ChainingAccessorsByException(a => a.FindWithSpecification(specification));
+            => ChainingAccessorsByException(a => a.FindListWithSpecification(specification));
 
-        public Task<IList<TEntity>> FindWithSpecificationAsync<TEntity>(CancellationToken cancellationToken = default,
-            ISpecification<TEntity>? specification = null)
-            where TEntity : class
-            => ChainingAccessorsByException(a => a.FindWithSpecificationAsync(cancellationToken, specification));
-
-
-        public IPagingList<TEntity> FindPaging<TEntity>(Action<IPagingList<TEntity>> pageAction)
-            where TEntity : class
-            => ChainingAccessorsByException(a => a.FindPaging(pageAction));
-
-        public Task<IPagingList<TEntity>> FindPagingAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+        public Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(ISpecification<TEntity>? specification = null,
             CancellationToken cancellationToken = default)
             where TEntity : class
-            => ChainingAccessorsByException(a => a.FindPagingAsync(pageAction, cancellationToken));
+            => ChainingAccessorsByException(a => a.FindListWithSpecificationAsync(specification, cancellationToken));
 
 
-        public IPagingList<TEntity> FindPagingWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
+        public IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
+            where TEntity : class
+            => ChainingAccessorsByException(a => a.FindPagingList(pageAction));
+
+        public Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+            CancellationToken cancellationToken = default)
+            where TEntity : class
+            => ChainingAccessorsByException(a => a.FindPagingListAsync(pageAction, cancellationToken));
+
+
+        public IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
             ISpecification<TEntity>? specification = null)
             where TEntity : class
-            => ChainingAccessorsByException(a => a.FindPagingWithSpecification(pageAction, specification));
+            => ChainingAccessorsByException(a => a.FindPagingListWithSpecification(pageAction, specification));
 
-        public Task<IPagingList<TEntity>> FindPagingWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
-            CancellationToken cancellationToken = default, ISpecification<TEntity>? specification = null)
+        public Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+            ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
             where TEntity : class
-            => ChainingAccessorsByException(a => a.FindPagingWithSpecificationAsync(pageAction, cancellationToken, specification));
+            => ChainingAccessorsByException(a => a.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
 
         #endregion
 

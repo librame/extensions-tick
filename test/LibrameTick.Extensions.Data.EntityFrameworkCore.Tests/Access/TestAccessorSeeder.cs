@@ -25,7 +25,7 @@ namespace Librame.Extensions.Data.Access
                 {
                     var user = new User
                     {
-                        Name = $"Test Name {i + 1}",
+                        Name = $"Seed Name {i + 1}",
                         Passwd = "123456"
                     };
 

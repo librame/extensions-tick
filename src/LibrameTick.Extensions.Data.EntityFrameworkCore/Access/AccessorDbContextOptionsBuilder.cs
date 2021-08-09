@@ -56,6 +56,14 @@ namespace Librame.Extensions.Data.Access
             => WithOption(e => e.WithEncoding(encoding));
 
         /// <summary>
+        /// 配置访问器所属群组（默认为 0，表示多个访问器划分为一组，同组意味着具有相同的增、删、改等操作；如果不需要改变，可不调用此方法）。
+        /// </summary>
+        /// <param name="group">给定的所属群组。</param>
+        /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+        public virtual AccessorDbContextOptionsBuilder WithGroup(int group)
+            => WithOption(e => e.WithGroup(group));
+
+        /// <summary>
         /// 配置访问器交互方式（默认为读/写；如果不需要改变，可不调用此方法）。
         /// </summary>
         /// <param name="interaction">给定的 <see cref="AccessorInteraction"/>。</param>

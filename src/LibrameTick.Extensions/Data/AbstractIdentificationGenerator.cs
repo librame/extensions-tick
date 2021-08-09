@@ -46,7 +46,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 生成标识对象。
         /// </summary>
-        /// <returns>返回标识符对象。</returns>
+        /// <returns>返回标识对象。</returns>
         public virtual object? GenerateObjectId()
             => GenerateId();
 
@@ -54,7 +54,7 @@ namespace Librame.Extensions.Data
         /// 异步生成标识对象。
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含标识符对象的异步操作。</returns>
+        /// <returns>返回一个包含标识对象的异步操作。</returns>
         public virtual async Task<object?> GenerateObjectIdAsync(CancellationToken cancellationToken = default)
             => await GenerateIdAsync(cancellationToken).ConfigureAwait();
     }

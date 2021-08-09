@@ -130,7 +130,6 @@ namespace Librame.Extensions.Data
 
                 _lastTimestamp = timestamp;
 
-                // Length(18): 814352650875961344
                 return nextId;
             }
         }

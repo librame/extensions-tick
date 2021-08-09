@@ -21,6 +21,7 @@ namespace Librame.Extensions.Data.Specification
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     public class BaseSpecification<T> : ISpecification<T>
+        where T : class
     {
         private readonly List<Expression<Func<T, object>>> _includes
             = new List<Expression<Func<T, object>>>();

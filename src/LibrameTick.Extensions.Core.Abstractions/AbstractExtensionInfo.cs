@@ -25,7 +25,6 @@ namespace Librame.Extensions.Core
         /// </summary>
         /// <param name="parentInfo">给定的父级 <see cref="IExtensionInfo"/>（可空；为空则表示当前为父级扩展）。</param>
         protected AbstractExtensionInfo(IExtensionInfo? parentInfo)
-            : base()
         {
             ParentInfo = parentInfo;
         }

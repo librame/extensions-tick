@@ -24,7 +24,6 @@ namespace Librame.Extensions.Core
         /// 构造一个 <see cref="ServiceCharacteristicCollection"/>。
         /// </summary>
         public ServiceCharacteristicCollection()
-            : base()
         {
         }
 

@@ -39,7 +39,7 @@ namespace Librame.Extensions.Data
         /// 唯一时间，这是一个避免重复的随机量，自行设定不要大于当前时间戳。
         /// </summary>
         public long Twepoch { get; private set; }
-            = 687888001020L;
+            = DateTimeExtensions.UtcBaseTime.Ticks;
 
 
         /// <summary>

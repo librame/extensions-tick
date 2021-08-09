@@ -10,21 +10,25 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Access
+using System.ComponentModel;
+
+namespace Librame.Extensions.Storage.Capacities
 {
     /// <summary>
-    /// 定义访问器集合的访问关系。
+    /// 定义表示文件大小的进制。
     /// </summary>
-    public enum AccessorsRelationship
+    public enum FileSizeSystem
     {
         /// <summary>
-        /// 对多访问器实现的聚合访问。在此设定下，可以对多访问器进行镜像操作。
+        /// 二进制。
         /// </summary>
-        Aggregation,
+        [Description("二进制")]
+        Binary = 2,
 
         /// <summary>
-        /// 对多访问器实现的切片访问。在此模式下，可以对多访问器进行分库操作。
+        /// 十进制。
         /// </summary>
-        Slicing
+        [Description("十进制")]
+        Decimal = 10
     }
 }

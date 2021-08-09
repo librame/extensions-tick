@@ -43,6 +43,8 @@ namespace Librame.Extensions.Data.ValueConversion
 
                 // 支持对字符串类型加密
                 converters.Add(new EncryptionConverter<string>(new StringEncryptionProvider(byteArrayProvider, descr.Encoding)));
+
+                _dictionary.AddOrUpdate(descr.ServiceType, converters, (k, ov) => converters);
             }
         }
 

@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Cryptography;
+
 namespace Librame.Extensions.Data
 {
     /// <summary>
@@ -25,6 +27,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 密码。
         /// </summary>
+        [Encrypted]
         public virtual string? Passwd { get; set; }
     }
 }

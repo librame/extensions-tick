@@ -71,9 +71,6 @@ namespace Librame.Extensions.Data
             return result.ToString();
         }
 
-        //private Task<MonggoIdentificationParameters> GenerateParametersAsync(CancellationToken cancellationToken = default)
-        //    => cancellationToken.RunTask(() => new MonggoIdentificationParameters(GetTimestampBytes()));
-
 
         private byte[] GetTimestampBytes()
         {

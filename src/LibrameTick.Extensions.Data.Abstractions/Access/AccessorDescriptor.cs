@@ -26,17 +26,24 @@ namespace Librame.Extensions.Data.Access
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="accessor">给定的访问器实例。</param>
+        /// <param name="group">给定的所属群组。</param>
         /// <param name="interaction">给定的交互方式。</param>
         /// <param name="isPooled">是否已池化。</param>
         /// <param name="priority">给定的优先级。</param>
         /// <param name="algorithms">给定的算法选项。</param>
         /// <param name="encoding">给定的字符编码。</param>
-        public AccessorDescriptor(Type serviceType, IAccessor accessor,
-            AccessorInteraction interaction, bool isPooled, float priority,
-            AlgorithmOptions algorithms, Encoding encoding)
+        public AccessorDescriptor(Type serviceType,
+            IAccessor accessor,
+            int group,
+            AccessorInteraction interaction,
+            bool isPooled,
+            float priority,
+            AlgorithmOptions algorithms,
+            Encoding encoding)
         {
             ServiceType = serviceType;
             Accessor = accessor;
+            Group = group;
             Interaction = interaction;
             IsPooled = isPooled;
             Priority = priority;
@@ -54,6 +61,11 @@ namespace Librame.Extensions.Data.Access
         /// 访问器实例。
         /// </summary>
         public IAccessor Accessor { get; init; }
+
+        /// <summary>
+        /// 所属群组。
+        /// </summary>
+        public int Group { get; init; }
 
         /// <summary>
         /// 交互方式。

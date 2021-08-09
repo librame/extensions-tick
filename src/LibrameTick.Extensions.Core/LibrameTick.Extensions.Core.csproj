@@ -23,5 +23,9 @@
   <ItemGroup>
     <ProjectReference Include="..\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Storage\" />
+  </ItemGroup>
 
 </Project>

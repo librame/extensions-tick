@@ -58,7 +58,7 @@ namespace Librame.Extensions.Data.Access
                     var algorithms = extension.Algorithms ?? _builder.Options.CoreOptions.Algorithms;
                     var encoding = extension.Encoding ?? _builder.Options.CoreOptions.Encoding;
 
-                    descriptors.Add(new AccessorDescriptor(extension.ServiceType!, accessor,
+                    descriptors.Add(new AccessorDescriptor(extension.ServiceType!, accessor, extension.Group,
                         extension.Interaction, extension.IsPooled, priority, algorithms, encoding));
                 }
             }

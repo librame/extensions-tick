@@ -30,14 +30,14 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 生成对象标识。
         /// </summary>
-        /// <returns>返回标识符对象。</returns>
+        /// <returns>返回标识对象。</returns>
         object? GenerateObjectId();
 
         /// <summary>
         /// 异步生成对象标识。
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含标识符对象的异步操作。</returns>
+        /// <returns>返回一个包含标识对象的异步操作。</returns>
         Task<object?> GenerateObjectIdAsync(CancellationToken cancellationToken = default);
     }
 }

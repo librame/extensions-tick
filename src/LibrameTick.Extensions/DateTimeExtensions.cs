@@ -20,6 +20,18 @@ namespace Librame.Extensions
     /// </summary>
     public static class DateTimeExtensions
     {
+        /// <summary>
+        /// 系统基础时间（默认为 <see cref="DateTime.UnixEpoch"/>）。
+        /// </summary>
+        public static readonly DateTime BaseTime
+            = DateTime.UnixEpoch;
+
+        /// <summary>
+        /// 系统 UTC 基础时间（默认为 <see cref="DateTimeOffset.UnixEpoch"/>）。
+        /// </summary>
+        public static readonly DateTimeOffset UtcBaseTime
+            = DateTimeOffset.UnixEpoch;
+
 
         /// <summary>
         /// 获取系统当前时间。
@@ -39,13 +51,19 @@ namespace Librame.Extensions
         /// <summary>
         /// 转换为相对于 Unix 时间等于 0 的时间点的周期数（可用于转换为 JavaScript 时间）。
         /// </summary>
+        /// <param name="dateTime">给定的 <see cref="DateTime"/>。</param>
+        /// <returns>返回长整数。</returns>
+        public static long ToUnixTicks(this DateTime dateTime)
+            => (long)TimeSpan.FromTicks(dateTime.Ticks - BaseTime.Ticks).TotalMilliseconds;
+
+        /// <summary>
+        /// 转换为相对于 Unix 时间等于 0 的时间点的周期数（可用于转换为 JavaScript 时间）。
+        /// </summary>
         /// <param name="dateTimeOffset">给定的 <see cref="DateTimeOffset"/>。</param>
         /// <returns>返回长整数。</returns>
         public static long ToUnixTicks(this DateTimeOffset dateTimeOffset)
         {
-            var unixEpochOffset = DateTimeOffset.UnixEpoch;
-
-            return (long)TimeSpan.FromTicks(dateTimeOffset.Ticks - unixEpochOffset.Ticks)
+            return (long)TimeSpan.FromTicks(dateTimeOffset.Ticks - UtcBaseTime.Ticks)
                 .TotalMilliseconds - GetUtcOffset(dateTimeOffset.Offset.Hours);
 
             // GetUtcOffset

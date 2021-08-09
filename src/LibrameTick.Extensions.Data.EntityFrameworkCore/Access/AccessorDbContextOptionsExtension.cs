@@ -30,6 +30,7 @@ namespace Librame.Extensions.Data.Access
 
         private AlgorithmOptions? _algorithms;
         private Encoding? _encoding;
+        private int _group;
         private AccessorInteraction _interaction = AccessorInteraction.ReadWrite;
         private bool _isPooled = false;
         private float _priority = -1; // 默认使用访问器定义的优先级属性值
@@ -53,6 +54,7 @@ namespace Librame.Extensions.Data.Access
         {
             _algorithms = copyFrom.Algorithms;
             _encoding = copyFrom.Encoding;
+            _group = copyFrom.Group;
             _interaction = copyFrom.Interaction;
             _isPooled = copyFrom.IsPooled;
             _priority = copyFrom.Priority;
@@ -71,6 +73,12 @@ namespace Librame.Extensions.Data.Access
         /// </summary>
         public Encoding? Encoding
             => _encoding;
+
+        /// <summary>
+        /// 所属群组。
+        /// </summary>
+        public int Group
+            => _group;
 
         /// <summary>
         /// 访问器交互方式。
@@ -136,6 +144,20 @@ namespace Librame.Extensions.Data.Access
             var clone = Clone();
 
             clone._encoding = encoding;
+
+            return clone;
+        }
+
+        /// <summary>
+        /// 使用指定的访问器所属群组创建一个选项扩展实例副本。
+        /// </summary>
+        /// <param name="group">给定的所属群组。</param>
+        /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+        public virtual AccessorDbContextOptionsExtension WithGroup(int group)
+        {
+            var clone = Clone();
+
+            clone._group = group;
 
             return clone;
         }
@@ -253,6 +275,10 @@ namespace Librame.Extensions.Data.Access
                             builder.Append(Extension.Encoding.AsEncodingName()).Append(' ');
                         }
 
+                        builder.Append(nameof(Extension.Group));
+                        builder.Append(": ");
+                        builder.Append(Extension.Group).Append(' ');
+
                         builder.Append(nameof(Extension.Interaction));
                         builder.Append(": ");
                         builder.Append(Extension.Interaction).Append(' ');
@@ -285,6 +311,9 @@ namespace Librame.Extensions.Data.Access
                 debugInfo["Accessor:" + nameof(Extension.Encoding)] =
                     (Extension.Encoding?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
 
+                debugInfo["Accessor:" + nameof(Extension.Group)] =
+                    Extension.Group.GetHashCode().ToString(CultureInfo.InvariantCulture);
+
                 debugInfo["Accessor:" + nameof(Extension.Interaction)] =
                     Extension.Interaction.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
@@ -304,6 +333,7 @@ namespace Librame.Extensions.Data.Access
                 {
                     var hashCode = Extension.Algorithms?.GetHashCode() ?? 0L;
                     hashCode = (hashCode * 3) ^ Extension.Encoding?.GetHashCode() ?? 0L;
+                    hashCode = (hashCode * 3) ^ Extension.Group.GetHashCode();
                     hashCode = (hashCode * 3) ^ Extension.Interaction.GetHashCode();
                     hashCode = (hashCode * 3) ^ Extension.IsPooled.GetHashCode();
                     hashCode = (hashCode * 3) ^ Extension.Priority.GetHashCode();

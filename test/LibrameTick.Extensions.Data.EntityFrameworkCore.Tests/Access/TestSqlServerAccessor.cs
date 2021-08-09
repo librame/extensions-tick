@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Librame.Extensions.Data.Access
 {
-    public class TestReadAccessor : AbstractAccessor<TestReadAccessor>, ITestAccessor
+    public class TestSqlServerAccessor : AbstractAccessor<TestSqlServerAccessor>, ITestAccessor
     {
 
 #pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
-        public TestReadAccessor(DbContextOptions<TestReadAccessor> options)
+        public TestSqlServerAccessor(DbContextOptions<TestSqlServerAccessor> options)
 #pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
             : base(options)
         {
@@ -22,10 +22,10 @@ namespace Librame.Extensions.Data.Access
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.CreateUserModel();
+
             var converterFactory = this.GetService<IEncryptionConverterFactory>();
             modelBuilder.UseEncryption(converterFactory, AccessorType);
-
-            modelBuilder.CreateUserModel();
         }
 
     }

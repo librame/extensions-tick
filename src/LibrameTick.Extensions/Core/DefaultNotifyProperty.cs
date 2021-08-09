@@ -24,7 +24,6 @@ namespace Librame.Extensions.Core
 
 
         private DefaultNotifyProperty()
-            : base()
         {
         }
 
