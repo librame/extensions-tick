@@ -17,37 +17,38 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 签名证书选项。
+    /// 定义实现 <see cref="IOptions"/> 的签名证书选项。
     /// </summary>
-    public class SigningCredentialsOptions
+    public class SigningCredentialsOptions : AbstractOptions
     {
         /// <summary>
         /// 构造一个 <see cref="SigningCredentialsOptions"/>。
         /// </summary>
-        /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
-        public SigningCredentialsOptions(INotifyProperty notifyProperty)
+        /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        public SigningCredentialsOptions(IPropertyNotifier parentNotifier)
+            : base(parentNotifier)
         {
-            NotifyProperty = notifyProperty;
         }
-
-
-        /// <summary>
-        /// 通知属性。
-        /// </summary>
-        protected INotifyProperty NotifyProperty { get; init; }
 
 
         /// <summary>
         /// 证书文件（默认兼容 IdentityServer4 生成的临时密钥文件）。
         /// </summary>
-        public string? CredentialsFile { get; set; }
-            = "tempkey.rsa"; // 默认兼容 IdentityServer4 生成的临时密钥文件
+        public string CredentialsFile
+        {
+            get => Notifier.GetOrAdd(nameof(CredentialsFile), "tempkey.rsa");
+            set => Notifier.AddOrUpdate(nameof(CredentialsFile), value);
+        }
 
         /// <summary>
         /// 签名证书。
         /// </summary>
         [JsonIgnore]
-        public SigningCredentials? Credentials { get; set; }
+        public SigningCredentials Credentials
+        {
+            get => Notifier.GetOrAdd(nameof(Credentials), CredentialsFile.LoadOrCreateCredentialsFromFile());
+            set => Notifier.AddOrUpdate(nameof(Credentials), value);
+        }
 
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回签名证书方法。</returns>
         public Func<SigningCredentials> SetCredentialsFunc(Func<SigningCredentials> credentialsFunc)
         {
-            NotifyProperty.SetValue(nameof(Credentials), credentialsFunc);
+            Notifier.AddOrUpdate(nameof(Credentials), credentialsFunc);
             return credentialsFunc;
         }
 
@@ -74,7 +75,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// </summary>
         /// <returns>返回字符串。</returns>
         public override string ToString()
-            => $"{nameof(CredentialsFile)}={CredentialsFile},{nameof(Credentials.Key.KeySize)}={Credentials?.Key.KeySize},{nameof(Credentials.Key.KeyId)}={Credentials?.Key.KeyId}";
+            => $"{nameof(CredentialsFile)}={CredentialsFile},{nameof(Credentials.Key.KeySize)}={Credentials.Key.KeySize},{nameof(Credentials.Key.KeyId)}={Credentials.Key.KeyId}";
 
     }
 }

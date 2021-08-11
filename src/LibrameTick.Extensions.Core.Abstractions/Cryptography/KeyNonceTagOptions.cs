@@ -10,23 +10,22 @@
 
 #endregion
 
-using Librame.Extensions.Core.Serialization;
 using System;
-using System.Text.Json.Serialization;
+using System.Security.Cryptography;
 
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 密钥、初始向量（IV）、验证标记选项。
+    /// 定义实现 <see cref="IOptions"/> 的密钥、初始向量（IV）、验证标记选项。
     /// </summary>
     public class KeyNonceTagOptions : KeyNonceOptions
     {
         /// <summary>
         /// 构造一个 <see cref="KeyNonceTagOptions"/>。
         /// </summary>
-        /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
-        public KeyNonceTagOptions(INotifyProperty notifyProperty)
-            : base(notifyProperty)
+        /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        public KeyNonceTagOptions(IPropertyNotifier parentNotifier)
+            : base(parentNotifier)
         {
         }
 
@@ -39,11 +38,10 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 验证标记。
         /// </summary>
-        [JsonConverter(typeof(JsonStringBase64Converter))]
-        public byte[]? Tag
+        public byte[] Tag
         {
-            get => NotifyProperty.GetValue<byte[]?>(nameof(Tag));
-            set => NotifyProperty.SetValue(nameof(Tag), value.NotNull(nameof(Tag)));
+            get => Notifier.GetOrAdd(nameof(Tag), Array.Empty<byte>());
+            set => Notifier.AddOrUpdate(nameof(Tag), value);
         }
 
 
@@ -54,7 +52,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回验证标记方法。</returns>
         public Func<byte[]> SetTagFunc(Func<byte[]> tagFunc)
         {
-            NotifyProperty.SetValue(nameof(Tag), tagFunc);
+            Notifier.AddOrUpdate(nameof(Tag), tagFunc);
             return tagFunc;
         }
 
@@ -72,6 +70,49 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回字符串。</returns>
         public override string ToString()
             => $"{nameof(TagMaxSize)}={TagMaxSize},{nameof(Tag)}={Tag};{base.ToString()}";
+
+
+        /// <summary>
+        /// 创建 AES-CCM 选项。
+        /// </summary>
+        /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
+        public static KeyNonceTagOptions CreateAesCcmOptions(IPropertyNotifier parentNotifier)
+        {
+            var options = new KeyNonceTagOptions(parentNotifier);
+
+            // 参数长度不能是 16、24 或 32 字节（128、192 或 256 位）
+            options.KeyMaxSize = 255;
+            options.NonceMaxSize = AesCcm.NonceByteSizes.MaxSize;
+            options.TagMaxSize = AesCcm.TagByteSizes.MaxSize;
+
+            options.Key = RandomExtensions.GenerateByteArray(options.KeyMaxSize);
+            options.Nonce = RandomExtensions.GenerateByteArray(options.NonceMaxSize);
+            options.Tag = RandomExtensions.GenerateByteArray(options.TagMaxSize);
+
+            return options;
+        }
+
+        /// <summary>
+        /// 创建 AES-GCM 选项。
+        /// </summary>
+        /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
+        public static KeyNonceTagOptions CreateAesGcmOptions(IPropertyNotifier parentNotifier)
+        {
+            var options = new KeyNonceTagOptions(parentNotifier);
+
+            // 参数长度不能是 16、24 或 32 字节（128、192 或 256 位）
+            options.KeyMaxSize = 255;
+            options.NonceMaxSize = AesGcm.NonceByteSizes.MaxSize;
+            options.TagMaxSize = AesGcm.TagByteSizes.MaxSize;
+
+            options.Key = RandomExtensions.GenerateByteArray(options.KeyMaxSize);
+            options.Nonce = RandomExtensions.GenerateByteArray(options.NonceMaxSize);
+            options.Tag = RandomExtensions.GenerateByteArray(options.TagMaxSize);
+
+            return options;
+        }
 
     }
 }

@@ -17,7 +17,7 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义抽象实现泛型扩展选项。
+    /// 定义抽象实现泛型 <see cref="AbstractExtensionOptions"/>。
     /// </summary>
     /// <typeparam name="TOptions">指定的扩展信息类型。</typeparam>
     public abstract class AbstractExtensionOptions<TOptions> : AbstractExtensionOptions
@@ -31,8 +31,8 @@ namespace Librame.Extensions.Core
         protected AbstractExtensionOptions(IExtensionOptions? parentOptions, DirectoryOptions? directories = null)
             : base(parentOptions, directories)
         {
-            PropertyChanging += AbstractExtensionOptions_PropertyChanging;
-            PropertyChanged += AbstractExtensionOptions_PropertyChanged;
+            Notifier.PropertyChanging += AbstractExtensionOptions_PropertyChanging;
+            Notifier.PropertyChanged += AbstractExtensionOptions_PropertyChanged;
         }
 
 

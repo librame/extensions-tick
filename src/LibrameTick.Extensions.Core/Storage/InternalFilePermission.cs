@@ -10,9 +10,14 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography
+namespace Librame.Extensions.Core.Storage
 {
-    class DefaultAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
+    class InternalFilePermission : AbstractFilePermission
     {
+        public InternalFilePermission(CoreExtensionBuilder builder)
+            : base(builder.Options.Requests)
+        {
+        }
+
     }
 }

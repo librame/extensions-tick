@@ -11,31 +11,27 @@
 #endregion
 
 using System;
-using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core
 {
     /// <summary>
     /// 定义扩展信息接口（<see cref="IExtensionOptions"/>、<see cref="IExtensionBuilder"/> 的公共基础扩展接口）。
     /// </summary>
-    public interface IExtensionInfo : INotifyProperty
+    public interface IExtensionInfo
     {
         /// <summary>
         /// 信息类型。
         /// </summary>
-        [JsonIgnore]
         Type InfoType { get; }
 
         /// <summary>
         /// 名称。
         /// </summary>
-        [JsonIgnore]
         string Name { get; }
 
         /// <summary>
         /// 父级信息。
         /// </summary>
-        [JsonIgnore]
         IExtensionInfo? ParentInfo { get; }
     }
 }

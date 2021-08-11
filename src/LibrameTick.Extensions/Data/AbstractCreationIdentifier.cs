@@ -134,6 +134,23 @@ namespace Librame.Extensions.Data
 
 
         /// <summary>
+        /// 比较创建者相等。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="ICreator{TCreatedBy}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public virtual bool Equals(ICreator<TCreatedBy>? other)
+            => other != null && CreatedBy != null && CreatedBy.Equals(other.CreatedBy);
+
+        /// <summary>
+        /// 比较创建时间相等。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="ICreationTime{TCreatedTime}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public virtual bool Equals(ICreationTime<TCreatedTime>? other)
+            => other != null && CreatedTime.Equals(other.CreatedTime);
+
+
+        /// <summary>
         /// 转换为创建者。
         /// </summary>
         /// <param name="createdBy">给定的创建者对象。</param>

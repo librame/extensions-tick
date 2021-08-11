@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data
     /// 定义泛型锁定接口。
     /// </summary>
     /// <typeparam name="TLockoutTime">指定的锁定期时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
-    public interface ILockout<TLockoutTime> : IObjectLockout
+    public interface ILockout<TLockoutTime> : IEquatable<TLockoutTime>, IObjectLockout
         where TLockoutTime : struct
     {
         /// <summary>

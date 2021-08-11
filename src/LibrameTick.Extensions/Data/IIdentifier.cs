@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data
     /// 定义泛型标识符接口。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型（兼容各种引用与值类型标识）。</typeparam>
-    public interface IIdentifier<TId> : IObjectIdentifier
+    public interface IIdentifier<TId> : IEquatable<IIdentifier<TId>>, IObjectIdentifier
         where TId : IEquatable<TId>
     {
         /// <summary>

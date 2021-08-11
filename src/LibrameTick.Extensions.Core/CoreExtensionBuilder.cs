@@ -34,13 +34,13 @@ namespace Librame.Extensions.Core
             : base(services, options)
         {
             // Cryptography
-            TryAddOrReplaceService<IAlgorithmParameterGenerator, DefaultAlgorithmParameterGenerator>();
-            TryAddOrReplaceService<IAsymmetricAlgorithm, DefaultAsymmetricAlgorithm>();
-            TryAddOrReplaceService<ISymmetricAlgorithm, DefaultSymmetricAlgorithm>();
+            TryAddOrReplaceService<IAlgorithmParameterGenerator, InternalAlgorithmParameterGenerator>();
+            TryAddOrReplaceService<IAsymmetricAlgorithm, InternalAsymmetricAlgorithm>();
+            TryAddOrReplaceService<ISymmetricAlgorithm, InternalSymmetricAlgorithm>();
 
             if (options.EnableAutoloaderActivator)
             {
-                AutoloaderActivator = new AssemblyAutoloaderActivator(options.AssemblyLoading);
+                AutoloaderActivator = new AssemblyAutoloaderActivator(options.AssemblyLoadings);
                 AutoloaderActivator.RegisterContainer(type => services.TryAddScoped(type));
             }
         }

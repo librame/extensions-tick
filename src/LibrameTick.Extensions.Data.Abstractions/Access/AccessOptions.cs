@@ -24,8 +24,8 @@ namespace Librame.Extensions.Data.Access
         /// <summary>
         /// 构造一个 <see cref="AccessOptions"/>。
         /// </summary>
-        /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
-        public AccessOptions(INotifyProperty notifyProperty)
+        /// <param name="notifyProperty">给定的 <see cref="IPropertyNotifier"/>。</param>
+        public AccessOptions(IPropertyNotifier notifyProperty)
         {
             NotifyProperty = notifyProperty;
         }
@@ -34,7 +34,7 @@ namespace Librame.Extensions.Data.Access
         /// <summary>
         /// 通知属性。
         /// </summary>
-        protected INotifyProperty NotifyProperty { get; init; }
+        protected IPropertyNotifier NotifyProperty { get; init; }
 
 
         /// <summary>

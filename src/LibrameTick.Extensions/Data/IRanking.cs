@@ -10,14 +10,15 @@
 
 #endregion
 
+using System;
+
 namespace Librame.Extensions.Data
 {
     /// <summary>
     /// 定义泛型排名接口。
     /// </summary>
     /// <typeparam name="TRank">指定的排序类型（兼容整数、单双精度等结构体的排序字段）。</typeparam>
-    public interface IRanking<TRank> : IObjectRanking
-        where TRank : struct
+    public interface IRanking<TRank> : IComparable<IRanking<TRank>>, IEquatable<IRanking<TRank>>, IObjectRanking
     {
         /// <summary>
         /// 排名。

@@ -24,13 +24,18 @@ namespace Librame.Extensions.Data
     /// </summary>
     /// <typeparam name="TRank">指定的排名类型（兼容整数、单双精度等结构体的排名字段）。</typeparam>
     public abstract class AbstractRanking<TRank> : IRanking<TRank>
-        where TRank : struct
+        where TRank : IComparable<TRank>, IEquatable<TRank>
     {
+
+#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
+
         /// <summary>
         /// 排名。
         /// </summary>
         [Display(Name = nameof(Rank), GroupName = nameof(DataResource.DataGroup), ResourceType = typeof(DataResource))]
         public virtual TRank Rank { get; set; }
+
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
 
         /// <summary>
@@ -39,6 +44,23 @@ namespace Librame.Extensions.Data
         [NotMapped]
         public virtual Type RankType
             => typeof(TRank);
+
+
+        /// <summary>
+        /// 比较排名。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="IRanking{TRank}"/>。</param>
+        /// <returns>返回 32 位整数。</returns>
+        public virtual int CompareTo(IRanking<TRank>? other)
+            => other != null ? Rank.CompareTo(other.Rank) : -1;
+
+        /// <summary>
+        /// 比较相等。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="IRanking{TRank}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public virtual bool Equals(IRanking<TRank>? other)
+            => other != null && Rank.Equals(other.Rank);
 
 
         /// <summary>

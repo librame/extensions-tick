@@ -12,12 +12,12 @@
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    class DefaultAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
+    class InternalAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
     {
         private CoreExtensionOptions _options;
 
 
-        public DefaultAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        public InternalAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
             CoreExtensionBuilder extensionBuilder)
             : base(parameterGenerator, extensionBuilder)
         {

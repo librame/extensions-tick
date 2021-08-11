@@ -37,10 +37,6 @@ namespace Librame.Extensions.Data.Access
 
         #region Private
 
-        /// <summary>
-        /// 批量处理访问器集合。
-        /// </summary>
-        /// <param name="action">给定的处理动作。</param>
         private void BatchingAccessors(Action<IAccessor> action)
         {
             foreach (var accessor in _accessors)
@@ -49,12 +45,6 @@ namespace Librame.Extensions.Data.Access
             }
         }
 
-        /// <summary>
-        /// 批量处理访问器集合。
-        /// </summary>
-        /// <typeparam name="TResult">指定的结果类型。</typeparam>
-        /// <param name="func">给定的处理方法。</param>
-        /// <returns>返回 <typeparamref name="TResult"/>。</returns>
         private TResult? BatchingAccessors<TResult>(Func<IAccessor, TResult> func)
         {
             var result = default(TResult);
@@ -68,45 +58,31 @@ namespace Librame.Extensions.Data.Access
         }
 
 
-        /// <summary>
-        /// 通过异常进行链式处理访问器集合（每次只保存单个访问器数据）。
-        /// </summary>
-        /// <param name="action">给定的处理方法。</param>
-        /// <param name="accessorIndex">给定的访问器起始索引（可选；默认从 0 开始）。</param>
         private void ChainingAccessorsByException(Action<IAccessor> action, int accessorIndex = 0)
         {
             try
             {
-                // 尝试使用指定索引处的访问器保存更改
                 action.Invoke(_accessors[accessorIndex]);
             }
             catch (Exception)
             {
                 if (accessorIndex < _accessors.Length - 1)
-                    ChainingAccessorsByException(action, accessorIndex++); // 链式保存更改
+                    ChainingAccessorsByException(action, accessorIndex++); // 链式处理
 
                 throw; // 所有访问器均出错时则抛出异常
             }
         }
 
-        /// <summary>
-        /// 通过异常进行链式处理访问器集合（每次只保存单个访问器数据）。
-        /// </summary>
-        /// <typeparam name="TResult">指定的结果类型。</typeparam>
-        /// <param name="func">给定的处理方法。</param>
-        /// <param name="accessorIndex">给定的访问器起始索引（可选；默认从 0 开始）。</param>
-        /// <returns>返回 <typeparamref name="TResult"/>。</returns>
         private TResult ChainingAccessorsByException<TResult>(Func<IAccessor, TResult> func, int accessorIndex = 0)
         {
             try
             {
-                // 尝试使用指定索引处的访问器保存更改
                 return func.Invoke(_accessors[accessorIndex]);
             }
             catch (Exception)
             {
                 if (accessorIndex < _accessors.Length - 1)
-                    return ChainingAccessorsByException(func, accessorIndex++); // 链式保存更改
+                    return ChainingAccessorsByException(func, accessorIndex++); // 链式处理
 
                 throw; // 所有访问器均出错时则抛出异常
             }

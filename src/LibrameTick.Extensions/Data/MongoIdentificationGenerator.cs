@@ -43,7 +43,7 @@ namespace Librame.Extensions.Data
         public MongoIdentificationGenerator(IClock clock)
         {
             _clock = clock;
-            _machineHash = _encoding.GetBytes(Dns.GetHostName()).AsMD5();
+            _machineHash = _encoding.GetBytes(Dns.GetHostName()).AsMd5();
             _processIdHex = BitConverter.GetBytes(Process.GetCurrentProcess().Id);
             Array.Reverse(_processIdHex);
         }

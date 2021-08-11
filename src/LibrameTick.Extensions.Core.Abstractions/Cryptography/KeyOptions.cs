@@ -10,31 +10,23 @@
 
 #endregion
 
-using Librame.Extensions.Core.Serialization;
 using System;
-using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
-    /// 密钥选项。
+    /// 定义实现 <see cref="IOptions"/> 的密钥选项。
     /// </summary>
-    public class KeyOptions
+    public class KeyOptions : AbstractOptions
     {
         /// <summary>
         /// 构造一个 <see cref="KeyOptions"/>。
         /// </summary>
-        /// <param name="notifyProperty">给定的 <see cref="INotifyProperty"/>。</param>
-        public KeyOptions(INotifyProperty notifyProperty)
+        /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        public KeyOptions(IPropertyNotifier parentNotifier)
+            : base(parentNotifier)
         {
-            NotifyProperty = notifyProperty;
         }
-
-
-        /// <summary>
-        /// 通知属性。
-        /// </summary>
-        protected INotifyProperty NotifyProperty { get; init; }
 
 
         /// <summary>
@@ -45,11 +37,10 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 密钥。
         /// </summary>
-        [JsonConverter(typeof(JsonStringBase64Converter))]
-        public byte[]? Key
+        public byte[] Key
         {
-            get => NotifyProperty.GetValue<byte[]>(nameof(Key));
-            set => NotifyProperty.SetValue(nameof(Key), value.NotNull(nameof(Key)));
+            get => Notifier.GetOrAdd(nameof(Key), Array.Empty<byte>());
+            set => Notifier.AddOrUpdate(nameof(Key), value);
         }
 
 
@@ -60,7 +51,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回密钥方法。</returns>
         public Func<byte[]> SetKeyFunc(Func<byte[]> keyFunc)
         {
-            NotifyProperty.SetValue(nameof(Key), keyFunc);
+            Notifier.AddOrUpdate(nameof(Key), keyFunc);
             return keyFunc;
         }
 

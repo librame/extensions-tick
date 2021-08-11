@@ -28,8 +28,8 @@ namespace Librame.Extensions.Collections
     /// <typeparam name="TItem">指定实现 <see cref="IParentIdentifier{TId}"/>、<see cref="IEquatable{TItem}"/> 等接口的项类型。</typeparam>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     [NotMapped]
-    public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>, IEquatable<TreeingNode<TItem, TId>>
-        where TItem : IParentIdentifier<TId>, IEquatable<TItem>
+    public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
+        where TItem : IParentIdentifier<TId>
         where TId : IEquatable<TId>
     {
         private readonly List<TreeingNode<TItem, TId>> _children;

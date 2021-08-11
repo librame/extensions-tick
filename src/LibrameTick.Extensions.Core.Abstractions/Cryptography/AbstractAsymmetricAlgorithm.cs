@@ -61,8 +61,6 @@ namespace Librame.Extensions.Core.Cryptography
             if (options == null)
                 options = DefaultRsaOptions;
 
-            options.Credentials.NotNull($"{nameof(options)}.{nameof(options.Credentials)}");
-
             var rsa = options.Credentials.AsRsa();
             return rsa.Encrypt(buffer, RsaPadding);
         }
@@ -77,8 +75,6 @@ namespace Librame.Extensions.Core.Cryptography
         {
             if (options == null)
                 options = DefaultRsaOptions;
-
-            options.Credentials.NotNull($"{nameof(options)}.{nameof(options.Credentials)}");
 
             var rsa = options.Credentials.AsRsa();
             return rsa.Decrypt(buffer, RsaPadding);

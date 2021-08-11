@@ -136,12 +136,7 @@ namespace Librame.Extensions.Data.Access
         /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
         public virtual IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
             where TEntity : class
-        {
-            var list = new PagingList<TEntity>(GetQueryable<TEntity>());
-            pageAction.Invoke(list);
-
-            return list;
-        }
+            => GetQueryable<TEntity>().AsPaging(pageAction);
 
         /// <summary>
         /// 异步查找实体分页集合。
@@ -153,16 +148,7 @@ namespace Librame.Extensions.Data.Access
         public virtual Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
             CancellationToken cancellationToken = default)
             where TEntity : class
-        {
-            IPagingList<TEntity> list = new PagingList<TEntity>(GetQueryable<TEntity>());
-
-            return cancellationToken.RunTask(() =>
-            {
-                pageAction.Invoke(list);
-
-                return list;
-            });
-        }
+            => GetQueryable<TEntity>().AsPagingAsync(pageAction, cancellationToken);
 
 
         /// <summary>

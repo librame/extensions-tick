@@ -18,10 +18,11 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core.Serialization
 {
     /// <summary>
-    /// 将 <see cref="Encoding"/> 与 JSON 字符串进行转换。
+    /// <see cref="Encoding"/> JSON 节点转换器。
     /// </summary>
     public class JsonStringEncodingConverter : JsonConverter<Encoding>
     {
+
         /// <summary>
         /// 读取 JSON。
         /// </summary>

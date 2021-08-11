@@ -38,7 +38,7 @@ namespace Librame.Extensions
 
 
         /// <summary>
-        /// 生成指定长度的随机数字节数组。
+        /// 使用 <see cref="RandomNumberGenerator"/> 生成指定长度的随机数字节数组。
         /// </summary>
         /// <param name="length">给定的字节数组元素长度。</param>
         /// <returns>返回生成的字节数组。</returns>
@@ -55,7 +55,7 @@ namespace Librame.Extensions
 
 
         /// <summary>
-        /// 生成指定个数与单个长度的随机数字符串数组。
+        /// 使用 <see cref="Random"/> 生成指定个数与单个长度的随机数字符串数组。
         /// </summary>
         /// <param name="count">给定要生成的随机字符串个数（如 100 个）。</param>
         /// <param name="length">给定单个随机字符串的长度（可选；默认 8 位长度）。</param>

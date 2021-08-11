@@ -12,14 +12,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义实现 <see cref="IExtensionInfo"/> 的扩展选项接口。
+    /// 定义实现 <see cref="IExtensionInfo"/>、<see cref="IOptions"/> 的扩展选项接口。
     /// </summary>
-    public interface IExtensionOptions : IExtensionInfo
+    public interface IExtensionOptions : IExtensionInfo, IOptions
     {
         /// <summary>
         /// 目录选项。
@@ -29,19 +28,16 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 替换服务字典集合。
         /// </summary>
-        [JsonIgnore]
         IDictionary<Type, Type> ReplacedServices { get; }
 
         /// <summary>
         /// 服务特征集合。
         /// </summary>
-        [JsonIgnore]
         ServiceCharacteristicCollection ServiceCharacteristics { get; }
 
         /// <summary>
         /// 父级选项。
         /// </summary>
-        [JsonIgnore]
         IExtensionOptions? ParentOptions { get; }
     }
 }

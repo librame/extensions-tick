@@ -18,7 +18,7 @@ namespace Librame.Extensions.Core
     /// <summary>
     /// 定义抽象实现 <see cref="IExtensionInfo"/>。
     /// </summary>
-    public abstract class AbstractExtensionInfo : AbstractNotifyProperty, IExtensionInfo
+    public abstract class AbstractExtensionInfo : IExtensionInfo
     {
         /// <summary>
         /// 抽象一个 <see cref="AbstractExtensionInfo"/>。

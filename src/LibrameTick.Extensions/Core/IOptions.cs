@@ -13,19 +13,13 @@
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义实现 <see cref="INotifyProperty"/> 的默认通知属性。
+    /// 选项接口。
     /// </summary>
-    public class DefaultNotifyProperty : AbstractNotifyProperty
+    public interface IOptions
     {
         /// <summary>
-        /// 当前实例。
+        /// 属性通知器。
         /// </summary>
-        public static readonly INotifyProperty Current = new DefaultNotifyProperty();
-
-
-        private DefaultNotifyProperty()
-        {
-        }
-
+        IPropertyNotifier Notifier { get; }
     }
 }

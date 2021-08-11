@@ -48,6 +48,15 @@ namespace Librame.Extensions.Data
 
 
         /// <summary>
+        /// 比较相等。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="IIdentifier{TId}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public virtual bool Equals(IIdentifier<TId>? other)
+            => other != null && Id.Equals(other.Id);
+
+
+        /// <summary>
         /// 转换为标识。
         /// </summary>
         /// <param name="id">给定的标识对象。</param>

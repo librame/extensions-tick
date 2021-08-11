@@ -24,21 +24,17 @@ namespace Librame.Extensions.Core.Cryptography
     {
 
         /// <summary>
-        /// 验证签名证书。
+        /// 当作证书。
         /// </summary>
         /// <param name="credentials">给定的 <see cref="SigningCredentials"/>。</param>
-        /// <returns>返回 <see cref="SigningCredentials"/>。</returns>
-        public static SigningCredentials Verify(this SigningCredentials credentials)
+        /// <returns>返回 <see cref="X509Certificate2"/>。</returns>
+        public static X509Certificate2 AsCertificate(this SigningCredentials credentials)
         {
-            if (!(credentials.Key is AsymmetricSecurityKey
-                || credentials.Key is JsonWebKey && ((JsonWebKey)credentials.Key).HasPrivateKey))
-            {
-                throw new InvalidOperationException("Invalid signing key.");
-            }
+            if (credentials.Key is X509SecurityKey x509Key)
+                return x509Key.Certificate;
 
-            return credentials;
+            throw new NotSupportedException($"Not supported signing credentials.");
         }
-
 
         /// <summary>
         /// 当作 RSA。
@@ -66,17 +62,37 @@ namespace Librame.Extensions.Core.Cryptography
             throw new NotSupportedException($"Not supported signing credentials.");
         }
 
+
         /// <summary>
-        /// 当作证书。
+        /// 从临时密钥文件加载或创建签名证书。
+        /// </summary>
+        /// <param name="credentialsFile">给定的证书文件。</param>
+        /// <returns>返回 <see cref="SigningCredentials"/>。</returns>
+        public static SigningCredentials LoadOrCreateCredentialsFromFile(this string credentialsFile)
+        {
+            if (string.IsNullOrEmpty(credentialsFile))
+                throw new ArgumentNullException(nameof(credentialsFile));
+
+            // 临时密钥文件通常存放在应用根目录
+            var tempRsaKey = TemporaryRsaKey.LoadOrCreateFile(credentialsFile.SetBasePath());
+            return new SigningCredentials(tempRsaKey.AsRsaKey(), SecurityAlgorithms.RsaSha256);
+        }
+
+
+        /// <summary>
+        /// 验证签名证书。
         /// </summary>
         /// <param name="credentials">给定的 <see cref="SigningCredentials"/>。</param>
-        /// <returns>返回 <see cref="X509Certificate2"/>。</returns>
-        public static X509Certificate2 AsCertificate(this SigningCredentials credentials)
+        /// <returns>返回 <see cref="SigningCredentials"/>。</returns>
+        public static SigningCredentials Verify(this SigningCredentials credentials)
         {
-            if (credentials.Key is X509SecurityKey x509Key)
-                return x509Key.Certificate;
+            if (!(credentials.Key is AsymmetricSecurityKey
+                || credentials.Key is JsonWebKey && ((JsonWebKey)credentials.Key).HasPrivateKey))
+            {
+                throw new InvalidOperationException("Invalid signing key.");
+            }
 
-            throw new NotSupportedException($"Not supported signing credentials.");
+            return credentials;
         }
 
     }

@@ -29,11 +29,21 @@ namespace Librame.Extensions.Core
         protected AbstractExtensionOptions(IExtensionOptions? parentOptions, DirectoryOptions? directories = null)
             : base(parentOptions)
         {
-            Directories = directories ?? parentOptions?.Directories ?? new DirectoryOptions();
+            Notifier = (parentOptions?.Notifier ?? directories?.Notifier)?.WithSender(this)
+                ?? DefaultPropertyNotifierFactory.Instance.Create(this);
+
+            Directories = directories ?? parentOptions?.Directories ?? new DirectoryOptions(Notifier);
             ReplacedServices = new Dictionary<Type, Type>();
             ServiceCharacteristics = new ServiceCharacteristicCollection();
             ParentOptions = parentOptions;
         }
+
+
+        /// <summary>
+        /// 属性通知器。
+        /// </summary>
+        [JsonIgnore]
+        public IPropertyNotifier Notifier { get; init; }
 
 
         /// <summary>

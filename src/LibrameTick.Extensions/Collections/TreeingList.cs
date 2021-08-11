@@ -23,11 +23,11 @@ namespace Librame.Extensions.Collections
     /// <summary>
     /// 定义一个树形列表。
     /// </summary>
-    /// <typeparam name="TItem">指定实现 <see cref="IParentIdentifier{TId}"/>、<see cref="IEquatable{TItem}"/> 等接口的项类型。</typeparam>
+    /// <typeparam name="TItem">指定实现 <see cref="IParentIdentifier{TId}"/> 等接口的项类型。</typeparam>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     [NotMapped]
     public class TreeingList<TItem, TId> : ITreeingList<TItem, TId>
-        where TItem : IParentIdentifier<TId>, IEquatable<TItem>
+        where TItem : IParentIdentifier<TId>
         where TId : IEquatable<TId>
     {
         /// <summary>
@@ -63,6 +63,40 @@ namespace Librame.Extensions.Collections
         /// </summary>
         public IReadOnlyList<TreeingNode<TItem, TId>> Nodes
             => _nodes;
+
+
+        /// <summary>
+        /// 包含指定的节点标识。
+        /// </summary>
+        /// <param name="id">给定的标识。</param>
+        /// <returns>返回布尔值。</returns>
+        public bool ContainsId(TId id)
+            => TryGetNode(id, out _);
+
+        /// <summary>
+        /// 查找指定标识的节点。
+        /// </summary>
+        /// <param name="id">给定的节点编号。</param>
+        /// <returns>返回 <see cref="TreeingNode{TItem, TId}"/>。</returns>
+        public TreeingNode<TItem, TId>? FindNode(TId id)
+        {
+            if (_nodes.Count < 1)
+                return null;
+
+            return _nodes.FirstOrDefault(p => p.Id.Equals(id));
+        }
+
+        /// <summary>
+        /// 包含指定的节点标识。
+        /// </summary>
+        /// <param name="id">给定的标识。</param>
+        /// <param name="node">输出可能存在的树形节点。</param>
+        /// <returns>返回布尔值。</returns>
+        public bool TryGetNode(TId id, [MaybeNullWhen(false)] out TreeingNode<TItem, TId> node)
+        {
+            node = FindNode(id);
+            return node != null;
+        }
 
 
         #region ICollection<TreeingNode<TItem, TId>>
@@ -129,41 +163,6 @@ namespace Librame.Extensions.Collections
             => GetEnumerator();
 
         #endregion
-
-
-        /// <summary>
-        /// 包含指定的节点标识。
-        /// </summary>
-        /// <param name="id">给定的标识。</param>
-        /// <returns>返回布尔值。</returns>
-        public bool ContainsId(TId id)
-            => ContainsId(id, out _);
-
-        /// <summary>
-        /// 包含指定的节点标识。
-        /// </summary>
-        /// <param name="id">给定的标识。</param>
-        /// <param name="node">输出可能存在的树形节点。</param>
-        /// <returns>返回布尔值。</returns>
-        public bool ContainsId(TId id, [MaybeNullWhen(false)] out TreeingNode<TItem, TId> node)
-        {
-            node = GetNode(id);
-            return node != null;
-        }
-
-
-        /// <summary>
-        /// 查找指定标识的节点。
-        /// </summary>
-        /// <param name="id">给定的节点编号。</param>
-        /// <returns>返回 <see cref="TreeingNode{TItem, TId}"/>。</returns>
-        public TreeingNode<TItem, TId>? GetNode(TId id)
-        {
-            if (_nodes.Count < 1)
-                return null;
-
-            return _nodes.FirstOrDefault(p => p.Id.Equals(id));
-        }
 
     }
 }

@@ -21,6 +21,7 @@ namespace Librame.Extensions.Core.Serialization
     /// </summary>
     public static class JsonConverterExtensions
     {
+
         /// <summary>
         /// 获取必需的字符串。
         /// </summary>

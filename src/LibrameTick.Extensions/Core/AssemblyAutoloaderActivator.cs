@@ -31,10 +31,10 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 构造一个 <see cref="AssemblyAutoloaderActivator"/>。
         /// </summary>
-        /// <param name="loadingOptions">给定的 <see cref="AssemblyLoadingOptions"/>（可选）。</param>
-        public AssemblyAutoloaderActivator(AssemblyLoadingOptions? loadingOptions = null)
+        /// <param name="options">给定的 <see cref="AssemblyLoadingOptions"/>（可选）。</param>
+        public AssemblyAutoloaderActivator(AssemblyLoadingOptions? options = null)
         {
-            _availableTypes = AssemblyLoader.LoadInstantiableTypesByAssemblies(_baseType, loadingOptions);
+            _availableTypes = AssemblyLoader.LoadInstantiableTypesByAssemblies(_baseType, options);
         }
 
 

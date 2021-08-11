@@ -68,10 +68,16 @@ namespace Librame.Extensions
         public static string WriteJson(this string filePath, object value, Encoding? encoding = null,
             JsonSerializerOptions? options = null, bool autoCreateDirectory = true)
         {
+            if (options == null)
+                options = new JsonSerializerOptions { WriteIndented = true };
+
             var json = JsonSerializer.Serialize(value, options);
 
             if (autoCreateDirectory)
-                filePath.CreateDirectory();
+            {
+                var dir = Path.GetDirectoryName(filePath);
+                dir!.CreateDirectory();
+            }
 
             File.WriteAllText(filePath, json, encoding ?? EncodingExtensions.UTF8Encoding);
             return json;

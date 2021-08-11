@@ -110,8 +110,8 @@ namespace Librame.Extensions.Core.Cryptography
 
             var ciphertext = new byte[buffer.Length];
 
-            var aes = new AesCcm(options.Key!);
-            aes.Encrypt(options.Nonce!, buffer, ciphertext, options.Tag!);
+            var aes = new AesCcm(options.Key);
+            aes.Encrypt(options.Nonce, buffer, ciphertext, options.Tag);
 
             return ciphertext;
         }
@@ -129,8 +129,8 @@ namespace Librame.Extensions.Core.Cryptography
 
             var plaintext = new byte[buffer.Length];
 
-            var aes = new AesCcm(options.Key!);
-            aes.Decrypt(options.Nonce!, buffer, options.Tag!, plaintext);
+            var aes = new AesCcm(options.Key);
+            aes.Decrypt(options.Nonce, buffer, options.Tag, plaintext);
 
             return plaintext;
         }
@@ -153,8 +153,8 @@ namespace Librame.Extensions.Core.Cryptography
 
             var ciphertext = new byte[buffer.Length];
 
-            var aes = new AesGcm(options.Key!);
-            aes.Encrypt(options.Nonce!, buffer, ciphertext, options.Tag!);
+            var aes = new AesGcm(options.Key);
+            aes.Encrypt(options.Nonce, buffer, ciphertext, options.Tag);
 
             return ciphertext;
         }
@@ -172,8 +172,8 @@ namespace Librame.Extensions.Core.Cryptography
 
             var plaintext = new byte[buffer.Length];
 
-            var aes = new AesGcm(options.Key!);
-            aes.Decrypt(options.Nonce!, buffer, options.Tag!, plaintext);
+            var aes = new AesGcm(options.Key);
+            aes.Decrypt(options.Nonce, buffer, options.Tag, plaintext);
 
             return plaintext;
         }

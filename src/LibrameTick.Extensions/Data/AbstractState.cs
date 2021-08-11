@@ -23,13 +23,18 @@ namespace Librame.Extensions.Data
     /// </summary>
     /// <typeparam name="TStatus">指定的状态类型（兼容不支持枚举类型的实体框架）。</typeparam>
     public abstract class AbstractState<TStatus> : IState<TStatus>
-        where TStatus : struct
+        where TStatus : IEquatable<TStatus>
     {
+
+#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
+
         /// <summary>
         /// 状态。
         /// </summary>
         [Display(Name = nameof(Status), GroupName = nameof(DataResource.DataGroup), ResourceType = typeof(DataResource))]
         public virtual TStatus Status { get; set; }
+
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
 
         /// <summary>
@@ -37,6 +42,15 @@ namespace Librame.Extensions.Data
         /// </summary>
         public virtual Type StatusType
             => typeof(TStatus);
+
+
+        /// <summary>
+        /// 比较相等。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="IState{TStatus}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public virtual bool Equals(IState<TStatus>? other)
+            => other != null && Status.Equals(other.Status);
 
 
         /// <summary>

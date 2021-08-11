@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 
 namespace Librame.Extensions
 {
@@ -22,7 +23,10 @@ namespace Librame.Extensions
     /// </summary>
     public static class TypeExtensions
     {
-        private static readonly Type NullableGenericTypeDefinition = typeof(Nullable<>);
+        private delegate object MemberGetDelegate<in TSource>(TSource source);
+
+        private static readonly Type _memberGetDelegateTypeDefinition = typeof(MemberGetDelegate<>);
+        private static readonly Type _nullableGenericTypeDefinition = typeof(Nullable<>);
 
 
         /// <summary>
@@ -39,7 +43,16 @@ namespace Librame.Extensions
         /// <param name="type">给定的类型。</param>
         /// <returns>返回布尔值。</returns>
         public static bool IsNullableType(this Type type)
-            => type.IsGenericType && type.GetGenericTypeDefinition() == NullableGenericTypeDefinition;
+            => type.IsGenericType && type.GetGenericTypeDefinition() == _nullableGenericTypeDefinition;
+
+
+        /// <summary>
+        /// 获取指定类型的程序集名称。
+        /// </summary>
+        /// <param name="type">给定的类型。</param>
+        /// <returns>返回名称字符串。</returns>
+        public static string? GetAssemblyName(this Type type)
+            => type.Assembly.GetName().Name;
 
 
         /// <summary>
@@ -61,6 +74,27 @@ namespace Librame.Extensions
 
                 type = type.BaseType;
             }
+        }
+
+
+        /// <summary>
+        /// 通过委托获取指定属性的值。
+        /// </summary>
+        /// <typeparam name="TSource">指定的源类型。</typeparam>
+        /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+        /// <param name="source">给定的 <typeparamref name="TSource"/>。</param>
+        /// <param name="nonPublic">指示是否应返回非公共的get访问器。如果返回非公共访问器，则为 True；否则，假的。</param>
+        /// <returns>返回值对象。</returns>
+        public static object GetValueByDelegate<TSource>(this PropertyInfo property, TSource source, bool nonPublic = false)
+        {
+            var method = property.GetGetMethod(nonPublic);
+            if (method == null)
+                throw new ArgumentException($"There is no get getter for a property '{property.Name}' of the type '{typeof(TSource)}'.");
+
+            var getMemberDelegate = (MemberGetDelegate<TSource>)Delegate
+                .CreateDelegate(_memberGetDelegateTypeDefinition.MakeGenericType(typeof(TSource)), method);
+            
+            return getMemberDelegate.Invoke(source);
         }
 
 

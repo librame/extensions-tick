@@ -22,9 +22,9 @@ namespace Librame.Extensions.Core
     public class LocalClock : IClock
     {
         /// <summary>
-        /// 默认本地 <see cref="IClock"/> 实例。
+        /// 只读实例。
         /// </summary>
-        public static readonly IClock Default = new LocalClock();
+        public static readonly IClock Instance = new LocalClock();
 
         private readonly TimeSpan _refluxOffsetMilliseconds;
 

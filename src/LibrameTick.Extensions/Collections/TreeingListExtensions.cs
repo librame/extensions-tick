@@ -26,40 +26,40 @@ namespace Librame.Extensions.Collections
     {
 
         /// <summary>
-        /// 转换为树形节点列表。
+        /// 将已实现 <see cref="IParentIdentifier{TId}"/> 的元素可枚举集合转换为树形列表。
         /// </summary>
         /// <typeparam name="TItem">指定实现 <see cref="IParentIdentifier{TId}"/> 的元素类型。</typeparam>
         /// <typeparam name="TId">指定的标识类型。</typeparam>
         /// <param name="items">给定的类型实例集合。</param>
-        /// <returns>返回树形节点列表。</returns>
-        public static List<TreeingNode<TItem, TId>> AsTreeingNodes<TItem, TId>(this IEnumerable<TItem> items)
-            where TItem : IParentIdentifier<TId>, IEquatable<TItem>
+        /// <returns>返回 <see cref="ITreeingList{TItem, TId}"/>。</returns>
+        public static ITreeingList<TItem, TId> AsTreeing<TItem, TId>(this IEnumerable<TItem> items)
+            where TItem : IParentIdentifier<TId>
             where TId : IEquatable<TId>
         {
             // 提取根父标识
             var rootParentId = items.Select(s => s.ParentId).Min();
 
-            return LookupNodes(items, rootParentId);
+            return new TreeingList<TItem, TId>(LookupNodes(items, rootParentId));
         }
 
         /// <summary>
-        /// 异步转换为树形节点列表。
+        /// 异步将已实现 <see cref="IParentIdentifier{TId}"/> 的元素可枚举集合转换为树形列表。
         /// </summary>
         /// <typeparam name="TItem">指定实现 <see cref="IParentIdentifier{TId}"/> 的元素类型。</typeparam>
         /// <typeparam name="TId">指定的标识类型。</typeparam>
         /// <param name="items">给定的类型实例集合。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
-        /// <returns>返回一个包含树形节点列表的异步操作。</returns>
-        public static Task<List<TreeingNode<TItem, TId>>> AsTreeingNodesAsync<TItem, TId>(this IEnumerable<TItem> items,
+        /// <returns>返回一个包含 <see cref="ITreeingList{TItem, TId}"/> 的异步操作。</returns>
+        public static Task<ITreeingList<TItem, TId>> AsTreeingAsync<TItem, TId>(this IEnumerable<TItem> items,
             CancellationToken cancellationToken = default)
-            where TItem : IParentIdentifier<TId>, IEquatable<TItem>
+            where TItem : IParentIdentifier<TId>
             where TId : IEquatable<TId>
-            => cancellationToken.RunTask(() => items.AsTreeingNodes<TItem, TId>());
+            => cancellationToken.RunTask(items.AsTreeing<TItem, TId>);
 
 
         private static List<TreeingNode<TItem, TId>> LookupNodes<TItem, TId>(IEnumerable<TItem> items,
             TId? currentParentId, int currentHierarchy = 0)
-            where TItem : IParentIdentifier<TId>, IEquatable<TItem>
+            where TItem : IParentIdentifier<TId>
             where TId : IEquatable<TId>
         {
             var nodes = new List<TreeingNode<TItem, TId>>();
@@ -71,11 +71,11 @@ namespace Librame.Extensions.Collections
 
             foreach (var parent in parents)
             {
-                var children = LookupNodes(items.Where(p => p.ParentId.Equals(parent.Id)),
-                    parent.ParentId, currentHierarchy++);
+                var parentHierarchy = currentHierarchy;
 
-                var node = new TreeingNode<TItem, TId>(parent, children, currentHierarchy);
-                nodes.Add(node);
+                var children = LookupNodes(items, parent.Id, currentHierarchy++);
+
+                nodes.Add(new TreeingNode<TItem, TId>(parent, children, parentHierarchy));
             }
 
             return nodes;

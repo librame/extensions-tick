@@ -23,7 +23,7 @@ namespace Librame.Extensions.Core
         /// 构造一个 <see cref="NotifyPropertyChangedEventArgs"/>。
         /// </summary>
         /// <param name="propertyName">给定的属性名称。</param>
-        /// <param name="changedValue">给定已改变的属性值。</param>
+        /// <param name="changedValue">给定要改变的属性值。</param>
         /// <param name="oldValue">给定当前的旧属性值。</param>
         /// <param name="isUpdate">是更新操作。</param>
         public NotifyPropertyChangedEventArgs(string? propertyName,

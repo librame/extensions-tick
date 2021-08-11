@@ -17,15 +17,35 @@ using System.Text.Json.Serialization;
 namespace Librame.Extensions.Core
 {
     /// <summary>
-    /// 定义程序集加载选项。
+    /// 定义实现 <see cref="IOptions"/> 的程序集加载选项。
     /// </summary>
-    public class AssemblyLoadingOptions
+    public class AssemblyLoadingOptions : AbstractOptions
     {
+        /// <summary>
+        /// 构造一个默认 <see cref="AbstractOptions"/>。
+        /// </summary>
+        public AssemblyLoadingOptions()
+        {
+        }
+
+        /// <summary>
+        /// 构造一个 <see cref="AbstractOptions"/>。
+        /// </summary>
+        /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        public AssemblyLoadingOptions(IPropertyNotifier parentNotifier)
+            : base(parentNotifier)
+        {
+        }
+
+
         /// <summary>
         /// 程序集筛选方式（默认无筛选）。
         /// </summary>
-        public AssemblyFiltration Filtration { get; set; }
-            = AssemblyFiltration.None;
+        public AssemblyFiltration Filtration
+        {
+            get => Notifier.GetOrAdd(nameof(Filtration), AssemblyFiltration.None);
+            set => Notifier.AddOrUpdate(nameof(Filtration), value);
+        }
 
         /// <summary>
         /// 程序集过滤字符串列表。
