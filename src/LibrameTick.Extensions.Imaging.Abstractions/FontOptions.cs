@@ -10,26 +10,25 @@
 
 #endregion
 
-namespace Librame.Extensions.Drawing
+namespace Librame.Extensions.Imaging
 {
+    using Core.Combiners;
+
     /// <summary>
-    /// 水印模式。
+    /// 字体选项。
     /// </summary>
-    public enum WatermarkMode
+    public class FontOptions
     {
         /// <summary>
-        /// 没有。
+        /// 字体文件路径。
         /// </summary>
-        None = 0,
+        public FilePathCombiner FilePath { get; set; }
+            = new FilePathCombiner("font.ttf");
 
         /// <summary>
-        /// 文本。
+        /// 大小。
         /// </summary>
-        Text = 1,
-
-        /// <summary>
-        /// 图像。
-        /// </summary>
-        Image = 2
+        public int Size { get; set; }
+            = 16;
     }
 }

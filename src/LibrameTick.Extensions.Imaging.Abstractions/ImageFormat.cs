@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Drawing
+namespace Librame.Extensions.Imaging
 {
     /// <summary>
     /// 图像格式。

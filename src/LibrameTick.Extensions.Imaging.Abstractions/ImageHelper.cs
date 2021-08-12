@@ -13,7 +13,7 @@
 using System;
 using System.Drawing;
 
-namespace Librame.Extensions.Drawing
+namespace Librame.Extensions.Imaging
 {
     using Core.Utilities;
 
