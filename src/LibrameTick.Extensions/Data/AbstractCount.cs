@@ -10,10 +10,7 @@
 
 #endregion
 
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data
 {

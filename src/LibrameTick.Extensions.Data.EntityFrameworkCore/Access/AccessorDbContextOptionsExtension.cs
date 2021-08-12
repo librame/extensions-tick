@@ -13,8 +13,6 @@
 using Librame.Extensions.Core.Cryptography;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
@@ -32,7 +30,7 @@ namespace Librame.Extensions.Data.Access
         private Encoding? _encoding;
         private int _group;
         private AccessorInteraction _interaction = AccessorInteraction.ReadWrite;
-        private bool _isPooled = false;
+        private bool _pooling = false;
         private float _priority = -1; // 默认使用访问器定义的优先级属性值
         private Type? _serviceType;
 
@@ -56,7 +54,7 @@ namespace Librame.Extensions.Data.Access
             _encoding = copyFrom.Encoding;
             _group = copyFrom.Group;
             _interaction = copyFrom.Interaction;
-            _isPooled = copyFrom.IsPooled;
+            _pooling = copyFrom.IsPooled;
             _priority = copyFrom.Priority;
             _serviceType = copyFrom.ServiceType;
         }
@@ -90,7 +88,7 @@ namespace Librame.Extensions.Data.Access
         /// 访问器是否已池化。
         /// </summary>
         public virtual bool IsPooled
-            => _isPooled;
+            => _pooling;
 
         /// <summary>
         /// 访问器优先级。
@@ -179,13 +177,13 @@ namespace Librame.Extensions.Data.Access
         /// <summary>
         /// 使用是否池化访问器创建一个选项扩展实例副本。
         /// </summary>
-        /// <param name="isPooled">是否已池化。</param>
+        /// <param name="pooling">是否池化。</param>
         /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-        public virtual AccessorDbContextOptionsExtension WithPool(bool isPooled)
+        public virtual AccessorDbContextOptionsExtension WithPooling(bool pooling)
         {
             var clone = Clone();
 
-            clone._isPooled = isPooled;
+            clone._pooling = pooling;
 
             return clone;
         }

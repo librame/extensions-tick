@@ -10,9 +10,6 @@
 
 #endregion
 
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Librame.Extensions.Core.Storage
 {
     /// <summary>
@@ -21,38 +18,25 @@ namespace Librame.Extensions.Core.Storage
     public interface IFilePermission
     {
         /// <summary>
-        /// 获取访问令牌。
-        /// </summary>
-        /// <returns>返回字符串。</returns>
-        string GetAccessToken();
-
-        /// <summary>
-        /// 异步获取访问令牌。
+        /// 异步获取访问令牌（通常由认证服务器下发）。
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含字符串的异步操作。</returns>
         Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default);
 
-
         /// <summary>
-        /// 获取授权码。
-        /// </summary>
-        /// <returns>返回字符串。</returns>
-        string GetAuthorizationCode();
-
-        /// <summary>
-        /// 异步获取授权码。
+        /// 异步获取基础认证码（通常由用户名和密码组成）。
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含字符串的异步操作。</returns>
-        Task<string> GetAuthorizationCodeAsync(CancellationToken cancellationToken = default);
-
+        Task<string> GetBasicCodeAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 获取 Cookie 值。
+        /// 异步获取持票人认证令牌（如：JWT 认证）。
         /// </summary>
-        /// <returns>返回字符串。</returns>
-        string GetCookieValue();
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含字符串的异步操作。</returns>
+        Task<string> GetBearerTokenAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 异步获取 Cookie 值。

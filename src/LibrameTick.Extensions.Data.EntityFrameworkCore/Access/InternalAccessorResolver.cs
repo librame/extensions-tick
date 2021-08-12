@@ -12,13 +12,10 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Librame.Extensions.Data.Access
 {
-    class DefaultAccessorResolver : IAccessorResolver
+    class InternalAccessorResolver : IAccessorResolver
     {
         private static readonly Type _accessorType
             = typeof(IAccessor);
@@ -35,7 +32,7 @@ namespace Librame.Extensions.Data.Access
         private readonly IServiceProvider _provider;
 
 
-        public DefaultAccessorResolver(DataExtensionBuilder builder, IServiceProvider provider)
+        public InternalAccessorResolver(DataExtensionBuilder builder, IServiceProvider provider)
         {
             _builder = builder;
             _provider = provider;

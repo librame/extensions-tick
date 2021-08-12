@@ -11,9 +11,6 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Access
 {

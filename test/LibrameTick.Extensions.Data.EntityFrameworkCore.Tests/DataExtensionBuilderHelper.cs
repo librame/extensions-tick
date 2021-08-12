@@ -1,6 +1,5 @@
 ﻿using Librame.Extensions.Core;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace Librame.Extensions.Data
 {

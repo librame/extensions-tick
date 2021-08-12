@@ -10,15 +10,13 @@
 
 #endregion
 
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Librame.Extensions.Data.Access
 {
-    class DefaultAccessorSlicer : AbstractAccessorSlicer<IAccessor>
+    class InternalAccessorAggregator : AbstractAccessorAggregator<IAccessor>
     {
-        protected override IAccessor CreateSharding(IEnumerable<IAccessor> accessors)
-            => accessors.First();
+        protected override IAccessor CreateChain(IEnumerable<IAccessor> accessors,
+            AccessorInteraction interaction)
+            => new InternalCompositeAccessor(accessors, interaction);
 
     }
 }

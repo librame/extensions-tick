@@ -11,8 +11,6 @@
 #endregion
 
 using Microsoft.Extensions.FileProviders;
-using System;
-using System.IO;
 
 namespace Librame.Extensions.Core.Storage
 {
@@ -96,7 +94,7 @@ namespace Librame.Extensions.Core.Storage
                 FileAccess.Read,
                 FileShare.ReadWrite,
                 bufferSize,
-                RequestOptions.Asynchronous | RequestOptions.SequentialScan);
+                FileOptions.Asynchronous | FileOptions.SequentialScan);
         }
 
         /// <summary>
@@ -114,7 +112,7 @@ namespace Librame.Extensions.Core.Storage
                 FileAccess.Write,
                 FileShare.ReadWrite,
                 bufferSize,
-                RequestOptions.Asynchronous | RequestOptions.SequentialScan);
+                FileOptions.Asynchronous | FileOptions.SequentialScan);
         }
 
     }

@@ -11,7 +11,6 @@
 #endregion
 
 using Microsoft.Extensions.FileProviders;
-using System.IO;
 
 namespace Librame.Extensions.Core.Storage
 {

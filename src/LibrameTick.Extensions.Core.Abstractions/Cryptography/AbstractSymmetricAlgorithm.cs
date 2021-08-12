@@ -10,7 +10,6 @@
 
 #endregion
 
-using System;
 using System.Security.Cryptography;
 
 namespace Librame.Extensions.Core.Cryptography
@@ -67,11 +66,12 @@ namespace Librame.Extensions.Core.Cryptography
             if (options == null)
                 options = DefaultAesOptions;
             
-            return AlgorithmExtensions.RunAes(aes =>
-            {
-                var transform = aes.CreateEncryptor();
-                return transform.TransformFinalBlock(buffer, 0, buffer.Length);
-            });
+            var aes = Aes.Create();
+            aes.Key = options.Key;
+            aes.IV = options.Nonce;
+
+            var transform = aes.CreateEncryptor();
+            return transform.TransformFinalBlock(buffer, 0, buffer.Length);
         }
 
         /// <summary>
@@ -85,11 +85,12 @@ namespace Librame.Extensions.Core.Cryptography
             if (options == null)
                 options = DefaultAesOptions;
 
-            return AlgorithmExtensions.RunAes(aes =>
-            {
-                var transform = aes.CreateDecryptor();
-                return transform.TransformFinalBlock(buffer, 0, buffer.Length);
-            });
+            var aes = Aes.Create();
+            aes.Key = options.Key;
+            aes.IV = options.Nonce;
+
+            var transform = aes.CreateDecryptor();
+            return transform.TransformFinalBlock(buffer, 0, buffer.Length);
         }
 
         #endregion

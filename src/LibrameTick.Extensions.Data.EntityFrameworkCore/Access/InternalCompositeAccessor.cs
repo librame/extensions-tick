@@ -12,22 +12,17 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Specification;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Access
 {
-    sealed class CompositeAccessor : IAccessor
+    sealed class InternalCompositeAccessor : IAccessor
     {
         private readonly IAccessor[] _accessors;
         private readonly AccessorInteraction _interaction;
 
 
-        public CompositeAccessor(IEnumerable<IAccessor> accessors,
+        public InternalCompositeAccessor(IEnumerable<IAccessor> accessors,
             AccessorInteraction interaction)
         {
             _accessors = accessors.ToArray();
@@ -92,7 +87,7 @@ namespace Librame.Extensions.Data.Access
 
 
         public Type AccessorType
-            => typeof(CompositeAccessor);
+            => typeof(InternalCompositeAccessor);
 
 
         #region Exists

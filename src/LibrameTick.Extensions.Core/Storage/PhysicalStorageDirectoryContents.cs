@@ -13,11 +13,7 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders.Internal;
 using Microsoft.Extensions.FileProviders.Physical;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
 namespace Librame.Extensions.Core.Storage
 {
@@ -26,7 +22,7 @@ namespace Librame.Extensions.Core.Storage
     /// </summary>
     public class PhysicalStorageDirectoryContents : IStorageDirectoryContents
     {
-        private readonly IEnumerable<IStorageFileInfo> _entries;
+        private readonly IEnumerable<IStorageFileInfo> _infos;
         private readonly string? _directory;
         private readonly ExclusionFilters _filters;
 
@@ -49,7 +45,7 @@ namespace Librame.Extensions.Core.Storage
         {
             Exists = Directory.Exists(directory);
 
-            _entries = directory.EnumerateStorageFileInfos(filters);
+            _infos = directory.EnumerateStorageFileInfos(filters);
             _directory = directory;
             _filters = filters;
         }
@@ -62,7 +58,7 @@ namespace Librame.Extensions.Core.Storage
         {
             Exists = (contents is PhysicalDirectoryContents physical) && physical.Exists;
 
-            _entries = contents.Select<IFileInfo, IStorageFileInfo>(info =>
+            _infos = contents.Select<IFileInfo, IStorageFileInfo>(info =>
             {
                 if (info is PhysicalFileInfo file)
                 {
@@ -86,20 +82,13 @@ namespace Librame.Extensions.Core.Storage
 
 
         /// <summary>
-        /// 获取枚举器。
+        /// 获取 <see cref="IStorageFileInfo"/> 枚举器。
         /// </summary>
-        /// <returns>返回 <see cref="IEnumerable{IStorageFileInfo}"/>。</returns>
-        public IEnumerator<IStorageFileInfo> GetEnumerator()
-            => _entries.GetEnumerator();
+        /// <returns>返回 <see cref="IEnumerator{IStorageFileInfo}"/>。</returns>
+        public IEnumerator<IFileInfo> GetEnumerator()
+            => _infos.GetEnumerator();
 
-        /// <summary>
-        /// 获取枚举器。
-        /// </summary>
-        /// <returns>返回 <see cref="IFileInfo"/>。</returns>
         IEnumerator IEnumerable.GetEnumerator()
-            => GetEnumerator();
-
-        IEnumerator<IFileInfo> IEnumerable<IFileInfo>.GetEnumerator()
             => GetEnumerator();
 
     }

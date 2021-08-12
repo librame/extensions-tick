@@ -2,7 +2,6 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Data.Store;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using Xunit;
 
 namespace Librame.Extensions.Data.Access
@@ -28,7 +27,7 @@ namespace Librame.Extensions.Data.Access
                 opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;",
                     a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
 
-                opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPool().WithPriority(2));
+                opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPooling().WithPriority(2));
             });
 
             services.AddDbContext<TestSqliteAccessor>(opts =>
@@ -45,11 +44,11 @@ namespace Librame.Extensions.Data.Access
                     // 测试时每次运行需新建数据库
                     opts.Access.EnsureDatabaseDeleted = true;
                 })
-                .AddSeeder<TestAccessorSeeder>()
-                .AddMigrator<TestAccessorMigrator>()
-                .AddInitializer<TestAccessorInitializer<TestMySqlAccessor>>()
-                .AddInitializer<TestAccessorInitializer<TestSqlServerAccessor>>()
-                .AddInitializer<TestAccessorInitializer<TestSqliteAccessor>>();
+                .AddSeeder<InternalTestAccessorSeeder>()
+                .AddMigrator<InternalTestAccessorMigrator>()
+                .AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
+                .AddInitializer<InternalTestAccessorInitializer<TestSqlServerAccessor>>()
+                .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>();
 
             var provider = services.BuildServiceProvider();
 

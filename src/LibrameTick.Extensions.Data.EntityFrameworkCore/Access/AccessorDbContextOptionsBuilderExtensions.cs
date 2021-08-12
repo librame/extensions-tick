@@ -12,7 +12,6 @@
 
 using Librame.Extensions.Data;
 using Librame.Extensions.Data.Access;
-using System;
 
 namespace Microsoft.EntityFrameworkCore
 {

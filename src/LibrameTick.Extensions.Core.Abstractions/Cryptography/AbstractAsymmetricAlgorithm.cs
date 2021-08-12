@@ -10,7 +10,6 @@
 
 #endregion
 
-using System;
 using System.Security.Cryptography;
 
 namespace Librame.Extensions.Core.Cryptography

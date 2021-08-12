@@ -10,13 +10,9 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Librame.Extensions.Data.Access
 {
-    class DefaultAccessorManager : IAccessorManager
+    class InternalAccessorManager : IAccessorManager
     {
         private IAccessorAggregator _aggregator;
         //private IAccessorSlicer _slicer;
@@ -33,7 +29,7 @@ namespace Librame.Extensions.Data.Access
             = new Dictionary<int, IAccessor?>();
 
 
-        public DefaultAccessorManager(DataExtensionBuilder builder,
+        public InternalAccessorManager(DataExtensionBuilder builder,
             IAccessorResolver resolver, IAccessorAggregator aggregator,
             IAccessorMigrator migrator)
         {

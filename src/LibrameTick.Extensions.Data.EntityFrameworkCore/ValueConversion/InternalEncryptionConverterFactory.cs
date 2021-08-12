@@ -14,19 +14,16 @@ using Librame.Extensions.Core.Cryptography;
 using Librame.Extensions.Data.Access;
 using Librame.Extensions.Data.Cryptography;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Librame.Extensions.Data.ValueConversion
 {
-    class DefaultEncryptionConverterFactory : IEncryptionConverterFactory
+    class InternalEncryptionConverterFactory : IEncryptionConverterFactory
     {
         private readonly ConcurrentDictionary<Type, List<ValueConverter>> _dictionary;
 
 
-        public DefaultEncryptionConverterFactory(ISymmetricAlgorithm symmetric, IAccessorManager accessors)
+        public InternalEncryptionConverterFactory(ISymmetricAlgorithm symmetric, IAccessorManager accessors)
         {
             _dictionary = new ConcurrentDictionary<Type, List<ValueConverter>>();
 

@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Access
 {
-    class TestAccessorSeeder : AbstractAccessorSeeder
+    class InternalTestAccessorSeeder : AbstractAccessorSeeder
     {
         private const string GetUsersKey = "GetTestUsers";
 
 
-        public TestAccessorSeeder(IIdentificationGeneratorFactory idGeneratorFactory)
+        public InternalTestAccessorSeeder(IIdentificationGeneratorFactory idGeneratorFactory)
             : base(idGeneratorFactory)
         {
         }

@@ -11,7 +11,6 @@
 #endregion
 
 using Librame.Extensions.Core.Cryptography;
-using System;
 using System.Text;
 
 namespace Librame.Extensions.Data.Access
@@ -28,7 +27,7 @@ namespace Librame.Extensions.Data.Access
         /// <param name="accessor">给定的访问器实例。</param>
         /// <param name="group">给定的所属群组。</param>
         /// <param name="interaction">给定的交互方式。</param>
-        /// <param name="isPooled">是否已池化。</param>
+        /// <param name="pooling">是否池化。</param>
         /// <param name="priority">给定的优先级。</param>
         /// <param name="algorithms">给定的算法选项。</param>
         /// <param name="encoding">给定的字符编码。</param>
@@ -36,7 +35,7 @@ namespace Librame.Extensions.Data.Access
             IAccessor accessor,
             int group,
             AccessorInteraction interaction,
-            bool isPooled,
+            bool pooling,
             float priority,
             AlgorithmOptions algorithms,
             Encoding encoding)
@@ -45,7 +44,7 @@ namespace Librame.Extensions.Data.Access
             Accessor = accessor;
             Group = group;
             Interaction = interaction;
-            IsPooled = isPooled;
+            Pooling = pooling;
             Priority = priority;
             Algorithms = algorithms;
             Encoding = encoding;
@@ -73,9 +72,9 @@ namespace Librame.Extensions.Data.Access
         public AccessorInteraction Interaction { get; init; }
 
         /// <summary>
-        /// 是否已池化。
+        /// 是否池化。
         /// </summary>
-        public bool IsPooled { get; init; }
+        public bool Pooling { get; init; }
 
         /// <summary>
         /// 优先级。

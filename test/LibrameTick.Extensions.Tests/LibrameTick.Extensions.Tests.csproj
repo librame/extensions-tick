@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>Librame.Extensions</RootNamespace>
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

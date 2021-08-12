@@ -12,18 +12,15 @@
 
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Librame.Extensions.Core.Storage
 {
-    sealed class CompositeStorageFileProvider : IStorageFileProvider
+    sealed class InternalCompositeStorageFileProvider : IStorageFileProvider
     {
         private readonly IStorageFileProvider[] _providers;
 
 
-        public CompositeStorageFileProvider(IEnumerable<IStorageFileProvider> providers)
+        public InternalCompositeStorageFileProvider(IEnumerable<IStorageFileProvider> providers)
         {
             _providers = providers.ToArray();
         }

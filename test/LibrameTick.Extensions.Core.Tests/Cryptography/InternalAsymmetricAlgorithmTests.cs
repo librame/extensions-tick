@@ -4,18 +4,18 @@ using Xunit;
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    public class DefaultAsymmetricAlgorithmTests
+    public class InternalAsymmetricAlgorithmTests
     {
         private static Encoding _encoding
             = Encoding.UTF8;
 
         private static byte[] _buffer
-            = _encoding.GetBytes(nameof(DefaultAsymmetricAlgorithmTests));
+            = _encoding.GetBytes(nameof(InternalAsymmetricAlgorithmTests));
 
         private IAsymmetricAlgorithm _algorithm;
 
 
-        public DefaultAsymmetricAlgorithmTests()
+        public InternalAsymmetricAlgorithmTests()
         {
             _algorithm = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<IAsymmetricAlgorithm>()!;
         }

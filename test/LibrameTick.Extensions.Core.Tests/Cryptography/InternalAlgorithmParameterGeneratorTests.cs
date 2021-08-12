@@ -3,12 +3,12 @@ using Xunit;
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    public class DefaultAlgorithmParameterGeneratorTests
+    public class InternalAlgorithmParameterGeneratorTests
     {
         private IAlgorithmParameterGenerator _generator;
 
 
-        public DefaultAlgorithmParameterGeneratorTests()
+        public InternalAlgorithmParameterGeneratorTests()
         {
             _generator = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<IAlgorithmParameterGenerator>();
         }

@@ -10,10 +10,6 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Librame.Extensions.Data.Access
 {
     /// <summary>

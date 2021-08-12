@@ -1,11 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Access
 {
-    class TestAccessorMigrator : IAccessorMigrator
+    class InternalTestAccessorMigrator : IAccessorMigrator
     {
         public void Migrate(IReadOnlyList<AccessorDescriptor> descriptors)
         {

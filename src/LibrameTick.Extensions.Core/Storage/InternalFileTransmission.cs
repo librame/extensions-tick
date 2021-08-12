@@ -10,14 +10,9 @@
 
 #endregion
 
-using System;
-using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Core.Storage
 {
@@ -50,7 +45,9 @@ namespace Librame.Extensions.Core.Storage
 
         public bool UseAccessToken { get; set; }
 
-        public bool UseAuthorizationCode { get; set; }
+        public bool UseBasicAuthentication { get; set; }
+
+        public bool UseBearerAuthentication { get; set; }
 
         public bool UseCookieValue { get; set; }
 
@@ -58,63 +55,67 @@ namespace Librame.Extensions.Core.Storage
             = true;
 
 
-        public Action<long, long>? ProgressAction { get; set; }
+        public Action<StorageProgressDescriptor>? ProgressAction { get; set; }
 
 
-        public async Task<string> DownloadFileAsync(string downloadUrl, string savePath,
+        #region Download
+
+        public async Task<string> DownloadFileAsync(string downloadUri, string savePath,
             CancellationToken cancellationToken = default)
         {
-            var hwr = await CreateRequestAsync(downloadUrl, "GET", cancellationToken).ConfigureAwait();
+            // 获取本地文件最后一次写入的结束位置
+            var startPosition = await GetFileLastEndPositionAsync(savePath, cancellationToken).ConfigureAwait();
 
-            var buffer = new byte[BufferSize];
-            var range = 0L;
+            var client = await CreateClientAsync(cancellationToken: cancellationToken).ConfigureAwait();
+            var message = await client.GetAsync(downloadUri, HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken).ConfigureAwait();
+            
+            var contentLength = message.Content.Headers.ContentLength;
+            if (contentLength == null || contentLength.HasValue && contentLength < 1)
+                return string.Empty;
 
-            if (File.Exists(savePath) && UseBreakpointResume)
+            using (var rs = await message.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait())
             {
-                using (var fs = File.OpenRead(savePath))
+                if (rs.CanSeek)
+                    rs.Position = startPosition;
+
+                using (var fs = new FileStream(savePath, FileMode.Append, FileAccess.Write))
                 {
-                    var readCount = 1;
-                    while (readCount > 0)
+                    var processingSize = 0L;
+                    var processingSpeed = 0L;
+                    var beginSecond = DateTime.Now.Second;
+
+                    var readLength = 0;
+                    var buffer = new byte[BufferSize];
+
+                    while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait()) > 0)
                     {
-                        // 每次从流中读取指定缓冲区的字节数，当读完后退出循环
-                        readCount = fs.Read(buffer, 0, buffer.Length);
-                    }
+                        await fs.WriteAsync(buffer, 0, readLength).ConfigureAwait();
 
-                    range = fs.Position;
-                }
+                        processingSize += readLength;
+                        processingSpeed += readLength;
 
-                hwr.AddRange(range);
-            }
-
-            using (var wr = hwr.GetResponse())
-            {
-                // Accept-Ranges: bytes or none.
-                var acceptRanges = wr.Headers[HttpResponseHeader.AcceptRanges];
-                var supportRanges = acceptRanges?.Contains("bytes");
-
-                using (var s = wr.GetResponseStream())
-                {
-                    var writeMode = FileMode.Create;
-
-                    // 如果需要且服务端支持 Ranges，才启用续传
-                    if (range > 0 && supportRanges.HasValue && supportRanges.Value && s.CanSeek)
-                    {
-                        s.Seek(range, SeekOrigin.Begin);
-                        writeMode = FileMode.Append;
-                    }
-
-                    using (var fs = File.Open(savePath, writeMode))
-                    {
-                        var readCount = 1;
-                        while (readCount > 0)
+                        if (ProgressAction != null)
                         {
-                            // 每次从流中读取指定缓冲区的字节数，当读完后退出循环
-                            readCount = s.Read(buffer, 0, buffer.Length);
+                            var endSecond = DateTime.Now.Second;
 
-                            // 将读取到的缓冲区字节数写入文件流
-                            fs.Write(buffer, 0, readCount);
+                            if (beginSecond != endSecond)
+                                processingSpeed = processingSpeed / (endSecond - beginSecond);
 
-                            ProgressAction?.Invoke(s.Length, fs.Position);
+                            ProgressAction.Invoke(new StorageProgressDescriptor
+                            {
+                                ContentLength = contentLength.Value,
+                                StartPosition = startPosition,
+                                ProcessingSize = processingSize,
+                                ProcessingSpeed = processingSpeed,
+                                ProcessingPercent = Math.Max((int)(processingSize * 100 / contentLength), 1)
+                            });
+
+                            if (beginSecond != endSecond)
+                            {
+                                beginSecond = DateTime.Now.Second;
+                                processingSpeed = 0;
+                            }
                         }
                     }
                 }
@@ -123,82 +124,142 @@ namespace Librame.Extensions.Core.Storage
             return savePath;
         }
 
-        public async Task<string> UploadFileAsync(string uploadUrl, string filePath,
+        private async Task<long> GetFileLastEndPositionAsync(string savePath,
             CancellationToken cancellationToken = default)
         {
-            string response = string.Empty;
-
-            var hwr = await CreateRequestAsync(uploadUrl, cancellationToken: cancellationToken).ConfigureAwait();
-
-            using (var s = hwr.GetRequestStream())
+            if (File.Exists(savePath) && UseBreakpointResume)
             {
-                var buffer = new byte[BufferSize];
+                using (var fs = File.OpenRead(savePath))
+                {
+                    var buffer = new byte[BufferSize];
+
+                    while (await fs.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait() > 0) ;
+
+                    return fs.Position;
+                }
+            }
+
+            return 0L;
+        }
+
+        #endregion
+
+
+        #region Upload
+
+        public async Task<string> UploadFileAsync(string uploadUri, string filePath,
+            string? saveFileNameStar = null, string? saveFileName = null,
+            CancellationToken cancellationToken = default)
+        {
+            var client = await CreateClientAsync(cancellationToken: cancellationToken).ConfigureAwait();
+
+            using (var content = new MultipartFormDataContent())
+            {
+                // 上传暂不支持续传
+                var fileBytes = await GetFileByteArrayAsync(filePath, startPosition: 0,
+                    cancellationToken).ConfigureAwait(false);
+
+                var bytesContent = new ByteArrayContent(fileBytes);
+
+                // 设置上传后保存的前缀路径和文件名称（文件名称如果重复会特殊处理）
+                bytesContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment");
+
+                // 保存文件名前缀
+                if (!string.IsNullOrEmpty(saveFileNameStar))
+                    bytesContent.Headers.ContentDisposition.FileNameStar = saveFileNameStar;
+
+                // 保存文件名
+                bytesContent.Headers.ContentDisposition.FileName = string.IsNullOrEmpty(saveFileName)
+                    ? Path.GetFileName(filePath) : saveFileName;
+
+                content.Add(bytesContent);
+
+                var message = await client.PostAsync(uploadUri, content).ConfigureAwait();
+
+                return await message.Content.ReadAsStringAsync().ConfigureAwait();
+            }
+        }
+
+        private async Task<byte[]> GetFileByteArrayAsync(string filePath,
+            long? startPosition = null, CancellationToken cancellationToken = default)
+        {
+            if (File.Exists(filePath))
+            {
+                byte[] allBytes;
 
                 using (var fs = File.OpenRead(filePath))
                 {
-                    var readCount = 1;
-                    while (readCount > 0)
+                    if (UseBreakpointResume && fs.CanSeek &&
+                        startPosition != null && startPosition.Value > 0)
                     {
-                        // 每次从文件流中读取指定缓冲区的字节数，当读完后退出循环
-                        readCount = fs.Read(buffer, 0, buffer.Length);
+                        fs.Position = startPosition.Value;
+                        allBytes = new byte[fs.Length - startPosition.Value];
+                    }
+                    else
+                    {
+                        allBytes = new byte[fs.Length];
+                    }
 
-                        // 将读取到的缓冲区字节数写入请求流
-                        s.Write(buffer, 0, readCount);
+                    var readLength = 0;
+                    var buffer = new byte[BufferSize];
 
-                        ProgressAction?.Invoke(fs.Length, s.Position);
+                    while ((readLength = await fs.ReadAsync(buffer, 0, buffer.Length,
+                        cancellationToken).ConfigureAwait()) > 0)
+                    {
+                        Array.Copy(buffer, allBytes, readLength);
                     }
                 }
+
+                return allBytes;
             }
 
-            using (var s = hwr.GetResponse().GetResponseStream())
-            {
-                using (var sr = new StreamReader(s, Encoding))
-                {
-                    response = await sr.ReadToEndAsync().ConfigureAwait();
-                }
-            }
-
-            return response;
+            return Array.Empty<byte>();
         }
 
-        private async Task<HttpWebRequest> CreateRequestAsync(string url,
+        #endregion
+
+
+        private async Task<HttpClient> CreateClientAsync(HttpClientHandler? handler = null,
             CancellationToken cancellationToken = default)
         {
-            var client = _factory.CreateClient();
-
-            //var authentication = new AuthenticationHeaderValue(
-            //    "Basic",
-            //    Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{password}")
-            //    ));
-
-            //client.DefaultRequestHeaders.Authorization = authentication;
+            var client = handler != null ? new HttpClient(handler) : _factory.CreateClient();
 
             client.Timeout = Timeout;
 
+            //client.DefaultRequestHeaders.Accept.Clear();
+            //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             client.DefaultRequestHeaders.UserAgent.TryParseAdd(_options.Requests.UserAgent);
 
-            //if (method.Equals("post", StringComparison.OrdinalIgnoreCase))
-            //    hwr.ContentType = $"application/x-www-form-urlencoded; charset={Encoding.AsEncodingName()}";
+            // Authentication: Basic
+            if (UseBasicAuthentication)
+            {
+                var parameter = await _permission.GetBasicCodeAsync(cancellationToken).ConfigureAwait();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", parameter);
+            }
 
-            //if (UseAccessToken)
-            //{
-            //    var accessToken = await _permission.GetAccessTokenAsync(cancellationToken).ConfigureAwait();
-            //    hwr.Headers.Add("access_token", accessToken);
-            //}
+            // Authentication: Bearer
+            if (UseBearerAuthentication)
+            {
+                var parameter = await _permission.GetBearerTokenAsync(cancellationToken).ConfigureAwait();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", parameter);
+            }
 
-            //if (UseAuthorizationCode)
-            //{
-            //    var authorizationCode = await _permission.GetAuthorizationCodeAsync(cancellationToken).ConfigureAwait();
-            //    hwr.Headers.Add(HttpRequestHeader.Authorization, authorizationCode);
-            //}
+            // AccessToken
+            if (UseAccessToken)
+            {
+                var accessToken = await _permission.GetAccessTokenAsync(cancellationToken).ConfigureAwait();
+                client.DefaultRequestHeaders.Add("access_token", accessToken);
+            }
 
-            //if (UseCookieValue)
-            //{
-            //    var cookieValue = await _permission.GetCookieValueAsync(cancellationToken).ConfigureAwait();
-            //    hwr.Headers.Add(HttpRequestHeader.Cookie, cookieValue);
-            //}
+            // Cookie
+            if (UseCookieValue)
+            {
+                var cookieValue = await _permission.GetCookieValueAsync(cancellationToken).ConfigureAwait();
+                client.DefaultRequestHeaders.Add(nameof(HttpRequestHeader.Cookie), cookieValue);
+            }
 
-            return hwr;
+            return client;
         }
 
     }

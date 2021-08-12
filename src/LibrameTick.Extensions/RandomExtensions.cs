@@ -10,10 +10,7 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Threading;
 
 namespace Librame.Extensions
 {

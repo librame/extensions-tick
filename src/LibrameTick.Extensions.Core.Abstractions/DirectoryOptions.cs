@@ -41,8 +41,8 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string BaseDirectory
         {
-            get => Notifier.GetString(nameof(BaseDirectory));
-            set => Notifier.SetString(nameof(BaseDirectory), value);
+            get => Notifier.GetOrAdd(nameof(BaseDirectory), string.Empty);
+            set => Notifier.AddOrUpdate(nameof(BaseDirectory), value);
         }
 
 
@@ -51,8 +51,8 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string ConfigDirectory
         {
-            get => Notifier.GetString(nameof(ConfigDirectory));
-            set => Notifier.SetString(nameof(ConfigDirectory), value);
+            get => Notifier.GetOrAdd(nameof(ConfigDirectory), string.Empty);
+            set => Notifier.AddOrUpdate(nameof(ConfigDirectory), value);
         }
 
         /// <summary>
@@ -60,8 +60,8 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string ReportDirectory
         {
-            get => Notifier.GetString(nameof(ReportDirectory));
-            set => Notifier.SetString(nameof(ReportDirectory), value);
+            get => Notifier.GetOrAdd(nameof(ReportDirectory), string.Empty);
+            set => Notifier.AddOrUpdate(nameof(ReportDirectory), value);
         }
 
         /// <summary>
@@ -69,8 +69,8 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string ResourceDirectory
         {
-            get => Notifier.GetString(nameof(ResourceDirectory));
-            set => Notifier.SetString(nameof(ResourceDirectory), value);
+            get => Notifier.GetOrAdd(nameof(ResourceDirectory), string.Empty);
+            set => Notifier.AddOrUpdate(nameof(ResourceDirectory), value);
         }
 
     }

@@ -10,7 +10,6 @@
 
 #endregion
 
-using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;

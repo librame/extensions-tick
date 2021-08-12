@@ -4,18 +4,18 @@ using Xunit;
 
 namespace Librame.Extensions.Core.Cryptography
 {
-    public class DefaultSymmetricAlgorithmTests
+    public class InternalSymmetricAlgorithmTests
     {
         private static Encoding _encoding
             = Encoding.UTF8;
 
         private static byte[] _buffer
-            = _encoding.GetBytes(nameof(DefaultSymmetricAlgorithmTests));
+            = _encoding.GetBytes(nameof(InternalSymmetricAlgorithmTests));
 
         private ISymmetricAlgorithm _algorithm;
 
 
-        public DefaultSymmetricAlgorithmTests()
+        public InternalSymmetricAlgorithmTests()
         {
             _algorithm = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<ISymmetricAlgorithm>()!;
         }

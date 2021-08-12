@@ -10,7 +10,6 @@
 
 #endregion
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Librame.Extensions

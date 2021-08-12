@@ -3,26 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31512.422
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions", "src\LibrameTick.Extensions\LibrameTick.Extensions.csproj", "{B5BEE114-3B4D-442C-BFF0-BAABD8C637BA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core.Abstractions", "src\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj", "{4BAF5CE3-5888-45C2-B21B-397B9C4AC8A9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core", "src\LibrameTick.Extensions.Core\LibrameTick.Extensions.Core.csproj", "{648994B9-C724-4992-BFA8-19082D7EAAC0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Tests", "test\LibrameTick.Extensions.Tests\LibrameTick.Extensions.Tests.csproj", "{D378C127-2EC4-40D5-8D81-561C075DFE61}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core.Tests", "test\LibrameTick.Extensions.Core.Tests\LibrameTick.Extensions.Core.Tests.csproj", "{5B7147BF-2DA8-4813-B2D8-35992871B62F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.Abstractions", "src\LibrameTick.Extensions.Data.Abstractions\LibrameTick.Extensions.Data.Abstractions.csproj", "{6723A874-AE94-4D8E-953E-67353CEE1854}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.EntityFrameworkCore", "src\LibrameTick.Extensions.Data.EntityFrameworkCore\LibrameTick.Extensions.Data.EntityFrameworkCore.csproj", "{6C7E4FE1-24A8-4B05-881D-A0F0DEE5CB41}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Imaging.Abstractions", "src\LibrameTick.Extensions.Imaging.Abstractions\LibrameTick.Extensions.Imaging.Abstractions.csproj", "{6675254F-8661-4D5B-B128-661A76D5E013}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0A92F6D6-9B9C-4491-9801-79BC7EDDC74A}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
@@ -33,11 +13,35 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BD2441C6
 		build\Version.props = build\Version.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.EntityFrameworkCore.Tests", "test\LibrameTick.Extensions.Data.EntityFrameworkCore.Tests\LibrameTick.Extensions.Data.EntityFrameworkCore.Tests.csproj", "{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions", "src\LibrameTick.Extensions\LibrameTick.Extensions.csproj", "{B5BEE114-3B4D-442C-BFF0-BAABD8C637BA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core.Abstractions", "src\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj", "{4BAF5CE3-5888-45C2-B21B-397B9C4AC8A9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core", "src\LibrameTick.Extensions.Core\LibrameTick.Extensions.Core.csproj", "{648994B9-C724-4992-BFA8-19082D7EAAC0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.Abstractions", "src\LibrameTick.Extensions.Data.Abstractions\LibrameTick.Extensions.Data.Abstractions.csproj", "{6723A874-AE94-4D8E-953E-67353CEE1854}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.EntityFrameworkCore", "src\LibrameTick.Extensions.Data.EntityFrameworkCore\LibrameTick.Extensions.Data.EntityFrameworkCore.csproj", "{6C7E4FE1-24A8-4B05-881D-A0F0DEE5CB41}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Imaging.Abstractions", "src\LibrameTick.Extensions.Imaging.Abstractions\LibrameTick.Extensions.Imaging.Abstractions.csproj", "{6675254F-8661-4D5B-B128-661A76D5E013}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Imaging.SkiaSharp", "src\LibrameTick.Extensions.Imaging.SkiaSharp\LibrameTick.Extensions.Imaging.SkiaSharp.csproj", "{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{691B25E2-DC1B-49B9-B0DF-527F4C869800}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibrameTick.Extensions.Data.Models", "shared\LibrameTick.Extensions.Data.Models\LibrameTick.Extensions.Data.Models.csproj", "{333EC14C-95CC-4DD0-9010-C1A1700BC296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.Models", "shared\LibrameTick.Extensions.Data.Models\LibrameTick.Extensions.Data.Models.csproj", "{333EC14C-95CC-4DD0-9010-C1A1700BC296}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Tests", "test\LibrameTick.Extensions.Tests\LibrameTick.Extensions.Tests.csproj", "{D378C127-2EC4-40D5-8D81-561C075DFE61}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core.Tests", "test\LibrameTick.Extensions.Core.Tests\LibrameTick.Extensions.Core.Tests.csproj", "{5B7147BF-2DA8-4813-B2D8-35992871B62F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.EntityFrameworkCore.Tests", "test\LibrameTick.Extensions.Data.EntityFrameworkCore.Tests\LibrameTick.Extensions.Data.EntityFrameworkCore.Tests.csproj", "{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibrameTick.Extensions.Imaging.SkiaSharp.Tests", "test\LibrameTick.Extensions.Imaging.SkiaSharp.Tests\LibrameTick.Extensions.Imaging.SkiaSharp.Tests.csproj", "{271BE4B7-19A4-4A9C-960F-DE436E838755}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,14 +61,6 @@ Global
 		{648994B9-C724-4992-BFA8-19082D7EAAC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{648994B9-C724-4992-BFA8-19082D7EAAC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{648994B9-C724-4992-BFA8-19082D7EAAC0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6723A874-AE94-4D8E-953E-67353CEE1854}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6723A874-AE94-4D8E-953E-67353CEE1854}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6723A874-AE94-4D8E-953E-67353CEE1854}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -77,14 +73,30 @@ Global
 		{6675254F-8661-4D5B-B128-661A76D5E013}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6675254F-8661-4D5B-B128-661A76D5E013}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6675254F-8661-4D5B-B128-661A76D5E013}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{333EC14C-95CC-4DD0-9010-C1A1700BC296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{333EC14C-95CC-4DD0-9010-C1A1700BC296}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{333EC14C-95CC-4DD0-9010-C1A1700BC296}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{333EC14C-95CC-4DD0-9010-C1A1700BC296}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D378C127-2EC4-40D5-8D81-561C075DFE61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B7147BF-2DA8-4813-B2D8-35992871B62F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{271BE4B7-19A4-4A9C-960F-DE436E838755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{271BE4B7-19A4-4A9C-960F-DE436E838755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{271BE4B7-19A4-4A9C-960F-DE436E838755}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{271BE4B7-19A4-4A9C-960F-DE436E838755}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -93,13 +105,15 @@ Global
 		{B5BEE114-3B4D-442C-BFF0-BAABD8C637BA} = {0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}
 		{4BAF5CE3-5888-45C2-B21B-397B9C4AC8A9} = {0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}
 		{648994B9-C724-4992-BFA8-19082D7EAAC0} = {0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}
-		{D378C127-2EC4-40D5-8D81-561C075DFE61} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
-		{5B7147BF-2DA8-4813-B2D8-35992871B62F} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
 		{6723A874-AE94-4D8E-953E-67353CEE1854} = {0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}
 		{6C7E4FE1-24A8-4B05-881D-A0F0DEE5CB41} = {0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}
 		{6675254F-8661-4D5B-B128-661A76D5E013} = {0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}
-		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
+		{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD} = {0AFB3E70-EAB4-4BC9-8232-9DBDBFD52600}
 		{333EC14C-95CC-4DD0-9010-C1A1700BC296} = {691B25E2-DC1B-49B9-B0DF-527F4C869800}
+		{D378C127-2EC4-40D5-8D81-561C075DFE61} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
+		{5B7147BF-2DA8-4813-B2D8-35992871B62F} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
+		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
+		{271BE4B7-19A4-4A9C-960F-DE436E838755} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {830A172B-0219-487F-BB20-5A070B3A51D4}

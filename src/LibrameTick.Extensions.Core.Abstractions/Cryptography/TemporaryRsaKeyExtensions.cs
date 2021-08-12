@@ -11,7 +11,6 @@
 #endregion
 
 using Microsoft.IdentityModel.Tokens;
-using System;
 
 namespace Librame.Extensions.Core.Cryptography
 {

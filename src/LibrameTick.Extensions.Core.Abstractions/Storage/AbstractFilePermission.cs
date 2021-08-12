@@ -10,9 +10,6 @@
 
 #endregion
 
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Librame.Extensions.Core.Storage
 {
     /// <summary>
@@ -34,43 +31,35 @@ namespace Librame.Extensions.Core.Storage
 
 
         /// <summary>
-        /// 获取访问令牌。
-        /// </summary>
-        /// <returns>返回字符串。</returns>
-        public virtual string GetAccessToken()
-            => _options.AccessTokenLength.GenerateByteArray().AsBase64String();
-
-        /// <summary>
-        /// 异步获取访问令牌。
+        /// 异步获取访问令牌（通常由认证服务器下发）。
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含字符串的异步操作。</returns>
         public virtual Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunTask(GetAccessToken);
-
-
-        /// <summary>
-        /// 获取授权码。
-        /// </summary>
-        /// <returns>返回字符串。</returns>
-        public virtual string GetAuthorizationCode()
-            => _options.AuthorizationCodeLength.GenerateByteArray().AsBase64String();
+            => cancellationToken.RunTask(() => _options.AuthAccessToken);
 
         /// <summary>
-        /// 异步获取授权码。
+        /// 异步获取基础认证码（通常由用户名和密码组成）。
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含字符串的异步操作。</returns>
-        public virtual Task<string> GetAuthorizationCodeAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunTask(GetAuthorizationCode);
-
+        public virtual Task<string> GetBasicCodeAsync(CancellationToken cancellationToken = default)
+        {
+            return cancellationToken.RunTask(() =>
+            {
+                return $"{_options.AuthUsername}:{_options.AuthPassword}"
+                    .FromEncodingString()
+                    .AsBase64String();
+            });
+        }
 
         /// <summary>
-        /// 获取 Cookie 值。
+        /// 异步获取持票人认证令牌（如：JWT 认证）。
         /// </summary>
-        /// <returns>返回字符串。</returns>
-        public virtual string GetCookieValue()
-            => _options.CookieValueLength.GenerateByteArray().AsBase64String();
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含字符串的异步操作。</returns>
+        public virtual Task<string> GetBearerTokenAsync(CancellationToken cancellationToken = default)
+            => cancellationToken.RunTask(() => _options.AuthJwtToken);
 
         /// <summary>
         /// 异步获取 Cookie 值。
@@ -78,7 +67,7 @@ namespace Librame.Extensions.Core.Storage
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含字符串的异步操作。</returns>
         public virtual Task<string> GetCookieValueAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunTask(GetCookieValue);
+            => cancellationToken.RunTask(() => "CookieValue");
 
     }
 }

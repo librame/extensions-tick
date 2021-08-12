@@ -10,18 +10,14 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace Librame.Extensions.Data
 {
-    class DefaultIdentificationGeneratorFactory : IIdentificationGeneratorFactory
+    class InternalIdentificationGeneratorFactory : IIdentificationGeneratorFactory
     {
         private IReadOnlyList<IObjectIdentificationGenerator> _idGenerators;
 
 
-        public DefaultIdentificationGeneratorFactory(DataExtensionBuilder builder)
+        public InternalIdentificationGeneratorFactory(DataExtensionBuilder builder)
         {
             _idGenerators = builder.Options.IdGenerators;
         }

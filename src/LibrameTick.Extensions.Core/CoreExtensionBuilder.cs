@@ -11,9 +11,9 @@
 #endregion
 
 using Librame.Extensions.Core.Cryptography;
+using Librame.Extensions.Core.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
 
 namespace Librame.Extensions.Core
 {
@@ -37,6 +37,11 @@ namespace Librame.Extensions.Core
             TryAddOrReplaceService<IAlgorithmParameterGenerator, InternalAlgorithmParameterGenerator>();
             TryAddOrReplaceService<IAsymmetricAlgorithm, InternalAsymmetricAlgorithm>();
             TryAddOrReplaceService<ISymmetricAlgorithm, InternalSymmetricAlgorithm>();
+
+            // Storage
+            TryAddOrReplaceService<IFileManager, InternalFileManager>();
+            TryAddOrReplaceService<IFilePermission, InternalFilePermission>();
+            TryAddOrReplaceService<IFileTransmission, InternalFileTransmission>();
 
             if (options.EnableAutoloaderActivator)
             {

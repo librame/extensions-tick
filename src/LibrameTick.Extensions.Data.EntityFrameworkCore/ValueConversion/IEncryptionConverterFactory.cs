@@ -11,7 +11,6 @@
 #endregion
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
 
 namespace Librame.Extensions.Data.ValueConversion
 {

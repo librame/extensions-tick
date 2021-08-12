@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Access
 {
-    class TestAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor>
+    class InternalTestAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor>
         where TAccessor : AbstractAccessor, ITestAccessor
     {
-        private TestAccessorSeeder _seeder;
+        private InternalTestAccessorSeeder _seeder;
 
 
-        public TestAccessorInitializer(TAccessor accessor, TestAccessorSeeder seeder)
+        public InternalTestAccessorInitializer(TAccessor accessor, InternalTestAccessorSeeder seeder)
             : base(accessor)
         {
             _seeder = seeder;

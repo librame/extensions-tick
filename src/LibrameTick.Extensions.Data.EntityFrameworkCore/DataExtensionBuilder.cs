@@ -14,7 +14,6 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Data.Access;
 using Librame.Extensions.Data.Store;
 using Librame.Extensions.Data.ValueConversion;
-using System;
 
 namespace Librame.Extensions.Data
 {
@@ -35,19 +34,19 @@ namespace Librame.Extensions.Data
             : base(parentBuilder, options)
         {
             // Base: IdentificationGenerator
-            TryAddOrReplaceService<IIdentificationGeneratorFactory, DefaultIdentificationGeneratorFactory>();
+            TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
 
             // Access
-            TryAddOrReplaceService<IAccessorAggregator, DefaultAccessorAggregator>();
-            TryAddOrReplaceService<IAccessorManager, DefaultAccessorManager>();
-            TryAddOrReplaceService<IAccessorResolver, DefaultAccessorResolver>();
-            TryAddOrReplaceService<IAccessorSlicer, DefaultAccessorSlicer>();
+            TryAddOrReplaceService<IAccessorAggregator, InternalAccessorAggregator>();
+            TryAddOrReplaceService<IAccessorManager, InternalAccessorManager>();
+            TryAddOrReplaceService<IAccessorResolver, InternalAccessorResolver>();
+            TryAddOrReplaceService<IAccessorSlicer, InternalAccessorSlicer>();
 
             // Store
             TryAddOrReplaceService(typeof(IStore<>), typeof(BaseStore<>));
 
             // ValueConversion
-            TryAddOrReplaceService<IEncryptionConverterFactory, DefaultEncryptionConverterFactory>();
+            TryAddOrReplaceService<IEncryptionConverterFactory, InternalEncryptionConverterFactory>();
         }
 
 

@@ -11,14 +11,13 @@
 #endregion
 
 using Microsoft.Extensions.FileProviders;
-using System.Collections.Generic;
 
 namespace Librame.Extensions.Core.Storage
 {
     /// <summary>
     /// 定义存储目录内容集合接口。
     /// </summary>
-    public interface IStorageDirectoryContents : IEnumerable<IStorageFileInfo>, IDirectoryContents
+    public interface IStorageDirectoryContents : IDirectoryContents
     {
     }
 }

@@ -13,7 +13,6 @@
 using Librame.Extensions.Core;
 using Librame.Extensions.Core.Cryptography;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Text;
 
 namespace Librame.Extensions.Data.Access
@@ -80,12 +79,12 @@ namespace Librame.Extensions.Data.Access
             => WithOption(e => e.WithPriority(priority));
 
         /// <summary>
-        /// 配置访问器是否已池化（默认为否，如果不需要改变，可不调用此方法）。
+        /// 配置访问器是否池化（默认为否，如果不需要改变，可不调用此方法）。
         /// </summary>
-        /// <param name="isPooled">给定的访问器是否已池化（可选；默认为已池化）。</param>
+        /// <param name="pooling">给定的访问器是否池化（可选；默认池化）。</param>
         /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-        public virtual AccessorDbContextOptionsBuilder WithPool(bool isPooled = true)
-            => WithOption(e => e.WithPool(isPooled));
+        public virtual AccessorDbContextOptionsBuilder WithPooling(bool pooling = true)
+            => WithOption(e => e.WithPooling(pooling));
 
         /// <summary>
         /// 配置访问器服务类型。

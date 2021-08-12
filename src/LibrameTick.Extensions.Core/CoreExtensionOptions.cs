@@ -37,6 +37,11 @@ namespace Librame.Extensions.Core
             ServiceCharacteristics.AddSingleton<IAlgorithmParameterGenerator>();
             ServiceCharacteristics.AddSingleton<IAsymmetricAlgorithm>();
             ServiceCharacteristics.AddSingleton<ISymmetricAlgorithm>();
+
+            // Storage
+            ServiceCharacteristics.AddSingleton<IFileManager>();
+            ServiceCharacteristics.AddSingleton<IFilePermission>();
+            ServiceCharacteristics.AddSingleton<IFileTransmission>();
         }
 
 

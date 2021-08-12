@@ -11,10 +11,6 @@
 #endregion
 
 using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Librame.Extensions.Core.Storage
 {
@@ -30,10 +26,10 @@ namespace Librame.Extensions.Core.Storage
             _memoryCache = memoryCache;
             _options = builder.Options;
 
-            if (_options.Requests.FileProviders.Count > 0)
-                throw new ArgumentException("");
+            if (_options.Requests.FileProviders.Count < 0)
+                throw new ArgumentException($"The {nameof(CoreExtensionOptions)}.{nameof(_options.Requests)}.{nameof(_options.Requests.FileProviders)} is empty. ex: services.AddLibrame(opts => opts.{nameof(_options.Requests)}.{nameof(_options.Requests.FileProviders)}.Add(new {nameof(PhysicalStorageFileProvider)}()))");
             
-            _fileProvider = new CompositeStorageFileProvider(_options.Requests.FileProviders);
+            _fileProvider = new InternalCompositeStorageFileProvider(_options.Requests.FileProviders);
         }
 
 
@@ -49,6 +45,8 @@ namespace Librame.Extensions.Core.Storage
             => cancellationToken.RunTask(() => _fileProvider.GetDirectoryContents(subpath));
 
 
+        #region Read
+
         public Task<string> ReadStringAsync(string subpath)
         {
             var fileInfo = _fileProvider.GetFileInfo(subpath);
@@ -61,51 +59,66 @@ namespace Librame.Extensions.Core.Storage
 
         public Task<string> ReadStringAsync(IStorageFileInfo fileInfo)
         {
-            using (var s = fileInfo.CreateReadStream())
-            using (var sr = new StreamReader(s))
+            using (var rs = fileInfo.CreateReadStream())
+            using (var sr = new StreamReader(rs))
             {
                 return sr.ReadToEndAsync();
             }
         }
 
-        /// <summary>
-        /// 异步读取。
-        /// </summary>
-        /// <param name="fileInfo">给定的 <see cref="IStorageFileInfo"/>。</param>
-        /// <param name="writeStream">给定的写入 <see cref="Stream"/>。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回 <see cref="Task"/>。</returns>
+
         public async Task ReadAsync(IStorageFileInfo fileInfo, Stream writeStream,
             CancellationToken cancellationToken = default)
         {
-            var buffer = new byte[_options.Requests.BufferSize];
-
             if (writeStream.CanSeek)
                 writeStream.Seek(0, SeekOrigin.Begin);
 
-            using (var readStream = fileInfo.CreateReadStream())
+            using (var rs = fileInfo.CreateReadStream())
             {
-                var currentCount = 1;
-                while (currentCount > 0)
-                {
-                    // 每次从文件流中读取指定缓冲区的字节数，当读完后退出循环
-                    currentCount = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait();
+                var processingSize = 0L;
+                var processingSpeed = 0L;
+                var beginSecond = DateTime.Now.Second;
 
-                    // 将读取到的缓冲区字节数写入请求流
-                    await writeStream.WriteAsync(buffer, 0, currentCount, cancellationToken).ConfigureAwait();
+                var readLength = 0;
+                var buffer = new byte[_options.Requests.BufferSize];
+
+                while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait()) > 0)
+                {
+                    await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).ConfigureAwait();
+
+                    processingSize += readLength;
+                    processingSpeed += readLength;
 
                     if (ProgressAction != null)
                     {
-                        var descriptor = new StorageProgressDescriptor(
-                        readStream.Length, readStream.Position,
-                        writeStream.Length, writeStream.Position, currentCount);
+                        var endSecond = DateTime.Now.Second;
 
-                        ProgressAction.Invoke(descriptor);
+                        if (beginSecond != endSecond)
+                            processingSpeed = processingSpeed / (endSecond - beginSecond);
+
+                        ProgressAction.Invoke(new StorageProgressDescriptor
+                        {
+                            ContentLength = fileInfo.Length,
+                            StartPosition = 0,
+                            ProcessingSize = processingSize,
+                            ProcessingSpeed = processingSpeed,
+                            ProcessingPercent = Math.Max((int)(processingSize * 100 / fileInfo.Length), 1)
+                        });
+
+                        if (beginSecond != endSecond)
+                        {
+                            beginSecond = DateTime.Now.Second;
+                            processingSpeed = 0;
+                        }
                     }
                 }
             }
         }
 
+        #endregion
+
+
+        #region Write
 
         /// <summary>
         /// 异步写入字符串。
@@ -115,15 +128,13 @@ namespace Librame.Extensions.Core.Storage
         /// <returns>返回 <see cref="Task"/>。</returns>
         public Task WriteStringAsync(IStorageFileInfo fileInfo, string content)
         {
-            fileInfo.NotNull(nameof(fileInfo));
-            content.NotEmpty(nameof(content));
-
-            using (var readStream = fileInfo.CreateReadStream())
-            using (var sw = new StreamWriter(readStream))
+            using (var rs = fileInfo.CreateReadStream())
+            using (var sw = new StreamWriter(rs))
             {
                 return sw.WriteAsync(content);
             }
         }
+
 
         /// <summary>
         /// 异步写入。
@@ -134,33 +145,52 @@ namespace Librame.Extensions.Core.Storage
         /// <returns>返回 <see cref="Task"/>。</returns>
         public async Task WriteAsync(IStorageFileInfo fileInfo, Stream readStream, CancellationToken cancellationToken = default)
         {
-            var buffer = new byte[_options.Requests.BufferSize];
-
             if (readStream.CanSeek)
                 readStream.Seek(0, SeekOrigin.Begin);
 
             using (var writeStream = fileInfo.CreateWriteStream())
             {
-                var currentCount = 1;
-                while (currentCount > 0)
-                {
-                    // 每次从文件流中读取指定缓冲区的字节数，当读完后退出循环
-                    currentCount = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait();
+                var processingSize = 0L;
+                var processingSpeed = 0L;
+                var beginSecond = DateTime.Now.Second;
 
-                    // 将读取到的缓冲区字节数写入请求流
-                    await writeStream.WriteAsync(buffer, 0, currentCount, cancellationToken).ConfigureAwait();
+                var readLength = 0;
+                var buffer = new byte[_options.Requests.BufferSize];
+
+                while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait()) > 0)
+                {
+                    await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).ConfigureAwait();
+
+                    processingSize += readLength;
+                    processingSpeed += readLength;
 
                     if (ProgressAction != null)
                     {
-                        var descriptor = new StorageProgressDescriptor(
-                        readStream.Length, readStream.Position,
-                        writeStream.Length, writeStream.Position, currentCount);
+                        var endSecond = DateTime.Now.Second;
 
-                        ProgressAction.Invoke(descriptor);
+                        if (beginSecond != endSecond)
+                            processingSpeed = processingSpeed / (endSecond - beginSecond);
+
+                        ProgressAction.Invoke(new StorageProgressDescriptor
+                        {
+                            ContentLength = fileInfo.Length,
+                            StartPosition = 0,
+                            ProcessingSize = processingSize,
+                            ProcessingSpeed = processingSpeed,
+                            ProcessingPercent = Math.Max((int)(processingSize * 100 / fileInfo.Length), 1)
+                        });
+
+                        if (beginSecond != endSecond)
+                        {
+                            beginSecond = DateTime.Now.Second;
+                            processingSpeed = 0;
+                        }
                     }
                 }
             }
         }
+
+        #endregion
 
     }
 }

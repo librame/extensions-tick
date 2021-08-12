@@ -4,8 +4,9 @@ namespace Librame.Extensions.Core
 {
     public class CoreExtensionBuilderTests
     {
+
         [Fact]
-        public void AbstractTest()
+        public void AllTest()
         {
             Assert.NotNull(CoreExtensionBuilderHelper.CurrentBuilder.InfoType);
             Assert.Null(CoreExtensionBuilderHelper.CurrentBuilder.ParentInfo);

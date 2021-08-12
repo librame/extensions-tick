@@ -10,8 +10,6 @@
 
 #endregion
 
-using System;
-
 namespace Librame.Extensions.Core
 {
     /// <summary>

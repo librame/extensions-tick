@@ -11,8 +11,6 @@
 #endregion
 
 using Librame.Extensions.Core.Serialization;
-using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core.Storage
@@ -37,7 +35,7 @@ namespace Librame.Extensions.Core.Storage
         /// </summary>
         public string AuthUsername
         {
-            get => Notifier.GetOrAdd(nameof(AuthUsername), string.Empty);
+            get => Notifier.GetOrAdd(nameof(AuthUsername), nameof(AuthUsername));
             set => Notifier.AddOrUpdate(nameof(AuthUsername), value);
         }
 
@@ -47,37 +45,27 @@ namespace Librame.Extensions.Core.Storage
         [JsonConverter(typeof(JsonStringEncryptionConverter))]
         public string AuthPassword
         {
-            get => Notifier.GetOrAdd(nameof(AuthPassword), string.Empty);
+            get => Notifier.GetOrAdd(nameof(AuthPassword), nameof(AuthPassword));
             set => Notifier.AddOrUpdate(nameof(AuthPassword), value);
         }
 
+        /// <summary>
+        /// 认证 JWT 令牌。
+        /// </summary>
+        public string AuthJwtToken
+        {
+            get => Notifier.GetOrAdd(nameof(AuthJwtToken), nameof(AuthJwtToken));
+            set => Notifier.AddOrUpdate(nameof(AuthJwtToken), value);
+        }
 
-        ///// <summary>
-        ///// 访问令牌长度（默认 32 位长度）。
-        ///// </summary>
-        //public int AccessTokenLength
-        //{
-        //    get => Notifier.GetOrAdd(nameof(AccessTokenLength), 32);
-        //    set => Notifier.AddOrUpdate(nameof(AccessTokenLength), value);
-        //}
-
-        ///// <summary>
-        ///// 授权码长度（默认 32 位长度）。
-        ///// </summary>
-        //public int AuthorizationCodeLength
-        //{
-        //    get => Notifier.GetOrAdd(nameof(AuthorizationCodeLength), 32);
-        //    set => Notifier.AddOrUpdate(nameof(AuthorizationCodeLength), value);
-        //}
-
-        ///// <summary>
-        ///// Cookie 值长度（默认 16 位长度）。
-        ///// </summary>
-        //public int CookieValueLength
-        //{
-        //    get => Notifier.GetOrAdd(nameof(CookieValueLength), 16);
-        //    set => Notifier.AddOrUpdate(nameof(CookieValueLength), value);
-        //}
+        /// <summary>
+        /// 认证访问令牌。
+        /// </summary>
+        public string AuthAccessToken
+        {
+            get => Notifier.GetOrAdd(nameof(AuthAccessToken), nameof(AuthAccessToken));
+            set => Notifier.AddOrUpdate(nameof(AuthAccessToken), value);
+        }
 
         /// <summary>
         /// 缓冲区大小（默认 512 字节）。

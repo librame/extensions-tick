@@ -14,8 +14,6 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Data.Access;
 using Librame.Extensions.Data.Store;
 using Librame.Extensions.Data.ValueConversion;
-using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Data
@@ -37,8 +35,7 @@ namespace Librame.Extensions.Data
             : base(parentOptions, parentOptions.Directories)
         {
             CoreOptions = parentOptions.GetRequiredOptions<CoreExtensionOptions>();
-
-            Access = new AccessOptions(this);
+            Access = new AccessOptions(Notifier);
 
             // Base: IdentificationGenerator
             AddIdGenerator(new MongoIdentificationGenerator(CoreOptions.Clock));
@@ -72,11 +69,11 @@ namespace Librame.Extensions.Data
         /// </summary>
         public CoreExtensionOptions CoreOptions { get; init; }
 
-
         /// <summary>
         /// 访问选项。
         /// </summary>
         public AccessOptions Access { get; init; }
+
 
         /// <summary>
         /// 标识生成器列表集合（默认已集成 <see cref="string"/> “MongoDB”、<see cref="long"/> “雪花”、<see cref="Guid"/> “COMB for SQL Server” 等标识类型的生成器）。

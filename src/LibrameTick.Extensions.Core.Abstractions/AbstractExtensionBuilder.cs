@@ -11,8 +11,6 @@
 #endregion
 
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 
 namespace Librame.Extensions.Core
 {
