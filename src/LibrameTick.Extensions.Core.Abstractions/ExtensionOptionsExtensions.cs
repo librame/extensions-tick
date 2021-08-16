@@ -10,9 +10,6 @@
 
 #endregion
 
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 namespace Librame.Extensions.Core
 {
     /// <summary>
@@ -22,18 +19,27 @@ namespace Librame.Extensions.Core
     {
 
         /// <summary>
+        /// 构建扩展选项的 JSON 文件路径。
+        /// </summary>
+        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+        /// <returns>返回字符串。</returns>
+        public static string BuildJsonPath(this IExtensionOptions options)
+            => $"{options.GetType().GetAssemblyName()}.json".SetBasePath(options.Directories.ConfigDirectory);
+
+
+        /// <summary>
         /// 查找指定目标扩展选项（支持链式查找父级扩展选项）。
         /// </summary>
         /// <typeparam name="TTargetOptions">指定的目标扩展选项类型。</typeparam>
-        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+        /// <param name="lastOptions">给定配置的最后一个 <see cref="IExtensionOptions"/>。</param>
         /// <returns>返回 <typeparamref name="TTargetOptions"/>。</returns>
-        public static TTargetOptions? FindOptions<TTargetOptions>(this IExtensionOptions options)
+        public static TTargetOptions? FindOptions<TTargetOptions>(this IExtensionOptions lastOptions)
             where TTargetOptions : IExtensionOptions
         {
-            if (!(options is TTargetOptions targetOptions))
+            if (!(lastOptions is TTargetOptions targetOptions))
             {
-                if (options.ParentOptions != null)
-                    return FindOptions<TTargetOptions>(options.ParentOptions);
+                if (lastOptions.ParentOptions != null)
+                    return FindOptions<TTargetOptions>(lastOptions.ParentOptions);
 
                 return default;
             }
@@ -45,62 +51,44 @@ namespace Librame.Extensions.Core
         /// 获取必需的目标扩展选项（通过 <see cref="FindOptions{TTargetOptions}(IExtensionOptions)"/> 实现，如果未找到则抛出异常）。
         /// </summary>
         /// <typeparam name="TTargetOptions">指定的目标扩展选项类型。</typeparam>
-        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+        /// <param name="lastOptions">给定配置的最后一个 <see cref="IExtensionOptions"/>。</param>
         /// <returns>返回 <typeparamref name="TTargetOptions"/>。</returns>
-        public static TTargetOptions GetRequiredOptions<TTargetOptions>(this IExtensionOptions options)
+        public static TTargetOptions GetRequiredOptions<TTargetOptions>(this IExtensionOptions lastOptions)
             where TTargetOptions : IExtensionOptions
         {
-            var targetOptions = options.FindOptions<TTargetOptions>();
+            var targetOptions = lastOptions.FindOptions<TTargetOptions>();
             if (targetOptions == null)
-                throw new ArgumentException($"Target options instance '{typeof(TTargetOptions)}' not found from current options '{options.GetType()}'.");
+                throw new ArgumentException($"Target options instance '{typeof(TTargetOptions)}' not found from current options '{lastOptions.GetType()}'.");
 
             return targetOptions;
         }
 
 
         /// <summary>
-        /// 另存为 JSON 文件。
+        /// 将当前扩展选项（含父级扩展选项）另存为 JSON 文件。
         /// </summary>
-        /// <typeparam name="TOptions">指定的 <see cref="IExtensionOptions"/>。</typeparam>
-        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-        /// <param name="filePath">给定的 JSON 文件路径（可选；默认保存到选项配置目录，并以当前选项名称为配置文件名）。</param>
-        /// <returns>返回文件路径。</returns>
-        public static string SaveAsJson<TOptions>(this TOptions options, string? filePath = null)
-            where TOptions : IExtensionOptions
+        /// <param name="lastOptions">给定配置的最后一个 <see cref="IExtensionOptions"/>。</param>
+        /// <returns>返回 <see cref="Dictionary{String, IExtensionOptions}"/>。</returns>
+        public static Dictionary<string, IExtensionOptions> SaveOptionsAsJson(this IExtensionOptions lastOptions)
         {
-            var jsonOptions = new JsonSerializerOptions();
+            var allOptions = new Dictionary<string, IExtensionOptions>();
 
-            jsonOptions.WriteIndented = true;
-            jsonOptions.Converters.Add(new JsonStringEnumConverter());
-            
-            return options.SaveAsJson(jsonOptions, filePath);
-        }
+            SaveOptions(lastOptions, allOptions);
 
-        /// <summary>
-        /// 另存为 JSON 文件。
-        /// </summary>
-        /// <typeparam name="TOptions">指定的 <see cref="IExtensionOptions"/>。</typeparam>
-        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-        /// <param name="jsonOptions">给定的 <see cref="JsonSerializerOptions"/>。</param>
-        /// <param name="filePath">给定的 JSON 文件路径（可选；默认保存到选项配置目录，并以当前选项名称为配置文件名）。</param>
-        /// <returns>返回文件路径。</returns>
-        public static string SaveAsJson<TOptions>(this TOptions options, JsonSerializerOptions jsonOptions, string? filePath = null)
-            where TOptions : IExtensionOptions
-        {
-            if (string.IsNullOrWhiteSpace(filePath))
+            return allOptions;
+
+            static string SaveOptions(IExtensionOptions current, Dictionary<string, IExtensionOptions> dictionary)
             {
-                // 尝试创建配置目录
-                Directory.CreateDirectory(options.Directories.ConfigDirectory);
-                // 默认使用当前选项名称为配置文件名
-                filePath = Path.Combine(options.Directories.ConfigDirectory, $"{options.Name}.json");
+                var jsonPath = current.BuildJsonPath();
+
+                jsonPath.WriteJson(current);
+                dictionary.Add(jsonPath, current);
+
+                if (current.ParentOptions != null)
+                    SaveOptions(current.ParentOptions, dictionary);
+
+                return jsonPath;
             }
-
-            var json = JsonSerializer.Serialize(options, jsonOptions);
-
-            // 写入文件
-            File.WriteAllText(filePath, json);
-
-            return filePath;
         }
 
     }

@@ -11,8 +11,8 @@
 #endregion
 
 using Librame.Extensions.Core.Cryptography;
-using Librame.Extensions.Core.Serialization;
 using Librame.Extensions.Core.Storage;
+using Librame.Extensions.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
 

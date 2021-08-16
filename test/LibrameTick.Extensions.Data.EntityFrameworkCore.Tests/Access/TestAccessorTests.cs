@@ -43,12 +43,16 @@ namespace Librame.Extensions.Data.Access
                 {
                     // 测试时每次运行需新建数据库
                     opts.Access.EnsureDatabaseDeleted = true;
+
+                    // 每次修改选项时自动保存为 JSON 文件
+                    opts.PropertyChangedAction = (o, e) => o.SaveOptionsAsJson();
                 })
                 .AddSeeder<InternalTestAccessorSeeder>()
                 .AddMigrator<InternalTestAccessorMigrator>()
                 .AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqlServerAccessor>>()
-                .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>();
+                .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>()
+                .SaveOptionsAsJson(); // 首次保存选项为 JSON 文件
 
             var provider = services.BuildServiceProvider();
 

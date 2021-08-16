@@ -12,6 +12,7 @@
 
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Librame.Extensions
 {
@@ -55,7 +56,7 @@ namespace Librame.Extensions
 
 
         /// <summary>
-        /// 写入 JSON。
+        /// 写入 JSON（默认支持枚举类型）。
         /// </summary>
         /// <param name="filePath">给定的文件路径。</param>
         /// <param name="value">给定的对象值。</param>
@@ -67,7 +68,14 @@ namespace Librame.Extensions
             JsonSerializerOptions? options = null, bool autoCreateDirectory = true)
         {
             if (options == null)
-                options = new JsonSerializerOptions { WriteIndented = true };
+            {
+                options = new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                };
+
+                options.Converters.Add(new JsonStringEnumConverter());
+            }
 
             var json = JsonSerializer.Serialize(value, options);
 

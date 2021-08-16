@@ -30,6 +30,8 @@ namespace Librame.Extensions.Core
             Action<CoreExtensionOptions>? setupAction = null)
         {
             var options = new CoreExtensionOptions();
+            options.TryLoadOptionsFromJson();
+
             setupAction?.Invoke(options);
 
             return new CoreExtensionBuilder(services, options);

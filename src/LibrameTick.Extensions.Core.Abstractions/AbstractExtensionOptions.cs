@@ -31,9 +31,10 @@ namespace Librame.Extensions.Core
                 ?? DefaultPropertyNotifierFactory.Instance.Create(this);
 
             Directories = directories ?? parentOptions?.Directories ?? new DirectoryOptions(Notifier);
+            ParentOptions = parentOptions;
+
             ReplacedServices = new Dictionary<Type, Type>();
             ServiceCharacteristics = new ServiceCharacteristicCollection();
-            ParentOptions = parentOptions;
         }
 
 

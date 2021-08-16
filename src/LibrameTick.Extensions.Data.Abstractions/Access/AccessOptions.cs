@@ -15,7 +15,7 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Data.Access
 {
     /// <summary>
-    /// 访问选项。
+    /// 定义实现 <see cref="IOptions"/> 的访问选项。
     /// </summary>
     public class AccessOptions : AbstractOptions
     {

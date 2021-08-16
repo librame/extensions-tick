@@ -31,7 +31,7 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         /// <summary>
-        /// 证书文件（默认兼容 IdentityServer4 生成的临时密钥文件）。
+        /// 证书文件（不包含路径，通常位于应用程序根目录；默认兼容 IdentityServer4 生成的临时密钥文件）。
         /// </summary>
         public string CredentialsFile
         {

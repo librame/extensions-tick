@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core.Serialization;
+using Librame.Extensions.Serialization;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core.Storage

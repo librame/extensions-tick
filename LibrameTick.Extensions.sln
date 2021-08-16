@@ -25,9 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.EntityFrameworkCore", "src\LibrameTick.Extensions.Data.EntityFrameworkCore\LibrameTick.Extensions.Data.EntityFrameworkCore.csproj", "{6C7E4FE1-24A8-4B05-881D-A0F0DEE5CB41}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Imaging.Abstractions", "src\LibrameTick.Extensions.Imaging.Abstractions\LibrameTick.Extensions.Imaging.Abstractions.csproj", "{6675254F-8661-4D5B-B128-661A76D5E013}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Drawing.Abstractions", "src\LibrameTick.Extensions.Drawing.Abstractions\LibrameTick.Extensions.Drawing.Abstractions.csproj", "{6675254F-8661-4D5B-B128-661A76D5E013}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Imaging.SkiaSharp", "src\LibrameTick.Extensions.Imaging.SkiaSharp\LibrameTick.Extensions.Imaging.SkiaSharp.csproj", "{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Drawing.SkiaSharp", "src\LibrameTick.Extensions.Drawing.SkiaSharp\LibrameTick.Extensions.Drawing.SkiaSharp.csproj", "{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{691B25E2-DC1B-49B9-B0DF-527F4C869800}"
 EndProject
@@ -41,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Core
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.EntityFrameworkCore.Tests", "test\LibrameTick.Extensions.Data.EntityFrameworkCore.Tests\LibrameTick.Extensions.Data.EntityFrameworkCore.Tests.csproj", "{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibrameTick.Extensions.Imaging.SkiaSharp.Tests", "test\LibrameTick.Extensions.Imaging.SkiaSharp.Tests\LibrameTick.Extensions.Imaging.SkiaSharp.Tests.csproj", "{271BE4B7-19A4-4A9C-960F-DE436E838755}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Drawing.SkiaSharp.Tests", "test\LibrameTick.Extensions.Drawing.SkiaSharp.Tests\LibrameTick.Extensions.Drawing.SkiaSharp.Tests.csproj", "{271BE4B7-19A4-4A9C-960F-DE436E838755}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

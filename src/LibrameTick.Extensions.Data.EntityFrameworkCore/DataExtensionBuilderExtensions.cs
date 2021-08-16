@@ -30,6 +30,8 @@ namespace Librame.Extensions.Data
             Action<DataExtensionOptions>? setupAction = null)
         {
             var options = new DataExtensionOptions(parent.Options);
+            options.TryLoadOptionsFromJson();
+
             setupAction?.Invoke(options);
 
             return new DataExtensionBuilder(parent, options);
