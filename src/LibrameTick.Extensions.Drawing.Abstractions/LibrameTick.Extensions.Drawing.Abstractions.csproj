@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Librame.Extensions.Drawing</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>..\..\bin\</OutputPath>
+    <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

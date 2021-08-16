@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Data.Access;
+using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Cryptography;
 using Librame.Extensions.Data.ValueConversion;
 using Microsoft.EntityFrameworkCore;

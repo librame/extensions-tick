@@ -1,10 +1,10 @@
 using Librame.Extensions.Core;
-using Librame.Extensions.Data.Store;
+using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Librame.Extensions.Data.Access
+namespace Librame.Extensions.Data.Accessing
 {
     public class TestAccessorTests
     {

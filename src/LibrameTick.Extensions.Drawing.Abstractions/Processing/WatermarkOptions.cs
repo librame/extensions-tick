@@ -1,0 +1,86 @@
+﻿#region License
+
+/* **************************************************************************************
+ * Copyright (c) Librame Pong All rights reserved.
+ * 
+ * https://github.com/librame
+ * 
+ * You must not remove this notice, or any other, from this software.
+ * **************************************************************************************/
+
+#endregion
+
+using Librame.Extensions.Core;
+using System.Drawing;
+
+namespace Librame.Extensions.Drawing.Processing
+{
+    /// <summary>
+    /// 定义实现 <see cref="IOptions"/> 的水印选项。
+    /// </summary>
+    public class WatermarkOptions : AbstractOptions
+    {
+        /// <summary>
+        /// 构造一个 <see cref="WatermarkOptions"/>。
+        /// </summary>
+        /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        public WatermarkOptions(IPropertyNotifier parentNotifier)
+            : base(parentNotifier)
+        {
+            Font = new FontOptions(Notifier) { Size = 32 };
+        }
+
+
+        /// <summary>
+        /// 字体选项。
+        /// </summary>
+        public FontOptions Font { get; init; }
+
+
+        /// <summary>
+        /// 水印模式。
+        /// </summary>
+        public WatermarkMode Mode
+        {
+            get => Notifier.GetOrAdd(nameof(Mode), WatermarkMode.Image);
+            set => Notifier.AddOrUpdate(nameof(Mode), value);
+        }
+
+        /// <summary>
+        /// 初始坐标（负值表示反向）。
+        /// </summary>
+        public Point InitialCoord
+        {
+            get => Notifier.GetOrAdd(nameof(InitialCoord), new Point(30, 50));
+            set => Notifier.AddOrUpdate(nameof(InitialCoord), value);
+        }
+
+        /// <summary>
+        /// 是否使用随机坐标（默认不随机）。
+        /// </summary>
+        public bool IsRandomCoord
+        {
+            get => Notifier.GetOrAdd(nameof(IsRandomCoord), false);
+            set => Notifier.AddOrUpdate(nameof(IsRandomCoord), value);
+        }
+
+        /// <summary>
+        /// 文本内容。
+        /// </summary>
+        public string Text
+        {
+            get => Notifier.GetOrAdd(nameof(Text), nameof(Librame));
+            set => Notifier.AddOrUpdate(nameof(Text), value);
+        }
+
+        /// <summary>
+        /// 图片文件。
+        /// </summary>
+        public string ImageFile
+        {
+            get => Notifier.GetOrAdd(nameof(ImageFile), "watermark.png");
+            set => Notifier.AddOrUpdate(nameof(ImageFile), value);
+        }
+
+    }
+}

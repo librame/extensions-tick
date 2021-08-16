@@ -11,8 +11,8 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Data.Access;
-using Librame.Extensions.Data.Store;
+using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
 
 namespace Librame.Extensions.Data

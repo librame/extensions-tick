@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Librame.Extensions.Drawing</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>..\..\bin\</OutputPath>
+    <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="2.80.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibrameTick.Extensions.Core\LibrameTick.Extensions.Core.csproj" />
+    <ProjectReference Include="..\LibrameTick.Extensions.Drawing.Abstractions\LibrameTick.Extensions.Drawing.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

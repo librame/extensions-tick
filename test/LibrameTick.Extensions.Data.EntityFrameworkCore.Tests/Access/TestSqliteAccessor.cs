@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Librame.Extensions.Data.Access
+namespace Librame.Extensions.Data.Accessing
 {
     public class TestSqliteAccessor : AbstractAccessor<TestSqliteAccessor>, ITestAccessor
     {

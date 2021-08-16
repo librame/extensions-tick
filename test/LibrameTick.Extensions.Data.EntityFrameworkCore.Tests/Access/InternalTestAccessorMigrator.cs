@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Librame.Extensions.Data.Access
+namespace Librame.Extensions.Data.Accessing
 {
     class InternalTestAccessorMigrator : IAccessorMigrator
     {

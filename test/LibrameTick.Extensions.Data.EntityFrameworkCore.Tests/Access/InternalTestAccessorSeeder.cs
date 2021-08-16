@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Librame.Extensions.Data.Access
+namespace Librame.Extensions.Data.Accessing
 {
     class InternalTestAccessorSeeder : AbstractAccessorSeeder
     {
