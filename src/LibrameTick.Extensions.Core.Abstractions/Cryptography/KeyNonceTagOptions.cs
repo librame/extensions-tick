@@ -81,7 +81,7 @@ namespace Librame.Extensions.Core.Cryptography
             var options = new KeyNonceTagOptions(parentNotifier);
 
             // 参数长度不能是 16、24 或 32 字节（128、192 或 256 位）
-            options.KeyMaxSize = 255;
+            options.KeyMaxSize = 28;
             options.NonceMaxSize = AesCcm.NonceByteSizes.MaxSize;
             options.TagMaxSize = AesCcm.TagByteSizes.MaxSize;
 

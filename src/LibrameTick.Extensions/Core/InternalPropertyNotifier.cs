@@ -67,7 +67,7 @@ namespace Librame.Extensions.Core
         }
 
 
-        public object AddOrUpdate(string propertyName, object propertyValue)
+        public object AddOrUpdate(string propertyName, object propertyValue, Action<object>? addedOrUpdatedAction = null)
         {
             if (propertyValue == null)
                 throw new ArgumentException($"The value of the property '{propertyName}' to be added cannot be null.");
@@ -81,6 +81,8 @@ namespace Librame.Extensions.Core
                 HandleNotice(propertyName, propertyValue, oldValue, isUpdate: true, () =>
                 {
                     _propertyValues[key] = propertyValue;
+
+                    addedOrUpdatedAction?.Invoke(propertyValue);
                 });
             }
             else
@@ -88,13 +90,16 @@ namespace Librame.Extensions.Core
                 HandleNotice(propertyName, propertyValue, oldValue: null, isUpdate: false, () =>
                 {
                     _propertyValues.TryAdd(key, propertyValue);
+
+                    addedOrUpdatedAction?.Invoke(propertyValue);
                 });
             }
 
             return propertyValue;
         }
 
-        public object AddOrUpdate(string propertyName, Func<object> propertyValueFunc, bool isInitializeValue = false)
+        public object AddOrUpdate(string propertyName, Func<object> propertyValueFunc, bool isInitializeValue = false,
+            Action<object>? addedOrUpdatedAction = null)
         {
             if (propertyValueFunc == null)
                 throw new ArgumentException($"The value func of the property '{propertyName}' to be added cannot be null.");
@@ -110,6 +115,8 @@ namespace Librame.Extensions.Core
                     HandleNotice(propertyName, propertyValueFunc, oldValueFunc, isUpdate: true, () =>
                     {
                         _propertyFuncs[key] = propertyValueFunc;
+
+                        addedOrUpdatedAction?.Invoke(propertyValueFunc);
                     });
                 }
                 else
@@ -117,6 +124,8 @@ namespace Librame.Extensions.Core
                     HandleNotice(propertyName, propertyValueFunc, oldValue: null, isUpdate: false, () =>
                     {
                         _propertyFuncs.TryAdd(key, propertyValueFunc);
+
+                        addedOrUpdatedAction?.Invoke(propertyValueFunc);
                     });
                 }
 
@@ -127,37 +136,64 @@ namespace Librame.Extensions.Core
         }
 
 
-        public TValue GetOrAdd<TValue>(string propertyName, TValue addPropertyValue)
+        public TValue GetOrAdd<TValue>(string propertyName, TValue addPropertyValue,
+            Action<TValue>? addedAction = null, Action<TValue>? gotAction = null)
         {
             var key = BuildKey(propertyName);
 
             if (_propertyValues.ContainsKey(key))
-                return (TValue)_propertyValues[key];
+            {
+                var currentValue = (TValue)_propertyValues[key];
+                gotAction?.Invoke(currentValue);
+
+                return currentValue;
+            }
 
             if (_propertyFuncs.ContainsKey(key))
-                return (TValue)_propertyFuncs[key].Invoke();
+            {
+                var currentValue = (TValue)_propertyFuncs[key].Invoke();
+                gotAction?.Invoke(currentValue);
+
+                return currentValue;
+            }
 
             if (addPropertyValue == null)
                 throw new ArgumentException($"The value of the property '{propertyName}' to be added cannot be null.");
 
             _propertyValues.TryAdd(key, addPropertyValue);
+
+            addedAction?.Invoke(addPropertyValue);
+
             return addPropertyValue;
         }
 
-        public object GetOrAdd(string propertyName, object addPropertyValue)
+        public object GetOrAdd(string propertyName, object addPropertyValue,
+            Action<object>? addedAction = null, Action<object>? gotAction = null)
         {
             var key = BuildKey(propertyName);
 
             if (_propertyValues.ContainsKey(key))
-                return _propertyValues[key];
+            {
+                var currentValue = _propertyValues[key];
+                gotAction?.Invoke(currentValue);
+
+                return currentValue;
+            }
 
             if (_propertyFuncs.ContainsKey(key))
-                return _propertyFuncs[key].Invoke();
+            {
+                var currentValue = _propertyFuncs[key].Invoke();
+                gotAction?.Invoke(currentValue);
+
+                return currentValue;
+            }
 
             if (addPropertyValue == null)
                 throw new ArgumentException($"The value of the property '{propertyName}' to be added cannot be null.");
 
             _propertyValues.TryAdd(key, addPropertyValue);
+
+            addedAction?.Invoke(addPropertyValue);
 
             return addPropertyValue;
         }

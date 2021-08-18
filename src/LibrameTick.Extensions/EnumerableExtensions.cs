@@ -88,9 +88,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> or <paramref name="action"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -106,9 +103,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/>, <paramref name="action"/> or <paramref name="breakFunc"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -130,9 +124,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> or <paramref name="action"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -150,9 +141,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/>, <paramref name="action"/> or <paramref name="breakFunc"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -177,9 +165,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> or <paramref name="action"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -192,9 +177,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/>, <paramref name="action"/> or <paramref name="breakFunc"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -215,9 +197,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> or <paramref name="action"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -234,9 +213,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 遍历元素集合（元素集合为空或空集合则返回，不抛异常）。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/>, <paramref name="action"/> or <paramref name="breakFunc"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="items">给定的元素集合。</param>
         /// <param name="action">给定的遍历动作。</param>
@@ -264,9 +240,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 修剪集合初始和末尾指定项。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="enumerable"/> or <paramref name="firstAndLast"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
         /// <param name="firstAndLast">要修剪的初始和末尾项。</param>
@@ -280,9 +253,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 修剪集合初始指定项。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="enumerable"/> or <paramref name="first"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
         /// <param name="first">要修剪的初始项。</param>
@@ -296,9 +266,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 修剪集合末尾指定项。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="enumerable"/> or <paramref name="last"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
         /// <param name="last">要修剪的末尾项。</param>
@@ -313,9 +280,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 修剪集合初始和末尾指定项。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="enumerable"/> or <paramref name="isFirstAndLastFunc"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
         /// <param name="isFirstAndLastFunc">断定是初始和末尾项的方法。</param>
@@ -328,9 +292,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 修剪集合初始指定项。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="enumerable"/> or <paramref name="isFirstFunc"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
         /// <param name="isFirstFunc">断定是初始项的方法。</param>
@@ -361,9 +322,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 修剪集合末尾指定项。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="enumerable"/> or <paramref name="isLastFunc"/> is null.
-        /// </exception>
         /// <typeparam name="T">指定的类型。</typeparam>
         /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
         /// <param name="isLastFunc">断定是末尾项的方法。</param>

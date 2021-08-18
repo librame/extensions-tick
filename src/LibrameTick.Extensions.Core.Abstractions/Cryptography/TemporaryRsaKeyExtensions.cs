@@ -28,13 +28,16 @@ namespace Librame.Extensions.Core.Cryptography
         /// <returns>返回 <see cref="RsaSecurityKey"/>。</returns>
         public static RsaSecurityKey AsRsaKey(this TemporaryRsaKey tempKey, bool requiredPrivateKey = true)
         {
-            var rsaKey = new RsaSecurityKey(tempKey.Parameters)
+            if (tempKey.Parameters == null)
+                throw new ArgumentException("The temporary rsa key parameters is null.");
+
+            var rsaKey = new RsaSecurityKey(tempKey.Parameters.AsParameters())
             {
                 KeyId = tempKey.KeyId
             };
 
             if (requiredPrivateKey && rsaKey.PrivateKeyStatus == PrivateKeyStatus.DoesNotExist)
-                throw new NotSupportedException($"The temporary rsa key does not have a private key.");
+                throw new NotSupportedException("The temporary rsa key does not have a private key.");
 
             return rsaKey;
         }

@@ -136,13 +136,25 @@ namespace Librame.Extensions.Core
         /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
         /// </summary>
         /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
-        /// <param name="implementationType">给定的实现类型。</param>
         /// <param name="characteristic">给定的 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="implementationType">给定的实现类型。</param>
         /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
         public static IServiceCollection TryAddEnumerableByCharacteristic(this IServiceCollection services,
             ServiceCharacteristic characteristic, Type implementationType)
+            => services.TryAddEnumerableByCharacteristic(characteristic, implementationType, out _);
+
+        /// <summary>
+        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// </summary>
+        /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
+        /// <param name="characteristic">给定的 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="implementationType">给定的实现类型。</param>
+        /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
+        /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+        public static IServiceCollection TryAddEnumerableByCharacteristic(this IServiceCollection services,
+            ServiceCharacteristic characteristic, Type implementationType, out ServiceDescriptor descriptor)
         {
-            var descriptor = new ServiceDescriptor(characteristic.ServiceType, implementationType, characteristic.Lifetime);
+            descriptor = new ServiceDescriptor(characteristic.ServiceType, implementationType, characteristic.Lifetime);
 
             services.TryAddEnumerable(descriptor);
 
@@ -158,9 +170,24 @@ namespace Librame.Extensions.Core
         /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
         public static IServiceCollection TryAddEnumerableByCharacteristic(this IServiceCollection services,
             ServiceCharacteristic characteristic, IEnumerable<Type> implementationTypes)
+            => services.TryAddEnumerableByCharacteristic(characteristic, implementationTypes, out _);
+
+        /// <summary>
+        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// </summary>
+        /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
+        /// <param name="characteristic">给定的 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="implementationTypes">给定的实现类型集合。</param>
+        /// <param name="descriptors">输出 <see cref="IEnumerable{ServiceDescriptor}"/>。</param>
+        /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+        public static IServiceCollection TryAddEnumerableByCharacteristic(this IServiceCollection services,
+            ServiceCharacteristic characteristic, IEnumerable<Type> implementationTypes,
+            out IEnumerable<ServiceDescriptor> descriptors)
         {
-            var descriptors = implementationTypes
-                .Select(implType => new ServiceDescriptor(characteristic.ServiceType, implType, characteristic.Lifetime));
+            descriptors = implementationTypes.Select(implType =>
+            {
+                return new ServiceDescriptor(characteristic.ServiceType, implType, characteristic.Lifetime);
+            });
 
             services.TryAddEnumerable(descriptors);
 

@@ -57,7 +57,7 @@ namespace Librame.Extensions
         {
             var str = "abcdefg";
             Assert.Equal(str, str.ToCharArray().JoinString());
-            Assert.Equal(str, str.ToCharArray().JoinString(','));
+            Assert.Equal("a,b,c,d,e,f,g", str.ToCharArray().JoinString(','));
 
             var array = new string[] { "123", "456" };
             Assert.Equal("123456", array.JoinString());
@@ -107,9 +107,9 @@ namespace Librame.Extensions
             var testString = "Append";
 
             result = str.Leading(testString);
-            Assert.Equal($"{str}{testString}", result); // appended
+            Assert.Equal($"{testString}{str}", result); // appended
 
-            result = result.Trailing(testString);
+            result = str.Trailing(testString);
             Assert.Equal($"{str}{testString}", result); // no append
         }
 

@@ -10,15 +10,19 @@
 
 #endregion
 
-using SkiaSharp;
-
-namespace Librame.Extensions.Drawing.Processing
+namespace Librame.Extensions.Drawing
 {
     /// <summary>
-    /// 定义实现 <see cref="ICollection{SKBitmap}"/> 的位图列表接口。
+    /// 定义实现 <see cref="IEnumerable{BitmapDescriptor}"/> 的位图列表接口。
     /// </summary>
-    public interface IBitmapList : ICollection<SKBitmap>, IDisposable
+    public interface IBitmapList : IEnumerable<BitmapDescriptor>, IDisposable
     {
+        /// <summary>
+        /// 位图数。
+        /// </summary>
+        int Count { get; }
+
+
         /// <summary>
         /// 添加位图。
         /// </summary>
@@ -31,7 +35,6 @@ namespace Librame.Extensions.Drawing.Processing
         /// <param name="imageBuffers">给定的位图字节数组集合。</param>
         void Add(IEnumerable<byte[]> imageBuffers);
 
-
         /// <summary>
         /// 添加位图。
         /// </summary>
@@ -43,5 +46,11 @@ namespace Librame.Extensions.Drawing.Processing
         /// </summary>
         /// <param name="imagePaths">给定的位图路径集合。</param>
         void Add(IEnumerable<string> imagePaths);
+
+
+        /// <summary>
+        /// 清除当前位图集合。
+        /// </summary>
+        void Clear();
     }
 }

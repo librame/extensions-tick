@@ -14,7 +14,6 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Drawing.Verification;
 using Librame.Extensions.Drawing.Processing;
 using SkiaSharp;
-using System.Drawing;
 
 namespace Librame.Extensions.Drawing
 {
@@ -31,20 +30,21 @@ namespace Librame.Extensions.Drawing
             : base(parentOptions, parentOptions.Directories)
         {
             CoreOptions = parentOptions.GetRequiredOptions<CoreExtensionOptions>();
-            Colors = new ColorOptions(Notifier);
+            Colors = ColorOptions.CreateLightOptions(Notifier);
             Captcha = new CaptchaOptions(Notifier);
+            Scaling = new ScalingOptions(Notifier);
             Watermark = new WatermarkOptions(Notifier);
 
             ImageDirectory = Directories.BaseDirectory.CombinePath("images");
 
             // Processing
-            ServiceCharacteristics.AddSingleton<IScaleService>();
+            ServiceCharacteristics.AddSingleton<ISavingDrawableProcessor>();
+            ServiceCharacteristics.AddSingleton<IScalingDrawableProcessor>();
+            ServiceCharacteristics.AddSingleton<IWatermarkDrawableProcessor>();
+            ServiceCharacteristics.AddSingleton<IProcessorManager>();
 
             // Verification
             ServiceCharacteristics.AddScope<ICaptchaGenerator>();
-
-            // Watermarking
-            ServiceCharacteristics.AddScope<IWatermarkGenerator>();
         }
 
 
@@ -64,6 +64,11 @@ namespace Librame.Extensions.Drawing
         public CaptchaOptions Captcha { get; init; }
 
         /// <summary>
+        /// 缩放选项。
+        /// </summary>
+        public ScalingOptions Scaling { get; init; }
+
+        /// <summary>
         /// 水印选项。
         /// </summary>
         public WatermarkOptions Watermark { get; init; }
@@ -74,17 +79,8 @@ namespace Librame.Extensions.Drawing
         /// </summary>
         public string ImageDirectory
         {
-            get => Notifier.GetOrAdd(nameof(ImageDirectory), string.Empty);
+            get => Notifier.GetOrAddDirectory(nameof(ImageDirectory), string.Empty);
             set => Notifier.AddOrUpdate(nameof(ImageDirectory), value);
-        }
-
-        /// <summary>
-        /// 图像子目录方法。
-        /// </summary>
-        public Func<DateTime, string> ImageSubdirectoryFunc
-        {
-            get => Notifier.GetOrAdd(nameof(ImageSubdirectoryFunc), (Func<DateTime, string>)(now => $"{now.ToString("yyMM")}"));
-            set => Notifier.AddOrUpdate(nameof(ImageSubdirectoryFunc), value);
         }
 
         /// <summary>
@@ -113,16 +109,6 @@ namespace Librame.Extensions.Drawing
             get => Notifier.GetOrAdd(nameof(ResizeQuality), SKFilterQuality.Medium);
             set => Notifier.AddOrUpdate(nameof(ResizeQuality), value);
         }
-
-        /// <summary>
-        /// 缩放描述符列表。
-        /// </summary>
-        public List<ScaleDescriptor> Scales { get; init; }
-            = new List<ScaleDescriptor>
-            {
-                new("-small", new Size(100, 70), addWatermark: false),
-                new("-large", new Size(1000, 700), addWatermark: true)
-            };
 
         /// <summary>
         /// 支持的图像扩展名列表。

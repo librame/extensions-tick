@@ -11,6 +11,8 @@
 #endregion
 
 using Librame.Extensions.Core;
+using Librame.Extensions.Drawing.Processing;
+using Librame.Extensions.Drawing.Verification;
 
 namespace Librame.Extensions.Drawing
 {
@@ -30,20 +32,13 @@ namespace Librame.Extensions.Drawing
         public DrawingExtensionBuilder(IExtensionBuilder parentBuilder, DrawingExtensionOptions options)
             : base(parentBuilder, options)
         {
-            // Base: IdentificationGenerator
-            TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
-
-            // Access
-            TryAddOrReplaceService<IAccessorAggregator, InternalAccessorAggregator>();
-            TryAddOrReplaceService<IAccessorManager, InternalAccessorManager>();
-            TryAddOrReplaceService<IAccessorResolver, InternalAccessorResolver>();
-            TryAddOrReplaceService<IAccessorSlicer, InternalAccessorSlicer>();
-
-            // Store
-            TryAddOrReplaceService(typeof(IStore<>), typeof(BaseStore<>));
+            // Processing
+            TryAddOrReplaceService<ISavingDrawableProcessor, InternalSavingDrawableProcessor>();
+            TryAddOrReplaceService<IScalingDrawableProcessor, InternalScaleDrawableProcessor>();
+            TryAddOrReplaceService<IWatermarkDrawableProcessor, InternalWatermarkDrawableProcessor>();
 
             // ValueConversion
-            TryAddOrReplaceService<IEncryptionConverterFactory, InternalEncryptionConverterFactory>();
+            TryAddOrReplaceService<ICaptchaGenerator, InternalCaptchaGenerator>();
         }
 
     }

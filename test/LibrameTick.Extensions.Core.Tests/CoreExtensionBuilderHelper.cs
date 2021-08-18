@@ -13,7 +13,7 @@ namespace Librame.Extensions.Core
         {
             if (_builder is null)
             {
-                var fileProvider = new PhysicalStorageFileProvider(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativePath);
+                var fileProvider = new PhysicalStorageFileProvider(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath);
 
                 var services = new ServiceCollection();
                 _builder = services.AddLibrame(opts => opts.Requests.FileProviders.Add(fileProvider));

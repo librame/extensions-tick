@@ -43,6 +43,8 @@ namespace Librame.Extensions.Core
             TryAddOrReplaceService<IFilePermission, InternalFilePermission>();
             TryAddOrReplaceService<IFileTransmission, InternalFileTransmission>();
 
+            TryAddOrReplaceService<IProcessorManager, InternalProcessorManager>();
+
             if (options.EnableAutoloaderActivator)
             {
                 AutoloaderActivator = new AssemblyAutoloaderActivator(options.AssemblyLoadings);

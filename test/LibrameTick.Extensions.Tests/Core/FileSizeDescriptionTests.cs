@@ -12,7 +12,7 @@ namespace Librame.Extensions.Core
             var unitString = fileSize.FormatSizeStringWithUnit(FileSizeSystem.Binary, FileSizeUnit.PeByte);
             Assert.NotEmpty(unitString);
 
-            var adapterUnitString = fileSize.FormatSizeStringWithAdaptionUnit(FileSizeSystem.Decimal);
+            var adapterUnitString = fileSize.FormatSizeStringWithAdaptionUnit(FileSizeSystem.Binary);
             Assert.Equal(unitString, adapterUnitString);
         }
 

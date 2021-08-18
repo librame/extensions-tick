@@ -65,12 +65,9 @@ namespace Librame.Extensions
             var list = ExpressionExtensions.New<List<string>>();
             Assert.NotNull(list);
 
-            var guid = Guid.NewGuid();
-            var bytesGuid = ExpressionExtensions.New<Guid>(guid.ToByteArray());
-            Assert.Equal(guid, bytesGuid);
-
-            var stringGuid = (Guid)typeof(Guid).NewByExpression(guid.ToString());
-            Assert.Equal(guid, stringGuid);
+            var fileName = @"D:\test.txt";
+            var expressionFileInfo = ExpressionExtensions.New<FileInfo>(fileName);
+            Assert.Equal(fileName, expressionFileInfo.FullName);
         }
 
     }

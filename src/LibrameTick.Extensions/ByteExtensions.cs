@@ -29,9 +29,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 转换 BASE32 字符串。
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="bytes"/> is null or empty.
-        /// </exception>
         /// <param name="bytes">给定的字节数组。</param>
         /// <returns>返回字符串。</returns>
         public static string AsBase32String(this byte[] bytes)
@@ -94,9 +91,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 还原 BASE32 字符串。
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="base32String"/> is null or empty.
-        /// </exception>
         /// <param name="base32String">给定的 BASE32 字符串。</param>
         /// <returns>返回字节数组。</returns>
         public static byte[] FromBase32String(this string base32String)

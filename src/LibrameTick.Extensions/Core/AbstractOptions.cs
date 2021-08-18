@@ -24,7 +24,7 @@ namespace Librame.Extensions.Core
         /// </summary>
         protected AbstractOptions()
         {
-            Notifier = DefaultPropertyNotifierFactory.Instance.Create(this);
+            Notifier = new InternalPropertyNotifier(this);
         }
 
         /// <summary>

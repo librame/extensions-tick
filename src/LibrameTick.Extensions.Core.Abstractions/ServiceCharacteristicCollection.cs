@@ -51,7 +51,19 @@ namespace Librame.Extensions.Core
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddSingleton<TService>(bool replaceIfExists = false)
             where TService : class
-            => AddSingleton(typeof(TService), replaceIfExists);
+            => AddSingleton<TService>(out _, replaceIfExists);
+
+        /// <summary>
+        /// 添加单例服务特征。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <param name="characteristic">输出 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
+        /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+        public ServiceCharacteristicCollection AddSingleton<TService>(out ServiceCharacteristic characteristic,
+            bool replaceIfExists = false)
+            where TService : class
+            => AddSingleton(typeof(TService), out characteristic, replaceIfExists);
 
         /// <summary>
         /// 添加单例服务特征。
@@ -60,8 +72,19 @@ namespace Librame.Extensions.Core
         /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddSingleton(Type serviceType, bool replaceIfExists = false)
+            => AddSingleton(serviceType, out _, replaceIfExists);
+
+        /// <summary>
+        /// 添加单例服务特征。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <param name="characteristic">输出 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
+        /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+        public ServiceCharacteristicCollection AddSingleton(Type serviceType,
+            out ServiceCharacteristic characteristic, bool replaceIfExists = false)
         {
-            Add(ServiceCharacteristic.Singleton(serviceType, replaceIfExists));
+            Add(characteristic = ServiceCharacteristic.Singleton(serviceType, replaceIfExists));
             return this;
         }
 
@@ -74,7 +97,19 @@ namespace Librame.Extensions.Core
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddScope<TService>(bool replaceIfExists = false)
             where TService : class
-            => AddScope(typeof(TService), replaceIfExists);
+            => AddScope<TService>(out _, replaceIfExists);
+
+        /// <summary>
+        /// 添加域例服务特征。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <param name="characteristic">输出 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
+        /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+        public ServiceCharacteristicCollection AddScope<TService>(out ServiceCharacteristic characteristic,
+            bool replaceIfExists = false)
+            where TService : class
+            => AddScope(typeof(TService), out characteristic, replaceIfExists);
 
         /// <summary>
         /// 添加域例服务特征。
@@ -83,8 +118,19 @@ namespace Librame.Extensions.Core
         /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddScope(Type serviceType, bool replaceIfExists = false)
+            => AddScope(serviceType, out _, replaceIfExists);
+
+        /// <summary>
+        /// 添加域例服务特征。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <param name="characteristic">输出 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
+        /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+        public ServiceCharacteristicCollection AddScope(Type serviceType,
+            out ServiceCharacteristic characteristic, bool replaceIfExists = false)
         {
-            Add(ServiceCharacteristic.Scope(serviceType, replaceIfExists));
+            Add(characteristic = ServiceCharacteristic.Scope(serviceType, replaceIfExists));
             return this;
         }
 
@@ -97,7 +143,19 @@ namespace Librame.Extensions.Core
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddTransient<TService>(bool replaceIfExists = false)
             where TService : class
-            => AddTransient(typeof(TService), replaceIfExists);
+            => AddTransient<TService>(out _, replaceIfExists);
+
+        /// <summary>
+        /// 添加瞬例服务特征。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <param name="characteristic">输出 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
+        /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+        public ServiceCharacteristicCollection AddTransient<TService>(out ServiceCharacteristic characteristic,
+            bool replaceIfExists = false)
+            where TService : class
+            => AddTransient(typeof(TService), out characteristic, replaceIfExists);
 
         /// <summary>
         /// 添加瞬例服务特征。
@@ -106,8 +164,19 @@ namespace Librame.Extensions.Core
         /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
         /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
         public ServiceCharacteristicCollection AddTransient(Type serviceType, bool replaceIfExists = false)
+            => AddTransient(serviceType, out _, replaceIfExists);
+
+        /// <summary>
+        /// 添加瞬例服务特征。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <param name="characteristic">输出 <see cref="ServiceCharacteristic"/>。</param>
+        /// <param name="replaceIfExists">是否替换已存在的服务（可选；默认不替换）。</param>
+        /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+        public ServiceCharacteristicCollection AddTransient(Type serviceType,
+            out ServiceCharacteristic characteristic, bool replaceIfExists = false)
         {
-            Add(ServiceCharacteristic.Transient(serviceType, replaceIfExists));
+            Add(characteristic = ServiceCharacteristic.Transient(serviceType, replaceIfExists));
             return this;
         }
 

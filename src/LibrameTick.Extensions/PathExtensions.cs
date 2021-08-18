@@ -29,8 +29,8 @@ namespace Librame.Extensions
         /// <summary>
         /// 除去开发相对路径部分的 <see cref="Directory.GetCurrentDirectory()"/> 当前目录。
         /// </summary>
-        public static string CurrentDirectoryWithoutDevelopmentRelativePath
-            => CurrentDirectory.TrimDevelopmentRelativePath();
+        public static string CurrentDirectoryWithoutDevelopmentRelativeSubpath
+            => CurrentDirectory.TrimDevelopmentRelativeSubpath();
 
 
         /// <summary>
@@ -43,17 +43,32 @@ namespace Librame.Extensions
 
 
         /// <summary>
+        /// 删除目录。
+        /// </summary>
+        /// <param name="path">给定的目录路径。</param>
+        public static void DirectoryDelete(this string path)
+            => Directory.Delete(path);
+
+        /// <summary>
         /// 目录是否存在。
         /// </summary>
-        /// <param name="path">给定的路径。</param>
+        /// <param name="path">给定的目录路径。</param>
         /// <returns>返回布尔值。</returns>
         public static bool DirectoryExists(this string path)
             => Directory.Exists(path);
 
+
+        /// <summary>
+        /// 删除文件。
+        /// </summary>
+        /// <param name="path">给定的文件路径。</param>
+        public static void FileDelete(this string path)
+            => File.Delete(path);
+
         /// <summary>
         /// 文件是否存在。
         /// </summary>
-        /// <param name="path">给定的路径。</param>
+        /// <param name="path">给定的文件路径。</param>
         /// <returns>返回布尔值。</returns>
         public static bool FileExists(this string path)
             => File.Exists(path);
@@ -62,16 +77,13 @@ namespace Librame.Extensions
         /// <summary>
         /// 设置基础路径。
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="relativePath"/> is null or empty.
-        /// </exception>
         /// <param name="relativePath">给定的相对路径。</param>
-        /// <param name="basePath">给定的基础路径（可选；默认使用没有开发相对路径的当前目录）。</param>
+        /// <param name="basePath">给定的基础路径（可选；默认使用没有开发相对子路径的当前目录）。</param>
         /// <returns>返回路径字符串。</returns>
         public static string SetBasePath(this string relativePath, string? basePath = null)
         {
             if (string.IsNullOrEmpty(basePath))
-                basePath = CurrentDirectoryWithoutDevelopmentRelativePath;
+                basePath = CurrentDirectoryWithoutDevelopmentRelativeSubpath;
 
             if (relativePath.StartsWith("./") || !relativePath.StartsWith(basePath))
                 return Path.Combine(basePath, relativePath);
@@ -80,7 +92,7 @@ namespace Librame.Extensions
         }
 
 
-        #region CombinePath
+        #region Combine
 
         /// <summary>
         /// 合并路径。
@@ -91,24 +103,49 @@ namespace Librame.Extensions
         public static string CombinePath(this string basePath, string relativePath)
             => Path.Combine(basePath, relativePath);
 
+
         /// <summary>
-        /// 将字符串组合为相对路径（如：folder => folder/）。
+        /// 将文件夹名称集合组合为相对子路径（如：“folder1、folder2 => folder1\folder2\ 或 \folder1\folder2”）。
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="value"/> is null or empty.
+        /// <exception cref="InvalidOperationException">
+        /// <paramref name="folderNames"/> has invalid path chars.
         /// </exception>
-        /// <param name="value">给定的字符串值。</param>
-        /// <param name="pathSeparatorForward">路径分隔符前置（可选；默认后置）。</param>
+        /// <param name="folderNames">给定的文件夹名称集合。</param>
+        /// <param name="pathSeparatorEscaping">将路径分隔符转义（可选；默认不转义）。</param>
+        /// <param name="pathSeparatorForward">将路径分隔符前置（可选；默认后置）。</param>
         /// <returns>返回路径字符串。</returns>
-        public static string CombineRelativePath(this string value, bool pathSeparatorForward = false)
+        public static string CombineRelativeSubpath(this IEnumerable<string> folderNames,
+            bool pathSeparatorEscaping = false, bool pathSeparatorForward = false)
+            => folderNames.Select(value =>
+            {
+                return value.CombineRelativeSubpath(pathSeparatorEscaping, pathSeparatorForward);
+            })
+            .JoinString();
+
+        /// <summary>
+        /// 将文件夹名称组合为相对子路径（如：“folder => folder\ 或 \folder”）。
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// <paramref name="folderName"/> has invalid path chars.
+        /// </exception>
+        /// <param name="folderName">给定的文件夹名称。</param>
+        /// <param name="pathSeparatorEscaping">将路径分隔符转义（可选；默认不转义）。</param>
+        /// <param name="pathSeparatorForward">将路径分隔符前置（可选；默认后置）。</param>
+        /// <returns>返回路径字符串。</returns>
+        public static string CombineRelativeSubpath(this string folderName,
+            bool pathSeparatorEscaping = false, bool pathSeparatorForward = false)
         {
-            if (value.HasInvalidPathChars())
-                throw new InvalidOperationException($"'{value}' has invalid path chars.");
+            if (folderName.HasInvalidPathChars())
+                throw new InvalidOperationException($"'{folderName}' has invalid path chars.");
+
+            var separator = Path.DirectorySeparatorChar.ToString();
+            if (pathSeparatorEscaping)
+                separator = Regex.Escape(separator);
 
             if (pathSeparatorForward)
-                return $"{Path.DirectorySeparatorChar}{value}";
+                return $"{separator}{folderName}";
 
-            return $"{value}{Path.DirectorySeparatorChar}";
+            return $"{folderName}{separator}";
         }
 
         #endregion
@@ -117,22 +154,16 @@ namespace Librame.Extensions
         #region InvalidPathChars
 
         /// <summary>
-        /// 含有无效的路径字符集合。
+        /// 含无效的路径字符集合。
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="path"/> is null or empty.
-        /// </exception>
         /// <param name="path">给定的路径。</param>
         /// <returns>返回布尔值。</returns>
         public static bool HasInvalidPathChars(this string path)
             => path.HasInvalidChars(Path.GetInvalidPathChars());
 
         /// <summary>
-        /// 含有无效的文件名称字符集合。
+        /// 含无效的文件名称字符集合。
         /// </summary>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="fileName"/> is null or empty.
-        /// </exception>
         /// <param name="fileName">给定的文件名。</param>
         /// <returns>返回布尔值。</returns>
         public static bool HasInvalidFileNameChars(this string fileName)
@@ -141,15 +172,18 @@ namespace Librame.Extensions
         #endregion
 
 
-        #region TrimRelativePath
+        #region TrimRelativeSubpath
 
-        private static readonly string _developmentRelativePath = InitDevelopmentRelativePath();
+        private static readonly string _developmentRelativeSubpath
+            = InitDevelopmentRelativeSubpath();
 
-        private static string InitDevelopmentRelativePath()
+        private static string InitDevelopmentRelativeSubpath()
         {
             var separator = Regex.Escape(Path.DirectorySeparatorChar.ToString());
 
             var sb = new StringBuilder();
+
+            // 采用路径分隔符前置方案
             sb.Append($"({separator}bin|{separator}obj)");
             sb.Append($"({separator}x86|{separator}x64)?");
             sb.Append($"({separator}Debug|{separator}Release)");
@@ -158,13 +192,13 @@ namespace Librame.Extensions
         }
 
         /// <summary>
-        /// 修剪路径中存在的开发相对路径部分（如：prefix/bin/[x64/]Debug => prefix）。
+        /// 修剪路径中存在的开发相对路径部分（如：prefix\bin\[x64\]Debug => prefix）。
         /// </summary>
         /// <param name="path">给定的路径。</param>
         /// <returns>返回修剪后的路径字符串。</returns>
-        public static string TrimDevelopmentRelativePath(this string path)
+        public static string TrimDevelopmentRelativeSubpath(this string path)
         {
-            var regex = new Regex(_developmentRelativePath);
+            var regex = new Regex(_developmentRelativeSubpath);
             if (regex.IsMatch(path))
             {
                 var match = regex.Match(path);

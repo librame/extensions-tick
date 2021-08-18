@@ -16,15 +16,15 @@ using System.Drawing;
 namespace Librame.Extensions.Drawing
 {
     /// <summary>
-    /// 定义实现 <see cref="IOptions"/> 的背景噪点选项。
+    /// 定义实现 <see cref="IOptions"/> 的噪点选项。
     /// </summary>
-    public class BackgroundNoiseOptions : AbstractOptions
+    public class NoiseOptions : AbstractOptions
     {
         /// <summary>
-        /// 构造一个 <see cref="BackgroundNoiseOptions"/>。
+        /// 构造一个 <see cref="NoiseOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public BackgroundNoiseOptions(IPropertyNotifier parentNotifier)
+        public NoiseOptions(IPropertyNotifier parentNotifier)
             : base(parentNotifier)
         {
         }
@@ -42,9 +42,9 @@ namespace Librame.Extensions.Drawing
         /// <summary>
         /// 噪点间距。
         /// </summary>
-        public PointF Space
+        public Point Space
         {
-            get => Notifier.GetOrAdd(nameof(Space), new PointF(x: 5, y: 5));
+            get => Notifier.GetOrAdd(nameof(Space), new Point(x: 5, y: 5));
             set => Notifier.AddOrUpdate(nameof(Space), value);
         }
 

@@ -38,11 +38,18 @@ namespace Librame.Extensions
         }
 
         [Fact]
-        public void CombineRelativePathTest()
+        public void CombineRelativeSubpathTest()
         {
-            var str = nameof(PathExtensionsTests);
-            Assert.Equal($"{str}{Path.DirectorySeparatorChar}", str.CombineRelativePath());
-            Assert.Equal($"{Path.DirectorySeparatorChar}{str}", str.CombineRelativePath(pathSeparatorForward: true));
+            var separator = Path.DirectorySeparatorChar;
+
+            var folderName = nameof(PathExtensionsTests);
+            Assert.Equal($"{folderName}{separator}", folderName.CombineRelativeSubpath());
+            Assert.Equal($"{separator}{folderName}", folderName.CombineRelativeSubpath(pathSeparatorForward: true));
+
+            var folderNames = new string[] { folderName, "test" };
+            var relativeSubdirectory = folderNames.CombineRelativeSubpath();
+            Assert.StartsWith($"{folderName}{separator}", relativeSubdirectory);
+            Assert.EndsWith($"{"test"}{separator}", relativeSubdirectory);
         }
 
         #endregion
@@ -73,13 +80,13 @@ namespace Librame.Extensions
         #endregion
 
 
-        #region TrimRelativePath
+        #region TrimRelativeSubpath
 
         [Fact]
-        public void TrimDevelopmentRelativePathTest()
+        public void TrimDevelopmentRelativeSubpathTest()
         {
             var path = PathExtensions.CurrentDirectory;
-            Assert.NotEqual(path, path.TrimDevelopmentRelativePath());
+            Assert.NotEqual(path, path.TrimDevelopmentRelativeSubpath());
         }
 
         #endregion

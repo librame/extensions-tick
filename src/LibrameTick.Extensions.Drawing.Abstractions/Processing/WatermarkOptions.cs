@@ -38,6 +38,15 @@ namespace Librame.Extensions.Drawing.Processing
 
 
         /// <summary>
+        /// 文件名称后缀。
+        /// </summary>
+        public string FileNameSuffix
+        {
+            get => Notifier.GetOrAdd(nameof(FileNameSuffix), "-wm");
+            set => Notifier.AddOrUpdate(nameof(FileNameSuffix), value);
+        }
+
+        /// <summary>
         /// 水印模式。
         /// </summary>
         public WatermarkMode Mode

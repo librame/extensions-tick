@@ -22,14 +22,11 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 构造一个 <see cref="AbstractSymmetricAlgorithm"/>。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="parameterGenerator"/> or <paramref name="extensionBuilder"/> 为空。
-        /// </exception>
         /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
-        /// <param name="extensionBuilder">给定的 <see cref="IExtensionBuilder"/>。</param>
+        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
         public AbstractSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-            IExtensionBuilder extensionBuilder)
-            : base(parameterGenerator, extensionBuilder)
+            IExtensionOptions options)
+            : base(parameterGenerator, options)
         {
         }
 
@@ -108,7 +105,7 @@ namespace Librame.Extensions.Core.Cryptography
         {
             if (options == null)
                 options = DefaultAesCcmOptions;
-
+            
             var ciphertext = new byte[buffer.Length];
 
             var aes = new AesCcm(options.Key);

@@ -42,6 +42,8 @@ namespace Librame.Extensions.Core
             ServiceCharacteristics.AddSingleton<IFileManager>();
             ServiceCharacteristics.AddSingleton<IFilePermission>();
             ServiceCharacteristics.AddSingleton<IFileTransmission>();
+
+            ServiceCharacteristics.AddScope<IProcessorManager>();
         }
 
 

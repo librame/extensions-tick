@@ -43,7 +43,7 @@ namespace Librame.Extensions.Drawing
         /// </summary>
         public float Size
         {
-            get => Notifier.GetOrAdd(nameof(Size), 16);
+            get => Notifier.GetOrAdd(nameof(Size), 16F);
             set => Notifier.AddOrUpdate(nameof(Size), value);
         }
 

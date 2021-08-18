@@ -42,8 +42,9 @@ namespace Librame.Extensions.Core
         /// </summary>
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="propertyValue">给定的属性值对象。</param>
+        /// <param name="addedOrUpdatedAction">成功添加或更新后的动作（可选）。</param>
         /// <returns>返回属性值对象。</returns>
-        object AddOrUpdate(string propertyName, object propertyValue);
+        object AddOrUpdate(string propertyName, object propertyValue, Action<object>? addedOrUpdatedAction = null);
 
         /// <summary>
         /// 添加或更新属性值。
@@ -51,8 +52,10 @@ namespace Librame.Extensions.Core
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="propertyValueFunc">给定的属性值对象方法（默认初始会执行一次，以便支持事件参数集合调用）。</param>
         /// <param name="isInitializeValue">是否初始化属性值（如果使用初始化，则表示立即执行方法，并将执行结果缓存；反之则在每次获取属性值时再执行方法。可选；默认不初始化）。</param>
+        /// <param name="addedOrUpdatedAction">成功添加或更新后的动作（可选）。</param>
         /// <returns>返回属性值对象（如果已初始化属性值）或值对象方法。</returns>
-        object AddOrUpdate(string propertyName, Func<object> propertyValueFunc, bool isInitializeValue = false);
+        object AddOrUpdate(string propertyName, Func<object> propertyValueFunc, bool isInitializeValue = false,
+            Action<object>? addedOrUpdatedAction = null);
 
 
         /// <summary>
@@ -61,16 +64,22 @@ namespace Librame.Extensions.Core
         /// <typeparam name="TValue">指定的值类型。</typeparam>
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="addPropertyValue">给定的默认值。</param>
+        /// <param name="addedAction">成功添加后的动作（可选）。</param>
+        /// <param name="gotAction">成功获取后的动作（可选）。</param>
         /// <returns>返回属性值实例。</returns>
-        TValue GetOrAdd<TValue>(string propertyName, TValue addPropertyValue);
+        TValue GetOrAdd<TValue>(string propertyName, TValue addPropertyValue, Action<TValue>? addedAction = null,
+            Action<TValue>? gotAction = null);
 
         /// <summary>
         /// 获取或添加属性值。
         /// </summary>
         /// <param name="propertyName">给定的属性名称。</param>
         /// <param name="addPropertyValue">给定的默认值。</param>
+        /// <param name="addedAction">成功添加后的动作（可选）。</param>
+        /// <param name="gotAction">成功获取后的动作（可选）。</param>
         /// <returns>返回属性值对象。</returns>
-        object GetOrAdd(string propertyName, object addPropertyValue);
+        object GetOrAdd(string propertyName, object addPropertyValue, Action<object>? addedAction = null,
+            Action<object>? gotAction = null);
 
 
         /// <summary>

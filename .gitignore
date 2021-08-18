@@ -301,3 +301,4 @@ logs/
 _configs/
 _reports/
 _resources/
+/test/LibrameTick.Extensions.Drawing.SkiaSharp.Tests/images

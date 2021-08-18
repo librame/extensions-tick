@@ -20,16 +20,13 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// 构造一个 <see cref="AbstractAlgorithm"/>。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="parameterGenerator"/> or <paramref name="extensionBuilder"/> 为空。
-        /// </exception>
         /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
-        /// <param name="extensionBuilder">给定的 <see cref="IExtensionBuilder"/>。</param>
+        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
         public AbstractAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-            IExtensionBuilder extensionBuilder)
+            IExtensionOptions options)
         {
             ParameterGenerator = parameterGenerator;
-            ExtensionBuilder = extensionBuilder;
+            Options = options;
         }
 
 
@@ -39,8 +36,8 @@ namespace Librame.Extensions.Core.Cryptography
         public IAlgorithmParameterGenerator ParameterGenerator { get; private set; }
 
         /// <summary>
-        /// 扩展构建器。
+        /// 扩展选项。
         /// </summary>
-        public IExtensionBuilder ExtensionBuilder { get; private set; }
+        public IExtensionOptions Options { get; private set; }
     }
 }

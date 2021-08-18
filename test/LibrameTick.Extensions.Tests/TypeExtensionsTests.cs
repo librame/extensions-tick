@@ -39,7 +39,7 @@ namespace Librame.Extensions
             var testType = typeof(List<string>);
 
             Assert.True(baseType.IsAssignableFromTargetType(testType));
-            Assert.True(testType.IsAssignableFromTargetType(baseType));
+            Assert.True(testType.IsAssignableToBaseType(baseType));
 
             baseType = typeof(KeyedHashAlgorithm);
             testType = typeof(HMACMD5);
@@ -70,10 +70,7 @@ namespace Librame.Extensions
             var type = typeof(MD5);
 
             Assert.True(type.IsImplementedType<HashAlgorithm>());
-            Assert.ThrowsAny<NotSupportedException>(() =>
-            {
-                type.IsImplementedType<ICryptoTransform>();
-            });
+            Assert.True(type.IsImplementedType<ICryptoTransform>());
 
             Assert.True(type.IsImplementedType<HashAlgorithm>(out Type? resultType));
             Assert.Equal(typeof(HashAlgorithm), resultType);

@@ -33,9 +33,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 具有数字。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <returns>返回布尔值。</returns>
         public static bool HasDigit(this string value)
@@ -44,9 +41,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 是数字。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <returns>返回布尔值。</returns>
         public static bool IsDigit(this string value)
@@ -64,9 +58,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 具有小写字母。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <returns>返回布尔值。</returns>
         public static bool HasLower(this string value)
@@ -75,9 +66,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 是小写字母。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <returns>返回布尔值。</returns>
         public static bool IsLower(this string value)
@@ -95,9 +83,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 具有大写字母。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <returns>返回布尔值。</returns>
         public static bool HasUpper(this string value)
@@ -106,9 +91,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 是大写字母。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <returns>返回布尔值。</returns>
         public static bool IsUpper(this string value)
@@ -126,9 +108,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 具有大小写字母。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <param name="both">同时包含大小写字母（可选；默认同时包含）。</param>
         /// <returns>返回布尔值。</returns>
@@ -143,9 +122,6 @@ namespace Librame.Extensions
         /// <summary>
         /// 是大小写字母。
         /// </summary>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="value"/> is null.
-        /// </exception>
         /// <param name="value">给定的字符串。</param>
         /// <returns>返回布尔值。</returns>
         public static bool IsLetter(this string value)

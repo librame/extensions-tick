@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Librame.Extensions.Data
 {
-    public class IdentityGeneratorFactoryTests
+    public class InternalIdentityGeneratorFactoryTests
     {
 
         [Fact]

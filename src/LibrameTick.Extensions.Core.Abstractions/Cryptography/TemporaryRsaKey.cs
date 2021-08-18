@@ -27,7 +27,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// <summary>
         /// RSA 参数。
         /// </summary>
-        public RSAParameters Parameters { get; set; }
+        public RSAParametersInfo? Parameters { get; set; }
 
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace Librame.Extensions.Core.Cryptography
                 key = new TemporaryRsaKey
                 {
                     KeyId = GenerateKeyId(),
-                    Parameters = RSA.Create().ExportParameters(true)
+                    Parameters = RSA.Create().ExportParameters(true).FromParameters()
                 };
                 keyFile.WriteJson(key);
             }

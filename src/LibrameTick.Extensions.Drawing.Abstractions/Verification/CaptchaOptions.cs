@@ -27,7 +27,7 @@ namespace Librame.Extensions.Drawing.Verification
             : base(parentNotifier)
         {
             Font = new FontOptions(Notifier);
-            Noise = new BackgroundNoiseOptions(Notifier);
+            BackgroundNoise = new NoiseOptions(Notifier);
         }
 
 
@@ -37,8 +37,8 @@ namespace Librame.Extensions.Drawing.Verification
         public FontOptions Font { get; init; }
 
         /// <summary>
-        /// 噪点选项。
+        /// 背景噪点选项。
         /// </summary>
-        public BackgroundNoiseOptions Noise { get; init; }
+        public NoiseOptions BackgroundNoise { get; init; }
     }
 }

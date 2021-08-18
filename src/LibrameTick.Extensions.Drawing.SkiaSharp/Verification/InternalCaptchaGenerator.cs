@@ -10,93 +10,82 @@
 
 #endregion
 
-using Microsoft.Extensions.Logging;
+using Librame.Extensions.Core;
 using SkiaSharp;
 using System.Drawing;
 
 namespace Librame.Extensions.Drawing.Verification
 {
-    internal class InternalCaptchaGenerator : ICaptchaGenerator
+    class InternalCaptchaGenerator : AbstractDisposable, ICaptchaGenerator
     {
-        private readonly FilePathCombiner _fontFilePath;
+        private readonly DrawingExtensionOptions _options;
+        private readonly SKEncodedImageFormat _imageFormat;
+        private readonly SKColor _backgroundColor;
+
+        private SKPaint _forePaint;
+        private SKPaint _alternPaint;
+        private SKPaint _noisePaint;
 
 
-        public InternalCaptchaGenerator(DrawingBuilderDependency dependency, ILoggerFactory loggerFactory)
-            : base(dependency?.Options, loggerFactory)
+        public InternalCaptchaGenerator(DrawingExtensionOptions options)
         {
-            Dependency = dependency;
+            _options = options;
+            _imageFormat = options.ImageFormat.AsEncodedImageFormat();
+            _backgroundColor = options.Colors.Background.AsColor();
 
-            _fontFilePath = Options.Captcha.Font.FilePath
-                .ChangeBasePathIfEmpty(dependency.ResourceDirectory);
+            _forePaint = options.Watermark.Font.CreatePaint(options.Colors.Fore);
+            _alternPaint = options.Watermark.Font.CreatePaint(options.Colors.Alternate);
+            _noisePaint = options.Captcha.BackgroundNoise.CreatePaint(options.Colors.Interference);
         }
 
 
-        public IExtensionBuilderDependency Dependency { get; }
-
-        
-
-        public SKEncodedImageFormat CurrentImageFormat
-            => Options.ImageFormat.MatchEnum<ImageFormat, SKEncodedImageFormat>();
-
-
-        public Task<bool> DrawFileAsync(string captcha, string savePath, CancellationToken cancellationToken = default)
+        protected override bool ReleaseManaged()
         {
-            return cancellationToken.RunOrCancelAsync(() =>
+            _forePaint.Dispose();
+            _alternPaint.Dispose();
+            _noisePaint.Dispose();
+
+            return true;
+        }
+
+
+        public bool DrawFile(string captcha, string savePath)
+        {
+            DrawCore(captcha, data =>
             {
-                DrawCore(captcha, data =>
+                using (var fs = new FileStream(savePath, FileMode.OpenOrCreate))
                 {
-                    using (var fs = new FileStream(savePath, FileMode.OpenOrCreate))
-                    {
-                        data.SaveTo(fs);
-                    }
-
-                    Logger.LogInformation($"Captcha image file save as: {savePath}");
-                });
-
-                return File.Exists(savePath);
+                    data.SaveTo(fs);
+                }
             });
+
+            return File.Exists(savePath);
         }
 
-
-        public Task<bool> DrawStreamAsync(string captcha, Stream target, CancellationToken cancellationToken = default)
+        public bool DrawStream(string captcha, Stream target)
         {
-            return cancellationToken.RunOrCancelAsync(() =>
+            DrawCore(captcha, data =>
             {
-                DrawCore(captcha, data =>
-                {
-                    data.SaveTo(target);
-
-                    Logger.LogInformation($"Captcha image save as stream");
-                });
-
-                return true;
+                data.SaveTo(target);
             });
+
+            return true;
         }
 
-
-        public Task<byte[]> DrawBytesAsync(string captcha, CancellationToken cancellationToken = default)
+        public byte[] DrawBytes(string captcha)
         {
-            return cancellationToken.RunOrCancelAsync(() =>
+            var buffer = Array.Empty<byte>();
+
+            DrawCore(captcha, data =>
             {
-                var buffer = default(byte[]);
-
-                DrawCore(captcha, data =>
-                {
-                    buffer = data.ToArray();
-                    Logger.LogDebug($"Captcha image save as byte[]: length={buffer.Length}");
-                });
-
-                return buffer;
+                buffer = data.ToArray();
             });
+
+            return buffer;
         }
 
-
-        public void DrawCore(string captcha, Action<SKData> postAction)
+        private void DrawCore(string captcha, Action<SKData> postAction)
         {
-            Logger.LogInformation($"Captcha text: {captcha}");
-
-            var colors = Options.Captcha.Colors;
-
             var sizeAndPoints = ComputeSizeAndPoints(captcha);
             var imageSize = sizeAndPoints.Size;
             var imageInfo = new SKImageInfo(imageSize.Width, imageSize.Height,
@@ -106,36 +95,26 @@ namespace Librame.Extensions.Drawing.Verification
             using (var canvas = new SKCanvas(bmp))
             {
                 // Clear
-                canvas.DrawColor(colors.Background);
+                canvas.DrawColor(_backgroundColor);
 
                 // 绘制噪点
-                using (var noisePaint = CreateNoisePaint())
-                {
-                    var points = CreateNoisePoints(imageSize);
-                    canvas.DrawPoints(SKPointMode.Points, points, noisePaint);
-                }
+                var points = _options.Captcha.BackgroundNoise.CreatePoints(imageSize);
+                canvas.DrawPoints(SKPointMode.Points, points, _noisePaint);
 
                 // 绘制验证码
-                using (var forePaint = CreatePaint(colors.Fore))
-                using (var alternPaint = CreatePaint(colors.Alternate))
+                foreach (var p in sizeAndPoints.Points)
                 {
-                    foreach (var p in sizeAndPoints.Points)
-                    {
-                        var i = p.Key;
-                        var character = p.Value.Key;
-                        var point = p.Value.Value;
+                    var i = p.Key;
+                    var character = p.Value.Key;
+                    var point = p.Value.Value;
 
-                        canvas.DrawText(character, point.X, point.Y,
-                            i % 2 > 0 ? alternPaint : forePaint);
-                    }
+                    canvas.DrawText(character, point.X, point.Y,
+                        i % 2 > 0 ? _alternPaint : _forePaint);
                 }
 
                 using (var img = SKImage.FromBitmap(bmp))
-                using (var data = img.Encode(CurrentImageFormat, Options.Quality))
+                using (var data = img.Encode(_imageFormat, _options.EncodeQuality))
                 {
-                    if (data.IsNull())
-                        throw new InvalidOperationException(InternalResource.InvalidOperationExceptionUnsupportedImageFormat);
-
                     postAction.Invoke(data);
                 }
             }
@@ -147,91 +126,44 @@ namespace Librame.Extensions.Drawing.Verification
             var points = new Dictionary<int, KeyValuePair<string, SKPoint>>();
             var size = new Size();
 
-            using (var foreFont = CreatePaint(Options.Captcha.Colors.Fore))
+            var paddingHeight = (int)_forePaint.TextSize;
+            var paddingWidth = paddingHeight / 2;
+
+            var startX = paddingWidth;
+            var startY = paddingHeight;
+
+            for (int i = 0; i < captcha.Length; i++)
             {
-                var paddingHeight = (int)foreFont.TextSize;
-                var paddingWidth = paddingHeight / 2;
-                
-                var startX = paddingWidth;
-                var startY = paddingHeight;
+                // 当前字符
+                var character = captcha.Substring(i, 1);
 
-                for (int i = 0; i < captcha.Length; i++)
+                // 测算字符矩形
+                var rect = new SKRect();
+                _forePaint.MeasureText(character, ref rect);
+
+                // 当前字符宽高
+                var charWidth = (int)rect.Width;
+                var charHeight = (int)rect.Height;
+
+                var point = new SKPoint();
+
+                // 随机变换其余字符坐标
+                RandomExtensions.Run(r =>
                 {
-                    // 当前字符
-                    var character = captcha.Substring(i, 1);
+                    point.X = r.Next(startX, charWidth + startX);
+                    point.Y = r.Next(startY, charHeight + startY);
+                });
 
-                    // 测算字符矩形
-                    var rect = new SKRect();
-                    foreFont.MeasureText(character, ref rect);
+                // 附加为字符宽度加当前字符横坐标
+                startX = (int)point.X + charWidth + paddingWidth;
 
-                    // 当前字符宽高
-                    var charWidth = (int)rect.Width;
-                    var charHeight = (int)rect.Height;
-                    
-                    var point = new SKPoint();
-
-                    // 随机变换其余字符坐标
-                    RandomUtility.Run(r =>
-                    {
-                        point.X = r.Next(startX, charWidth + startX);
-                        point.Y = r.Next(startY, charHeight + startY);
-                    });
-                    
-                    // 附加为字符宽度加当前字符横坐标
-                    startX = (int)point.X + charWidth + paddingWidth;
-
-                    points.Add(i, new KeyValuePair<string, SKPoint>(character, point));
-                }
-
-                size.Width += startX + paddingWidth;
-                size.Height += startY + paddingHeight;
+                points.Add(i, new KeyValuePair<string, SKPoint>(character, point));
             }
+
+            size.Width += startX + paddingWidth;
+            size.Height += startY + paddingHeight;
 
             return (size, points);
-        }
-
-
-        private SKPaint CreatePaint(SKColor color)
-        {
-            var paint = new SKPaint();
-            paint.IsAntialias = true;
-            paint.Color = color;
-            // paint.StrokeCap = SKStrokeCap.Round;
-            paint.Typeface = SKTypeface.FromFile(_fontFilePath);
-            paint.TextSize = Options.Watermark.Font.Size;
-
-            return paint;
-        }
-
-        private SKPaint CreateNoisePaint()
-        {
-            var paint = new SKPaint();
-            paint.IsAntialias = true;
-            paint.Color = Options.Captcha.Colors.Disturbing;
-            paint.StrokeCap = SKStrokeCap.Square;
-            paint.StrokeWidth = Options.Captcha.Noise.Width;
-
-            return paint;
-        }
-
-        private SKPoint[] CreateNoisePoints(Size imageSize)
-        {
-            var noises = Options.Captcha.Noise;
-
-            var points = new List<SKPoint>();
-
-            var offset = noises.Width;
-            var xCount = imageSize.Width / noises.Space.X + offset;
-            var yCount = imageSize.Height / noises.Space.Y + offset;
-
-            for (int i = 0; i < xCount; i++)
-            for (int j = 0; j < yCount; j++)
-            {
-                var point = new SKPoint(i * noises.Space.X, j * noises.Space.Y);
-                points.Add(point);
-            }
-
-            return points.ToArray();
         }
 
     }

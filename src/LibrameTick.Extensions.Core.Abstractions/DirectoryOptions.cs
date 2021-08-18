@@ -21,12 +21,12 @@ namespace Librame.Extensions.Core
         /// 构造一个 <see cref="DirectoryOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        /// <param name="baseDirectory">给定的基础目录（可选；如果为空，则默认为 <see cref="PathExtensions.CurrentDirectoryWithoutDevelopmentRelativePath"/>）。</param>
+        /// <param name="baseDirectory">给定的基础目录（可选；如果为空，则默认为 <see cref="PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath"/>）。</param>
         public DirectoryOptions(IPropertyNotifier parentNotifier, string? baseDirectory = null)
             : base(parentNotifier)
         {
             if (string.IsNullOrWhiteSpace(baseDirectory))
-                baseDirectory = PathExtensions.CurrentDirectoryWithoutDevelopmentRelativePath;
+                baseDirectory = PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath;
 
             BaseDirectory = baseDirectory;
 
@@ -41,6 +41,7 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string BaseDirectory
         {
+            // 基础目录已存在
             get => Notifier.GetOrAdd(nameof(BaseDirectory), string.Empty);
             set => Notifier.AddOrUpdate(nameof(BaseDirectory), value);
         }
@@ -51,7 +52,7 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string ConfigDirectory
         {
-            get => Notifier.GetOrAdd(nameof(ConfigDirectory), string.Empty);
+            get => Notifier.GetOrAddDirectory(nameof(ConfigDirectory), string.Empty);
             set => Notifier.AddOrUpdate(nameof(ConfigDirectory), value);
         }
 
@@ -60,7 +61,7 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string ReportDirectory
         {
-            get => Notifier.GetOrAdd(nameof(ReportDirectory), string.Empty);
+            get => Notifier.GetOrAddDirectory(nameof(ReportDirectory), string.Empty);
             set => Notifier.AddOrUpdate(nameof(ReportDirectory), value);
         }
 
@@ -69,7 +70,7 @@ namespace Librame.Extensions.Core
         /// </summary>
         public string ResourceDirectory
         {
-            get => Notifier.GetOrAdd(nameof(ResourceDirectory), string.Empty);
+            get => Notifier.GetOrAddDirectory(nameof(ResourceDirectory), string.Empty);
             set => Notifier.AddOrUpdate(nameof(ResourceDirectory), value);
         }
 

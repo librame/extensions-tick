@@ -73,6 +73,8 @@ namespace Librame.Extensions.Core
             : base(services, options)
         {
             Options = options;
+
+            Services.AddSingleton(typeof(TOptions), options);
         }
 
         /// <summary>
@@ -87,6 +89,8 @@ namespace Librame.Extensions.Core
             : base(parentBuilder, options)
         {
             Options = options;
+
+            Services.AddSingleton(typeof(TOptions), options);
         }
 
 

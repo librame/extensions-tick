@@ -23,8 +23,8 @@ namespace Librame.Extensions.Core.Cryptography
         IAlgorithmParameterGenerator ParameterGenerator { get; }
 
         /// <summary>
-        /// 扩展构建器。
+        /// 扩展选项。
         /// </summary>
-        IExtensionBuilder ExtensionBuilder { get; }
+        IExtensionOptions Options { get; }
     }
 }

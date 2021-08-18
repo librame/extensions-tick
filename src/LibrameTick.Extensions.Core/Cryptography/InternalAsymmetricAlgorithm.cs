@@ -18,10 +18,10 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         public InternalAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-            CoreExtensionBuilder extensionBuilder)
-            : base(parameterGenerator, extensionBuilder)
+            CoreExtensionOptions options)
+            : base(parameterGenerator, options)
         {
-            _options = extensionBuilder.Options;
+            _options = options;
         }
 
 
