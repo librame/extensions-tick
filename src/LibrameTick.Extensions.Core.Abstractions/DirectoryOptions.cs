@@ -23,7 +23,7 @@ namespace Librame.Extensions.Core
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
         /// <param name="baseDirectory">给定的基础目录（可选；如果为空，则默认为 <see cref="PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath"/>）。</param>
         public DirectoryOptions(IPropertyNotifier parentNotifier, string? baseDirectory = null)
-            : base(parentNotifier)
+            : base(parentNotifier, sourceAliase: null)
         {
             if (string.IsNullOrWhiteSpace(baseDirectory))
                 baseDirectory = PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath;

@@ -24,8 +24,9 @@ namespace Librame.Extensions.Drawing.Processing
         /// 构造一个 <see cref="ScalingOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public ScalingOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public ScalingOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
         }
 

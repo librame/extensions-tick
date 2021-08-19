@@ -79,7 +79,7 @@ namespace Librame.Extensions.Core
         [JsonIgnore]
         public IClock Clock
         {
-            get => Notifier.GetOrAdd(nameof(Clock), LocalClock.Instance);
+            get => Notifier.GetOrAdd(nameof(Clock), Instantiator.GetClock());
             set => Notifier.AddOrUpdate(nameof(Clock), value);
         }
 

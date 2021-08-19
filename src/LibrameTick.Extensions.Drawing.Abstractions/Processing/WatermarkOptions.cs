@@ -24,10 +24,11 @@ namespace Librame.Extensions.Drawing.Processing
         /// 构造一个 <see cref="WatermarkOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public WatermarkOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public WatermarkOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
-            Font = new FontOptions(Notifier) { Size = 32 };
+            Font = new FontOptions(Notifier, nameof(Font)) { Size = 32 };
         }
 
 

@@ -28,7 +28,7 @@ namespace Librame.Extensions.Core
         public static Assembly[]? LoadAssemblies(AssemblyLoadingOptions? options = null)
         {
             if (options == null)
-                options = new AssemblyLoadingOptions();
+                options = new AssemblyLoadingOptions(nameof(AssemblyLoader));
 
             var assemblyNames = Assembly.GetEntryAssembly()?.GetReferencedAssemblies();
             if (assemblyNames == null)

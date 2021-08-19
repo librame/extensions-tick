@@ -76,7 +76,7 @@ namespace Librame.Extensions
         ///// <param name="value">给定的可枚举集合。</param>
         ///// <returns>返回是否为非空可枚举集合的布尔值。</returns>
         //public static bool IsNotEmpty([NotNullWhen(true)] this IEnumerable? value)
-        //    => !value.IsEmpty(); // NotNullWhen(true) 才能表示没有可能为空的情况
+        //    => !value.IsEmpty();
 
 
         ///// <summary>
@@ -93,7 +93,7 @@ namespace Librame.Extensions
         ///// <param name="value">给定的可枚举集合。</param>
         ///// <returns>返回是否为非空集合的布尔值。</returns>
         //public static bool IsNotEmpty<T>([NotNullWhen(true)] this ICollection<T>? value)
-        //    => value is not null && value.Count > 0; // NotNullWhen(true) 才能表示没有可能为空的情况
+        //    => value is not null && value.Count > 0;
 
 
         ///// <summary>
@@ -110,7 +110,7 @@ namespace Librame.Extensions
         ///// <param name="value">给定的字符串。</param>
         ///// <returns>返回是否为非空字符串的布尔值。</returns>
         //public static bool IsNotEmpty([NotNullWhen(true)] this string? value)
-        //    => !string.IsNullOrEmpty(value); // NotNullWhen(true) 才能表示没有可能为空的情况
+        //    => !string.IsNullOrEmpty(value);
 
         #endregion
 
@@ -129,7 +129,7 @@ namespace Librame.Extensions
         /// <returns>返回非空 <typeparamref name="T"/>。</returns>
         public static T NotNull<T>([NotNull] this T? value, string? paramName)
         {
-            if (value is null)
+            if (value == null)
                 throw new ArgumentNullException(paramName);
 
             return value;

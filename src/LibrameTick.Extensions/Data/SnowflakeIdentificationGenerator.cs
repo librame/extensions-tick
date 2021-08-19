@@ -35,7 +35,7 @@ namespace Librame.Extensions.Data
         /// </summary>
         /// <param name="machineId">给定的机器标识。</param>
         /// <param name="dataCenterId">给定的数据中心标识。</param>
-        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="LocalClock"/>）。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
         /// <param name="parameters">给定的 <see cref="SnowflakeIdentificationParameters"/>（可选）。</param>
         public SnowflakeIdentificationGenerator(long machineId, long dataCenterId,
             IClock clock, SnowflakeIdentificationParameters? parameters = null)

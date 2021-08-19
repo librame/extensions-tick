@@ -27,8 +27,8 @@ namespace Librame.Extensions.Core
         protected AbstractExtensionOptions(IExtensionOptions? parentOptions, DirectoryOptions? directories = null)
             : base(parentOptions)
         {
-            Notifier = (parentOptions?.Notifier ?? directories?.Notifier)?.WithSender(this)
-                ?? DefaultPropertyNotifierFactory.Instance.Create(this);
+            Notifier = (parentOptions?.Notifier ?? directories?.Notifier)?.WithSource(this)
+                ?? Instantiator.GetPropertyNotifier(this);
 
             Directories = directories ?? parentOptions?.Directories ?? new DirectoryOptions(Notifier);
             ParentOptions = parentOptions;

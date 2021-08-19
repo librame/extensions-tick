@@ -21,8 +21,9 @@ namespace Librame.Extensions.Core.Cryptography
         /// 构造一个 <see cref="KeyNonceOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public KeyNonceOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名。</param>
+        public KeyNonceOptions(IPropertyNotifier parentNotifier, string sourceAliase)
+            : base(parentNotifier, sourceAliase)
         {
         }
 
@@ -73,10 +74,11 @@ namespace Librame.Extensions.Core.Cryptography
         /// 创建 AES 选项。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        /// <param name="sourceAliase">给定的源别名。</param>
         /// <returns>返回 <see cref="KeyNonceOptions"/>。</returns>
-        public static KeyNonceOptions CreateAesOptions(IPropertyNotifier parentNotifier)
+        public static KeyNonceOptions CreateAesOptions(IPropertyNotifier parentNotifier, string sourceAliase)
         {
-            var options = new KeyNonceOptions(parentNotifier);
+            var options = new KeyNonceOptions(parentNotifier, sourceAliase);
 
             options.KeyMaxSize = 256;
             options.NonceMaxSize = 128;

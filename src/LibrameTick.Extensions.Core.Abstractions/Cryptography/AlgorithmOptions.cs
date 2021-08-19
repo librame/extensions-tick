@@ -18,15 +18,16 @@ namespace Librame.Extensions.Core.Cryptography
     public class AlgorithmOptions : AbstractOptions
     {
         /// <summary>
-        /// 使用默认 <see cref="IPropertyNotifier"/> 构造一个 <see cref="AlgorithmOptions"/>（此构造函数适用于独立使用 <see cref="AlgorithmOptions"/> 的情况）。
+        /// 构造一个独立属性通知器的 <see cref="AlgorithmOptions"/>（此构造函数适用于独立使用 <see cref="AlgorithmOptions"/> 的情况）。
         /// </summary>
-        public AlgorithmOptions()
-            : base()
+        /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
+        public AlgorithmOptions(string sourceAliase)
+            : base(sourceAliase)
         {
             HmacHash = new HmacHashOptions(Notifier);
-            Aes = KeyNonceOptions.CreateAesOptions(Notifier);
-            AesCcm = KeyNonceTagOptions.CreateAesCcmOptions(Notifier);
-            AesGcm = KeyNonceTagOptions.CreateAesGcmOptions(Notifier);
+            Aes = KeyNonceOptions.CreateAesOptions(Notifier, nameof(Aes));
+            AesCcm = KeyNonceTagOptions.CreateAesCcmOptions(Notifier, nameof(AesCcm));
+            AesGcm = KeyNonceTagOptions.CreateAesGcmOptions(Notifier, nameof(AesGcm));
             Rsa = new SigningCredentialsOptions(Notifier);
         }
 
@@ -34,13 +35,14 @@ namespace Librame.Extensions.Core.Cryptography
         /// 使用给定的父级 <see cref="IPropertyNotifier"/> 构造一个 <see cref="AlgorithmOptions"/>（此构造函数适用于集成在 <see cref="AbstractExtensionOptions"/> 中配合使用，以实现扩展选项整体对属性值变化及时作出响应）。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public AlgorithmOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public AlgorithmOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
             HmacHash = new HmacHashOptions(Notifier);
-            Aes = KeyNonceOptions.CreateAesOptions(Notifier);
-            AesCcm = KeyNonceTagOptions.CreateAesCcmOptions(Notifier);
-            AesGcm = KeyNonceTagOptions.CreateAesGcmOptions(Notifier);
+            Aes = KeyNonceOptions.CreateAesOptions(Notifier, nameof(Aes));
+            AesCcm = KeyNonceTagOptions.CreateAesCcmOptions(Notifier, nameof(AesCcm));
+            AesGcm = KeyNonceTagOptions.CreateAesGcmOptions(Notifier, nameof(AesGcm));
             Rsa = new SigningCredentialsOptions(Notifier);
         }
 

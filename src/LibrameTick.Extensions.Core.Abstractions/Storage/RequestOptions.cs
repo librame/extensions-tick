@@ -24,8 +24,9 @@ namespace Librame.Extensions.Core.Storage
         /// 使用给定的 <see cref="IPropertyNotifier"/> 构造一个 <see cref="RequestOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public RequestOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public RequestOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
         }
 

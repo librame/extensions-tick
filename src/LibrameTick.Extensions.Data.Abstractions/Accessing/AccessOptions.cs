@@ -23,8 +23,9 @@ namespace Librame.Extensions.Data.Accessing
         /// 构造一个 <see cref="AccessOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public AccessOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public AccessOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
         }
 

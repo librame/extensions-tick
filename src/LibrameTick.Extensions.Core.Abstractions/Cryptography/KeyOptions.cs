@@ -21,8 +21,9 @@ namespace Librame.Extensions.Core.Cryptography
         /// 构造一个 <see cref="KeyOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public KeyOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名。</param>
+        public KeyOptions(IPropertyNotifier parentNotifier, string sourceAliase)
+            : base(parentNotifier, sourceAliase)
         {
         }
 

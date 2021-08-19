@@ -24,8 +24,9 @@ namespace Librame.Extensions.Core.Cryptography
         /// 构造一个 <see cref="SigningCredentialsOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public SigningCredentialsOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public SigningCredentialsOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
         }
 

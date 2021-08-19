@@ -23,7 +23,9 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 构造一个默认 <see cref="AbstractOptions"/>。
         /// </summary>
-        public AssemblyLoadingOptions()
+        /// <param name="sourceAliase">给定的源别名。</param>
+        public AssemblyLoadingOptions(string sourceAliase)
+            : base(sourceAliase)
         {
         }
 
@@ -31,8 +33,9 @@ namespace Librame.Extensions.Core
         /// 构造一个 <see cref="AbstractOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public AssemblyLoadingOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public AssemblyLoadingOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
         }
 

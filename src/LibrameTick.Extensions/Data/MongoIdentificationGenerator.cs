@@ -36,7 +36,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 构造一个 <see cref="MongoIdentificationGenerator"/>。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="LocalClock"/>）。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
         public MongoIdentificationGenerator(IClock clock)
         {
             _clock = clock;

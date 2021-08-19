@@ -23,8 +23,9 @@ namespace Librame.Extensions.Drawing
         /// 构造一个 <see cref="FontOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public FontOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名。</param>
+        public FontOptions(IPropertyNotifier parentNotifier, string sourceAliase)
+            : base(parentNotifier, sourceAliase)
         {
         }
 

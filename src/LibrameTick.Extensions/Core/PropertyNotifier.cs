@@ -16,44 +16,82 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Librame.Extensions.Core
 {
-    sealed class InternalPropertyNotifier : IPropertyNotifier
+    /// <summary>
+    /// 定义实现 <see cref="IPropertyNotifier"/> 的属性通知器。
+    /// </summary>
+    public sealed class PropertyNotifier : IPropertyNotifier
     {
-        private readonly ConcurrentDictionary<string, object> _propertyValues;
-        private readonly ConcurrentDictionary<string, Func<object>> _propertyFuncs;
+        private readonly ConcurrentDictionary<PropertyNoticeNamedKey, object> _propertyValues;
+        private readonly ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>> _propertyFuncs;
 
-        
-        public InternalPropertyNotifier(object sender, IPropertyNotifier? parentNotifier = null,
-            ConcurrentDictionary<string, object>? propertyValues = null,
-            ConcurrentDictionary<string, Func<object>>? propertyFuncs = null)
+        private readonly TypeNamedKey _baseKey;
+
+
+        /// <summary>
+        /// 构造一个 <see cref="PropertyNotifier"/>。
+        /// </summary>
+        /// <param name="source">给定的属性源。</param>
+        /// <param name="sourceAliase">给定的属性源别名（可选）。</param>
+        public PropertyNotifier(object source, string? sourceAliase = null)
+            : this(source, sourceAliase, parentNotifier: null, propertyValues: null, propertyFuncs: null)
         {
-            _propertyValues = propertyValues ?? new ConcurrentDictionary<string, object>();
-            _propertyFuncs = propertyFuncs ?? new ConcurrentDictionary<string, Func<object>>();
+        }
 
-            Sender = sender;
-            SenderType = sender.GetType();
+        private PropertyNotifier(object source, string? sourceAliase,
+            IPropertyNotifier? parentNotifier,
+            ConcurrentDictionary<PropertyNoticeNamedKey, object>? propertyValues,
+            ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>>? propertyFuncs)
+        {
+            _propertyValues = propertyValues ?? new ConcurrentDictionary<PropertyNoticeNamedKey, object>();
+            _propertyFuncs = propertyFuncs ?? new ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>>();
+
+            _baseKey = new TypeNamedKey(source.GetType(), sourceAliase);
+
+            Source = source;
+            SourceAliase = sourceAliase;
             ParentNotifier = parentNotifier;
         }
 
 
-        public object Sender { get; init; }
+        /// <summary>
+        /// 属性源。
+        /// </summary>
+        public object Source { get; init; }
 
-        public Type SenderType { get; init; }
+        /// <summary>
+        /// 属性源别名。
+        /// </summary>
+        public string? SourceAliase { get; init; }
 
 
+        /// <summary>
+        /// 父级属性通知器。
+        /// </summary>
         public IPropertyNotifier? ParentNotifier { get; init; }
 
 
+        /// <summary>
+        /// 属性改变时事件。
+        /// </summary>
         public event PropertyChangingEventHandler? PropertyChanging;
 
+        /// <summary>
+        /// 属性改变后事件。
+        /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
 
-        private string BuildKey(string propertyName)
-            => propertyName.Leading($"{SenderType.FullName}:");
+        /// <summary>
+        /// 构建属性通知键。
+        /// </summary>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <returns>返回 <see cref="PropertyNoticeNamedKey"/>。</returns>
+        public PropertyNoticeNamedKey BuildKey(string propertyName)
+            => new PropertyNoticeNamedKey(propertyName, _baseKey);
 
 
-        private void HandleNotice(string? propertyName,
-            object? changingValue, object? oldValue, bool isUpdate, Action action)
+        private void HandleNotice(string propertyName, object? changingValue, object? oldValue,
+            bool isUpdate, Action action)
         {
             // 调用属性改变时事件处理程序
             PropertyChanging?.Invoke(this,
@@ -67,6 +105,13 @@ namespace Librame.Extensions.Core
         }
 
 
+        /// <summary>
+        /// 添加或更新属性值。
+        /// </summary>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <param name="propertyValue">给定的属性值对象。</param>
+        /// <param name="addedOrUpdatedAction">成功添加或更新后的动作（可选）。</param>
+        /// <returns>返回属性值对象。</returns>
         public object AddOrUpdate(string propertyName, object propertyValue, Action<object>? addedOrUpdatedAction = null)
         {
             if (propertyValue == null)
@@ -98,6 +143,14 @@ namespace Librame.Extensions.Core
             return propertyValue;
         }
 
+        /// <summary>
+        /// 添加或更新属性值。
+        /// </summary>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <param name="propertyValueFunc">给定的属性值对象方法（默认初始会执行一次，以便支持事件参数集合调用）。</param>
+        /// <param name="isInitializeValue">是否初始化属性值（如果使用初始化，则表示立即执行方法，并将执行结果缓存；反之则在每次获取属性值时再执行方法。可选；默认不初始化）。</param>
+        /// <param name="addedOrUpdatedAction">成功添加或更新后的动作（可选）。</param>
+        /// <returns>返回属性值对象（如果已初始化属性值）或值对象方法。</returns>
         public object AddOrUpdate(string propertyName, Func<object> propertyValueFunc, bool isInitializeValue = false,
             Action<object>? addedOrUpdatedAction = null)
         {
@@ -136,6 +189,15 @@ namespace Librame.Extensions.Core
         }
 
 
+        /// <summary>
+        /// 获取或添加属性值。
+        /// </summary>
+        /// <typeparam name="TValue">指定的值类型。</typeparam>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <param name="addPropertyValue">给定的默认值。</param>
+        /// <param name="addedAction">成功添加后的动作（可选）。</param>
+        /// <param name="gotAction">成功获取后的动作（可选）。</param>
+        /// <returns>返回属性值实例。</returns>
         public TValue GetOrAdd<TValue>(string propertyName, TValue addPropertyValue,
             Action<TValue>? addedAction = null, Action<TValue>? gotAction = null)
         {
@@ -167,6 +229,14 @@ namespace Librame.Extensions.Core
             return addPropertyValue;
         }
 
+        /// <summary>
+        /// 获取或添加属性值。
+        /// </summary>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <param name="addPropertyValue">给定的默认值。</param>
+        /// <param name="addedAction">成功添加后的动作（可选）。</param>
+        /// <param name="gotAction">成功获取后的动作（可选）。</param>
+        /// <returns>返回属性值对象。</returns>
         public object GetOrAdd(string propertyName, object addPropertyValue,
             Action<object>? addedAction = null, Action<object>? gotAction = null)
         {
@@ -199,6 +269,12 @@ namespace Librame.Extensions.Core
         }
 
 
+        /// <summary>
+        /// 尝试获取属性值。
+        /// </summary>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <param name="propertyValue">输出可能存在的属性值。</param>
+        /// <returns>返回是否已移除的布尔值。</returns>
         public bool TryGetValue(string propertyName, [MaybeNullWhen(false)] out object propertyValue)
         {
             var key = BuildKey(propertyName);
@@ -216,6 +292,12 @@ namespace Librame.Extensions.Core
         }
 
 
+        /// <summary>
+        /// 尝试移除属性值。
+        /// </summary>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <param name="propertyValue">输出可能存在的属性值。</param>
+        /// <returns>返回是否已移除的布尔值。</returns>
         public bool TryRemoveValue(string propertyName, [MaybeNullWhen(false)] out object propertyValue)
         {
             var key = BuildKey(propertyName);
@@ -233,11 +315,14 @@ namespace Librame.Extensions.Core
         }
 
 
-        public IPropertyNotifier WithSender(object newSender)
-            => new InternalPropertyNotifier(newSender, this, _propertyValues, _propertyFuncs);
-
-        //public IPropertyNotifier WithSender(Type newSenderType)
-        //    => new InternalPropertyNotifier(newSenderType, this, _propertyValues, _propertyFuncs);
+        /// <summary>
+        /// 使用新属性源创建一个 <see cref="IPropertyNotifier"/>。
+        /// </summary>
+        /// <param name="newSource">给定的新属性源。</param>
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        /// <returns>返回 <see cref="IPropertyNotifier"/>。</returns>
+        public IPropertyNotifier WithSource(object newSource, string? sourceAliase = null)
+            => new PropertyNotifier(newSource, sourceAliase, this, _propertyValues, _propertyFuncs);
 
     }
 }

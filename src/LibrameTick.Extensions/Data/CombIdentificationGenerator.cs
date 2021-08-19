@@ -26,7 +26,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 构造一个 <see cref="CombIdentificationGenerator"/>。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="LocalClock"/>）。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
         /// <param name="generation">给定的 <see cref="CombIdentificationGeneration"/>。</param>
         public CombIdentificationGenerator(IClock clock, CombIdentificationGeneration generation)
         {
@@ -125,7 +125,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 支持 MySQL 排序类型的 COMB 标识生成器（char(36)）。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="LocalClock"/>）。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
         /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
         public static CombIdentificationGenerator ForMySql(IClock clock)
             => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AsString);
@@ -133,7 +133,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 支持 Oracle 排序类型的 COMB 标识生成器（raw(16)）。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="LocalClock"/>）。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
         /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
         public static CombIdentificationGenerator ForOracle(IClock clock)
             => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AsBinary);
@@ -141,7 +141,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 支持 SQLite 排序类型的 COMB 标识生成器（text）。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="LocalClock"/>）。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
         /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
         public static CombIdentificationGenerator ForSqlite(IClock clock)
             => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AsString);
@@ -149,7 +149,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 支持 SQL Server 排序类型的 COMB 标识生成器（uniqueidentifier）。
         /// </summary>
-        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="LocalClock"/>）。</param>
+        /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
         /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
         public static CombIdentificationGenerator ForSqlServer(IClock clock)
             => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AtEnd);

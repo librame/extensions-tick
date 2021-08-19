@@ -23,11 +23,12 @@ namespace Librame.Extensions.Drawing.Verification
         /// 构造一个 <see cref="CaptchaOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public CaptchaOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
+        public CaptchaOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+            : base(parentNotifier, sourceAliase)
         {
-            Font = new FontOptions(Notifier);
-            BackgroundNoise = new NoiseOptions(Notifier);
+            Font = new FontOptions(Notifier, nameof(Font));
+            BackgroundNoise = new NoiseOptions(Notifier, nameof(BackgroundNoise));
         }
 
 

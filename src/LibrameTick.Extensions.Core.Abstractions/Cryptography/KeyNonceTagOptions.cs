@@ -23,8 +23,9 @@ namespace Librame.Extensions.Core.Cryptography
         /// 构造一个 <see cref="KeyNonceTagOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public KeyNonceTagOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名。</param>
+        public KeyNonceTagOptions(IPropertyNotifier parentNotifier, string sourceAliase)
+            : base(parentNotifier, sourceAliase)
         {
         }
 
@@ -75,10 +76,11 @@ namespace Librame.Extensions.Core.Cryptography
         /// 创建 AES-CCM 选项。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        /// <param name="sourceAliase">给定的源别名。</param>
         /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
-        public static KeyNonceTagOptions CreateAesCcmOptions(IPropertyNotifier parentNotifier)
+        public static KeyNonceTagOptions CreateAesCcmOptions(IPropertyNotifier parentNotifier, string sourceAliase)
         {
-            var options = new KeyNonceTagOptions(parentNotifier);
+            var options = new KeyNonceTagOptions(parentNotifier, sourceAliase);
 
             // 参数长度不能是 16、24 或 32 字节（128、192 或 256 位）
             options.KeyMaxSize = 28;
@@ -96,10 +98,11 @@ namespace Librame.Extensions.Core.Cryptography
         /// 创建 AES-GCM 选项。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
+        /// <param name="sourceAliase">给定的源别名。</param>
         /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
-        public static KeyNonceTagOptions CreateAesGcmOptions(IPropertyNotifier parentNotifier)
+        public static KeyNonceTagOptions CreateAesGcmOptions(IPropertyNotifier parentNotifier, string sourceAliase)
         {
-            var options = new KeyNonceTagOptions(parentNotifier);
+            var options = new KeyNonceTagOptions(parentNotifier, sourceAliase);
 
             // 参数长度不能是 16、24 或 32 字节（128、192 或 256 位）
             options.KeyMaxSize = 255;

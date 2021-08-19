@@ -21,20 +21,28 @@ namespace Librame.Extensions.Core
     public interface IPropertyNotifier : INotifyPropertyChanging, INotifyPropertyChanged
     {
         /// <summary>
-        /// 属性通知器的发起者。
+        /// 属性源。
         /// </summary>
-        object Sender { get; }
+        object Source { get; }
 
         /// <summary>
-        /// 属性通知器的发起者类型。
+        /// 属性源别名。
         /// </summary>
-        Type SenderType { get; }
+        string? SourceAliase { get; }
 
 
         /// <summary>
         /// 父级属性通知器。
         /// </summary>
         IPropertyNotifier? ParentNotifier { get; }
+
+
+        /// <summary>
+        /// 建立指定属性名称的键。
+        /// </summary>
+        /// <param name="propertyName">给定的属性名称。</param>
+        /// <returns>返回 <see cref="PropertyNoticeNamedKey"/>。</returns>
+        PropertyNoticeNamedKey BuildKey(string propertyName);
 
 
         /// <summary>
@@ -101,17 +109,11 @@ namespace Librame.Extensions.Core
 
 
         /// <summary>
-        /// 使用新属性通知器的发起者创建一个 <see cref="IPropertyNotifier"/>。
+        /// 使用新属性源创建一个 <see cref="IPropertyNotifier"/>。
         /// </summary>
-        /// <param name="newSender">给定的新发起者。</param>
+        /// <param name="newSource">给定的新属性源。</param>
+        /// <param name="sourceAliase">给定的源别名（可选）。</param>
         /// <returns>返回 <see cref="IPropertyNotifier"/>。</returns>
-        IPropertyNotifier WithSender(object newSender);
-
-        ///// <summary>
-        ///// 使用新属性通知器的发起者类型创建一个 <see cref="IPropertyNotifier"/>。
-        ///// </summary>
-        ///// <param name="newSenderType">给定的新发起者类型。</param>
-        ///// <returns>返回 <see cref="IPropertyNotifier"/>。</returns>
-        //IPropertyNotifier WithSender(Type newSenderType);
+        IPropertyNotifier WithSource(object newSource, string? sourceAliase = null);
     }
 }

@@ -20,20 +20,22 @@ namespace Librame.Extensions.Core
     public abstract class AbstractOptions : IOptions
     {
         /// <summary>
-        /// 构造一个默认 <see cref="AbstractOptions"/>。
+        /// 构造一个独立属性通知器的 <see cref="AbstractOptions"/>。
         /// </summary>
-        protected AbstractOptions()
+        /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
+        protected AbstractOptions(string sourceAliase)
         {
-            Notifier = new InternalPropertyNotifier(this);
+            Notifier = Instantiator.GetPropertyNotifier(this, sourceAliase);
         }
 
         /// <summary>
         /// 构造一个 <see cref="AbstractOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        protected AbstractOptions(IPropertyNotifier parentNotifier)
+        /// <param name="sourceAliase">给定的源别名（如果此选项会在同一源中重复使用，则必须设定不同的源别名，否则会造成属性通知器的实例冲突）。</param>
+        protected AbstractOptions(IPropertyNotifier parentNotifier, string? sourceAliase)
         {
-            Notifier = parentNotifier.WithSender(this);
+            Notifier = parentNotifier.WithSource(this, sourceAliase);
         }
 
 

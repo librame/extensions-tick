@@ -23,8 +23,9 @@ namespace Librame.Extensions.Drawing
         /// 构造一个 <see cref="ColorOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-        public ColorOptions(IPropertyNotifier parentNotifier)
-            : base(parentNotifier)
+        /// <param name="sourceAliase">给定的源别名。</param>
+        public ColorOptions(IPropertyNotifier parentNotifier, string sourceAliase)
+            : base(parentNotifier, sourceAliase)
         {
         }
 
@@ -91,7 +92,7 @@ namespace Librame.Extensions.Drawing
         /// <returns>返回 <see cref="ColorOptions"/>。</returns>
         public static ColorOptions CreateLightOptions(IPropertyNotifier parentNotifier)
         {
-            var options = new ColorOptions(parentNotifier);
+            var options = new ColorOptions(parentNotifier, "LightScheme");
 
             options.Fore = "#0066cc";
             options.Background = "#ccffff";
