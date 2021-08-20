@@ -1,4 +1,4 @@
-LibrameTick.Extensions 系列（Librame.Extensions Next Generation 系列）
+LibrameTick.Extensions 系列
 =========================
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/librame/extensions-tick/blob/main/LICENSE)
