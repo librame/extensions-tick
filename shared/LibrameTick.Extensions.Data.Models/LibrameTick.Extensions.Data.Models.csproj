@@ -3,12 +3,7 @@
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Data</RootNamespace>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <OutputPath>..\..\bin\</OutputPath>
-    <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

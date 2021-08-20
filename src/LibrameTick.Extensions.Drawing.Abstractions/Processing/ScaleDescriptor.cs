@@ -20,5 +20,5 @@ namespace Librame.Extensions.Drawing.Processing
     /// <param name="FileNameSuffix">给定的文件命名后缀。</param>
     /// <param name="MaxSize">给定的最大尺寸。</param>
     /// <param name="AddWatermark">是否添加水印。</param>
-    public record ScalingDescriptor(string FileNameSuffix, Size MaxSize, bool AddWatermark);
+    public record ScaleDescriptor(string FileNameSuffix, Size MaxSize, bool AddWatermark);
 }

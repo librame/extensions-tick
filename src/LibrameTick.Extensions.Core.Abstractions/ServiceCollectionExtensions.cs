@@ -31,6 +31,25 @@ namespace Librame.Extensions.Core
         }
 
 
+        /// <summary>
+        /// 包含服务类型。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型。</typeparam>
+        /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool ContainsService<TService>(this IServiceCollection services)
+            => services.ContainsService(typeof(TService));
+
+        /// <summary>
+        /// 包含服务类型。
+        /// </summary>
+        /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool ContainsService(this IServiceCollection services, Type serviceType)
+            => services.FirstOrDefault(p => p.ServiceType == serviceType) != null;
+
+
         #region TryAddOrReplaceByCharacteristic
 
         /// <summary>

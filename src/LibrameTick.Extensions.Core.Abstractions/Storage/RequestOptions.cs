@@ -98,6 +98,7 @@ namespace Librame.Extensions.Core.Storage
         /// <summary>
         /// 文件提供程序列表。
         /// </summary>
+        [JsonIgnore]
         public List<IStorageFileProvider> FileProviders { get; init; }
             = new List<IStorageFileProvider>();
 

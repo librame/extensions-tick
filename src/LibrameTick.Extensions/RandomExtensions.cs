@@ -37,7 +37,7 @@ namespace Librame.Extensions
         /// <summary>
         /// 使用 <see cref="RandomNumberGenerator"/> 生成指定长度的随机数字节数组。
         /// </summary>
-        /// <param name="length">给定的字节数组元素长度。</param>
+        /// <param name="length">给定的字节数组元素长度（即字节数组长度）。</param>
         /// <returns>返回生成的字节数组。</returns>
         public static byte[] GenerateByteArray(this int length)
         {

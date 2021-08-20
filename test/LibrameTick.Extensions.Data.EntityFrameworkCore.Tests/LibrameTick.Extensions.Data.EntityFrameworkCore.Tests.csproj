@@ -27,4 +27,8 @@
     <ProjectReference Include="..\..\src\LibrameTick.Extensions.Data.EntityFrameworkCore\LibrameTick.Extensions.Data.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="_configs\" />
+  </ItemGroup>
+
 </Project>

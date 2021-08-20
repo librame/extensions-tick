@@ -12,6 +12,7 @@
 
 using Librame.Extensions.Core.Cryptography;
 using Librame.Extensions.Core.Storage;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -33,6 +34,12 @@ namespace Librame.Extensions.Core
         public CoreExtensionBuilder(IServiceCollection services, CoreExtensionOptions options)
             : base(services, options)
         {
+            if (!Services.ContainsService<IMemoryCache>())
+                Services.AddMemoryCache();
+
+            if (!Services.ContainsService<IHttpClientFactory>())
+                Services.AddHttpClient();
+
             // Cryptography
             TryAddOrReplaceService<IAlgorithmParameterGenerator, InternalAlgorithmParameterGenerator>();
             TryAddOrReplaceService<IAsymmetricAlgorithm, InternalAsymmetricAlgorithm>();

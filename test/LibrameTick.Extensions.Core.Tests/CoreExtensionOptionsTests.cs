@@ -34,9 +34,6 @@ namespace Librame.Extensions.Core
             Assert.NotEmpty(_options.Directories.ConfigDirectory);
             Assert.NotEmpty(_options.Directories.ReportDirectory);
             Assert.NotEmpty(_options.Directories.ResourceDirectory);
-
-            _options.Algorithms.Aes.Key = RandomExtensions.GenerateByteArray(_options.Algorithms.Aes.KeyMaxSize);
-            Assert.NotNull(_options.Algorithms.Aes.Key);
         }
 
     }

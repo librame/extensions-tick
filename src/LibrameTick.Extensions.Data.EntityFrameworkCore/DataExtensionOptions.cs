@@ -67,6 +67,7 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 核心扩展选项。
         /// </summary>
+        [JsonIgnore]
         public CoreExtensionOptions CoreOptions { get; init; }
 
         /// <summary>

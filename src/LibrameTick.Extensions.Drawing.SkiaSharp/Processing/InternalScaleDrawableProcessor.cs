@@ -37,7 +37,7 @@ namespace Librame.Extensions.Drawing.Processing
 
         protected override IBitmapList ProcessCore(IBitmapList bitmaps)
         {
-            if (Options.Scaling.Descriptors.Count < 1)
+            if (Options.Scale.Descriptors.Count < 1)
                 return bitmaps;
 
             var scaleBitmaps = new BitmapList();
@@ -47,7 +47,7 @@ namespace Librame.Extensions.Drawing.Processing
             {
                 var realBitmap = (SKBitmap)bitmap.Source;
                 // 遍历缩放信息
-                foreach (var scaleDescriptor in Options.Scaling.Descriptors)
+                foreach (var scaleDescriptor in Options.Scale.Descriptors)
                 {
                     // 如果源图尺寸小于缩放尺寸，则跳过当前缩放信息
                     if (realBitmap.Width <= scaleDescriptor.MaxSize.Width
@@ -64,7 +64,7 @@ namespace Librame.Extensions.Drawing.Processing
 
                     // 是否附加缩放尺寸后缀
                     var scaleNameFuffix = scaleDescriptor.FileNameSuffix;
-                    if (Options.Scaling.AddScaleSizeSuffix)
+                    if (Options.Scale.AddScaleSizeSuffix)
                         scaleNameFuffix += $"-{scaleSize.Width}x{scaleSize.Height}";
 
                     // 创建缩放位图描述符

@@ -80,12 +80,12 @@ namespace Librame.Extensions.Core.Cryptography
         {
             var options = new KeyNonceOptions(parentNotifier, sourceAliase);
 
+            // 以位为单位
             options.KeyMaxSize = 256;
             options.NonceMaxSize = 128;
 
-            (var key, var iv) = AlgorithmExtensions.GetAesKeyAndIV();
-            options.Key = key;
-            options.Nonce = iv;
+            options.Key = RandomExtensions.GenerateByteArray(options.KeyMaxSize / 8);
+            options.Nonce = RandomExtensions.GenerateByteArray(options.NonceMaxSize / 8);
 
             return options;
         }

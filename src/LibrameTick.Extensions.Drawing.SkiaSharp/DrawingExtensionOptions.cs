@@ -14,6 +14,7 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Drawing.Verification;
 using Librame.Extensions.Drawing.Processing;
 using SkiaSharp;
+using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Drawing
 {
@@ -32,7 +33,7 @@ namespace Librame.Extensions.Drawing
             CoreOptions = parentOptions.GetRequiredOptions<CoreExtensionOptions>();
             Colors = ColorOptions.CreateLightOptions(Notifier);
             Captcha = new CaptchaOptions(Notifier);
-            Scaling = new ScalingOptions(Notifier);
+            Scale = new ScaleOptions(Notifier);
             Watermark = new WatermarkOptions(Notifier);
 
             ImageDirectory = Directories.BaseDirectory.CombinePath("images");
@@ -51,6 +52,7 @@ namespace Librame.Extensions.Drawing
         /// <summary>
         /// 核心扩展选项。
         /// </summary>
+        [JsonIgnore]
         public CoreExtensionOptions CoreOptions { get; init; }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace Librame.Extensions.Drawing
         /// <summary>
         /// 缩放选项。
         /// </summary>
-        public ScalingOptions Scaling { get; init; }
+        public ScaleOptions Scale { get; init; }
 
         /// <summary>
         /// 水印选项。
