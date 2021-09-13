@@ -26,7 +26,7 @@ namespace Librame.Extensions.Data.Accessing
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
         public static IAccessor? SliceReadAccessors(this IAccessorSlicer slicer,
             IReadOnlyList<AccessorDescriptor> descriptors, Func<IAccessor, bool>? customSliceFunc = null)
-            => slicer.SliceAccessors(descriptors, AccessorInteraction.Read | AccessorInteraction.ReadWrite, customSliceFunc);
+            => slicer.SliceAccessors(descriptors, AccessMode.Read | AccessMode.ReadWrite, customSliceFunc);
 
         /// <summary>
         /// 切片写入访问器集合（可用于读/写分库）。
@@ -37,7 +37,7 @@ namespace Librame.Extensions.Data.Accessing
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
         public static IAccessor? SliceWriteAccessors(this IAccessorSlicer slicer,
             IReadOnlyList<AccessorDescriptor> descriptors, Func<IAccessor, bool>? customSliceFunc = null)
-            => slicer.SliceAccessors(descriptors, AccessorInteraction.Write | AccessorInteraction.ReadWrite, customSliceFunc);
+            => slicer.SliceAccessors(descriptors, AccessMode.Write | AccessMode.ReadWrite, customSliceFunc);
 
     }
 }

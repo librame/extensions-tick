@@ -18,7 +18,7 @@ namespace Librame.Extensions.Core
     /// 定义类型命名键。
     /// </summary>
     /// <typeparam name="TSource">指定的源类型。</typeparam>
-    public record TypeNamedKey<TSource> : TypeNamedKey
+    public class TypeNamedKey<TSource> : TypeNamedKey
     {
         /// <summary>
         /// 构造一个 <see cref="TypeNamedKey{TSource}"/>。
@@ -44,7 +44,7 @@ namespace Librame.Extensions.Core
     /// <summary>
     /// 定义类型命名键。
     /// </summary>
-    public record TypeNamedKey
+    public class TypeNamedKey : IEquatable<TypeNamedKey>
     {
         /// <summary>
         /// 构造一个 <see cref="TypeNamedKey"/>。
@@ -67,6 +67,15 @@ namespace Librame.Extensions.Core
         /// 源别名。
         /// </summary>
         public string? SourceAliase { get; init; }
+
+
+        /// <summary>
+        /// 比较相等。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="TypeNamedKey"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public bool Equals(TypeNamedKey? other)
+            => other != null && SourceType.Equals(other.SourceType) && SourceAliase == other.SourceAliase;
 
 
         /// <summary>

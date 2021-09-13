@@ -15,7 +15,7 @@ using System.Text;
 namespace Librame.Extensions.Data.Cryptography
 {
     /// <summary>
-    /// 定义实现 <see cref="IEncryptionProvider{TValue}"/> 用于字符串的加密提供程序。
+    /// 定义实现 <see cref="IEncryptionProvider{String}"/> 用于字符串的加密提供程序。
     /// </summary>
     public class StringEncryptionProvider : IEncryptionProvider<string>
     {
@@ -27,11 +27,10 @@ namespace Librame.Extensions.Data.Cryptography
         /// 构造一个 <see cref="StringEncryptionProvider"/>。
         /// </summary>
         /// <param name="provider">给定的 <see cref="ByteArrayEncryptionProvider"/>。</param>
-        /// <param name="encoding">给定的 <see cref="Encoding"/>。</param>
-        public StringEncryptionProvider(ByteArrayEncryptionProvider provider, Encoding encoding)
+        public StringEncryptionProvider(ByteArrayEncryptionProvider provider)
         {
             _provider = provider;
-            _encoding = encoding;
+            _encoding = provider.Algorithm.Encoding;
         }
 
 

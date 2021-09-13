@@ -21,15 +21,15 @@ namespace Librame.Extensions.Core.Storage
         private readonly IStorageFileProvider _fileProvider;
 
 
-        public InternalFileManager(IMemoryCache memoryCache, CoreExtensionBuilder builder)
+        public InternalFileManager(IMemoryCache memoryCache, CoreExtensionOptions options)
         {
             _memoryCache = memoryCache;
-            _options = builder.Options;
+            _options = options;
 
-            if (_options.Requests.FileProviders.Count < 0)
-                throw new ArgumentException($"The {nameof(CoreExtensionOptions)}.{nameof(_options.Requests)}.{nameof(_options.Requests.FileProviders)} is empty. ex: services.AddLibrame(opts => opts.{nameof(_options.Requests)}.{nameof(_options.Requests.FileProviders)}.Add(new {nameof(PhysicalStorageFileProvider)}()))");
+            if (_options.WebRequest.FileProviders.Count < 0)
+                throw new ArgumentException($"The {nameof(CoreExtensionOptions)}.{nameof(_options.WebRequest)}.{nameof(_options.WebRequest.FileProviders)} is empty. ex: services.AddLibrame(opts => opts.{nameof(_options.WebRequest)}.{nameof(_options.WebRequest.FileProviders)}.Add(new {nameof(PhysicalStorageFileProvider)}()))");
             
-            _fileProvider = new InternalCompositeStorageFileProvider(_options.Requests.FileProviders);
+            _fileProvider = new InternalCompositeStorageFileProvider(_options.WebRequest.FileProviders);
         }
 
 
@@ -80,7 +80,7 @@ namespace Librame.Extensions.Core.Storage
                 var beginSecond = DateTime.Now.Second;
 
                 var readLength = 0;
-                var buffer = new byte[_options.Requests.BufferSize];
+                var buffer = new byte[_options.WebRequest.BufferSize];
 
                 while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait()) > 0)
                 {
@@ -155,7 +155,7 @@ namespace Librame.Extensions.Core.Storage
                 var beginSecond = DateTime.Now.Second;
 
                 var readLength = 0;
-                var buffer = new byte[_options.Requests.BufferSize];
+                var buffer = new byte[_options.WebRequest.BufferSize];
 
                 while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait()) > 0)
                 {

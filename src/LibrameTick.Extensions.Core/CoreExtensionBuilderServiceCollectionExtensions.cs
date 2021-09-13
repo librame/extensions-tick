@@ -10,12 +10,12 @@
 
 #endregion
 
-using Microsoft.Extensions.DependencyInjection;
+using Librame.Extensions.Core;
 
-namespace Librame.Extensions.Core
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
-    /// <see cref="CoreExtensionBuilder"/>、<see cref="ServiceCollection"/> 静态扩展。
+    /// <see cref="CoreExtensionBuilder"/> 与 <see cref="ServiceCollection"/> 静态扩展。
     /// </summary>
     public static class CoreExtensionBuilderServiceCollectionExtensions
     {

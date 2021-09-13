@@ -22,17 +22,6 @@ namespace Librame.Extensions
         private readonly static char[] _digitLetters
             = (StringExtensions.Digits + StringExtensions.UppercaseLetters).ToCharArray();
 
-        private static int _location
-            = Environment.TickCount;
-
-        // 支持多线程，各线程维持独立的随机实例
-        private static readonly ThreadLocal<Random> _random
-            = new ThreadLocal<Random>(() => new Random(Interlocked.Increment(ref _location)));
-
-        // 支持多线程，各线程维持独立的随机数生成器实例
-        private static readonly ThreadLocal<RandomNumberGenerator> _generator
-            = new ThreadLocal<RandomNumberGenerator>(() => RandomNumberGenerator.Create());
-
 
         /// <summary>
         /// 使用 <see cref="RandomNumberGenerator"/> 生成指定长度的随机数字节数组。
@@ -40,15 +29,7 @@ namespace Librame.Extensions
         /// <param name="length">给定的字节数组元素长度（即字节数组长度）。</param>
         /// <returns>返回生成的字节数组。</returns>
         public static byte[] GenerateByteArray(this int length)
-        {
-            return RunSecurity(rng =>
-            {
-                var buffer = new byte[length];
-                rng.GetBytes(buffer);
-
-                return buffer;
-            });
-        }
+            => RandomNumberGenerator.GetBytes(length);
 
 
         /// <summary>
@@ -104,7 +85,7 @@ namespace Librame.Extensions
         /// </summary>
         /// <param name="action">给定的动作。</param>
         public static void Run(this Action<Random> action)
-            => action.Invoke(_random.Value!);
+            => action.Invoke(Random.Shared);
 
         /// <summary>
         /// 运行伪随机数生成器，并返回值。
@@ -113,24 +94,7 @@ namespace Librame.Extensions
         /// <param name="func">给定的值方法。</param>
         /// <returns>返回 <typeparamref name="TValue"/>。</returns>
         public static TValue Run<TValue>(this Func<Random, TValue> func)
-            => func.Invoke(_random.Value!);
-
-
-        /// <summary>
-        /// 运行更具安全性的随机数生成器。
-        /// </summary>
-        /// <param name="action">给定的动作。</param>
-        public static void RunSecurity(this Action<RandomNumberGenerator> action)
-            => action.Invoke(_generator.Value!);
-
-        /// <summary>
-        /// 运行更具安全性的随机数生成器，并返回值。
-        /// </summary>
-        /// <typeparam name="TValue">指定的值类型。</typeparam>
-        /// <param name="func">给定的值方法。</param>
-        /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-        public static TValue RunSecurity<TValue>(this Func<RandomNumberGenerator, TValue> func)
-            => func.Invoke(_generator.Value!);
+            => func.Invoke(Random.Shared);
 
     }
 }

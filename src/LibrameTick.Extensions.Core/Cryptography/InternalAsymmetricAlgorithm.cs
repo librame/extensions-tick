@@ -26,7 +26,7 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         protected override SigningCredentialsOptions DefaultRsaOptions
-            => _options.Algorithms.Rsa;
+            => _options.Algorithm.Rsa;
 
     }
 }

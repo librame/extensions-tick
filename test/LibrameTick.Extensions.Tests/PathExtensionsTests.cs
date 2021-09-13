@@ -6,7 +6,7 @@ namespace Librame.Extensions
     {
 
         [Fact]
-        public void CreateDirectory()
+        public void CreateDirectoryTest()
         {
             var path = "subdir".SetBasePath();
             path.CreateDirectory();
@@ -17,7 +17,22 @@ namespace Librame.Extensions
         }
 
         [Fact]
-        public void SetBasePath()
+        public void FileReadAndWriteTest()
+        {
+            var byteArray = Guid.NewGuid().ToByteArray();
+            var path = "binary_test.bin".SetBasePath();
+
+            path.FileWrite(byteArray);
+            Assert.True(path.FileExists());
+
+            var buffer = path.FileRead();
+            Assert.True(byteArray.SequenceEqual(buffer));
+
+            path.FileDelete();
+        }
+
+        [Fact]
+        public void SetBasePathTest()
         {
             var str = "relativePath";
             Assert.NotEqual(str, str.SetBasePath());

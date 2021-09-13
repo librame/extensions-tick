@@ -27,14 +27,16 @@ namespace Librame.Extensions.Data.Accessing
         /// 获取读取访问器。
         /// </summary>
         /// <param name="group">给定的所属群组（可选；默认返回初始访问器）。</param>
+        /// <param name="basis">给定的分片依据（可选）。</param>
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
-        IAccessor GetReadAccessor(int? group = null);
+        IAccessor GetReadAccessor(int? group = null, object? basis = null);
 
         /// <summary>
         /// 获取写入访问器。
         /// </summary>
         /// <param name="group">给定的所属群组（可选；默认返回初始访问器）。</param>
+        /// <param name="basis">给定的分片依据（可选）。</param>
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
-        IAccessor GetWriteAccessor(int? group = null);
+        IAccessor GetWriteAccessor(int? group = null, object? basis = null);
     }
 }

@@ -12,8 +12,10 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Librame.Extensions.Data
 {
@@ -33,16 +35,21 @@ namespace Librame.Extensions.Data
         public DataExtensionBuilder(IExtensionBuilder parentBuilder, DataExtensionOptions options)
             : base(parentBuilder, options)
         {
-            // Base: IdentificationGenerator
+            TryAddEnumerableServices<IInterceptor, InternalAccessorSaveChangesInterceptor>();
+            TryAddOrReplaceService<IAuditingManager, InternalAuditingManager>();
             TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
 
-            // Access
+            // Accessing
             TryAddOrReplaceService<IAccessorAggregator, InternalAccessorAggregator>();
             TryAddOrReplaceService<IAccessorManager, InternalAccessorManager>();
+            TryAddOrReplaceService<IAccessorMigrator, InternalAccessorMigrator>();
             TryAddOrReplaceService<IAccessorResolver, InternalAccessorResolver>();
             TryAddOrReplaceService<IAccessorSlicer, InternalAccessorSlicer>();
 
-            // Store
+            // Sharding
+            TryAddOrReplaceService<IShardingManager, InternalShardingManager>();
+
+            // Storing
             TryAddOrReplaceService(typeof(IStore<>), typeof(BaseStore<>));
 
             // ValueConversion
@@ -63,27 +70,14 @@ namespace Librame.Extensions.Data
         }
 
         /// <summary>
-        /// 添加 <typeparamref name="TMigrator"/>。
-        /// </summary>
-        /// <typeparam name="TMigrator">指定的移植器类型。</typeparam>
-        /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-        public DataExtensionBuilder AddMigrator<TMigrator>()
-            where TMigrator : class, IAccessorMigrator
-        {
-            TryAddOrReplaceService<IAccessorMigrator, TMigrator>();
-            return this;
-        }
-
-        /// <summary>
-        /// 添加 <typeparamref name="TSeeder"/>（仅注册种子机类型，种子机接口仅用于匹配特征）。
+        /// 添加 <typeparamref name="TSeeder"/>。
         /// </summary>
         /// <typeparam name="TSeeder">指定的种子机类型。</typeparam>
         /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
         public DataExtensionBuilder AddSeeder<TSeeder>()
             where TSeeder : class, IAccessorSeeder
         {
-            // 仅注册种子机类型，种子机接口仅用于匹配特征
-            TryAddOrReplaceServiceByCharacteristic<IAccessorSeeder, TSeeder>();
+            TryAddOrReplaceService<IAccessorSeeder, TSeeder>();
             return this;
         }
 

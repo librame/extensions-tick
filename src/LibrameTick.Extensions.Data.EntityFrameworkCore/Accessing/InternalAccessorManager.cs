@@ -10,14 +10,17 @@
 
 #endregion
 
+using Librame.Extensions.Data.Sharding;
+
 namespace Librame.Extensions.Data.Accessing
 {
     class InternalAccessorManager : IAccessorManager
     {
-        private IAccessorAggregator _aggregator;
-        //private IAccessorSlicer _slicer;
-        private IAccessorMigrator _migrator;
-        private AccessOptions _options;
+        private readonly IAccessorAggregator _aggregator;
+        //private readonly IAccessorSlicer _slicer;
+        private readonly IAccessorMigrator _migrator;
+        private readonly IShardingManager _shardingManager;
+        private readonly AccessOptions _options;
 
         private IAccessor? _readAccessor;
         private IAccessor? _writeAccessor;
@@ -29,13 +32,14 @@ namespace Librame.Extensions.Data.Accessing
             = new Dictionary<int, IAccessor?>();
 
 
-        public InternalAccessorManager(DataExtensionBuilder builder,
+        public InternalAccessorManager(DataExtensionOptions options,
             IAccessorResolver resolver, IAccessorAggregator aggregator,
-            IAccessorMigrator migrator)
+            IAccessorMigrator migrator, IShardingManager shardingManager)
         {
             _aggregator = aggregator;
             _migrator = migrator;
-            _options = builder.Options.Access;
+            _options = options.Access;
+            _shardingManager = shardingManager;
 
             Descriptors = resolver.ResolveDescriptors();
             if (Descriptors.Count < 1)
@@ -76,24 +80,34 @@ namespace Librame.Extensions.Data.Accessing
         }
 
 
-        public IAccessor GetReadAccessor(int? group = null)
+        public IAccessor GetReadAccessor(int? group = null, object? basis = null)
         {
             OnAutomaticMigration();
 
-            if (group.HasValue && _readGroupAccessors.TryGetValue(group.Value, out var accessor))
-                return accessor ?? _readAccessor!;
+            return GetAccessor().ShardingDatabase(_shardingManager, Descriptors, basis);
 
-            return _readAccessor!;
+            IAccessor GetAccessor()
+            {
+                if (group.HasValue && _readGroupAccessors.TryGetValue(group.Value, out var accessor))
+                    return accessor ?? _readAccessor!;
+
+                return _readAccessor!;
+            }
         }
 
-        public IAccessor GetWriteAccessor(int? group = null)
+        public IAccessor GetWriteAccessor(int? group = null, object? basis = null)
         {
             OnAutomaticMigration();
 
-            if (group.HasValue && _writeGroupAccessors.TryGetValue(group.Value, out var accessor))
-                return accessor ?? _writeAccessor!;
+            return GetAccessor().ShardingDatabase(_shardingManager, Descriptors, basis);
 
-            return _writeAccessor!;
+            IAccessor GetAccessor()
+            {
+                if (group.HasValue && _writeGroupAccessors.TryGetValue(group.Value, out var accessor))
+                    return accessor ?? _writeAccessor!;
+
+                return _writeAccessor!;
+            }
         }
 
     }

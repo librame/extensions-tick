@@ -26,13 +26,13 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         protected override KeyNonceOptions DefaultAesOptions
-            => _options.Algorithms.Aes;
+            => _options.Algorithm.Aes;
 
         protected override KeyNonceTagOptions DefaultAesCcmOptions
-            => _options.Algorithms.AesCcm;
+            => _options.Algorithm.AesCcm;
 
         protected override KeyNonceTagOptions DefaultAesGcmOptions
-            => _options.Algorithms.AesGcm;
+            => _options.Algorithm.AesGcm;
 
     }
 }

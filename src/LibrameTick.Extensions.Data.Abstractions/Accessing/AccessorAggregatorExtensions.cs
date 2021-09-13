@@ -25,7 +25,7 @@ namespace Librame.Extensions.Data.Accessing
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
         public static IAccessor? AggregateReadAccessors(this IAccessorAggregator aggregator,
             IReadOnlyList<AccessorDescriptor> descriptors)
-            => aggregator.AggregateAccessors(descriptors, AccessorInteraction.Read | AccessorInteraction.ReadWrite);
+            => aggregator.AggregateAccessors(descriptors, AccessMode.Read | AccessMode.ReadWrite);
 
         /// <summary>
         /// 聚合写入访问器集合。
@@ -35,7 +35,7 @@ namespace Librame.Extensions.Data.Accessing
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
         public static IAccessor? AggregateWriteAccessors(this IAccessorAggregator aggregator,
             IReadOnlyList<AccessorDescriptor> descriptors)
-            => aggregator.AggregateAccessors(descriptors, AccessorInteraction.Write | AccessorInteraction.ReadWrite);
+            => aggregator.AggregateAccessors(descriptors, AccessMode.Write | AccessMode.ReadWrite);
 
     }
 }

@@ -36,6 +36,24 @@ namespace Librame.Extensions.Data.Accessing
         /// </summary>
         protected TAccessor Accessor { get; }
 
+        /// <summary>
+        /// 是否已填充。
+        /// </summary>
+        protected bool IsPopulated { get; private set; }
+
+
+        /// <summary>
+        /// 设置正在填充。
+        /// </summary>
+        /// <returns>返回布尔值。</returns>
+        protected virtual bool SetPopulating()
+        {
+            if (!IsPopulated)
+                IsPopulated = true;
+
+            return IsPopulated;
+        }
+
 
         /// <summary>
         /// 初始化访问器。
@@ -43,15 +61,20 @@ namespace Librame.Extensions.Data.Accessing
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
         public virtual void Initialize(IServiceProvider services)
         {
-            var builder = services.GetRequiredService<DataExtensionBuilder>();
+            var options = services.GetRequiredService<DataExtensionOptions>();
 
-            if (builder.Options.Access.EnsureDatabaseDeleted)
+            if (options.Access.EnsureDatabaseDeleted)
                 Accessor.Database.EnsureDeleted();
 
-            if (builder.Options.Access.EnsureDatabaseCreated)
+            if (options.Access.EnsureDatabaseCreated)
                 Accessor.Database.EnsureCreated();
 
-            Populate(services, builder.Options);
+            Populate(services, options);
+
+            if (IsPopulated)
+            {
+                Accessor.SaveChanges();
+            }
         }
 
         /// <summary>
@@ -63,15 +86,20 @@ namespace Librame.Extensions.Data.Accessing
         public virtual async Task InitializeAsync(IServiceProvider services,
             CancellationToken cancellationToken = default)
         {
-            var builder = services.GetRequiredService<DataExtensionBuilder>();
+            var options = services.GetRequiredService<DataExtensionOptions>();
 
-            if (builder.Options.Access.EnsureDatabaseDeleted)
+            if (options.Access.EnsureDatabaseDeleted)
                 await Accessor.Database.EnsureDeletedAsync(cancellationToken);
 
-            if (builder.Options.Access.EnsureDatabaseCreated)
+            if (options.Access.EnsureDatabaseCreated)
                 await Accessor.Database.EnsureCreatedAsync(cancellationToken);
 
-            await PopulateAsync(services, builder.Options, cancellationToken);
+            await PopulateAsync(services, options, cancellationToken);
+
+            if (IsPopulated)
+            {
+                await Accessor.SaveChangesAsync(cancellationToken);
+            }
         }
 
 

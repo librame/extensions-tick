@@ -92,6 +92,36 @@ namespace Librame.Extensions
         }
 
 
+        /// <summary>
+        /// 尝试获取特性。
+        /// </summary>
+        /// <typeparam name="TAttribute">指定的特性类型。</typeparam>
+        /// <param name="sourceType">给定的源类型。</param>
+        /// <param name="attribute">输出取得的特性。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool TryGetAttribute<TAttribute>(this Type sourceType,
+            [MaybeNullWhen(false)] out TAttribute attribute)
+            where TAttribute : Attribute
+        {
+            attribute = sourceType.GetCustomAttribute<TAttribute>();
+            return attribute != null;
+        }
+
+        /// <summary>
+        /// 尝试获取特性。
+        /// </summary>
+        /// <param name="sourceType">给定的源类型。</param>
+        /// <param name="attributeType">给定要取得的特性类型。</param>
+        /// <param name="attribute">输出取得的特性。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool TryGetAttribute(this Type sourceType, Type attributeType,
+            [MaybeNullWhen(false)] out Attribute attribute)
+        {
+            attribute = sourceType.GetCustomAttribute(attributeType);
+            return attribute != null;
+        }
+
+
         #region IsAssignableType
 
         /// <summary>

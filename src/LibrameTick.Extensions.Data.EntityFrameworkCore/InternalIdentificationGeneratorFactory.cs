@@ -17,9 +17,9 @@ namespace Librame.Extensions.Data
         private IReadOnlyList<IObjectIdentificationGenerator> _idGenerators;
 
 
-        public InternalIdentificationGeneratorFactory(DataExtensionBuilder builder)
+        public InternalIdentificationGeneratorFactory(DataExtensionOptions options)
         {
-            _idGenerators = builder.Options.IdGenerators;
+            _idGenerators = options.IdGenerators;
         }
 
 

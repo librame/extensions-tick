@@ -19,11 +19,11 @@ namespace Librame.Extensions.Data.Accessing
     sealed class InternalCompositeAccessor : IAccessor
     {
         private readonly IAccessor[] _accessors;
-        private readonly AccessorInteraction _interaction;
+        private readonly AccessMode _interaction;
 
 
         public InternalCompositeAccessor(IEnumerable<IAccessor> accessors,
-            AccessorInteraction interaction)
+            AccessMode interaction)
         {
             _accessors = accessors.ToArray();
             _interaction = interaction;
@@ -85,6 +85,9 @@ namespace Librame.Extensions.Data.Accessing
 
         #endregion
 
+
+        public string AccessorId
+            => ChainingAccessorsByException(a => a.AccessorId);
 
         public Type AccessorType
             => typeof(InternalCompositeAccessor);
@@ -267,14 +270,38 @@ namespace Librame.Extensions.Data.Accessing
         #endregion
 
 
-        #region SaveChanges
+        #region IConnectable
+
+        public string? CurrentConnectionString
+            => ChainingAccessorsByException(a => a.CurrentConnectionString);
+
+        public Action<IConnectable>? ChangingAction
+        {
+            get => ChainingAccessorsByException(a => a.ChangingAction);
+            set => ChainingAccessorsByException(a => a.ChangingAction = value);
+        }
+
+        public Action<IConnectable>? ChangedAction
+        {
+            get => ChainingAccessorsByException(a => a.ChangedAction);
+            set => ChainingAccessorsByException(a => a.ChangedAction = value);
+        }
+
+
+        public IConnectable ChangeConnection(string newConnectionString)
+            => ChainingAccessorsByException(a => a.ChangeConnection(newConnectionString));
+
+        #endregion
+
+
+        #region ISaveChangeable
 
         public int SaveChanges()
             => SaveChanges(acceptAllChangesOnSuccess: true);
 
         public int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            if (_interaction == AccessorInteraction.Read)
+            if (_interaction == AccessMode.Read)
                 throw new NotSupportedException($"{nameof(IAccessor)} in read interaction, the {nameof(SaveChanges)} is not supported.");
 
             return BatchingAccessors(a => a.SaveChanges(acceptAllChangesOnSuccess));
@@ -287,7 +314,7 @@ namespace Librame.Extensions.Data.Accessing
         public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
             CancellationToken cancellationToken = default)
         {
-            if (_interaction == AccessorInteraction.Read)
+            if (_interaction == AccessMode.Read)
                 throw new NotSupportedException($"{nameof(IAccessor)} in read interaction, the {nameof(SaveChangesAsync)} is not supported.");
 
             return BatchingAccessors(a => a.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken))!;

@@ -10,6 +10,10 @@
 
 #endregion
 
+using Librame.Extensions.Serialization;
+using System.Text;
+using System.Text.Json.Serialization;
+
 namespace Librame.Extensions.Core.Cryptography
 {
     /// <summary>
@@ -74,6 +78,17 @@ namespace Librame.Extensions.Core.Cryptography
 
 
         /// <summary>
+        /// 字符编码（默认使用 <see cref="Encoding.UTF8"/>）。
+        /// </summary>
+        [JsonConverter(typeof(JsonStringEncodingConverter))]
+        public Encoding Encoding
+        {
+            get => Notifier.GetOrAdd(nameof(Encoding), Encoding.UTF8);
+            set => Notifier.AddOrUpdate(nameof(Encoding), value);
+        }
+
+
+        /// <summary>
         /// 获取哈希码。
         /// </summary>
         /// <returns>返回 32 位整数。</returns>
@@ -85,7 +100,7 @@ namespace Librame.Extensions.Core.Cryptography
         /// </summary>
         /// <returns>返回字符串。</returns>
         public override string ToString()
-            => $"{HmacHash};{Aes};{AesCcm};{AesGcm};{Rsa}";
+            => $"{nameof(Encoding)}={Encoding.AsEncodingName()};{nameof(HmacHash)}:{HmacHash};{nameof(Aes)}:{Aes};{nameof(AesCcm)}:{AesCcm};{nameof(AesGcm)}:{AesGcm};{nameof(Rsa)}:{Rsa}";
 
     }
 }

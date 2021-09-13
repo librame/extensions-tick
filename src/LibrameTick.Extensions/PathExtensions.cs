@@ -24,7 +24,7 @@ namespace Librame.Extensions
         /// <see cref="Directory.GetCurrentDirectory()"/> 当前目录。
         /// </summary>
         public static readonly string CurrentDirectory
-            = Directory.GetCurrentDirectory();
+            = Directory.GetCurrentDirectory(); //Environment.ProcessPath;
 
         /// <summary>
         /// 除去开发相对路径部分的 <see cref="Directory.GetCurrentDirectory()"/> 当前目录。
@@ -75,6 +75,55 @@ namespace Librame.Extensions
 
 
         /// <summary>
+        /// 文件读取。
+        /// </summary>
+        /// <param name="path">给定的文件路径。</param>
+        /// <returns>返回字节数组。</returns>
+        public static byte[] FileRead(this string path)
+            => path.FileRead(0L);
+
+        /// <summary>
+        /// 文件读取。
+        /// </summary>
+        /// <param name="path">给定的文件路径。</param>
+        /// <param name="fileOffset">给定的读取偏移量。</param>
+        /// <returns>返回字节数组。</returns>
+        public static byte[] FileRead(this string path, long fileOffset)
+        {
+            using (var handle = File.OpenHandle(path))
+            {
+                var length = RandomAccess.GetLength(handle);
+                var buffer = new byte[length - fileOffset];
+
+                var readLength = RandomAccess.Read(handle, buffer, fileOffset);
+                return buffer;
+            }
+        }
+
+        /// <summary>
+        /// 文件写入。
+        /// </summary>
+        /// <param name="path">给定的文件路径。</param>
+        /// <param name="buffer">给定的字节数组。</param>
+        public static void FileWrite(this string path, byte[] buffer)
+            => path.FileWrite(buffer, 0L);
+
+        /// <summary>
+        /// 文件写入。
+        /// </summary>
+        /// <param name="path">给定的文件路径。</param>
+        /// <param name="buffer">给定的字节数组。</param>
+        /// <param name="fileOffset">给定的读取偏移量。</param>
+        public static void FileWrite(this string path, byte[] buffer, long fileOffset)
+        {
+            using (var handle = File.OpenHandle(path, FileMode.Create, FileAccess.Write, FileShare.Read))
+            {
+                RandomAccess.Write(handle, buffer, fileOffset);
+            }
+        }
+
+
+        /// <summary>
         /// 设置基础路径。
         /// </summary>
         /// <param name="relativePath">给定的相对路径。</param>
@@ -85,8 +134,12 @@ namespace Librame.Extensions
             if (string.IsNullOrEmpty(basePath))
                 basePath = CurrentDirectoryWithoutDevelopmentRelativeSubpath;
 
-            if (relativePath.StartsWith("./") || !relativePath.StartsWith(basePath))
+            if (relativePath.StartsWith("./")
+                || relativePath.StartsWith(".\\")
+                || !relativePath.StartsWith(basePath))
+            {
                 return Path.Combine(basePath, relativePath);
+            }
 
             return relativePath;
         }

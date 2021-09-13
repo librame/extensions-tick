@@ -27,9 +27,9 @@ namespace Librame.Extensions.Data.Accessing
         /// 聚合访问器集合。
         /// </summary>
         /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
-        /// <param name="interaction">给定的 <see cref="AccessorInteraction"/>。</param>
+        /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
         IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
-            AccessorInteraction interaction);
+            AccessMode interaction);
     }
 }

@@ -42,7 +42,6 @@ namespace Librame.Extensions.Drawing
             ServiceCharacteristics.AddSingleton<ISavingDrawableProcessor>();
             ServiceCharacteristics.AddSingleton<IScalingDrawableProcessor>();
             ServiceCharacteristics.AddSingleton<IWatermarkDrawableProcessor>();
-            ServiceCharacteristics.AddSingleton<IProcessorManager>();
 
             // Verification
             ServiceCharacteristics.AddScope<ICaptchaGenerator>();

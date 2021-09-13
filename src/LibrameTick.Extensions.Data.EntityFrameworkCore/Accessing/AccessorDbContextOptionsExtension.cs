@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core.Cryptography;
+using Librame.Extensions.Data.Sharding;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
@@ -26,12 +27,12 @@ namespace Librame.Extensions.Data.Accessing
         // 异构数据源数据同步功能的标识必须使用统一的生成方案
         //private IIdentificationGenerator<Guid>? _guidGenerator;
 
-        private AlgorithmOptions? _algorithms;
-        private Encoding? _encoding;
-        private int _group;
-        private AccessorInteraction _interaction = AccessorInteraction.ReadWrite;
-        private bool _pooling = false;
-        private float _priority = -1; // 默认使用访问器定义的优先级属性值
+        private int _group; // 默认为 0；表示所有访问器在同一组，配置访问模式实现对应的功能
+        private AccessMode _access = AccessMode.ReadWrite; // 默认为读/写模式；表示访问器可以进行读/写数据库操作
+        private bool _pooling; // 默认为 FALSE；表示是否为 DbContextPool。
+        private float _priority = -1; // 默认为 -1；表示使用访问器实现 ISortable 的优先级属性值
+        private AlgorithmOptions? _algorithm; // 默认为 NULL；表示使用 CoreExtensionOptions.Algorithm 全局配置，提供对数据字段值的加解密功能
+        private ShardingNamingAttribute? _shardingNaming; // 默认为 NULL；表示不分库
         private Type? _serviceType;
 
         private DbContextOptionsExtensionInfo? _info;
@@ -50,44 +51,32 @@ namespace Librame.Extensions.Data.Accessing
         /// <param name="copyFrom">给定要克隆的 <see cref="AccessorDbContextOptionsExtension"/>。</param>
         protected AccessorDbContextOptionsExtension(AccessorDbContextOptionsExtension copyFrom)
         {
-            _algorithms = copyFrom.Algorithms;
-            _encoding = copyFrom.Encoding;
             _group = copyFrom.Group;
-            _interaction = copyFrom.Interaction;
-            _pooling = copyFrom.IsPooled;
+            _access = copyFrom.Access;
+            _pooling = copyFrom.Pooling;
             _priority = copyFrom.Priority;
+            _algorithm = copyFrom.Algorithm;
+            _shardingNaming = copyFrom.ShardingNaming;
             _serviceType = copyFrom.ServiceType;
         }
 
 
         /// <summary>
-        /// 算法选项。
-        /// </summary>
-        public virtual AlgorithmOptions? Algorithms
-            => _algorithms;
-
-        /// <summary>
-        /// 字符编码。
-        /// </summary>
-        public Encoding? Encoding
-            => _encoding;
-
-        /// <summary>
         /// 所属群组。
         /// </summary>
-        public int Group
+        public virtual int Group
             => _group;
 
         /// <summary>
-        /// 访问器交互方式。
+        /// 访问模式。
         /// </summary>
-        public virtual AccessorInteraction Interaction
-            => _interaction;
+        public virtual AccessMode Access
+            => _access;
 
         /// <summary>
-        /// 访问器是否已池化。
+        /// 是否池化。
         /// </summary>
-        public virtual bool IsPooled
+        public virtual bool Pooling
             => _pooling;
 
         /// <summary>
@@ -97,7 +86,19 @@ namespace Librame.Extensions.Data.Accessing
             => _priority;
 
         /// <summary>
-        /// 访问器服务类型。
+        /// 算法选项。
+        /// </summary>
+        public virtual AlgorithmOptions? Algorithm
+            => _algorithm;
+
+        /// <summary>
+        /// 分库命名特性。
+        /// </summary>
+        public virtual ShardingNamingAttribute? ShardingNaming
+            => _shardingNaming;
+
+        /// <summary>
+        /// 服务类型。
         /// </summary>
         public virtual Type? ServiceType
             => _serviceType;
@@ -119,35 +120,7 @@ namespace Librame.Extensions.Data.Accessing
 
 
         /// <summary>
-        /// 使用指定的算法选项创建一个选项扩展实例副本。
-        /// </summary>
-        /// <param name="algorithms">给定的 <see cref="AlgorithmOptions"/>。</param>
-        /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-        public virtual AccessorDbContextOptionsExtension WithAlgorithms(AlgorithmOptions algorithms)
-        {
-            var clone = Clone();
-
-            clone._algorithms = algorithms;
-
-            return clone;
-        }
-
-        /// <summary>
-        /// 使用指定的字符编码创建一个选项扩展实例副本。
-        /// </summary>
-        /// <param name="encoding">给定的 <see cref="AlgorithmOptions"/>。</param>
-        /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-        public virtual AccessorDbContextOptionsExtension WithEncoding(Encoding encoding)
-        {
-            var clone = Clone();
-
-            clone._encoding = encoding;
-
-            return clone;
-        }
-
-        /// <summary>
-        /// 使用指定的访问器所属群组创建一个选项扩展实例副本。
+        /// 使用指定的所属群组创建一个选项扩展实例副本。
         /// </summary>
         /// <param name="group">给定的所属群组。</param>
         /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
@@ -161,21 +134,21 @@ namespace Librame.Extensions.Data.Accessing
         }
 
         /// <summary>
-        /// 使用指定的访问器交互方式创建一个选项扩展实例副本。
+        /// 使用指定的访问模式创建一个选项扩展实例副本。
         /// </summary>
-        /// <param name="interaction">给定的 <see cref="AccessorInteraction"/>。</param>
+        /// <param name="access">给定的 <see cref="AccessMode"/>。</param>
         /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-        public virtual AccessorDbContextOptionsExtension WithInteraction(AccessorInteraction interaction)
+        public virtual AccessorDbContextOptionsExtension WithAccess(AccessMode access)
         {
             var clone = Clone();
 
-            clone._interaction = interaction;
+            clone._access = access;
 
             return clone;
         }
 
         /// <summary>
-        /// 使用是否池化访问器创建一个选项扩展实例副本。
+        /// 使用指定的是否池化创建一个选项扩展实例副本。
         /// </summary>
         /// <param name="pooling">是否池化。</param>
         /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
@@ -189,9 +162,9 @@ namespace Librame.Extensions.Data.Accessing
         }
 
         /// <summary>
-        /// 使用访问器优先级创建一个选项扩展实例副本。
+        /// 使用指定的优先级创建一个选项扩展实例副本。
         /// </summary>
-        /// <param name="priority">给定的访问器优先级（数值越小越优先）。</param>
+        /// <param name="priority">给定的优先级（数值越小越优先）。</param>
         /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
         public virtual AccessorDbContextOptionsExtension WithPriority(float priority)
         {
@@ -203,9 +176,37 @@ namespace Librame.Extensions.Data.Accessing
         }
 
         /// <summary>
-        /// 使用指定的访问器服务类型创建一个选项扩展实例副本。
+        /// 使用指定的算法选项创建一个选项扩展实例副本。
         /// </summary>
-        /// <param name="serviceType">给定的访问器服务类型。</param>
+        /// <param name="algorithm">给定的 <see cref="AlgorithmOptions"/>。</param>
+        /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+        public virtual AccessorDbContextOptionsExtension WithAlgorithm(AlgorithmOptions algorithm)
+        {
+            var clone = Clone();
+
+            clone._algorithm = algorithm;
+
+            return clone;
+        }
+
+        /// <summary>
+        /// 使用指定的分片命名特性创建一个选项扩展实例副本。
+        /// </summary>
+        /// <param name="shardingNaming">给定的 <see cref="ShardingNamingAttribute"/>。</param>
+        /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+        public virtual AccessorDbContextOptionsExtension WithShardingNaming(ShardingNamingAttribute shardingNaming)
+        {
+            var clone = Clone();
+
+            clone._shardingNaming = shardingNaming;
+
+            return clone;
+        }
+
+        /// <summary>
+        /// 使用指定的服务类型创建一个选项扩展实例副本。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
         /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
         public virtual AccessorDbContextOptionsExtension WithServiceType(Type serviceType)
         {
@@ -259,35 +260,33 @@ namespace Librame.Extensions.Data.Accessing
                     {
                         var builder = new StringBuilder();
 
-                        if (Extension.Algorithms != null)
-                        {
-                            builder.Append(nameof(Extension.Algorithms));
-                            builder.Append(": ");
-                            builder.Append(Extension.Algorithms).Append(' ');
-                        }
-
-                        if (Extension.Encoding != null)
-                        {
-                            builder.Append(nameof(Extension.Encoding));
-                            builder.Append(": ");
-                            builder.Append(Extension.Encoding.AsEncodingName()).Append(' ');
-                        }
-
                         builder.Append(nameof(Extension.Group));
                         builder.Append(": ");
                         builder.Append(Extension.Group).Append(' ');
 
-                        builder.Append(nameof(Extension.Interaction));
+                        builder.Append(nameof(Extension.Access));
                         builder.Append(": ");
-                        builder.Append(Extension.Interaction).Append(' ');
+                        builder.Append(Extension.Access).Append(' ');
+
+                        builder.Append(nameof(Extension.Pooling));
+                        builder.Append(": ");
+                        builder.Append(Extension.Pooling ? "True" : "False").Append(' ');
 
                         builder.Append(nameof(Extension.Priority));
                         builder.Append(": ");
                         builder.Append(Extension.Priority).Append(' ');
 
-                        builder.Append(nameof(Extension.IsPooled));
-                        builder.Append(": ");
-                        builder.Append(Extension.IsPooled ? "True" : "False").Append(' ');
+                        if (Extension.Algorithm != null)
+                        {
+                            builder.Append(nameof(Extension.Algorithm));
+                            builder.Append(": ");
+                            builder.Append(Extension.Algorithm).Append(' ');
+                        }
+
+                        if (Extension.ShardingNaming != null)
+                        {
+                            builder.Append("ShardingNaming: ").Append(Extension.ShardingNaming).Append(' ');
+                        }
 
                         if (Extension.ServiceType != null)
                         {
@@ -303,23 +302,23 @@ namespace Librame.Extensions.Data.Accessing
 
             public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
             {
-                debugInfo["Accessor:" + nameof(Extension.Algorithms)] =
-                    (Extension.Algorithms?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
-
-                debugInfo["Accessor:" + nameof(Extension.Encoding)] =
-                    (Extension.Encoding?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
-
                 debugInfo["Accessor:" + nameof(Extension.Group)] =
                     Extension.Group.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
-                debugInfo["Accessor:" + nameof(Extension.Interaction)] =
-                    Extension.Interaction.GetHashCode().ToString(CultureInfo.InvariantCulture);
+                debugInfo["Accessor:" + nameof(Extension.Access)] =
+                    Extension.Access.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
-                debugInfo["Accessor:" + nameof(Extension.IsPooled)] =
-                    Extension.IsPooled.GetHashCode().ToString(CultureInfo.InvariantCulture);
+                debugInfo["Accessor:" + nameof(Extension.Pooling)] =
+                    Extension.Pooling.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
                 debugInfo["Accessor:" + nameof(Extension.Priority)] =
                     Extension.Priority.GetHashCode().ToString(CultureInfo.InvariantCulture);
+
+                debugInfo["Accessor:" + nameof(Extension.Algorithm)] =
+                    (Extension.Algorithm?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
+
+                debugInfo["Accessor:" + nameof(Extension.ShardingNaming)] =
+                    (Extension.ShardingNaming?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
 
                 debugInfo["Accessor:" + nameof(Extension.ServiceType)] =
                     (Extension.ServiceType?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
@@ -329,12 +328,12 @@ namespace Librame.Extensions.Data.Accessing
             {
                 if (_serviceProviderHash == null)
                 {
-                    var hashCode = Extension.Algorithms?.GetHashCode() ?? 0L;
-                    hashCode = (hashCode * 3) ^ Extension.Encoding?.GetHashCode() ?? 0L;
-                    hashCode = (hashCode * 3) ^ Extension.Group.GetHashCode();
-                    hashCode = (hashCode * 3) ^ Extension.Interaction.GetHashCode();
-                    hashCode = (hashCode * 3) ^ Extension.IsPooled.GetHashCode();
+                    var hashCode = (long)Extension.Group.GetHashCode();
+                    hashCode = (hashCode * 3) ^ Extension.Access.GetHashCode();
+                    hashCode = (hashCode * 3) ^ Extension.Pooling.GetHashCode();
                     hashCode = (hashCode * 3) ^ Extension.Priority.GetHashCode();
+                    hashCode = (hashCode * 3) ^ Extension.Algorithm?.GetHashCode() ?? 0L;
+                    hashCode = (hashCode * 3) ^ Extension.ShardingNaming?.GetHashCode() ?? 0L;
                     hashCode = (hashCode * 1073742113) ^ Extension.ServiceType?.GetHashCode() ?? 0L;
 
                     _serviceProviderHash = hashCode;

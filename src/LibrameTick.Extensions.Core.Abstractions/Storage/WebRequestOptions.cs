@@ -18,14 +18,14 @@ namespace Librame.Extensions.Core.Storage
     /// <summary>
     /// 定义实现 <see cref="IOptions"/> 的请求选项。
     /// </summary>
-    public class RequestOptions : AbstractOptions
+    public class WebRequestOptions : AbstractOptions
     {
         /// <summary>
-        /// 使用给定的 <see cref="IPropertyNotifier"/> 构造一个 <see cref="RequestOptions"/>。
+        /// 使用给定的 <see cref="IPropertyNotifier"/> 构造一个 <see cref="WebRequestOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
         /// <param name="sourceAliase">给定的源别名（可选）。</param>
-        public RequestOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
+        public WebRequestOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
             : base(parentNotifier, sourceAliase)
         {
         }
@@ -80,6 +80,7 @@ namespace Librame.Extensions.Core.Storage
         /// <summary>
         /// 超时（默认 5 秒）。
         /// </summary>
+        [JsonIgnore]
         public TimeSpan Timeout
         {
             get => Notifier.GetOrAdd(nameof(Timeout), TimeSpan.FromSeconds(5));

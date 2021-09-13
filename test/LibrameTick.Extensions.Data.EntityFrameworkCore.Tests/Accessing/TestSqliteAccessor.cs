@@ -1,31 +1,29 @@
-﻿using Librame.Extensions.Data.ValueConversion;
+﻿using Librame.Extensions.Data.Sharding;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestSqliteAccessor : AbstractAccessor<TestSqliteAccessor>, ITestAccessor
+    public class TestSqliteAccessor : AbstractDataAccessor<TestSqliteAccessor>, ITestAccessor
     {
 
 #pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
         public TestSqliteAccessor(DbContextOptions<TestSqliteAccessor> options)
-#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
             : base(options)
         {
         }
+
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
 
         public DbSet<User> Users { get; set; }
 
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnDataModelCreating(ModelBuilder modelBuilder,
+            IShardingManager shardingManager)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnDataModelCreating(modelBuilder, shardingManager);
 
             modelBuilder.CreateUserModel();
-
-            var converterFactory = this.GetService<IEncryptionConverterFactory>();
-            modelBuilder.UseEncryption(converterFactory, AccessorType);
         }
 
     }

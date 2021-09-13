@@ -45,7 +45,7 @@ namespace Librame.Extensions.Data
         /// <param name="factory">给定的 <see cref="IIdentificationGeneratorFactory"/>。</param>
         /// <param name="idType">给定的标识类型。</param>
         /// <returns>返回标识对象。</returns>
-        public static object? GetNewId(this IIdentificationGeneratorFactory factory, Type idType)
+        public static object GetNewId(this IIdentificationGeneratorFactory factory, Type idType)
             => factory.GetIdGenerator(idType).GenerateObjectId();
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Librame.Extensions.Data
         /// <param name="idType">给定的标识类型。</param>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识对象的异步操作。</returns>
-        public static Task<object?> GetNewIdAsync<TId>(this IIdentificationGeneratorFactory factory, Type idType,
+        public static Task<object> GetNewIdAsync<TId>(this IIdentificationGeneratorFactory factory, Type idType,
             CancellationToken cancellationToken = default)
             => factory.GetIdGenerator(idType).GenerateObjectIdAsync(cancellationToken);
 

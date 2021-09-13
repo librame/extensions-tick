@@ -67,53 +67,10 @@ namespace Librame.Extensions.Core
         public IExtensionBuilder? ParentBuilder { get; init; }
 
 
-        #region TryAddOrReplaceServiceByCharacteristic
-
-        /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceService(Type, Type)"/> 区别是此方法的特征服务仅用于匹配特征，不用于容器注册。
-        /// </summary>
-        /// <typeparam name="TCharacteristic">指定的特征类型。</typeparam>
-        /// <typeparam name="TService">指定的服务类型（如果扩展选项的替换服务字典集合中存在此服务类型，则优先使用扩展选项中的服务类型）。</typeparam>
-        /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder TryAddOrReplaceServiceByCharacteristic<TCharacteristic, TService>()
-            => TryAddOrReplaceServiceByCharacteristic(typeof(TCharacteristic), typeof(TService));
-
-        /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceService(Type, Type)"/> 区别是此方法的特征服务仅用于匹配特征，不用于容器注册。
-        /// </summary>
-        /// <typeparam name="TCharacteristic">指定的特征类型。</typeparam>
-        /// <param name="serviceType">给定的服务类型（如果扩展选项的替换服务字典集合中存在此服务类型，则优先使用扩展选项中的服务类型）。</param>
-        /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder TryAddOrReplaceServiceByCharacteristic<TCharacteristic>(Type serviceType)
-            => TryAddOrReplaceServiceByCharacteristic(typeof(TCharacteristic), serviceType);
-
-        /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceService(Type, Type)"/> 区别是此方法的特征服务仅用于匹配特征，不用于容器注册。
-        /// </summary>
-        /// <param name="characteristicType">给定的特征类型。</param>
-        /// <param name="serviceType">给定的服务类型（如果扩展选项的替换服务字典集合中存在此服务类型，则优先使用扩展选项中的服务类型）。</param>
-        /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-        public virtual IExtensionBuilder TryAddOrReplaceServiceByCharacteristic(Type characteristicType, Type serviceType)
-        {
-            if (!Options.ServiceCharacteristics.TryGetValue(characteristicType, out var characteristic))
-                characteristic = ServiceCharacteristic.Singleton(characteristicType);
-
-            if (Options.ReplacedServices.TryGetValue(serviceType, out var replacedType))
-                serviceType = replacedType;
-
-            var descriptor = ServiceDescriptor.Describe(serviceType, serviceType, characteristic.Lifetime);
-            Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
-
-            return this;
-        }
-
-        #endregion
-
-
         #region TryAddOrReplaceService
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
         /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
@@ -122,7 +79,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService<TService>(out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
         /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
@@ -135,7 +92,7 @@ namespace Librame.Extensions.Core
         }
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <typeparam name="TImplementation">指定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
@@ -146,7 +103,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService<TService, TImplementation>(out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <typeparam name="TImplementation">指定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
@@ -158,7 +115,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(typeof(TService), typeof(TImplementation), out descriptor);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
@@ -168,7 +125,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService<TService>(implementationType, out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
@@ -180,7 +137,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(typeof(TService), implementationType, out descriptor);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
@@ -189,7 +146,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(serviceType, implementationType, out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。与 <see cref="TryAddOrReplaceServiceByCharacteristic(Type, Type)"/> 区别是此方法的服务类型即特征服务类型，服务类型既用于匹配特征，也用于容器注册。
+        /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
@@ -207,12 +164,18 @@ namespace Librame.Extensions.Core
             descriptor = ServiceDescriptor.Describe(serviceType, implementationType, characteristic.Lifetime);
             Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
 
+            if (characteristic.AddImplementationType && descriptor.ImplementationType != null)
+            {
+                Services.Add(new ServiceDescriptor(descriptor.ImplementationType,
+                    sp => sp.GetRequiredService(serviceType), descriptor.Lifetime));
+            }
+
             return this;
         }
 
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="factory">给定的服务方法。</param>
@@ -223,7 +186,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(factory, out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="factory">给定的服务方法。</param>
@@ -235,7 +198,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(typeof(TService), factory, out descriptor);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="factory">给定的服务方法。</param>
@@ -245,7 +208,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(serviceType, factory, out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="factory">给定的服务方法。</param>
@@ -260,12 +223,18 @@ namespace Librame.Extensions.Core
             descriptor = ServiceDescriptor.Singleton(serviceType, factory);
             Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
 
+            if (characteristic.AddImplementationType && descriptor.ImplementationType != null)
+            {
+                Services.Add(new ServiceDescriptor(descriptor.ImplementationType,
+                    sp => sp.GetRequiredService(serviceType), descriptor.Lifetime));
+            }
+
             return this;
         }
 
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="instance">给定的服务实例。</param>
@@ -275,7 +244,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(instance, out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="instance">给定的服务实例。</param>
@@ -287,7 +256,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(typeof(TService), instance, out descriptor);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="instance">给定的服务实例。</param>
@@ -296,7 +265,7 @@ namespace Librame.Extensions.Core
             => TryAddOrReplaceService(serviceType, instance, out _);
 
         /// <summary>
-        /// 通过服务特征实现添加或替换服务。
+        /// 尝试通过服务特征实现添加或替换服务。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="instance">给定的服务实例。</param>
@@ -312,16 +281,22 @@ namespace Librame.Extensions.Core
             descriptor = ServiceDescriptor.Singleton(serviceType, instance);
             Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
 
+            if (characteristic.AddImplementationType && descriptor.ImplementationType != null)
+            {
+                Services.Add(new ServiceDescriptor(descriptor.ImplementationType,
+                    sp => sp.GetRequiredService(serviceType), descriptor.Lifetime));
+            }
+
             return this;
         }
 
         #endregion
 
 
-        #region TryAddEnumerable
+        #region TryAddEnumerableServices
 
         /// <summary>
-        /// 通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
@@ -332,7 +307,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices<TService, TImplementation>(out _);
 
         /// <summary>
-        /// 通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
@@ -344,7 +319,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices(typeof(TService), typeof(TImplementation), out descriptor);
 
         /// <summary>
-        /// 通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="implementationType">给定的实现类型。</param>
@@ -354,7 +329,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices<TService>(implementationType, out _);
 
         /// <summary>
-        /// 通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="implementationType">给定的实现类型。</param>
@@ -366,7 +341,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices(typeof(TService), implementationType, out descriptor);
 
         /// <summary>
-        /// 通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="implementationType">给定的实现类型。</param>
@@ -375,7 +350,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices(serviceType, implementationType, out _);
 
         /// <summary>
-        /// 通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
+        /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="implementationType">给定的实现类型。</param>
@@ -394,7 +369,7 @@ namespace Librame.Extensions.Core
 
 
         /// <summary>
-        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
+        /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="implementationTypes">给定的实现类型集合。</param>
@@ -404,7 +379,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices<TService>(implementationTypes, out _);
 
         /// <summary>
-        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
+        /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
         /// </summary>
         /// <typeparam name="TService">指定的服务类型。</typeparam>
         /// <param name="implementationTypes">给定的实现类型集合。</param>
@@ -416,7 +391,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices(typeof(TService), implementationTypes, out descriptors);
 
         /// <summary>
-        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
+        /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="implementationTypes">给定的实现类型集合。</param>
@@ -425,7 +400,7 @@ namespace Librame.Extensions.Core
             => TryAddEnumerableServices(serviceType, implementationTypes, out _);
 
         /// <summary>
-        /// 通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
+        /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="implementationTypes">给定的实现类型集合。</param>

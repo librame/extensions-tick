@@ -1,4 +1,5 @@
 using Librame.Extensions.Core;
+using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
                     a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
 
-                opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPriority(1));
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(1));
             });
             
             services.AddDbContextPool<TestSqlServerAccessor>(opts =>
@@ -27,7 +28,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;",
                     a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
 
-                opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPooling().WithPriority(2));
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPooling().WithPriority(2));
             });
 
             services.AddDbContext<TestSqliteAccessor>(opts =>
@@ -35,7 +36,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlite("Data Source=librame_extensions.db",
                     a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
 
-                opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Read));
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Read).WithShardingNaming<DateTimeShardingStrategy>("%y"));
             });
 
             services.AddLibrame()
@@ -48,7 +49,6 @@ namespace Librame.Extensions.Data.Accessing
                     opts.PropertyChangedAction = (o, e) => o.SaveOptionsAsJson();
                 })
                 .AddSeeder<InternalTestAccessorSeeder>()
-                .AddMigrator<InternalTestAccessorMigrator>()
                 .AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqlServerAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>()

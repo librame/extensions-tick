@@ -13,10 +13,10 @@
 namespace Librame.Extensions.Data.Accessing
 {
     /// <summary>
-    /// 定义用于对数据源访问器的读、写或读/写模式的常量交互方式。
+    /// 定义用于对数据源访问器的读、写或读/写的常量访问模式（可组合使用）。
     /// </summary>
     [Flags]
-    public enum AccessorInteraction
+    public enum AccessMode
     {
         /// <summary>
         /// 对数据源访问器的读访问。可以从数据源访问器中读取数据。结合 Write 进行读写访问。

@@ -15,7 +15,7 @@ using Librame.Extensions.Core.Cryptography;
 namespace Librame.Extensions.Data.Cryptography
 {
     /// <summary>
-    /// 定义实现 <see cref="IEncryptionProvider{TValue}"/> 用于字节数组的加密提供程序。
+    /// 定义实现 <see cref="IEncryptionProvider{ByteArray}"/> 用于字节数组的加密提供程序。
     /// </summary>
     public class ByteArrayEncryptionProvider : IEncryptionProvider<byte[]>
     {
@@ -34,6 +34,13 @@ namespace Librame.Extensions.Data.Cryptography
             _symmetric = symmetric;
             _algorithms = algorithms;
         }
+
+
+        /// <summary>
+        /// 算法选项。
+        /// </summary>
+        public AlgorithmOptions Algorithm
+            => _algorithms;
 
 
         /// <summary>

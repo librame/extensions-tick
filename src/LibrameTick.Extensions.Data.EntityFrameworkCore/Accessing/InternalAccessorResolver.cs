@@ -52,11 +52,10 @@ namespace Librame.Extensions.Data.Accessing
 
                     // 默认使用访问器定义的优先级属性值
                     var priority = extension.Priority < 0 ? accessor.Priority : extension.Priority;
-                    var algorithms = extension.Algorithms ?? _builder.Options.CoreOptions.Algorithms;
-                    var encoding = extension.Encoding ?? _builder.Options.CoreOptions.Encoding;
+                    var algorithms = extension.Algorithm ?? _builder.Options.CoreOptions.Algorithm;
 
-                    descriptors.Add(new AccessorDescriptor(extension.ServiceType!, accessor, extension.Group,
-                        extension.Interaction, extension.IsPooled, priority, algorithms, encoding));
+                    descriptors.Add(new AccessorDescriptor(accessor, extension.ServiceType!, extension.Group,
+                        extension.Access, extension.Pooling, priority, algorithms, extension.ShardingNaming));
                 }
             }
 

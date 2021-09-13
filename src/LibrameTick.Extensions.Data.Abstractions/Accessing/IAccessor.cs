@@ -19,8 +19,13 @@ namespace Librame.Extensions.Data.Accessing
     /// <summary>
     /// 定义表示数据访问的访问器接口（主要用于适配数据实现层的访问对象；如 EFCore 实现层的 DbContext 对象）。
     /// </summary>
-    public interface IAccessor : ISortable, IDisposable, IAsyncDisposable
+    public interface IAccessor : IConnectable, ISaveChangeable, ISortable, IDisposable, IAsyncDisposable
     {
+        /// <summary>
+        /// 访问器标识。
+        /// </summary>
+        string AccessorId { get; }
+
         /// <summary>
         /// 访问器类型。
         /// </summary>
@@ -370,41 +375,6 @@ namespace Librame.Extensions.Data.Accessing
         /// </summary>
         /// <param name="entities">给定要更新的实体对象集合。</param>
         void UpdateRange(IEnumerable<object> entities);
-
-        #endregion
-
-
-        #region SaveChanges
-
-        /// <summary>
-        /// 保存更改。
-        /// </summary>
-        /// <returns>返回受影响的行数。</returns>
-        int SaveChanges();
-
-        /// <summary>
-        /// 保存更改。
-        /// </summary>
-        /// <param name="acceptAllChangesOnSuccess">指示是否在更改已成功发送到数据库之后调用。</param>
-        /// <returns>返回受影响的行数。</returns>
-        int SaveChanges(bool acceptAllChangesOnSuccess);
-
-
-        /// <summary>
-        /// 异步保存更改。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含受影响行数的异步操作。</returns>
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// 异步保存更改。
-        /// </summary>
-        /// <param name="acceptAllChangesOnSuccess">指示是否在更改已成功发送到数据库之后调用。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含受影响行数的异步操作。</returns>
-        Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
-            CancellationToken cancellationToken = default);
 
         #endregion
 

@@ -54,7 +54,7 @@ namespace Librame.Extensions.Core
 
             if (options.EnableAutoloaderActivator)
             {
-                AutoloaderActivator = new AssemblyAutoloaderActivator(options.AssemblyLoadings);
+                AutoloaderActivator = new AssemblyAutoloaderActivator(options.AssemblyLoading);
                 AutoloaderActivator.RegisterContainer(type => services.TryAddScoped(type));
             }
         }

@@ -30,20 +30,20 @@ namespace Librame.Extensions.Data.Accessing
         /// 创建访问器集合链。
         /// </summary>
         /// <param name="accessors">给定的 <see cref="IEnumerable{TAccessor}"/>。</param>
-        /// <param name="interaction">给定的 <see cref="AccessorInteraction"/>。</param>
+        /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
         /// <returns>返回 <typeparamref name="TAccessor"/>。</returns>
         protected abstract TAccessor CreateChain(IEnumerable<TAccessor> accessors,
-            AccessorInteraction interaction);
+            AccessMode interaction);
 
 
         /// <summary>
         /// 聚合访问器集合。
         /// </summary>
         /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
-        /// <param name="interaction">给定的 <see cref="AccessorInteraction"/>。</param>
+        /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
         public virtual IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
-            AccessorInteraction interaction)
+            AccessMode interaction)
         {
             if (descriptors.Count == 1)
             {

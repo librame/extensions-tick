@@ -43,15 +43,28 @@ namespace Librame.Extensions.Data
         /// 生成标识对象。
         /// </summary>
         /// <returns>返回标识对象。</returns>
-        public virtual object? GenerateObjectId()
-            => GenerateId();
+        public virtual object GenerateObjectId()
+        {
+            var id = GenerateId();
+            if (id == null)
+                throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.");
+
+            return id;
+        }
 
         /// <summary>
         /// 异步生成标识对象。
         /// </summary>
         /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
         /// <returns>返回一个包含标识对象的异步操作。</returns>
-        public virtual async Task<object?> GenerateObjectIdAsync(CancellationToken cancellationToken = default)
-            => await GenerateIdAsync(cancellationToken).ConfigureAwait();
+        public virtual async Task<object> GenerateObjectIdAsync(CancellationToken cancellationToken = default)
+        {
+            var id = await GenerateIdAsync(cancellationToken).ConfigureAwait();
+            if (id == null)
+                throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.");
+
+            return id;
+        }
+
     }
 }

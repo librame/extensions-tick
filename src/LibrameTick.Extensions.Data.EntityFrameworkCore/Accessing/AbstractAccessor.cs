@@ -13,12 +13,14 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Specification;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Linq.Expressions;
 
 namespace Librame.Extensions.Data.Accessing
 {
     /// <summary>
-    /// 抽象 <see cref="AbstractAccessor"/> 的泛型实现。
+    /// 定义抽象 <see cref="AbstractAccessor"/> 的泛型实现。
     /// </summary>
     /// <typeparam name="TAccessor">指定实现 <see cref="AbstractAccessor"/> 的访问器类型。</typeparam>
     public abstract class AbstractAccessor<TAccessor> : AbstractAccessor
@@ -47,7 +49,7 @@ namespace Librame.Extensions.Data.Accessing
 
 
     /// <summary>
-    /// 抽象 <see cref="DbContext"/> 与 <see cref="IAccessor"/> 的实现。
+    /// 定义抽象 <see cref="DbContext"/> 与 <see cref="IAccessor"/> 的实现。
     /// </summary>
     public abstract class AbstractAccessor : DbContext, IAccessor
     {
@@ -58,14 +60,90 @@ namespace Librame.Extensions.Data.Accessing
         protected AbstractAccessor(DbContextOptions options)
             : base(options)
         {
+            OptionsExtension = options.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault();
+
+            // 当切换分库后，须确保数据库已被创建
+            ChangedAction = conn => ((AbstractAccessor)conn).Database.EnsureCreated();
         }
 
+
+        /// <summary>
+        /// 核心选项扩展。
+        /// </summary>
+        protected CoreOptionsExtension? OptionsExtension { get; init; }
+
+        /// <summary>
+        /// 关系连接。
+        /// </summary>
+        protected IRelationalConnection? RelationalConnection
+            => GetScopeService<IRelationalConnection>();
+
+
+        /// <summary>
+        /// 访问器标识。
+        /// </summary>
+        public virtual string AccessorId
+            => ContextId.ToString();
 
         /// <summary>
         /// 访问器类型。
         /// </summary>
         public virtual Type AccessorType
             => GetType();
+
+
+        #region GetScopeService
+
+        /// <summary>
+        /// 获取范围服务。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型</typeparam>
+        /// <param name="serviceType">给定的服务类型（可选；默认使用指定的泛型服务类型）。</param>
+        /// <returns>返回 <typeparamref name="TService"/>。</returns>
+        protected virtual TService GetRequiredScopeService<TService>(Type? serviceType = null)
+            => (TService)GetRequiredScopeService(serviceType ?? typeof(TService));
+
+        /// <summary>
+        /// 获取范围服务。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <returns>返回对象。</returns>
+        protected virtual object GetRequiredScopeService(Type serviceType)
+        {
+            var service = GetScopeService(serviceType);
+            if (service == null)
+                throw new ArgumentException($"The scope instance of the service type '{serviceType}' is null.");
+            
+            return service;
+        }
+
+
+        /// <summary>
+        /// 获取范围服务。
+        /// </summary>
+        /// <typeparam name="TService">指定的服务类型</typeparam>
+        /// <param name="serviceType">给定的服务类型（可选；默认使用指定的泛型服务类型）。</param>
+        /// <returns>返回 <typeparamref name="TService"/>。</returns>
+        protected virtual TService? GetScopeService<TService>(Type? serviceType = null)
+            => (TService?)GetScopeService(serviceType ?? typeof(TService));
+
+        /// <summary>
+        /// 获取范围服务。
+        /// </summary>
+        /// <param name="serviceType">给定的服务类型。</param>
+        /// <returns>返回对象。</returns>
+        protected virtual object? GetScopeService(Type serviceType)
+        {
+            // this.GetService<T>() 即 InfrastructureExtensions.GetService<T>() 这种方法可能会抛出 internalServiceProvider 不是范围服务，
+            // 而内部使用的 internalServiceProvider.GetService<IDbContextOptions>()?.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault()
+            // 方式获取到的实例可能为空，而直接通过 DbContext 构造函数的 DbContextOptions 参数获取到的服务实例则正常
+
+            // OptionsExtension?.ApplicationServiceProvider 此处是范围服务
+            return ((IInfrastructure<IServiceProvider>)this).Instance.GetService(serviceType)
+                ?? OptionsExtension?.ApplicationServiceProvider?.GetService(serviceType);
+        }
+
+        #endregion
 
 
         #region Exists
@@ -327,6 +405,48 @@ namespace Librame.Extensions.Data.Accessing
         {
             base.Update(entity);
             return entity;
+        }
+
+        #endregion
+
+
+        #region IConnectable
+
+        /// <summary>
+        /// 当前连接字符串。
+        /// </summary>
+        public virtual string? CurrentConnectionString
+            => RelationalConnection?.ConnectionString;
+
+        /// <summary>
+        /// 改变时动作（传入的参数为当前 <see cref="IAccessor"/>）。
+        /// </summary>
+        public Action<IConnectable>? ChangingAction { get; set; }
+
+        /// <summary>
+        /// 改变后动作（传入的参数为当前 <see cref="IAccessor"/>）。
+        /// </summary>
+        public Action<IConnectable>? ChangedAction { get; set; }
+
+
+        /// <summary>
+        /// 改变数据库连接。
+        /// </summary>
+        /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
+        /// <returns>返回 <see cref="IAccessor"/>。</returns>
+        public virtual IConnectable ChangeConnection(string newConnectionString)
+        {
+            var connection = RelationalConnection?.DbConnection;
+            if (connection != null)
+            {
+                ChangingAction?.Invoke(this);
+
+                connection.ConnectionString = newConnectionString;
+
+                ChangedAction?.Invoke(this);
+            }
+
+            return this;
         }
 
         #endregion

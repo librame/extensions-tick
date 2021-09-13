@@ -14,7 +14,7 @@ namespace Librame.Extensions
         }
 
 
-        #region Insert and Append
+        #region Append and Insert
 
         [Fact]
         public void AppendTest()
@@ -45,6 +45,21 @@ namespace Librame.Extensions
                 str.Insert(insert, startIndex: 6));
 
             Assert.Equal($"{str}{insert}", str.Insert(insert, startIndex: str.Length));
+        }
+
+        #endregion
+
+
+        #region Format
+
+        [Fact]
+        public void FormatStringTest()
+        {
+            var buffer = Guid.NewGuid().ToByteArray();
+            Assert.NotEmpty(buffer.FormatString(DateTime.Now.Ticks));
+
+            var number = 1;
+            Assert.Equal("0001", number.FormatString(4));
         }
 
         #endregion
@@ -111,6 +126,112 @@ namespace Librame.Extensions
 
             result = str.Trailing(testString);
             Assert.Equal($"{str}{testString}", result); // no append
+        }
+
+        #endregion
+
+
+        #region Naming Conventions
+
+        [Fact]
+        public void PascalCasingAndCamelCasingTest()
+        {
+            // Word
+            var pascalWord = "Naming";
+            var camelWord = pascalWord.AsCamelCasing();
+
+            Assert.Equal("naming", camelWord);
+            Assert.Equal(pascalWord, camelWord.AsPascalCasing());
+
+            // Words
+            var pascalWords = "Naming Conventions";
+            var camelWords = pascalWords.AsCamelCasing(' ');
+
+            Assert.Equal("naming conventions", camelWords);
+            Assert.Equal(pascalWords, camelWords.AsPascalCasing(' '));
+        }
+
+        #endregion
+
+
+        #region Singular & Plural
+
+        [Fact]
+        public void SingularAndPluralTest()
+        {
+            // Pluralize
+            var value = "item";
+            Assert.Equal("items", value.AsPluralize());
+
+            value = "child";
+            Assert.Equal("children", value.AsPluralize());
+
+            value = "chinese";
+            Assert.Equal("chinese", value.AsPluralize());
+
+            value = "foot";
+            Assert.Equal("feet", value.AsPluralize());
+
+            value = "half";
+            Assert.Equal("halves", value.AsPluralize());
+
+            value = "knife";
+            Assert.Equal("knives", value.AsPluralize());
+
+            // Singularize
+            value = "items";
+            Assert.Equal("item", value.AsSingularize());
+
+            value = "children";
+            Assert.Equal("child", value.AsSingularize());
+
+            value = "chinese";
+            Assert.Equal("chinese", value.AsSingularize());
+
+            value = "feet";
+            Assert.Equal("foot", value.AsSingularize());
+
+            value = "halves";
+            Assert.Equal("half", value.AsSingularize());
+
+            value = "knives";
+            Assert.Equal("knife", value.AsSingularize());
+        }
+
+        #endregion
+
+
+        #region TrySplitPair
+
+        [Fact]
+        public void TrySplitPairTest()
+        {
+            var value = "123ab==-092cd";
+
+            if (value.TrySplitPair('=', out var pair))
+            {
+                Assert.Equal("123ab", pair.Key);
+                Assert.Equal("=-092cd", pair.Value);
+            }
+
+            if (value.TrySplitPairByLastIndexOf('=', out pair))
+            {
+                Assert.Equal("123ab=", pair.Key);
+                Assert.Equal("-092cd", pair.Value);
+            }
+        }
+
+        #endregion
+
+
+        #region SystemString
+
+        [Fact]
+        public void SystemStringTest()
+        {
+            var number = DateTime.Now.Ticks;
+            // "EVToTnQQBTB"
+            Assert.NotEmpty(number.AsSystemString());
         }
 
         #endregion

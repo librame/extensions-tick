@@ -12,8 +12,10 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Data
@@ -36,6 +38,7 @@ namespace Librame.Extensions.Data
         {
             CoreOptions = parentOptions.GetRequiredOptions<CoreExtensionOptions>();
             Access = new AccessOptions(Notifier);
+            Auditing = new AuditOptions(Notifier);
 
             // Base: IdentificationGenerator
             AddIdGenerator(new MongoIdentificationGenerator(CoreOptions.Clock));
@@ -44,19 +47,26 @@ namespace Librame.Extensions.Data
             // 异构数据源数据同步功能的标识必须使用统一的生成方案
             AddIdGenerator(CombIdentificationGenerator.ForSqlServer(CoreOptions.Clock));
 
+            ServiceCharacteristics.AddScope<IInterceptor>();
+            ServiceCharacteristics.AddScope<IAuditingManager>();
             ServiceCharacteristics.AddSingleton<IIdentificationGeneratorFactory>();
 
-            // Access
+            // Accessing
             ServiceCharacteristics.AddScope<IAccessorAggregator>();
             ServiceCharacteristics.AddScope<IAccessorManager>();
             ServiceCharacteristics.AddScope<IAccessorResolver>();
             ServiceCharacteristics.AddScope<IAccessorSlicer>();
-
             ServiceCharacteristics.AddScope<IAccessorMigrator>();
-            ServiceCharacteristics.AddScope<IAccessorSeeder>();
+
+            ServiceCharacteristics.AddScope<IAccessorSeeder>(addImplementationType: true);
             ServiceCharacteristics.AddScope<IAccessorInitializer>();
 
-            // Store
+            // Sharding
+            ShardingStrategies.Add(new DateTimeShardingStrategy(CoreOptions.Clock));
+            ShardingStrategies.Add(new DateTimeOffsetShardingStrategy(CoreOptions.Clock));
+            ServiceCharacteristics.AddScope<IShardingManager>();
+
+            // Storing
             ServiceCharacteristics.AddScope(typeof(IStore<>));
 
             // ValueConversion
@@ -75,6 +85,11 @@ namespace Librame.Extensions.Data
         /// </summary>
         public AccessOptions Access { get; init; }
 
+        /// <summary>
+        /// 审计选项。
+        /// </summary>
+        public AuditOptions Auditing { get; init; }
+
 
         /// <summary>
         /// 标识生成器列表集合（默认已集成 <see cref="string"/> “MongoDB”、<see cref="long"/> “雪花”、<see cref="Guid"/> “COMB for SQL Server” 等标识类型的生成器）。
@@ -82,6 +97,13 @@ namespace Librame.Extensions.Data
         [JsonIgnore]
         public IReadOnlyList<IObjectIdentificationGenerator> IdGenerators
             => _idGenerators;
+
+        /// <summary>
+        /// 分片策略列表集合（默认已集合 <see cref="DateTimeShardingStrategy"/>、<see cref="DateTimeOffsetShardingStrategy"/> 等分片策略）。
+        /// </summary>
+        [JsonIgnore]
+        public List<IShardingStrategy> ShardingStrategies { get; init; }
+            = new();
 
 
         /// <summary>

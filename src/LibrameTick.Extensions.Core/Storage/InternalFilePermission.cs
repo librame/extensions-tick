@@ -14,8 +14,8 @@ namespace Librame.Extensions.Core.Storage
 {
     class InternalFilePermission : AbstractFilePermission
     {
-        public InternalFilePermission(CoreExtensionBuilder builder)
-            : base(builder.Options.Requests)
+        public InternalFilePermission(CoreExtensionOptions options)
+            : base(options.WebRequest)
         {
         }
 

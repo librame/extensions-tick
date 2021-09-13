@@ -10,6 +10,7 @@
 
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -361,32 +362,57 @@ namespace Librame.Extensions
 
         #region Singular & Plural
 
-        private static readonly List<(Regex, string)> _singularRegexList =
-            new List<(Regex, string)>()
-            {
-                (new Regex("(?<keep>[^aeiou])ies$"), "${keep}y"),
-                (new Regex("(?<keep>[aeiou]y)s$"), "${keep}"),
-                (new Regex("(?<keep>[sxzh])es$"), "${keep}"),
-                (new Regex("(?<keep>[^sxzhyu])s$"), "${keep}")
-            };
+        private static readonly List<(Regex, string)> _singularRegexList = new()
+        {
+            (new Regex("(?<keep>nese)$"), "${keep}"), // Prototype
+            (new Regex("(?<keep>craft)$"), "${keep}"), // Prototype
+            (new Regex("(?<keep>ee)"), "oo"),
+            (new Regex("(?<keep>men)"), "man"),
+            (new Regex("(?<keep>[lae])ves$"), "${keep}f"),
+            (new Regex("(?<keep>[i])ves$"), "${keep}fe"),
+            (new Regex("(?<keep>[^aeiou])ies$"), "${keep}y"),
+            (new Regex("(?<keep>[aeiou]y)s$"), "${keep}"),
+            (new Regex("(?<keep>[sxzh])es$"), "${keep}"),
+            (new Regex("(?<keep>[^sxzhyu])s$"), "${keep}")
+        };
 
-        private static readonly List<(Regex, string)> _pluralRegexList =
-            new List<(Regex, string)>()
-            {
-                (new Regex("(?<keep>[^aeiou])y$"), "${keep}ies"),
-                (new Regex("(?<keep>[aeiou]y)$"), "${keep}s"),
-                (new Regex("(?<keep>[sxzh])$"), "${keep}es"),
-                (new Regex("(?<keep>[^sxzhy])$"), "${keep}s")
-            };
+        private static readonly List<(Regex, string)> _pluralRegexList = new()
+        {
+            (new Regex("(?<keep>nese)$"), "${keep}"), // Prototype
+            (new Regex("(?<keep>craft)$"), "${keep}"), // Prototype
+            (new Regex("(?<keep>oo)"), "ee"),
+            (new Regex("(?<keep>man)"), "men"),
+            (new Regex("(?<keep>[lae])f$"), "${keep}ves"),
+            (new Regex("(?<keep>[i])fe$"), "${keep}ves"),
+            (new Regex("(?<keep>[^aeiou])y$"), "${keep}ies"),
+            (new Regex("(?<keep>[aeiou]y)$"), "${keep}s"),
+            (new Regex("(?<keep>[sxzh])$"), "${keep}es"),
+            (new Regex("(?<keep>[^sxzhy])$"), "${keep}s")
+        };
+
+        private static readonly Dictionary<string, string> _irregularPlurals = new()
+        {
+            { "child", "children" },
+            { "ox", "oxen" },
+            { "mouse", "mice" },
+            { "person", "people" },
+            { "policeman", "police" }
+        };
 
 
         /// <summary>
-        /// 复数单词单数化。
+        /// 复数单词单数化（支持常见的不规则复数单词）。
         /// </summary>
         /// <param name="plural">给定的复数化英文单词。</param>
         /// <returns>返回字符串。</returns>
         public static string AsSingularize(this string plural)
         {
+            foreach (var pair in _irregularPlurals)
+            {
+                if (pair.Value == plural)
+                    return pair.Key;
+            }
+
             foreach (var (r, s) in _singularRegexList)
             {
                 if (r.IsMatch(plural))
@@ -397,12 +423,15 @@ namespace Librame.Extensions
         }
 
         /// <summary>
-        /// 单数单词复数化。
+        /// 单数单词复数化（支持常见的不规则复数单词）。
         /// </summary>
         /// <param name="singular">给定的单数化英文单词。</param>
         /// <returns>返回字符串。</returns>
         public static string AsPluralize(this string singular)
         {
+            if (_irregularPlurals.TryGetValue(singular, out var value))
+                return value;
+
             foreach (var (r, s) in _pluralRegexList)
             {
                 if (r.IsMatch(singular))
@@ -415,107 +444,107 @@ namespace Librame.Extensions
         #endregion
 
 
-        #region SplitPair
+        #region TrySplitPair
 
         /// <summary>
-        /// 分拆以等号分隔的键值对字符串。
+        /// 尝试分拆包含指定分隔符的键值对字符串。
         /// </summary>
-        /// <example>
-        /// var pair = "key==-value";
-        /// return (Key:key, Value:=-value).
-        /// </example>
-        /// <param name="pair">给定的键值对字符串。</param>
-        /// <returns>返回键值对。</returns>
-        public static KeyValuePair<string, string> SplitPair(this string pair)
-            => pair.SplitPair('=');
-
-        /// <summary>
-        /// 分拆包含指定分隔符的键值对字符串。
-        /// </summary>
-        /// <example>
-        /// var pair = "key==-value";
-        /// return (Key:key, Value:=-value).
-        /// </example>
-        /// <param name="pair">给定的键值对字符串。</param>
-        /// <param name="separator">给定字符串包含的分隔符。</param>
-        /// <returns>返回键值对。</returns>
-        public static KeyValuePair<string, string> SplitPair(this string pair, char separator)
+        /// <param name="value">给定的字符串值。</param>
+        /// <param name="separator">给定的分隔符。</param>
+        /// <param name="pair">输出 <see cref="KeyValuePair{String, String}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool TrySplitPair(this string value, char separator,
+            [MaybeNullWhen(false)] out KeyValuePair<string, string> pair)
         {
-            var separatorIndex = pair.IndexOf(separator);
-            var name = pair.Substring(0, separatorIndex);
-            var value = pair.Substring(separatorIndex + 1);
+            var separatorIndex = value.IndexOf(separator);
 
-            return new KeyValuePair<string, string>(name, value);
+            // 分隔符不能位于起始或末尾
+            if (separatorIndex > 0 && separatorIndex < value.Length - 1)
+            {
+                pair = new(value.Substring(0, separatorIndex),
+                    value.Substring(separatorIndex + 1));
+
+                return true;
+            }
+
+            pair = new();
+            return false;
         }
 
         /// <summary>
-        /// 分拆包含指定分隔符的键值对字符串。
+        /// 尝试分拆包含指定分隔符的键值对字符串。
         /// </summary>
-        /// <example>
-        /// var pair = "key==-value";
-        /// return (Key:key, Value:=-value).
-        /// </example>
-        /// <param name="pair">给定的键值对字符串。</param>
-        /// <param name="separator">给定字符串包含的分隔符。</param>
-        /// <returns>返回键值对。</returns>
-        public static KeyValuePair<string, string> SplitPair(this string pair, string separator)
+        /// <param name="value">给定的字符串值。</param>
+        /// <param name="separator">给定的分隔符。</param>
+        /// <param name="pair">输出 <see cref="KeyValuePair{String, String}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool TrySplitPair(this string value, string separator,
+            [MaybeNullWhen(false)] out KeyValuePair<string, string> pair)
         {
-            var separatorIndex = pair.IndexOf(separator, StringComparison.OrdinalIgnoreCase);
-            var name = pair.Substring(0, separatorIndex);
-            var value = pair.Substring(separatorIndex + separator.Length);
+            var separatorIndex = value.IndexOf(separator, StringComparison.OrdinalIgnoreCase);
 
-            return new KeyValuePair<string, string>(name, value);
+            // 分隔符不能位于起始或末尾
+            if (separatorIndex > 0 && separatorIndex < value.Length - separator.Length)
+            {
+                pair = new(value.Substring(0, separatorIndex),
+                    value.Substring(separatorIndex + separator.Length));
+
+                return true;
+            }
+
+            pair = new();
+            return false;
         }
 
 
         /// <summary>
-        /// 分拆最后一个以等号分隔的键值对字符串。
+        /// 尝试分拆最后一个包含指定分隔符的键值对字符串。
         /// </summary>
-        /// <example>
-        /// var pair = "key==-value";
-        /// return (Key:key, Value:=-value).
-        /// </example>
-        /// <param name="pair">给定的键值对字符串。</param>
-        /// <returns>返回键值对。</returns>
-        public static KeyValuePair<string, string> SplitPairByLastIndexOf(this string pair)
-            => pair.SplitPairByLastIndexOf('=');
-
-        /// <summary>
-        /// 分拆最后一个包含指定分隔符的键值对字符串。
-        /// </summary>
-        /// <example>
-        /// var pair = "key==-value";
-        /// return (Key:key, Value:=-value).
-        /// </example>
-        /// <param name="pair">给定的键值对字符串。</param>
-        /// <param name="separator">给定字符串包含的分隔符（可选；默认为等号）。</param>
-        /// <returns>返回键值对。</returns>
-        public static KeyValuePair<string, string> SplitPairByLastIndexOf(this string pair, char separator)
+        /// <param name="value">给定的字符串值。</param>
+        /// <param name="separator">给定的分隔符。</param>
+        /// <param name="pair">输出 <see cref="KeyValuePair{String, String}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool TrySplitPairByLastIndexOf(this string value, char separator,
+            [MaybeNullWhen(false)] out KeyValuePair<string, string> pair)
         {
-            var separatorIndex = pair.LastIndexOf(separator);
-            var name = pair.Substring(0, separatorIndex);
-            var value = pair.Substring(separatorIndex + 1);
+            var separatorIndex = value.LastIndexOf(separator);
 
-            return new KeyValuePair<string, string>(name, value);
+            // 分隔符不能位于起始或末尾
+            if (separatorIndex > 0 && separatorIndex < value.Length - 1)
+            {
+                pair = new(value.Substring(0, separatorIndex),
+                    value.Substring(separatorIndex + 1));
+
+                return true;
+            }
+
+            pair = new();
+            return false;
         }
 
         /// <summary>
-        /// 分拆最后一个包含指定分隔符的键值对字符串。
+        /// 尝试分拆最后一个包含指定分隔符的键值对字符串。
         /// </summary>
-        /// <example>
-        /// var pair = "key==-value";
-        /// return (Key:key, Value:=-value).
-        /// </example>
-        /// <param name="pair">给定的键值对字符串。</param>
-        /// <param name="separator">给定字符串包含的分隔符。</param>
-        /// <returns>返回键值对。</returns>
-        public static KeyValuePair<string, string> SplitPairByLastIndexOf(this string pair, string separator)
+        /// <param name="value">给定的字符串值。</param>
+        /// <param name="separator">给定的分隔符。</param>
+        /// <param name="pair">输出 <see cref="KeyValuePair{String, String}"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public static bool TrySplitPairByLastIndexOf(this string value, string separator,
+            [MaybeNullWhen(false)] out KeyValuePair<string, string> pair)
         {
-            var separatorIndex = pair.LastIndexOf(separator, StringComparison.OrdinalIgnoreCase);
-            var name = pair.Substring(0, separatorIndex);
-            var value = pair.Substring(separatorIndex + separator.Length);
+            var separatorIndex = value.LastIndexOf(separator, StringComparison.OrdinalIgnoreCase);
 
-            return new KeyValuePair<string, string>(name, value);
+            // 分隔符不能位于起始或末尾
+            if (separatorIndex > 0 && separatorIndex < value.Length - separator.Length)
+            {
+                pair = new(value.Substring(0, separatorIndex),
+                    value.Substring(separatorIndex + separator.Length));
+
+                return true;
+            }
+
+            pair = new();
+            return false;
         }
 
         #endregion

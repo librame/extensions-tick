@@ -24,15 +24,15 @@ namespace Librame.Extensions.Core.Storage
 
 
         public InternalFileTransmission(IFilePermission permission,
-            IHttpClientFactory factory, CoreExtensionBuilder builder)
+            IHttpClientFactory factory, CoreExtensionOptions options)
         {
             _permission = permission;
             _factory = factory;
-            _options = builder.Options;
+            _options = options;
 
-            Encoding = _options.Encoding;
-            BufferSize = _options.Requests.BufferSize;
-            Timeout = _options.Requests.Timeout;
+            Encoding = _options.Algorithm.Encoding;
+            BufferSize = _options.WebRequest.BufferSize;
+            Timeout = _options.WebRequest.Timeout;
         }
 
 
@@ -229,7 +229,7 @@ namespace Librame.Extensions.Core.Storage
             //client.DefaultRequestHeaders.Accept.Clear();
             //client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            client.DefaultRequestHeaders.UserAgent.TryParseAdd(_options.Requests.UserAgent);
+            client.DefaultRequestHeaders.UserAgent.TryParseAdd(_options.WebRequest.UserAgent);
 
             // Authentication: Basic
             if (UseBasicAuthentication)

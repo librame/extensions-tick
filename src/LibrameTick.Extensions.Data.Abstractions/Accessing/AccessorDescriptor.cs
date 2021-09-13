@@ -11,7 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core.Cryptography;
-using System.Text;
+using Librame.Extensions.Data.Sharding;
 
 namespace Librame.Extensions.Data.Accessing
 {
@@ -23,31 +23,31 @@ namespace Librame.Extensions.Data.Accessing
         /// <summary>
         /// 构造一个 <see cref="AccessorDescriptor"/>。
         /// </summary>
-        /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="accessor">给定的访问器实例。</param>
+        /// <param name="serviceType">给定的服务类型。</param>
         /// <param name="group">给定的所属群组。</param>
-        /// <param name="interaction">给定的交互方式。</param>
+        /// <param name="access">给定的访问模式。</param>
         /// <param name="pooling">是否池化。</param>
         /// <param name="priority">给定的优先级。</param>
-        /// <param name="algorithms">给定的算法选项。</param>
-        /// <param name="encoding">给定的字符编码。</param>
-        public AccessorDescriptor(Type serviceType,
-            IAccessor accessor,
+        /// <param name="algorithm">给定的算法选项。</param>
+        /// <param name="shardingNaming">给定的分库命名特性。</param>
+        public AccessorDescriptor(IAccessor accessor,
+            Type serviceType,
             int group,
-            AccessorInteraction interaction,
+            AccessMode access,
             bool pooling,
             float priority,
-            AlgorithmOptions algorithms,
-            Encoding encoding)
+            AlgorithmOptions algorithm,
+            ShardingNamingAttribute? shardingNaming)
         {
-            ServiceType = serviceType;
             Accessor = accessor;
+            ServiceType = serviceType;
             Group = group;
-            Interaction = interaction;
+            Access = access;
             Pooling = pooling;
             Priority = priority;
-            Algorithms = algorithms;
-            Encoding = encoding;
+            Algorithm = algorithm;
+            ShardingNaming = shardingNaming;
         }
 
 
@@ -67,9 +67,9 @@ namespace Librame.Extensions.Data.Accessing
         public int Group { get; init; }
 
         /// <summary>
-        /// 交互方式。
+        /// 访问模式。
         /// </summary>
-        public AccessorInteraction Interaction { get; init; }
+        public AccessMode Access { get; init; }
 
         /// <summary>
         /// 是否池化。
@@ -84,12 +84,12 @@ namespace Librame.Extensions.Data.Accessing
         /// <summary>
         /// 算法选项。
         /// </summary>
-        public AlgorithmOptions Algorithms { get; init; }
+        public AlgorithmOptions Algorithm { get; init; }
 
         /// <summary>
-        /// 字符编码。
+        /// 分库命名特性。
         /// </summary>
-        public Encoding Encoding { get; init; }
+        public ShardingNamingAttribute? ShardingNaming { get; init; }
 
 
         /// <summary>

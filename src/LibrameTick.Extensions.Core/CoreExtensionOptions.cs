@@ -12,8 +12,6 @@
 
 using Librame.Extensions.Core.Cryptography;
 using Librame.Extensions.Core.Storage;
-using Librame.Extensions.Serialization;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Core
@@ -29,9 +27,9 @@ namespace Librame.Extensions.Core
         public CoreExtensionOptions()
             : base(parentOptions: null)
         {
-            Algorithms = new AlgorithmOptions(Notifier);
-            AssemblyLoadings = new AssemblyLoadingOptions(Notifier);
-            Requests = new RequestOptions(Notifier);
+            Algorithm = new AlgorithmOptions(Notifier);
+            AssemblyLoading = new AssemblyLoadingOptions(Notifier);
+            WebRequest = new WebRequestOptions(Notifier);
 
             // Cryptography
             ServiceCharacteristics.AddSingleton<IAlgorithmParameterGenerator>();
@@ -50,28 +48,18 @@ namespace Librame.Extensions.Core
         /// <summary>
         /// 算法选项。
         /// </summary>
-        public AlgorithmOptions Algorithms { get; init; }
+        public AlgorithmOptions Algorithm { get; init; }
 
         /// <summary>
         /// 程序集加载选项。
         /// </summary>
-        public AssemblyLoadingOptions AssemblyLoadings { get; init; }
+        public AssemblyLoadingOptions AssemblyLoading { get; init; }
 
         /// <summary>
-        /// 请求选项。
+        /// Web 请求选项。
         /// </summary>
-        public RequestOptions Requests { get; init; }
+        public WebRequestOptions WebRequest { get; init; }
 
-
-        /// <summary>
-        /// 字符编码。
-        /// </summary>
-        [JsonConverter(typeof(JsonStringEncodingConverter))]
-        public Encoding Encoding
-        {
-            get => Notifier.GetOrAdd(nameof(Encoding), Encoding.UTF8);
-            set => Notifier.AddOrUpdate(nameof(Encoding), value);
-        }
 
         /// <summary>
         /// 时钟。

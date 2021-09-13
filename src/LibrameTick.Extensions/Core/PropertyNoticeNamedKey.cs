@@ -16,7 +16,7 @@ namespace Librame.Extensions.Core
     /// 定义属性通知命名键。
     /// </summary>
     /// <typeparam name="TSource">指定的源类型。</typeparam>
-    public record PropertyNoticeNamedKey<TSource> : PropertyNoticeNamedKey
+    public class PropertyNoticeNamedKey<TSource> : PropertyNoticeNamedKey
     {
         /// <summary>
         /// 构造一个 <see cref="PropertyNoticeNamedKey{TSource}"/>。
@@ -61,7 +61,7 @@ namespace Librame.Extensions.Core
     /// <summary>
     /// 定义属性通知命名键。
     /// </summary>
-    public record PropertyNoticeNamedKey
+    public class PropertyNoticeNamedKey : IEquatable<PropertyNoticeNamedKey>
     {
         /// <summary>
         /// 构造一个 <see cref="TypeNamedKey"/>。
@@ -95,6 +95,15 @@ namespace Librame.Extensions.Core
         /// 基础键。
         /// </summary>
         public TypeNamedKey BaseKey { get; init; }
+
+
+        /// <summary>
+        /// 比较相等。
+        /// </summary>
+        /// <param name="other">给定的 <see cref="PropertyNoticeNamedKey"/>。</param>
+        /// <returns>返回布尔值。</returns>
+        public bool Equals(PropertyNoticeNamedKey? other)
+            => other != null && BaseKey.Equals(other.BaseKey);
 
 
         /// <summary>

@@ -17,14 +17,14 @@ namespace Librame.Extensions.Core.Storage
     /// </summary>
     public abstract class AbstractFilePermission : IFilePermission
     {
-        private readonly RequestOptions _options;
+        private readonly WebRequestOptions _options;
 
 
         /// <summary>
         /// 构造一个 <see cref="AbstractFilePermission"/>。
         /// </summary>
-        /// <param name="options">给定的 <see cref="RequestOptions"/>。</param>
-        protected AbstractFilePermission(RequestOptions options)
+        /// <param name="options">给定的 <see cref="WebRequestOptions"/>。</param>
+        protected AbstractFilePermission(WebRequestOptions options)
         {
             _options = options;
         }

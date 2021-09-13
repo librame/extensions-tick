@@ -33,13 +33,13 @@ namespace Librame.Extensions.Data.ValueConversion
                 var converters = new List<ValueConverter>();
 
                 // 以字节数组为基础加密提供程序
-                var byteArrayProvider = new ByteArrayEncryptionProvider(symmetric, descr.Algorithms);
+                var byteArrayProvider = new ByteArrayEncryptionProvider(symmetric, descr.Algorithm);
 
                 // 支持对字节数组类型加密
                 converters.Add(new EncryptionConverter<byte[]>(byteArrayProvider));
 
                 // 支持对字符串类型加密
-                converters.Add(new EncryptionConverter<string>(new StringEncryptionProvider(byteArrayProvider, descr.Encoding)));
+                converters.Add(new EncryptionConverter<string>(new StringEncryptionProvider(byteArrayProvider)));
 
                 _dictionary.AddOrUpdate(descr.ServiceType, converters, (k, ov) => converters);
             }

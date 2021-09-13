@@ -2,7 +2,7 @@
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public interface ITestAccessor : IAccessor
+    public interface ITestAccessor : IDataAccessor
     {
         DbSet<User> Users { get; set; }
     }

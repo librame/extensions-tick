@@ -15,7 +15,7 @@ namespace Librame.Extensions.Drawing
     /// <summary>
     /// 定义位图描述符。
     /// </summary>
-    public record BitmapDescriptor
+    public class BitmapDescriptor
     {
         /// <summary>
         /// 构造一个 <see cref="BitmapDescriptor"/>。

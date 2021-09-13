@@ -15,7 +15,7 @@ namespace Librame.Extensions.Data.Accessing
     class InternalAccessorAggregator : AbstractAccessorAggregator<IAccessor>
     {
         protected override IAccessor CreateChain(IEnumerable<IAccessor> accessors,
-            AccessorInteraction interaction)
+            AccessMode interaction)
             => new InternalCompositeAccessor(accessors, interaction);
 
     }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Data.Accessing
 {
@@ -7,8 +7,8 @@ namespace Librame.Extensions.Data.Accessing
         private const string GetUsersKey = "GetTestUsers";
 
 
-        public InternalTestAccessorSeeder(IIdentificationGeneratorFactory idGeneratorFactory)
-            : base(idGeneratorFactory)
+        public InternalTestAccessorSeeder(CoreExtensionOptions options, IIdentificationGeneratorFactory idGeneratorFactory)
+            : base(options.Clock, idGeneratorFactory)
         {
         }
 

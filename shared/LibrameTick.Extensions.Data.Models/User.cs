@@ -11,12 +11,14 @@
 #endregion
 
 using Librame.Extensions.Data.Cryptography;
+using Librame.Extensions.Data.Sharding;
 
 namespace Librame.Extensions.Data
 {
     /// <summary>
     /// 用户模型。
     /// </summary>
+    [ShardingNaming(typeof(ModShardingStrategy), "%m3")]
     public class User : AbstractCreationIdentifier<long, long>
     {
         /// <summary>
