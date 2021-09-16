@@ -7,6 +7,7 @@ namespace Librame.Extensions.Data.Accessing
     {
 
 #pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
+
         public TestMySqlAccessor(DbContextOptions<TestMySqlAccessor> options)
             : base(options)
         {
@@ -19,11 +20,11 @@ namespace Librame.Extensions.Data.Accessing
 
 
         protected override void OnDataModelCreating(ModelBuilder modelBuilder,
-            IShardingManager shardingManager)
+            IShardingManager shardingManager, DataExtensionOptions dataOptions)
         {
-            base.OnDataModelCreating(modelBuilder, shardingManager);
+            base.OnDataModelCreating(modelBuilder, shardingManager, dataOptions);
 
-            modelBuilder.CreateUserModel();
+            modelBuilder.CreateUserModel(shardingManager);
         }
 
     }

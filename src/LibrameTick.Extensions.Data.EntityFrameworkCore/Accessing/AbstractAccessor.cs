@@ -62,8 +62,8 @@ namespace Librame.Extensions.Data.Accessing
         {
             OptionsExtension = options.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault();
 
-            // 当切换分库后，须确保数据库已被创建
-            ChangedAction = conn => ((AbstractAccessor)conn).Database.EnsureCreated();
+            // 当启用分库功能时，需在切换到分库后尝试创建数据库
+            ChangedAction = accessor => accessor.TryCreateDatabase();
         }
 
 
@@ -71,6 +71,12 @@ namespace Librame.Extensions.Data.Accessing
         /// 核心选项扩展。
         /// </summary>
         protected CoreOptionsExtension? OptionsExtension { get; init; }
+
+        /// <summary>
+        /// 数据扩展选项。
+        /// </summary>
+        protected DataExtensionOptions DataOptions
+            => GetRequiredScopeService<DataExtensionOptions>();
 
         /// <summary>
         /// 关系连接。
@@ -100,7 +106,7 @@ namespace Librame.Extensions.Data.Accessing
         /// <typeparam name="TService">指定的服务类型</typeparam>
         /// <param name="serviceType">给定的服务类型（可选；默认使用指定的泛型服务类型）。</param>
         /// <returns>返回 <typeparamref name="TService"/>。</returns>
-        protected virtual TService GetRequiredScopeService<TService>(Type? serviceType = null)
+        public virtual TService GetRequiredScopeService<TService>(Type? serviceType = null)
             => (TService)GetRequiredScopeService(serviceType ?? typeof(TService));
 
         /// <summary>
@@ -108,7 +114,7 @@ namespace Librame.Extensions.Data.Accessing
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <returns>返回对象。</returns>
-        protected virtual object GetRequiredScopeService(Type serviceType)
+        public virtual object GetRequiredScopeService(Type serviceType)
         {
             var service = GetScopeService(serviceType);
             if (service == null)
@@ -124,7 +130,7 @@ namespace Librame.Extensions.Data.Accessing
         /// <typeparam name="TService">指定的服务类型</typeparam>
         /// <param name="serviceType">给定的服务类型（可选；默认使用指定的泛型服务类型）。</param>
         /// <returns>返回 <typeparamref name="TService"/>。</returns>
-        protected virtual TService? GetScopeService<TService>(Type? serviceType = null)
+        public virtual TService? GetScopeService<TService>(Type? serviceType = null)
             => (TService?)GetScopeService(serviceType ?? typeof(TService));
 
         /// <summary>
@@ -132,7 +138,7 @@ namespace Librame.Extensions.Data.Accessing
         /// </summary>
         /// <param name="serviceType">给定的服务类型。</param>
         /// <returns>返回对象。</returns>
-        protected virtual object? GetScopeService(Type serviceType)
+        public virtual object? GetScopeService(Type serviceType)
         {
             // this.GetService<T>() 即 InfrastructureExtensions.GetService<T>() 这种方法可能会抛出 internalServiceProvider 不是范围服务，
             // 而内部使用的 internalServiceProvider.GetService<IDbContextOptions>()?.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault()
@@ -410,7 +416,7 @@ namespace Librame.Extensions.Data.Accessing
         #endregion
 
 
-        #region IConnectable
+        #region IConnectable<IAccessor>
 
         /// <summary>
         /// 当前连接字符串。
@@ -421,12 +427,12 @@ namespace Librame.Extensions.Data.Accessing
         /// <summary>
         /// 改变时动作（传入的参数为当前 <see cref="IAccessor"/>）。
         /// </summary>
-        public Action<IConnectable>? ChangingAction { get; set; }
+        public Action<IAccessor>? ChangingAction { get; set; }
 
         /// <summary>
         /// 改变后动作（传入的参数为当前 <see cref="IAccessor"/>）。
         /// </summary>
-        public Action<IConnectable>? ChangedAction { get; set; }
+        public Action<IAccessor>? ChangedAction { get; set; }
 
 
         /// <summary>
@@ -434,7 +440,7 @@ namespace Librame.Extensions.Data.Accessing
         /// </summary>
         /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
         /// <returns>返回 <see cref="IAccessor"/>。</returns>
-        public virtual IConnectable ChangeConnection(string newConnectionString)
+        public virtual IAccessor ChangeConnection(string newConnectionString)
         {
             var connection = RelationalConnection?.DbConnection;
             if (connection != null)
@@ -447,6 +453,39 @@ namespace Librame.Extensions.Data.Accessing
             }
 
             return this;
+        }
+
+
+        /// <summary>
+        /// 尝试创建数据库（已集成是否需要先删除数据库功能）。
+        /// </summary>
+        /// <returns>返回布尔值。</returns>
+        public virtual bool TryCreateDatabase()
+        {
+            if (DataOptions.Access.EnsureDatabaseDeleted)
+                Database.EnsureDeleted();
+
+            if (DataOptions.Access.EnsureDatabaseCreated)
+                return Database.EnsureCreated();
+
+            return false;
+        }
+
+        /// <summary>
+        /// 异步尝试创建数据库（已集成是否需要先删除数据库功能）。
+        /// </summary>
+        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+        /// <returns>返回一个包含布尔值的异步操作。</returns>
+        public virtual async Task<bool> TryCreateDatabaseAsync(
+            CancellationToken cancellationToken = default)
+        {
+            if (DataOptions.Access.EnsureDatabaseDeleted)
+                await Database.EnsureDeletedAsync(cancellationToken);
+
+            if (DataOptions.Access.EnsureDatabaseCreated)
+                await Database.EnsureCreatedAsync(cancellationToken);
+
+            return false;
         }
 
         #endregion

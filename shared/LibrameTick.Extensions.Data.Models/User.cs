@@ -18,7 +18,8 @@ namespace Librame.Extensions.Data
     /// <summary>
     /// 用户模型。
     /// </summary>
-    [ShardingNaming(typeof(ModShardingStrategy), "%m3")]
+    [Audited]
+    [ShardingNaming(typeof(CultureInfoShardingStrategy), "%c")]
     public class User : AbstractCreationIdentifier<long, long>
     {
         /// <summary>

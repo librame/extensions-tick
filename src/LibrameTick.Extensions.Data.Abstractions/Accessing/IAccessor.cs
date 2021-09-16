@@ -19,7 +19,7 @@ namespace Librame.Extensions.Data.Accessing
     /// <summary>
     /// 定义表示数据访问的访问器接口（主要用于适配数据实现层的访问对象；如 EFCore 实现层的 DbContext 对象）。
     /// </summary>
-    public interface IAccessor : IConnectable, ISaveChangeable, ISortable, IDisposable, IAsyncDisposable
+    public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable, IDisposable, IAsyncDisposable
     {
         /// <summary>
         /// 访问器标识。

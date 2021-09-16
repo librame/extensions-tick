@@ -1,5 +1,4 @@
 using Librame.Extensions.Core;
-using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +35,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlite("Data Source=librame_extensions.db",
                     a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.Read).WithShardingNaming<DateTimeShardingStrategy>("%y"));
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Read)); //.WithShardingNaming<DateTimeShardingStrategy>("%y")
             });
 
             services.AddLibrame()
@@ -55,7 +54,7 @@ namespace Librame.Extensions.Data.Accessing
                 .SaveOptionsAsJson(); // 首次保存选项为 JSON 文件
 
             var provider = services.BuildServiceProvider();
-
+            
             provider.UseAccessorInitializer();
 
             var store = provider.GetRequiredService<IStore<User>>();

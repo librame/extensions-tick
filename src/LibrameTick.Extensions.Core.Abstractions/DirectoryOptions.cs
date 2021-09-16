@@ -18,6 +18,15 @@ namespace Librame.Extensions.Core
     public class DirectoryOptions : AbstractOptions
     {
         /// <summary>
+        /// 构造一个独立属性通知器的 <see cref="DirectoryOptions"/>（此构造函数适用于独立使用 <see cref="DirectoryOptions"/> 的情况）。
+        /// </summary>
+        /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
+        public DirectoryOptions(string sourceAliase)
+            : base(sourceAliase)
+        {
+        }
+
+        /// <summary>
         /// 构造一个 <see cref="DirectoryOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>

@@ -14,6 +14,8 @@ using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Cryptography;
 using Librame.Extensions.Data.ValueConversion;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System.Linq.Expressions;
 
 namespace Librame.Extensions.Data
 {
@@ -28,26 +30,52 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 对使用 <see cref="EncryptedAttribute"/> 的属性应用加密功能。
         /// </summary>
-        /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
+        /// <param name="mutableEntityType">给定的 <see cref="IMutableEntityType"/>。</param>
         /// <param name="converterFactory">给定的 <see cref="IEncryptionConverterFactory"/>。</param>
         /// <param name="accessorType">给定的访问器类型。</param>
-        /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
-        public static ModelBuilder UseEncryption(this ModelBuilder modelBuilder,
+        /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+        public static IMutableEntityType UseEncryption(this IMutableEntityType mutableEntityType,
             IEncryptionConverterFactory converterFactory, Type accessorType)
         {
-            foreach (var metadata in modelBuilder.Model.GetEntityTypes())
-            {
-                var encryptedProperties = metadata.ClrType.GetProperties()
-                    .Where(p => Attribute.IsDefined(p, _encryptedAttributeType));
+            var encryptedProperties = mutableEntityType.ClrType.GetProperties()
+                .Where(p => Attribute.IsDefined(p, _encryptedAttributeType));
 
-                foreach (var property in encryptedProperties)
+            foreach (var property in encryptedProperties)
+            {
+                var converter = converterFactory.GetConverter(accessorType, property.PropertyType);
+                mutableEntityType.GetProperty(property.Name).SetValueConverter(converter);
+            }
+
+            return mutableEntityType;
+        }
+
+        /// <summary>
+        /// 使用查询过滤器集合。
+        /// </summary>
+        /// <param name="mutableEntityType">给定的 <see cref="IMutableEntityType"/>。</param>
+        /// <param name="queryFilters">给定的查询过滤器集合。</param>
+        /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+        /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+        public static IMutableEntityType UseQueryFilters(this IMutableEntityType mutableEntityType,
+            IEnumerable<IQueryFilter> queryFilters, IAccessor accessor)
+        {
+            foreach (var filter in queryFilters)
+            {
+                if (filter.Enabling(mutableEntityType.ClrType))
                 {
-                    var converter = converterFactory.GetConverter(accessorType, property.PropertyType);
-                    metadata.GetProperty(property.Name).SetValueConverter(converter);
+                    var method = filter.GetType()
+                        .GetMethod(nameof(filter.GetQueryFilter))?
+                        .MakeGenericMethod(mutableEntityType.ClrType);
+
+                    if (method is not null)
+                    {
+                        var expression = (LambdaExpression?)method.Invoke(filter, new object[] { accessor });
+                        mutableEntityType.SetQueryFilter(expression);
+                    }
                 }
             }
 
-            return modelBuilder;
+            return mutableEntityType;
         }
 
     }

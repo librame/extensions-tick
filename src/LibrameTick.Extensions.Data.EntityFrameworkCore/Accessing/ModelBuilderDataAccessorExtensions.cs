@@ -27,23 +27,54 @@ namespace Librame.Extensions.Data.Accessing
         /// </summary>
         /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
         /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
+        /// <param name="dataOptions">给定的 <see cref="DataExtensionOptions"/>。</param>
         /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
         public static ModelBuilder CreateDataModel(this ModelBuilder modelBuilder,
-            IShardingManager shardingManager)
+            IShardingManager shardingManager, DataExtensionOptions dataOptions)
         {
+            var limitableMaxLength = dataOptions.Store.LimitableMaxLengthOfProperty;
+
             modelBuilder.Entity<Audit>(b =>
             {
-                b.ToTableByPluralize(shardingManager);
+                b.ToTableWithSharding(shardingManager);
+
+                b.HasIndex(i => new { i.TableName, i.EntityId, i.StateName }).HasDatabaseName().IsUnique();
 
                 b.HasKey(k => k.Id);
 
-                b.HasIndex(i => i.Name);
-
                 b.Property(p => p.Id).ValueGeneratedNever();
 
-                b.Property(p => p.Name).HasMaxLength(50);
-                b.Property(p => p.Passwd).HasMaxLength(50);
-                b.Property(p => p.CreatedTime).HasMaxLength(50);
+                if (limitableMaxLength > 0)
+                {
+                    b.Property(p => p.Id).HasMaxLength(limitableMaxLength);
+
+                    b.Property(p => p.EntityId).HasMaxLength(limitableMaxLength).IsRequired();
+                    b.Property(p => p.TableName).HasMaxLength(limitableMaxLength).IsRequired();
+                    b.Property(p => p.StateName).HasMaxLength(limitableMaxLength);
+                    b.Property(p => p.EntityTypeName).HasMaxLength(limitableMaxLength);
+                }
+            });
+
+            modelBuilder.Entity<AuditProperty>(b =>
+            {
+                b.ToTableWithSharding(shardingManager);
+
+                b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
+
+                b.HasKey(k => k.Id);
+
+                b.Property(x => x.Id).ValueGeneratedNever();
+
+                if (limitableMaxLength > 0)
+                {
+                    b.Property(p => p.AuditId).HasMaxLength(limitableMaxLength).IsRequired();
+                    b.Property(p => p.PropertyName).HasMaxLength(limitableMaxLength);
+                    b.Property(p => p.PropertyTypeName).HasMaxLength(limitableMaxLength);
+                }
+
+                // MaxLength
+                b.Property(p => p.OldValue);
+                b.Property(p => p.NewValue);
             });
 
             return modelBuilder;

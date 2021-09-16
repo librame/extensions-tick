@@ -270,26 +270,32 @@ namespace Librame.Extensions.Data.Accessing
         #endregion
 
 
-        #region IConnectable
+        #region IConnectable<IAccessor>
 
         public string? CurrentConnectionString
             => ChainingAccessorsByException(a => a.CurrentConnectionString);
 
-        public Action<IConnectable>? ChangingAction
+        public Action<IAccessor>? ChangingAction
         {
             get => ChainingAccessorsByException(a => a.ChangingAction);
             set => ChainingAccessorsByException(a => a.ChangingAction = value);
         }
 
-        public Action<IConnectable>? ChangedAction
+        public Action<IAccessor>? ChangedAction
         {
             get => ChainingAccessorsByException(a => a.ChangedAction);
             set => ChainingAccessorsByException(a => a.ChangedAction = value);
         }
 
 
-        public IConnectable ChangeConnection(string newConnectionString)
+        public IAccessor ChangeConnection(string newConnectionString)
             => ChainingAccessorsByException(a => a.ChangeConnection(newConnectionString));
+
+        public bool TryCreateDatabase()
+            => ChainingAccessorsByException(a => a.TryCreateDatabase());
+
+        public Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
+            => ChainingAccessorsByException(a => a.TryCreateDatabaseAsync(cancellationToken));
 
         #endregion
 

@@ -26,8 +26,8 @@ namespace Librame.Extensions.Data.Accessing
         DbSet<Audit> Audits { get; set; }
 
         /// <summary>
-        /// 表格数据集。
+        /// 审计属性数据集。
         /// </summary>
-        DbSet<Tabulation> Tabulations { get; set; }
+        DbSet<AuditProperty> AuditProperties {  get; set; }
     }
 }

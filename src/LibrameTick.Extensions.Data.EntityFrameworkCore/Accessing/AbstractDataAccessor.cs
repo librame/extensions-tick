@@ -14,6 +14,9 @@ using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Librame.Extensions.Data.Accessing
 {
@@ -51,6 +54,8 @@ namespace Librame.Extensions.Data.Accessing
     /// </summary>
     public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
     {
+        private IReadOnlyList<Audit>? _audits;
+
 
 #pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
@@ -61,6 +66,40 @@ namespace Librame.Extensions.Data.Accessing
         protected AbstractDataAccessor(DbContextOptions options)
             : base(options)
         {
+            SavingChanges += AbstractDataAccessor_SavingChanges;
+            SavedChanges += AbstractDataAccessor_SavedChanges;
+        }
+
+
+        private void AbstractDataAccessor_SavedChanges(object? sender, SavedChangesEventArgs e)
+        {
+            var accessor = (sender as AbstractDataAccessor)!;
+            if (accessor._audits != null)
+                accessor.DataOptions.Audit.NotificationAction?.Invoke(accessor._audits);
+        }
+
+        private void AbstractDataAccessor_SavingChanges(object? sender, SavingChangesEventArgs e)
+        {
+            var accessor = (sender as AbstractDataAccessor)!;
+            var auditOptions = accessor.DataOptions.Audit;
+            var auditingManager = accessor.GetRequiredScopeService<IAuditingManager>();
+
+#pragma warning disable EF1001 // Internal EF Core API usage.
+
+            var entityEntries = ((IDbContextDependencies)accessor).StateManager
+                .GetEntriesForState(auditOptions.AddedState, auditOptions.ModifiedState,
+                    auditOptions.DeletedState, auditOptions.UnchangedState);
+
+            accessor._audits = auditingManager.GetAudits(entityEntries.Select(s => new EntityEntry(s)));
+
+#pragma warning restore EF1001 // Internal EF Core API usage.
+
+            // 保存审计数据
+            if (accessor._audits.Count > 0 && auditOptions.SaveAudits)
+            {
+                accessor.Audits.AddRange(accessor._audits);
+                accessor.AuditProperties.AddRange(accessor._audits.SelectMany(s => s.Properties));
+            }
         }
 
 #pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
@@ -72,9 +111,15 @@ namespace Librame.Extensions.Data.Accessing
         public DbSet<Audit> Audits { get; set; }
 
         /// <summary>
-        /// 表格数据集。
+        /// 审计属性数据集。
         /// </summary>
-        public DbSet<Tabulation> Tabulations { get; set; }
+        public DbSet<AuditProperty> AuditProperties { get; set; }
+
+
+        /// <summary>
+        /// 模型创建后置动作。
+        /// </summary>
+        protected Action<IMutableEntityType>? ModelCreatingPostAction { get; set; }
 
 
         /// <summary>
@@ -85,11 +130,19 @@ namespace Librame.Extensions.Data.Accessing
         {
             base.OnModelCreating(modelBuilder);
 
+            var dataOptions = GetRequiredScopeService<DataExtensionOptions>();
+
             var shardingManager = GetRequiredScopeService<IShardingManager>();
-            OnDataModelCreating(modelBuilder, shardingManager);
+            OnDataModelCreating(modelBuilder, shardingManager, dataOptions);
 
             var converterFactory = GetRequiredScopeService<IEncryptionConverterFactory>();
-            modelBuilder.UseEncryption(converterFactory, AccessorType);
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                entityType.UseEncryption(converterFactory, AccessorType);
+                entityType.UseQueryFilters(dataOptions.QueryFilters, this);
+
+                ModelCreatingPostAction?.Invoke(entityType);
+            }
         }
 
         /// <summary>
@@ -97,10 +150,11 @@ namespace Librame.Extensions.Data.Accessing
         /// </summary>
         /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
         /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
+        /// <param name="dataOptions">给定的 <see cref="DataExtensionOptions"/>。</param>
         protected virtual void OnDataModelCreating(ModelBuilder modelBuilder,
-            IShardingManager shardingManager)
+            IShardingManager shardingManager, DataExtensionOptions dataOptions)
         {
-            modelBuilder.CreateDataModel(shardingManager);
+            modelBuilder.CreateDataModel(shardingManager, dataOptions);
         }
 
     }

@@ -1,15 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Librame.Extensions.Data.Sharding;
+using Microsoft.EntityFrameworkCore;
 
 namespace Librame.Extensions.Data.Accessing
 {
     static class ModelBuilderTestAccessorExtensions
     {
 
-        public static ModelBuilder CreateUserModel(this ModelBuilder modelBuilder)
+        public static ModelBuilder CreateUserModel(this ModelBuilder modelBuilder,
+            IShardingManager shardingManager)
         {
             modelBuilder.Entity<User>(b =>
             {
-                b.ToTableByPluralize();
+                b.ToTableWithSharding(shardingManager);
 
                 b.HasKey(k => k.Id);
 

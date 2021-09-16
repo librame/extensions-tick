@@ -15,7 +15,6 @@ using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace Librame.Extensions.Data
@@ -37,8 +36,9 @@ namespace Librame.Extensions.Data
             : base(parentOptions, parentOptions.Directories)
         {
             CoreOptions = parentOptions.GetRequiredOptions<CoreExtensionOptions>();
-            Access = new AccessOptions(Notifier);
-            Auditing = new AuditOptions(Notifier);
+            Access = new(Notifier);
+            Audit = new(Notifier);
+            Store = new(Notifier);
 
             // Base: IdentificationGenerator
             AddIdGenerator(new MongoIdentificationGenerator(CoreOptions.Clock));
@@ -47,7 +47,6 @@ namespace Librame.Extensions.Data
             // 异构数据源数据同步功能的标识必须使用统一的生成方案
             AddIdGenerator(CombIdentificationGenerator.ForSqlServer(CoreOptions.Clock));
 
-            ServiceCharacteristics.AddScope<IInterceptor>();
             ServiceCharacteristics.AddScope<IAuditingManager>();
             ServiceCharacteristics.AddSingleton<IIdentificationGeneratorFactory>();
 
@@ -64,6 +63,7 @@ namespace Librame.Extensions.Data
             // Sharding
             ShardingStrategies.Add(new DateTimeShardingStrategy(CoreOptions.Clock));
             ShardingStrategies.Add(new DateTimeOffsetShardingStrategy(CoreOptions.Clock));
+            ShardingStrategies.Add(new CultureInfoShardingStrategy());
             ServiceCharacteristics.AddScope<IShardingManager>();
 
             // Storing
@@ -88,7 +88,12 @@ namespace Librame.Extensions.Data
         /// <summary>
         /// 审计选项。
         /// </summary>
-        public AuditOptions Auditing { get; init; }
+        public AuditOptions Audit { get; init; }
+
+        /// <summary>
+        /// 存储选项。
+        /// </summary>
+        public StoreOptions Store {  get; init; }
 
 
         /// <summary>
@@ -99,10 +104,17 @@ namespace Librame.Extensions.Data
             => _idGenerators;
 
         /// <summary>
-        /// 分片策略列表集合（默认已集合 <see cref="DateTimeShardingStrategy"/>、<see cref="DateTimeOffsetShardingStrategy"/> 等分片策略）。
+        /// 分片策略列表集合（默认已集成 <see cref="CultureInfoShardingStrategy"/>、<see cref="DateTimeShardingStrategy"/>、<see cref="DateTimeOffsetShardingStrategy"/> 等分片策略）。
         /// </summary>
         [JsonIgnore]
         public List<IShardingStrategy> ShardingStrategies { get; init; }
+            = new();
+
+        /// <summary>
+        /// 查询过滤器列表集合。
+        /// </summary>
+        [JsonIgnore]
+        public List<IQueryFilter> QueryFilters { get; init; }
             = new();
 
 

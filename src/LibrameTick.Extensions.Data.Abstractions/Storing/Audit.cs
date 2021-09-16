@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Data.Sharding;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Librame.Extensions.Data.Storing
 {
@@ -48,6 +49,7 @@ namespace Librame.Extensions.Data.Storing
         /// <summary>
         /// 审计属性列表。
         /// </summary>
+        [NotMapped]
         public virtual List<AuditProperty> Properties { get; set; }
             = new List<AuditProperty>();
 

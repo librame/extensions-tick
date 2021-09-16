@@ -21,6 +21,16 @@ namespace Librame.Extensions.Drawing.Processing
     public class WatermarkOptions : AbstractOptions
     {
         /// <summary>
+        /// 构造一个独立属性通知器的 <see cref="WatermarkOptions"/>（此构造函数适用于独立使用 <see cref="WatermarkOptions"/> 的情况）。
+        /// </summary>
+        /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
+        public WatermarkOptions(string sourceAliase)
+            : base(sourceAliase)
+        {
+            Font = new FontOptions(Notifier, nameof(Font)) { Size = 32 };
+        }
+
+        /// <summary>
         /// 构造一个 <see cref="WatermarkOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>

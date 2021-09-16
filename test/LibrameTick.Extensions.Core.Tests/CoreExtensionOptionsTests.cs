@@ -26,8 +26,6 @@ namespace Librame.Extensions.Core
             Assert.NotNull(_options.InfoType);
             Assert.NotEmpty(_options.Name);
             Assert.Null(_options.ParentOptions);
-
-            Assert.NotNull(_options.Encoding);
             Assert.NotNull(_options.Algorithm);
 
             Assert.NotEmpty(_options.Directories.BaseDirectory);

@@ -22,6 +22,15 @@ namespace Librame.Extensions.Data
     public class AuditOptions : AbstractOptions
     {
         /// <summary>
+        /// 构造一个独立属性通知器的 <see cref="AuditOptions"/>（此构造函数适用于独立使用 <see cref="AuditOptions"/> 的情况）。
+        /// </summary>
+        /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
+        public AuditOptions(string sourceAliase)
+            : base(sourceAliase)
+        {
+        }
+
+        /// <summary>
         /// 构造一个 <see cref="AuditOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>

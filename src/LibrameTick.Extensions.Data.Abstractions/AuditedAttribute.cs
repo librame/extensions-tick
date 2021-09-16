@@ -15,15 +15,15 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data
 {
     /// <summary>
-    /// 定义用于实体操作的审计特性（详情可参见 <see cref="Audit"/>）。
+    /// 定义用于已审计实体操作的特性（详情可参见 <see cref="Audit"/>）。
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public class AuditAttribute : Attribute
+    public class AuditedAttribute : Attribute
     {
         /// <summary>
-        /// 构造一个 <see cref="AuditAttribute"/>。
+        /// 构造一个 <see cref="AuditedAttribute"/>。
         /// </summary>
-        public AuditAttribute()
+        public AuditedAttribute()
         {
         }
 

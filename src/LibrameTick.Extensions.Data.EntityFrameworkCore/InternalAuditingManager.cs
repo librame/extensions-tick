@@ -20,7 +20,7 @@ namespace Librame.Extensions.Data
 {
     class InternalAuditingManager : IAuditingManager
     {
-        private readonly Type _attributeType = typeof(AuditAttribute);
+        private readonly Type _attributeType = typeof(AuditedAttribute);
 
         private readonly IIdentificationGeneratorFactory _idGeneratorFactory;
 
@@ -66,6 +66,7 @@ namespace Librame.Extensions.Data
 
                 var auditProperty = new AuditProperty();
 
+                auditProperty.Id = _idGeneratorFactory.GetNewId<string>();
                 auditProperty.AuditId = audit.Id;
                 auditProperty.PropertyName = property.Name;
                 auditProperty.PropertyTypeName = GetTypeName(property.ClrType);
@@ -94,7 +95,9 @@ namespace Librame.Extensions.Data
                         break;
                 }
 
-                audit.Properties.Add(auditProperty);
+                // 当前属性的新值与旧值均为空时，则不被审计
+                if (!(string.IsNullOrEmpty(auditProperty.NewValue) && string.IsNullOrEmpty(auditProperty.OldValue)))
+                    audit.Properties.Add(auditProperty);
             }
         }
         

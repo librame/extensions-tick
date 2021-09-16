@@ -238,7 +238,7 @@ namespace Librame.Extensions.Data.Accessing
 
         private sealed class ExtensionInfo : DbContextOptionsExtensionInfo
         {
-            private long? _serviceProviderHash;
+            private int? _serviceProviderHash;
             private string? _logFragment;
 
             public ExtensionInfo(AccessorDbContextOptionsExtension extension)
@@ -300,6 +300,42 @@ namespace Librame.Extensions.Data.Accessing
                 }
             }
 
+            public override int GetServiceProviderHashCode()
+            {
+                if (_serviceProviderHash == null)
+                {
+                    var hashCode = new HashCode();
+
+                    hashCode.Add(Extension._group);
+                    hashCode.Add(Extension._access);
+                    hashCode.Add(Extension._pooling);
+                    hashCode.Add(Extension._priority);
+
+                    if (Extension._algorithm != null)
+                        hashCode.Add(Extension._algorithm);
+
+                    if (Extension._shardingNaming != null)
+                        hashCode.Add(Extension._shardingNaming);
+
+                    if (Extension._serviceType != null)
+                        hashCode.Add(Extension._serviceType);
+
+                    _serviceProviderHash = hashCode.ToHashCode();
+                }
+
+                return _serviceProviderHash.Value;
+            }
+
+            public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other)
+                => other is ExtensionInfo otherInfo
+                    && Extension._group == otherInfo.Extension._group
+                    && Extension._access == otherInfo.Extension._access
+                    && Extension._pooling == otherInfo.Extension._pooling
+                    && Extension._priority == otherInfo.Extension._priority
+                    && Extension._algorithm?.ToString() == otherInfo.Extension._algorithm?.ToString()
+                    && Extension._shardingNaming?.ToString() == otherInfo.Extension._shardingNaming?.ToString()
+                    && Extension._serviceType == otherInfo.Extension._serviceType;
+
             public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
             {
                 debugInfo["Accessor:" + nameof(Extension.Group)] =
@@ -315,32 +351,15 @@ namespace Librame.Extensions.Data.Accessing
                     Extension.Priority.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
                 debugInfo["Accessor:" + nameof(Extension.Algorithm)] =
-                    (Extension.Algorithm?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
+                    (Extension.Algorithm?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
                 debugInfo["Accessor:" + nameof(Extension.ShardingNaming)] =
-                    (Extension.ShardingNaming?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
+                    (Extension.ShardingNaming?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
                 debugInfo["Accessor:" + nameof(Extension.ServiceType)] =
-                    (Extension.ServiceType?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
+                    (Extension.ServiceType?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
             }
 
-            public override long GetServiceProviderHashCode()
-            {
-                if (_serviceProviderHash == null)
-                {
-                    var hashCode = (long)Extension.Group.GetHashCode();
-                    hashCode = (hashCode * 3) ^ Extension.Access.GetHashCode();
-                    hashCode = (hashCode * 3) ^ Extension.Pooling.GetHashCode();
-                    hashCode = (hashCode * 3) ^ Extension.Priority.GetHashCode();
-                    hashCode = (hashCode * 3) ^ Extension.Algorithm?.GetHashCode() ?? 0L;
-                    hashCode = (hashCode * 3) ^ Extension.ShardingNaming?.GetHashCode() ?? 0L;
-                    hashCode = (hashCode * 1073742113) ^ Extension.ServiceType?.GetHashCode() ?? 0L;
-
-                    _serviceProviderHash = hashCode;
-                }
-
-                return _serviceProviderHash.Value;
-            }
         }
 
     }

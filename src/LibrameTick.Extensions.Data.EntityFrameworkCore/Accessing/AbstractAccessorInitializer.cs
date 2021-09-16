@@ -61,14 +61,9 @@ namespace Librame.Extensions.Data.Accessing
         /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
         public virtual void Initialize(IServiceProvider services)
         {
+            Accessor.TryCreateDatabase();
+
             var options = services.GetRequiredService<DataExtensionOptions>();
-
-            if (options.Access.EnsureDatabaseDeleted)
-                Accessor.Database.EnsureDeleted();
-
-            if (options.Access.EnsureDatabaseCreated)
-                Accessor.Database.EnsureCreated();
-
             Populate(services, options);
 
             if (IsPopulated)
@@ -86,14 +81,9 @@ namespace Librame.Extensions.Data.Accessing
         public virtual async Task InitializeAsync(IServiceProvider services,
             CancellationToken cancellationToken = default)
         {
+            await Accessor.TryCreateDatabaseAsync(cancellationToken);
+
             var options = services.GetRequiredService<DataExtensionOptions>();
-
-            if (options.Access.EnsureDatabaseDeleted)
-                await Accessor.Database.EnsureDeletedAsync(cancellationToken);
-
-            if (options.Access.EnsureDatabaseCreated)
-                await Accessor.Database.EnsureCreatedAsync(cancellationToken);
-
             await PopulateAsync(services, options, cancellationToken);
 
             if (IsPopulated)

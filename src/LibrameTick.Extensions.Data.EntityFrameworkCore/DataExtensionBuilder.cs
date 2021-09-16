@@ -15,7 +15,6 @@ using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Librame.Extensions.Data
 {
@@ -35,7 +34,6 @@ namespace Librame.Extensions.Data
         public DataExtensionBuilder(IExtensionBuilder parentBuilder, DataExtensionOptions options)
             : base(parentBuilder, options)
         {
-            TryAddEnumerableServices<IInterceptor, InternalAccessorSaveChangesInterceptor>();
             TryAddOrReplaceService<IAuditingManager, InternalAuditingManager>();
             TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
 

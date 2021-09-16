@@ -21,6 +21,15 @@ namespace Librame.Extensions.Core.Cryptography
     public class SigningCredentialsOptions : AbstractOptions
     {
         /// <summary>
+        /// 构造一个独立属性通知器的 <see cref="SigningCredentialsOptions"/>（此构造函数适用于独立使用 <see cref="SigningCredentialsOptions"/> 的情况）。
+        /// </summary>
+        /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
+        public SigningCredentialsOptions(string sourceAliase)
+            : base(sourceAliase)
+        {
+        }
+
+        /// <summary>
         /// 构造一个 <see cref="SigningCredentialsOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>

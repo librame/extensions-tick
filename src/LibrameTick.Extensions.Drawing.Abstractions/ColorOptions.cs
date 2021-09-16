@@ -20,6 +20,15 @@ namespace Librame.Extensions.Drawing
     public class ColorOptions : AbstractOptions
     {
         /// <summary>
+        /// 构造一个独立属性通知器的 <see cref="ColorOptions"/>（此构造函数适用于独立使用 <see cref="ColorOptions"/> 的情况）。
+        /// </summary>
+        /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
+        public ColorOptions(string sourceAliase)
+            : base(sourceAliase)
+        {
+        }
+
+        /// <summary>
         /// 构造一个 <see cref="ColorOptions"/>。
         /// </summary>
         /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
