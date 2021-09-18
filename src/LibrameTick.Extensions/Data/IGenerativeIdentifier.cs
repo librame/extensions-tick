@@ -10,14 +10,13 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义泛型生成式标识符接口。
+/// </summary>
+/// <typeparam name="TGenId">指定的生成式标识类型（如：<see cref="Guid"/>、<see cref="long"/>、<see cref="string"/> 等类型）。</typeparam>
+public interface IGenerativeIdentifier<TGenId> : IIdentifier<TGenId>
+    where TGenId : IEquatable<TGenId>
 {
-    /// <summary>
-    /// 定义泛型生成式标识符接口。
-    /// </summary>
-    /// <typeparam name="TGenId">指定的生成式标识类型（如：<see cref="Guid"/>、<see cref="long"/>、<see cref="string"/> 等类型）。</typeparam>
-    public interface IGenerativeIdentifier<TGenId> : IIdentifier<TGenId>
-        where TGenId : IEquatable<TGenId>
-    {
-    }
 }

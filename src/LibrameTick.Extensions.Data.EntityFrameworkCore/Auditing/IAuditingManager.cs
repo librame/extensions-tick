@@ -12,20 +12,17 @@
 
 using Librame.Extensions.Data.Storing;
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data.Auditing;
+
+/// <summary>
+/// 定义审计管理器接口。
+/// </summary>
+public interface IAuditingManager
 {
     /// <summary>
-    /// 定义用于已审计实体操作的特性（详情可参见 <see cref="Audit"/>）。
+    /// 获取审计列表。
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public class AuditedAttribute : Attribute
-    {
-        /// <summary>
-        /// 构造一个 <see cref="AuditedAttribute"/>。
-        /// </summary>
-        public AuditedAttribute()
-        {
-        }
-
-    }
+    /// <param name="entityEntries">给定的 <see cref="IEnumerable{EntityEntry}"/>。</param>
+    /// <returns>返回 <see cref="IReadOnlyList{Audit}"/>。</returns>
+    IReadOnlyList<Audit> GetAudits(IEnumerable<EntityEntry> entityEntries);
 }

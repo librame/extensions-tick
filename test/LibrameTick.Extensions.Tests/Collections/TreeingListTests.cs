@@ -1,4 +1,5 @@
 using Librame.Extensions.Data;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Librame.Extensions.Collections

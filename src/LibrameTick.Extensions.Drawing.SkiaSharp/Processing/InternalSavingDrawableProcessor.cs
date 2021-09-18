@@ -11,75 +11,73 @@
 #endregion
 
 using Librame.Extensions.Core;
-using SkiaSharp;
 
-namespace Librame.Extensions.Drawing.Processing
+namespace Librame.Extensions.Drawing.Processing;
+
+class InternalSavingDrawableProcessor : AbstractDrawableProcessor, ISavingDrawableProcessor
 {
-    class InternalSavingDrawableProcessor : AbstractDrawableProcessor, ISavingDrawableProcessor
+    private readonly IClock _clock;
+    private readonly SKEncodedImageFormat _imageFormat;
+
+
+    public InternalSavingDrawableProcessor(DrawingExtensionOptions options)
+        : base(options)
     {
-        private readonly IClock _clock;
-        private readonly SKEncodedImageFormat _imageFormat;
+        _clock = options.CoreOptions.Clock;
+        _imageFormat = options.ImageFormat.AsEncodedImageFormat();
+    }
 
 
-        public InternalSavingDrawableProcessor(DrawingExtensionOptions options)
-            : base(options)
+    public Func<IClock, string> SaveSubpathFunc { get; set; }
+        = clock =>
         {
-            _clock = options.CoreOptions.Clock;
-            _imageFormat = options.ImageFormat.AsEncodedImageFormat();
-        }
+            var now = clock.GetNow();
+            var folderNames = new string[] { now.ToString("yyMM"), now.ToString("dd") };
+            return folderNames.CombineRelativeSubpath();
+        };
 
-
-        public Func<IClock, string> SaveSubpathFunc { get; set; }
-            = clock =>
-            {
-                var now = clock.GetNow();
-                var folderNames = new string[] { now.ToString("yyMM"), now.ToString("dd") };
-                return folderNames.CombineRelativeSubpath();
-            };
-
-        public Func<IClock, BitmapDescriptor, string> SaveFileBaseNameFunc { get; set; }
-            = (clock, descr) =>
-            {
-                var fileBaseName = string.Empty;
-                if (descr.FromFile)
-                    fileBaseName = Path.GetFileNameWithoutExtension(descr.FilePath);
-
-                return string.IsNullOrEmpty(fileBaseName)
-                    ? clock.GetNow().Ticks.ToString()
-                    : fileBaseName;
-            };
-
-
-        protected override bool ReleaseManaged()
-            => true;
-
-
-        protected override IBitmapList ProcessCore(IBitmapList bitmaps)
+    public Func<IClock, BitmapDescriptor, string> SaveFileBaseNameFunc { get; set; }
+        = (clock, descr) =>
         {
-            var baseDirectory = SaveSubpathFunc.Invoke(_clock).SetBasePath(Options.ImageDirectory);
-            baseDirectory.CreateDirectory();
+            var fileBaseName = string.Empty;
+            if (descr.FromFile)
+                fileBaseName = Path.GetFileNameWithoutExtension(descr.FilePath);
 
-            foreach (var bitmap in bitmaps)
+            return string.IsNullOrEmpty(fileBaseName)
+                ? clock.GetNow().Ticks.ToString()
+                : fileBaseName;
+        };
+
+
+    protected override bool ReleaseManaged()
+        => true;
+
+
+    protected override IBitmapList ProcessCore(IBitmapList bitmaps)
+    {
+        var baseDirectory = SaveSubpathFunc.Invoke(_clock).SetBasePath(Options.ImageDirectory);
+        baseDirectory.CreateDirectory();
+
+        foreach (var bitmap in bitmaps)
+        {
+            var realBitmap = (SKBitmap)bitmap.Source;
+            using (var image = SKImage.FromBitmap(realBitmap))
+            using (var data = image.Encode(_imageFormat, Options.EncodeQuality))
             {
-                var realBitmap = (SKBitmap)bitmap.Source;
-                using (var image = SKImage.FromBitmap(realBitmap))
-                using (var data = image.Encode(_imageFormat, Options.EncodeQuality))
+                // 文件基础名+另存为后缀+文件格式名，如：6123xxxx-suffix.jpeg
+                var fileName = SaveFileBaseNameFunc.Invoke(_clock, bitmap)
+                    + bitmap.SaveAsSuffix + Options.ImageFormat.Leading('.');
+
+                bitmap.SaveAsPath = baseDirectory.CombinePath(fileName);
+
+                using (var fs = new FileStream(bitmap.SaveAsPath, FileMode.OpenOrCreate))
                 {
-                    // 文件基础名+另存为后缀+文件格式名，如：6123xxxx-suffix.jpeg
-                    var fileName = SaveFileBaseNameFunc.Invoke(_clock, bitmap)
-                        + bitmap.SaveAsSuffix + Options.ImageFormat.Leading('.');
-
-                    bitmap.SaveAsPath = baseDirectory.CombinePath(fileName);
-
-                    using (var fs = new FileStream(bitmap.SaveAsPath, FileMode.OpenOrCreate))
-                    {
-                        data.SaveTo(fs);
-                    }
+                    data.SaveTo(fs);
                 }
             }
-
-            return bitmaps;
         }
 
+        return bitmaps;
     }
+
 }

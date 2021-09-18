@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
 using Xunit;
 
 namespace Librame.Extensions.Core.Storage
@@ -19,7 +20,7 @@ namespace Librame.Extensions.Core.Storage
         {
             var url = "https://www.baidu.com/img/baidu_jgylogo3.gif";
             var filePath = @"d:\baidu_jgylogo3.gif";
-            File.Delete(filePath);
+            filePath.FileDelete();
 
             var savePath = await _transmission.DownloadFileAsync(url, filePath).ConfigureAwait();
             Assert.True(savePath.FileExists());

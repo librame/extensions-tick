@@ -10,16 +10,15 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义行版本接口。
+/// </summary>
+public interface IRowVersion
 {
     /// <summary>
-    /// 定义行版本接口。
+    /// 行版本。
     /// </summary>
-    public interface IRowVersion
-    {
-        /// <summary>
-        /// 行版本。
-        /// </summary>
-        byte[] RowVersion { get; set; }
-    }
+    byte[] RowVersion { get; set; }
 }

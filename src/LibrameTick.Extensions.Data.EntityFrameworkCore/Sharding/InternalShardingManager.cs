@@ -10,21 +10,20 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Sharding
+namespace Librame.Extensions.Data.Sharding;
+
+class InternalShardingManager : IShardingManager
 {
-    class InternalShardingManager : IShardingManager
+    private readonly DataExtensionOptions _options;
+
+
+    public InternalShardingManager(DataExtensionOptions options)
     {
-        private readonly DataExtensionOptions _options;
-
-
-        public InternalShardingManager(DataExtensionOptions options)
-        {
-            _options = options;
-        }
-
-
-        public IShardingStrategy? GetStrategy(Type strategyType)
-            => _options.ShardingStrategies.FirstOrDefault(s => s.StrategyType == strategyType);
-
+        _options = options;
     }
+
+
+    public IShardingStrategy? GetStrategy(Type strategyType)
+        => _options.ShardingStrategies.FirstOrDefault(s => s.StrategyType == strategyType);
+
 }

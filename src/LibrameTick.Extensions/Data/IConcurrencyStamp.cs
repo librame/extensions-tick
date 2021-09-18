@@ -10,16 +10,15 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义并发标记接口。
+/// </summary>
+public interface IConcurrencyStamp
 {
     /// <summary>
-    /// 定义并发标记接口。
+    /// 并发标记。
     /// </summary>
-    public interface IConcurrencyStamp
-    {
-        /// <summary>
-        /// 并发标记。
-        /// </summary>
-        string ConcurrencyStamp { get; set; }
-    }
+    string ConcurrencyStamp { get; set; }
 }

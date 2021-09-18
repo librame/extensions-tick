@@ -10,27 +10,26 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义泛型标识符接口。
+/// </summary>
+/// <typeparam name="TId">指定的标识类型（兼容各种引用与值类型标识）。</typeparam>
+public interface IIdentifier<TId> : IEquatable<IIdentifier<TId>>, IObjectIdentifier
+    where TId : IEquatable<TId>
 {
     /// <summary>
-    /// 定义泛型标识符接口。
+    /// 标识。
     /// </summary>
-    /// <typeparam name="TId">指定的标识类型（兼容各种引用与值类型标识）。</typeparam>
-    public interface IIdentifier<TId> : IEquatable<IIdentifier<TId>>, IObjectIdentifier
-        where TId : IEquatable<TId>
-    {
-        /// <summary>
-        /// 标识。
-        /// </summary>
-        TId Id { get; set; }
+    TId Id { get; set; }
 
 
-        /// <summary>
-        /// 转换为标识。
-        /// </summary>
-        /// <param name="id">给定的标识对象。</param>
-        /// <param name="paramName">给定的参数名称。</param>
-        /// <returns>返回 <typeparamref name="TId"/>。</returns>
-        TId ToId(object? id, string? paramName);
-    }
+    /// <summary>
+    /// 转换为标识。
+    /// </summary>
+    /// <param name="id">给定的标识对象。</param>
+    /// <param name="paramName">给定的参数名称。</param>
+    /// <returns>返回 <typeparamref name="TId"/>。</returns>
+    TId ToId(object? id, string? paramName);
 }

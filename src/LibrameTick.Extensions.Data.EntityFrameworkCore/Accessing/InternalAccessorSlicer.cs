@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Accessing
-{
-    class InternalAccessorSlicer : AbstractAccessorSlicer<IAccessor>
-    {
-        protected override IAccessor CreateSharding(IEnumerable<IAccessor> accessors)
-            => accessors.First();
+namespace Librame.Extensions.Data.Accessing;
 
-    }
+class InternalAccessorSlicer : AbstractAccessorSlicer<IAccessor>
+{
+    protected override IAccessor CreateSharding(IEnumerable<IAccessor> accessors)
+        => accessors.First();
+
 }

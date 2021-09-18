@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象创建接口。
+/// </summary>
+public interface IObjectCreation : IObjectCreationTime, IObjectCreator
 {
-    /// <summary>
-    /// 定义对象创建接口。
-    /// </summary>
-    public interface IObjectCreation : IObjectCreationTime, IObjectCreator
-    {
-    }
 }

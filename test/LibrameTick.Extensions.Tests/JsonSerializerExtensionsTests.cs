@@ -30,7 +30,7 @@ namespace Librame.Extensions
             options = path.ReadJson<TestOptions>();
             Assert.NotNull(options);
 
-            File.Delete(path);
+            path.FileDelete();
         }
 
         #endregion

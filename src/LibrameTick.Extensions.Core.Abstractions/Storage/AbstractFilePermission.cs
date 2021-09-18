@@ -10,64 +10,63 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage
+namespace Librame.Extensions.Core.Storage;
+
+/// <summary>
+/// 定义抽象实现 <see cref="IFilePermission"/>。
+/// </summary>
+public abstract class AbstractFilePermission : IFilePermission
 {
+    private readonly WebRequestOptions _options;
+
+
     /// <summary>
-    /// 定义抽象实现 <see cref="IFilePermission"/>。
+    /// 构造一个 <see cref="AbstractFilePermission"/>。
     /// </summary>
-    public abstract class AbstractFilePermission : IFilePermission
+    /// <param name="options">给定的 <see cref="WebRequestOptions"/>。</param>
+    protected AbstractFilePermission(WebRequestOptions options)
     {
-        private readonly WebRequestOptions _options;
-
-
-        /// <summary>
-        /// 构造一个 <see cref="AbstractFilePermission"/>。
-        /// </summary>
-        /// <param name="options">给定的 <see cref="WebRequestOptions"/>。</param>
-        protected AbstractFilePermission(WebRequestOptions options)
-        {
-            _options = options;
-        }
-
-
-        /// <summary>
-        /// 异步获取访问令牌（通常由认证服务器下发）。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含字符串的异步操作。</returns>
-        public virtual Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunTask(() => _options.AuthAccessToken);
-
-        /// <summary>
-        /// 异步获取基础认证码（通常由用户名和密码组成）。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含字符串的异步操作。</returns>
-        public virtual Task<string> GetBasicCodeAsync(CancellationToken cancellationToken = default)
-        {
-            return cancellationToken.RunTask(() =>
-            {
-                return $"{_options.AuthUsername}:{_options.AuthPassword}"
-                    .FromEncodingString()
-                    .AsBase64String();
-            });
-        }
-
-        /// <summary>
-        /// 异步获取持票人认证令牌（如：JWT 认证）。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含字符串的异步操作。</returns>
-        public virtual Task<string> GetBearerTokenAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunTask(() => _options.AuthJwtToken);
-
-        /// <summary>
-        /// 异步获取 Cookie 值。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含字符串的异步操作。</returns>
-        public virtual Task<string> GetCookieValueAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunTask(() => "CookieValue");
-
+        _options = options;
     }
+
+
+    /// <summary>
+    /// 异步获取访问令牌（通常由认证服务器下发）。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含字符串的异步操作。</returns>
+    public virtual Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.RunTask(() => _options.AuthAccessToken);
+
+    /// <summary>
+    /// 异步获取基础认证码（通常由用户名和密码组成）。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含字符串的异步操作。</returns>
+    public virtual Task<string> GetBasicCodeAsync(CancellationToken cancellationToken = default)
+    {
+        return cancellationToken.RunTask(() =>
+        {
+            return $"{_options.AuthUsername}:{_options.AuthPassword}"
+                .FromEncodingString()
+                .AsBase64String();
+        });
+    }
+
+    /// <summary>
+    /// 异步获取持票人认证令牌（如：JWT 认证）。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含字符串的异步操作。</returns>
+    public virtual Task<string> GetBearerTokenAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.RunTask(() => _options.AuthJwtToken);
+
+    /// <summary>
+    /// 异步获取 Cookie 值。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含字符串的异步操作。</returns>
+    public virtual Task<string> GetCookieValueAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.RunTask(() => "CookieValue");
+
 }

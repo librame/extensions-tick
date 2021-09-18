@@ -10,46 +10,45 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象状态接口。
+/// </summary>
+public interface IObjectState
 {
     /// <summary>
-    /// 定义对象状态接口。
+    /// 状态类型。
     /// </summary>
-    public interface IObjectState
-    {
-        /// <summary>
-        /// 状态类型。
-        /// </summary>
-        Type StatusType { get; }
+    Type StatusType { get; }
 
 
-        /// <summary>
-        /// 获取对象状态。
-        /// </summary>
-        /// <returns>返回状态（兼容不支持枚举类型的实体框架）。</returns>
-        object GetObjectStatus();
+    /// <summary>
+    /// 获取对象状态。
+    /// </summary>
+    /// <returns>返回状态（兼容不支持枚举类型的实体框架）。</returns>
+    object GetObjectStatus();
 
-        /// <summary>
-        /// 异步获取对象状态。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含状态（兼容不支持枚举类型的实体框架）的异步操作。</returns>
-        ValueTask<object> GetObjectStatusAsync(CancellationToken cancellationToken = default);
+    /// <summary>
+    /// 异步获取对象状态。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含状态（兼容不支持枚举类型的实体框架）的异步操作。</returns>
+    ValueTask<object> GetObjectStatusAsync(CancellationToken cancellationToken = default);
 
 
-        /// <summary>
-        /// 设置对象状态。
-        /// </summary>
-        /// <param name="newStatus">给定的新状态对象。</param>
-        /// <returns>返回状态（兼容不支持枚举类型的实体框架）。</returns>
-        object SetObjectStatus(object newStatus);
+    /// <summary>
+    /// 设置对象状态。
+    /// </summary>
+    /// <param name="newStatus">给定的新状态对象。</param>
+    /// <returns>返回状态（兼容不支持枚举类型的实体框架）。</returns>
+    object SetObjectStatus(object newStatus);
 
-        /// <summary>
-        /// 异步设置对象状态。
-        /// </summary>
-        /// <param name="newStatus">给定的新状态对象。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含状态（兼容不支持枚举类型的实体框架）的异步操作。</returns>
-        ValueTask<object> SetObjectStatusAsync(object newStatus, CancellationToken cancellationToken = default);
-    }
+    /// <summary>
+    /// 异步设置对象状态。
+    /// </summary>
+    /// <param name="newStatus">给定的新状态对象。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含状态（兼容不支持枚举类型的实体框架）的异步操作。</returns>
+    ValueTask<object> SetObjectStatusAsync(object newStatus, CancellationToken cancellationToken = default);
 }

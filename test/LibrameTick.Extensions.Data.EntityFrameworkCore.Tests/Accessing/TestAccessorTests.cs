@@ -2,6 +2,7 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using Xunit;
 
 namespace Librame.Extensions.Data.Accessing

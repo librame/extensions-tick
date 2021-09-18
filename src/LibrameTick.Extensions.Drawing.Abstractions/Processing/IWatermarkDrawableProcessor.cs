@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Drawing.Processing
+namespace Librame.Extensions.Drawing.Processing;
+
+/// <summary>
+/// 定义实现 <see cref="IDrawableProcessor"/> 的可绘制水印处理器接口。
+/// </summary>
+public interface IWatermarkDrawableProcessor : IDrawableProcessor
 {
-    /// <summary>
-    /// 定义实现 <see cref="IDrawableProcessor"/> 的可绘制水印处理器接口。
-    /// </summary>
-    public interface IWatermarkDrawableProcessor : IDrawableProcessor
-    {
-    }
 }

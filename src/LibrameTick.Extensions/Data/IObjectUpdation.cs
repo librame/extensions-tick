@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象更新接口。
+/// </summary>
+public interface IObjectUpdation : IObjectUpdator, IObjectUpdationTime, IObjectCreation
 {
-    /// <summary>
-    /// 定义对象更新接口。
-    /// </summary>
-    public interface IObjectUpdation : IObjectUpdator, IObjectUpdationTime, IObjectCreation
-    {
-    }
 }

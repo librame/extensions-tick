@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象创建标识符接口。
+/// </summary>
+public interface IObjectCreationIdentifier : IObjectCreation, IObjectIdentifier
 {
-    /// <summary>
-    /// 定义对象创建标识符接口。
-    /// </summary>
-    public interface IObjectCreationIdentifier : IObjectCreation, IObjectIdentifier
-    {
-    }
 }

@@ -10,37 +10,34 @@
 
 #endregion
 
-using Microsoft.IdentityModel.Tokens;
+namespace Librame.Extensions.Core.Cryptography;
 
-namespace Librame.Extensions.Core.Cryptography
+/// <summary>
+/// <see cref="TemporaryRsaKey"/> 静态扩展。
+/// </summary>
+public static class TemporaryRsaKeyExtensions
 {
+
     /// <summary>
-    /// <see cref="TemporaryRsaKey"/> 静态扩展。
+    /// 转换为 <see cref="RsaSecurityKey"/>。
     /// </summary>
-    public static class TemporaryRsaKeyExtensions
+    /// <param name="tempKey">给定的 <see cref="TemporaryRsaKey"/>。</param>
+    /// <param name="requiredPrivateKey">必需存在私钥（可选；默认需要）。</param>
+    /// <returns>返回 <see cref="RsaSecurityKey"/>。</returns>
+    public static RsaSecurityKey AsRsaKey(this TemporaryRsaKey tempKey, bool requiredPrivateKey = true)
     {
+        if (tempKey.Parameters is null)
+            throw new ArgumentException("The temporary rsa key parameters is null.");
 
-        /// <summary>
-        /// 转换为 <see cref="RsaSecurityKey"/>。
-        /// </summary>
-        /// <param name="tempKey">给定的 <see cref="TemporaryRsaKey"/>。</param>
-        /// <param name="requiredPrivateKey">必需存在私钥（可选；默认需要）。</param>
-        /// <returns>返回 <see cref="RsaSecurityKey"/>。</returns>
-        public static RsaSecurityKey AsRsaKey(this TemporaryRsaKey tempKey, bool requiredPrivateKey = true)
+        var rsaKey = new RsaSecurityKey(tempKey.Parameters.AsParameters())
         {
-            if (tempKey.Parameters == null)
-                throw new ArgumentException("The temporary rsa key parameters is null.");
+            KeyId = tempKey.KeyId
+        };
 
-            var rsaKey = new RsaSecurityKey(tempKey.Parameters.AsParameters())
-            {
-                KeyId = tempKey.KeyId
-            };
+        if (requiredPrivateKey && rsaKey.PrivateKeyStatus is PrivateKeyStatus.DoesNotExist)
+            throw new NotSupportedException("The temporary rsa key does not have a private key.");
 
-            if (requiredPrivateKey && rsaKey.PrivateKeyStatus == PrivateKeyStatus.DoesNotExist)
-                throw new NotSupportedException("The temporary rsa key does not have a private key.");
-
-            return rsaKey;
-        }
-
+        return rsaKey;
     }
+
 }

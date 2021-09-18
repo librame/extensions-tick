@@ -10,17 +10,16 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Accessing
+namespace Librame.Extensions.Data.Accessing;
+
+/// <summary>
+/// 定义 <see cref="IAccessor"/> 解析器接口。
+/// </summary>
+public interface IAccessorResolver
 {
     /// <summary>
-    /// 定义 <see cref="IAccessor"/> 解析器接口。
+    /// 解析访问器描述符列表。
     /// </summary>
-    public interface IAccessorResolver
-    {
-        /// <summary>
-        /// 解析访问器描述符列表。
-        /// </summary>
-        /// <returns>返回 <see cref="IReadOnlyList{AccessorDescriptor}"/>。</returns>
-        IReadOnlyList<AccessorDescriptor> ResolveDescriptors();
-    }
+    /// <returns>返回 <see cref="IReadOnlyList{AccessorDescriptor}"/>。</returns>
+    IReadOnlyList<AccessorDescriptor> ResolveDescriptors();
 }

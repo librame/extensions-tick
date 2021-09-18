@@ -10,26 +10,25 @@
 
 #endregion
 
-namespace Librame.Extensions.Drawing.Processing
+namespace Librame.Extensions.Drawing.Processing;
+
+/// <summary>
+/// 水印模式。
+/// </summary>
+public enum WatermarkMode
 {
     /// <summary>
-    /// 水印模式。
+    /// 没有。
     /// </summary>
-    public enum WatermarkMode
-    {
-        /// <summary>
-        /// 没有。
-        /// </summary>
-        None = 0,
+    None = 0,
 
-        /// <summary>
-        /// 文本。
-        /// </summary>
-        Text = 1,
+    /// <summary>
+    /// 文本。
+    /// </summary>
+    Text = 1,
 
-        /// <summary>
-        /// 图像。
-        /// </summary>
-        Image = 2
-    }
+    /// <summary>
+    /// 图像。
+    /// </summary>
+    Image = 2
 }

@@ -10,14 +10,11 @@
 
 #endregion
 
-using Microsoft.Extensions.FileProviders;
+namespace Librame.Extensions.Core.Storage;
 
-namespace Librame.Extensions.Core.Storage
+/// <summary>
+/// 定义存储目录内容集合接口。
+/// </summary>
+public interface IStorageDirectoryContents : IDirectoryContents
 {
-    /// <summary>
-    /// 定义存储目录内容集合接口。
-    /// </summary>
-    public interface IStorageDirectoryContents : IDirectoryContents
-    {
-    }
 }

@@ -1,8 +1,9 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace Librame.Extensions.Data.Sharding
 {
-    public class ShardingDescriptorTests
+    public class ShardDescriptorTests
     {
 
         [Fact]
@@ -10,12 +11,12 @@ namespace Librame.Extensions.Data.Sharding
         {
             var now = DateTime.Now;
 
-            var sharding = new ShardingNamingDescriptor("Sharding", now.Year.ToString());
+            var sharding = new ShardDescriptor("Shard", now.Year.ToString());
 
             var expected = $"{sharding.BaseName}{sharding.SuffixConnector}{now.Year}";
             Assert.Equal(expected, sharding);
 
-            var copyShard = ShardingNamingDescriptor.Parse(expected);
+            var copyShard = ShardDescriptor.Parse(expected);
             Assert.Equal(expected, copyShard);
 
             var newSharding = sharding.WithSuffix(now.Month.ToString());

@@ -10,9 +10,8 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography
+namespace Librame.Extensions.Core.Cryptography;
+
+class InternalAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
 {
-    class InternalAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
-    {
-    }
 }

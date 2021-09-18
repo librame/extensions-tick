@@ -10,23 +10,22 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义泛型锁定接口。
+/// </summary>
+/// <typeparam name="TLockoutTime">指定的锁定期时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
+public interface ILockout<TLockoutTime> : IEquatable<TLockoutTime>, IObjectLockout
+    where TLockoutTime : struct
 {
     /// <summary>
-    /// 定义泛型锁定接口。
+    /// 锁定期结束时间。
     /// </summary>
-    /// <typeparam name="TLockoutTime">指定的锁定期时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
-    public interface ILockout<TLockoutTime> : IEquatable<TLockoutTime>, IObjectLockout
-        where TLockoutTime : struct
-    {
-        /// <summary>
-        /// 锁定期结束时间。
-        /// </summary>
-        TLockoutTime? LockoutEnd { get; set; }
+    TLockoutTime? LockoutEnd { get; set; }
 
-        /// <summary>
-        /// 已锁定。
-        /// </summary>
-        bool LockoutEnabled { get; set; }
-    }
+    /// <summary>
+    /// 已锁定。
+    /// </summary>
+    bool LockoutEnabled { get; set; }
 }

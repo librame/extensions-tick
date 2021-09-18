@@ -10,53 +10,50 @@
 
 #endregion
 
-using System.Security.Cryptography;
+namespace Librame.Extensions.Core.Cryptography;
 
-namespace Librame.Extensions.Core.Cryptography
+/// <summary>
+/// 定义一个用于文件型的临时 RSA 密钥。
+/// </summary>
+public class TemporaryRsaKey
 {
     /// <summary>
-    /// 定义一个用于文件型的临时 RSA 密钥。
+    /// 密钥标识。
     /// </summary>
-    public class TemporaryRsaKey
+    public string? KeyId { get; set; }
+
+    /// <summary>
+    /// RSA 参数。
+    /// </summary>
+    public RSAParametersInfo? Parameters { get; set; }
+
+
+    /// <summary>
+    /// 生成密钥标识。
+    /// </summary>
+    /// <returns>返回字符串。</returns>
+    public static string GenerateKeyId()
+        => RandomExtensions.GenerateByteArray(16).AsBase64String();
+
+    /// <summary>
+    /// 从文件中加载或创建 <see cref="TemporaryRsaKey"/>。
+    /// </summary>
+    /// <param name="keyFile">给定的密钥文件。</param>
+    /// <returns>返回 <see cref="TemporaryRsaKey"/>。</returns>
+    public static TemporaryRsaKey LoadOrCreateFile(string keyFile)
     {
-        /// <summary>
-        /// 密钥标识。
-        /// </summary>
-        public string? KeyId { get; set; }
-
-        /// <summary>
-        /// RSA 参数。
-        /// </summary>
-        public RSAParametersInfo? Parameters { get; set; }
-
-
-        /// <summary>
-        /// 生成密钥标识。
-        /// </summary>
-        /// <returns>返回字符串。</returns>
-        public static string GenerateKeyId()
-            => RandomExtensions.GenerateByteArray(16).AsBase64String();
-
-        /// <summary>
-        /// 从文件中加载或创建 <see cref="TemporaryRsaKey"/>。
-        /// </summary>
-        /// <param name="keyFile">给定的密钥文件。</param>
-        /// <returns>返回 <see cref="TemporaryRsaKey"/>。</returns>
-        public static TemporaryRsaKey LoadOrCreateFile(string keyFile)
+        var key = keyFile.ReadJson<TemporaryRsaKey>();
+        if (key is null)
         {
-            var key = keyFile.ReadJson<TemporaryRsaKey>();
-            if (key == null)
+            key = new TemporaryRsaKey
             {
-                key = new TemporaryRsaKey
-                {
-                    KeyId = GenerateKeyId(),
-                    Parameters = RSA.Create().ExportParameters(true).FromParameters()
-                };
-                keyFile.WriteJson(key);
-            }
-
-            return key;
+                KeyId = GenerateKeyId(),
+                Parameters = RSA.Create().ExportParameters(true).FromParameters()
+            };
+            keyFile.WriteJson(key);
         }
 
+        return key;
     }
+
 }

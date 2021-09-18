@@ -10,24 +10,24 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+class InternalIdentificationGeneratorFactory : IIdentificationGeneratorFactory
 {
-    class InternalIdentificationGeneratorFactory : IIdentificationGeneratorFactory
+    private IReadOnlyList<IObjectIdentificationGenerator> _idGenerators;
+
+
+    public InternalIdentificationGeneratorFactory(DataExtensionOptions options)
     {
-        private IReadOnlyList<IObjectIdentificationGenerator> _idGenerators;
-
-
-        public InternalIdentificationGeneratorFactory(DataExtensionOptions options)
-        {
-            _idGenerators = options.IdGenerators;
-        }
-
-
-        public virtual IIdentificationGenerator<TId> GetIdGenerator<TId>()
-            => (IIdentificationGenerator<TId>)GetIdGenerator(typeof(TId));
-
-        public virtual IObjectIdentificationGenerator GetIdGenerator(Type idType)
-            => _idGenerators.First(p => p.IdType == idType);
-
+        _idGenerators = options.IdGenerators;
     }
+
+
+    public virtual IIdentificationGenerator<TId> GetIdGenerator<TId>()
+        where TId : IEquatable<TId>
+        => (IIdentificationGenerator<TId>)GetIdGenerator(typeof(TId));
+
+    public virtual IObjectIdentificationGenerator GetIdGenerator(Type idType)
+        => _idGenerators.First(p => p.IdType == idType);
+
 }

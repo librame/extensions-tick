@@ -10,27 +10,24 @@
 
 #endregion
 
-using Microsoft.Extensions.FileProviders;
+namespace Librame.Extensions.Core.Storage;
 
-namespace Librame.Extensions.Core.Storage
+/// <summary>
+/// 定义存储文件提供程序接口。
+/// </summary>
+public interface IStorageFileProvider : IFileProvider
 {
     /// <summary>
-    /// 定义存储文件提供程序接口。
+    /// 获取目录内容集合。
     /// </summary>
-    public interface IStorageFileProvider : IFileProvider
-    {
-        /// <summary>
-        /// 获取目录内容集合。
-        /// </summary>
-        /// <param name="subpath">给定的子路径。</param>
-        /// <returns>返回 <see cref="IStorageDirectoryContents"/>。</returns>
-        new IStorageDirectoryContents GetDirectoryContents(string subpath);
+    /// <param name="subpath">给定的子路径。</param>
+    /// <returns>返回 <see cref="IStorageDirectoryContents"/>。</returns>
+    new IStorageDirectoryContents GetDirectoryContents(string subpath);
 
-        /// <summary>
-        /// 获取文件信息。
-        /// </summary>
-        /// <param name="subpath">给定的子路径。</param>
-        /// <returns>返回 <see cref="IStorageFileInfo"/>。</returns>
-        new IStorageFileInfo GetFileInfo(string subpath);
-    }
+    /// <summary>
+    /// 获取文件信息。
+    /// </summary>
+    /// <param name="subpath">给定的子路径。</param>
+    /// <returns>返回 <see cref="IStorageFileInfo"/>。</returns>
+    new IStorageFileInfo GetFileInfo(string subpath);
 }

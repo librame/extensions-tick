@@ -10,13 +10,12 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Accessing
-{
-    class InternalAccessorAggregator : AbstractAccessorAggregator<IAccessor>
-    {
-        protected override IAccessor CreateChain(IEnumerable<IAccessor> accessors,
-            AccessMode interaction)
-            => new InternalCompositeAccessor(accessors, interaction);
+namespace Librame.Extensions.Data.Accessing;
 
-    }
+class InternalAccessorAggregator : AbstractAccessorAggregator<IAccessor>
+{
+    protected override IAccessor CreateChain(IEnumerable<IAccessor> accessors,
+        AccessMode interaction)
+        => new InternalCompositeAccessor(accessors, interaction);
+
 }

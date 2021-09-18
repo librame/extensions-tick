@@ -10,26 +10,25 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Accessing
+namespace Librame.Extensions.Data.Accessing;
+
+/// <summary>
+/// <see cref="IAccessor"/> 聚合器接口。
+/// </summary>
+public interface IAccessorAggregator
 {
     /// <summary>
-    /// <see cref="IAccessor"/> 聚合器接口。
+    /// 访问器类型。
     /// </summary>
-    public interface IAccessorAggregator
-    {
-        /// <summary>
-        /// 访问器类型。
-        /// </summary>
-        Type AccessorType { get; }
+    Type AccessorType { get; }
 
 
-        /// <summary>
-        /// 聚合访问器集合。
-        /// </summary>
-        /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
-        /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
-        /// <returns>返回 <see cref="IAccessor"/>。</returns>
-        IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
-            AccessMode interaction);
-    }
+    /// <summary>
+    /// 聚合访问器集合。
+    /// </summary>
+    /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
+    /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
+    /// <returns>返回 <see cref="IAccessor"/>。</returns>
+    IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
+        AccessMode interaction);
 }

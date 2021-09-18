@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
+using System;
 
 namespace Librame.Extensions.Data
 {

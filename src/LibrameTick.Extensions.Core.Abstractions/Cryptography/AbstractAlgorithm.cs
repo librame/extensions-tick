@@ -10,34 +10,33 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography
+namespace Librame.Extensions.Core.Cryptography;
+
+/// <summary>
+/// 抽象实现 <see cref="IAlgorithm"/>。
+/// </summary>
+public abstract class AbstractAlgorithm : IAlgorithm
 {
     /// <summary>
-    /// 抽象实现 <see cref="IAlgorithm"/>。
+    /// 构造一个 <see cref="AbstractAlgorithm"/>。
     /// </summary>
-    public abstract class AbstractAlgorithm : IAlgorithm
+    /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
+    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+    public AbstractAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        IExtensionOptions options)
     {
-        /// <summary>
-        /// 构造一个 <see cref="AbstractAlgorithm"/>。
-        /// </summary>
-        /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
-        /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-        public AbstractAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-            IExtensionOptions options)
-        {
-            ParameterGenerator = parameterGenerator;
-            Options = options;
-        }
-
-
-        /// <summary>
-        /// 参数生成器。
-        /// </summary>
-        public IAlgorithmParameterGenerator ParameterGenerator { get; private set; }
-
-        /// <summary>
-        /// 扩展选项。
-        /// </summary>
-        public IExtensionOptions Options { get; private set; }
+        ParameterGenerator = parameterGenerator;
+        Options = options;
     }
+
+
+    /// <summary>
+    /// 参数生成器。
+    /// </summary>
+    public IAlgorithmParameterGenerator ParameterGenerator { get; private set; }
+
+    /// <summary>
+    /// 扩展选项。
+    /// </summary>
+    public IExtensionOptions Options { get; private set; }
 }

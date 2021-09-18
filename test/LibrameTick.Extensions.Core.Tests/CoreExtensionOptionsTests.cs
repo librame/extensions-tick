@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 
 namespace Librame.Extensions.Core
@@ -14,8 +15,8 @@ namespace Librame.Extensions.Core
             _options.PropertyChangedAction = (opts, e) =>
             {
                 var filePath = opts.SaveOptionsAsJson().First().Key;
-                Assert.True(File.Exists(filePath));
-                File.Delete(filePath);
+                Assert.True(filePath.FileExists());
+                filePath.FileDelete();
             };
         }
 

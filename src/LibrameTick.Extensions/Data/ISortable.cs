@@ -10,16 +10,15 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义可排序接口。
+/// </summary>
+public interface ISortable : IComparable<ISortable>
 {
     /// <summary>
-    /// 定义可排序接口。
+    /// 排序优先级（数值越小越优先）。
     /// </summary>
-    public interface ISortable : IComparable<ISortable>
-    {
-        /// <summary>
-        /// 排序优先级（数值越小越优先）。
-        /// </summary>
-        float Priority { get; }
-    }
+    float Priority { get; }
 }

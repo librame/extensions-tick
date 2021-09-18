@@ -10,18 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义泛型父标识符接口。
+/// </summary>
+/// <typeparam name="TId">指定的标识类型（兼容各种引用与值类型标识）。</typeparam>
+public interface IParentIdentifier<TId> : IIdentifier<TId>, IObjectParentIdentifier
+    where TId : IEquatable<TId>
 {
     /// <summary>
-    /// 定义泛型父标识符接口。
+    /// 父标识。
     /// </summary>
-    /// <typeparam name="TId">指定的标识类型（兼容各种引用与值类型标识）。</typeparam>
-    public interface IParentIdentifier<TId> : IIdentifier<TId>, IObjectParentIdentifier
-        where TId : IEquatable<TId>
-    {
-        /// <summary>
-        /// 父标识。
-        /// </summary>
-        TId ParentId { get; set; }
-    }
+    TId ParentId { get; set; }
 }

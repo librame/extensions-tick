@@ -10,14 +10,13 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage
-{
-    class InternalFilePermission : AbstractFilePermission
-    {
-        public InternalFilePermission(CoreExtensionOptions options)
-            : base(options.WebRequest)
-        {
-        }
+namespace Librame.Extensions.Core.Storage;
 
+class InternalFilePermission : AbstractFilePermission
+{
+    public InternalFilePermission(CoreExtensionOptions options)
+        : base(options.WebRequest)
+    {
     }
+
 }

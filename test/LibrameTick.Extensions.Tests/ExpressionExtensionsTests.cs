@@ -1,4 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq.Expressions;
 using System.Text;
 using Xunit;
 
@@ -54,7 +57,7 @@ namespace Librame.Extensions
             var notEqualExpression = codePageName.CreateNotEqualPropertyExpression<Encoding>(orginalCodePage);
             Assert.False(notEqualExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
 
-            // p => p.CodePage == orginalCodePage
+            // p => p.CodePage is orginalCodePage
             var equalExpression = codePageName.CreateEqualPropertyExpression<Encoding>(orginalCodePage);
             Assert.True(equalExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
         }

@@ -10,21 +10,20 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography
+namespace Librame.Extensions.Core.Cryptography;
+
+/// <summary>
+/// 定义算法接口。
+/// </summary>
+public interface IAlgorithm
 {
     /// <summary>
-    /// 定义算法接口。
+    /// 参数生成器。
     /// </summary>
-    public interface IAlgorithm
-    {
-        /// <summary>
-        /// 参数生成器。
-        /// </summary>
-        IAlgorithmParameterGenerator ParameterGenerator { get; }
+    IAlgorithmParameterGenerator ParameterGenerator { get; }
 
-        /// <summary>
-        /// 扩展选项。
-        /// </summary>
-        IExtensionOptions Options { get; }
-    }
+    /// <summary>
+    /// 扩展选项。
+    /// </summary>
+    IExtensionOptions Options { get; }
 }

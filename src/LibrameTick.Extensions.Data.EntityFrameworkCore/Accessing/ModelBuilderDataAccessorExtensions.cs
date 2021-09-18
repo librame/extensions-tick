@@ -10,75 +10,70 @@
 
 #endregion
 
-using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
-using Microsoft.EntityFrameworkCore;
 
-namespace Librame.Extensions.Data.Accessing
+namespace Librame.Extensions.Data.Accessing;
+
+/// <summary>
+/// <see cref="ModelBuilder"/> 与 <see cref="AbstractDataAccessor"/> 静态扩展。
+/// </summary>
+public static class ModelBuilderDataAccessorExtensions
 {
+
     /// <summary>
-    /// <see cref="ModelBuilder"/> 与 <see cref="AbstractDataAccessor"/> 静态扩展。
+    /// 创建数据模型。
     /// </summary>
-    public static class ModelBuilderDataAccessorExtensions
+    /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
+    /// <param name="dataAccessor">给定的 <see cref="IDataAccessor"/>。</param>
+    /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
+    public static ModelBuilder CreateDataModel(this ModelBuilder modelBuilder, IDataAccessor dataAccessor)
     {
+        var limitableMaxLength = dataAccessor.DataOptions.Store.LimitableMaxLengthOfProperty;
 
-        /// <summary>
-        /// 创建数据模型。
-        /// </summary>
-        /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-        /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-        /// <param name="dataOptions">给定的 <see cref="DataExtensionOptions"/>。</param>
-        /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
-        public static ModelBuilder CreateDataModel(this ModelBuilder modelBuilder,
-            IShardingManager shardingManager, DataExtensionOptions dataOptions)
+        modelBuilder.Entity<Audit>(b =>
         {
-            var limitableMaxLength = dataOptions.Store.LimitableMaxLengthOfProperty;
+            b.ToTableWithSharding(dataAccessor.ShardingManager);
 
-            modelBuilder.Entity<Audit>(b =>
+            b.HasIndex(i => new { i.TableName, i.EntityId, i.StateName }).HasDatabaseName().IsUnique();
+
+            b.HasKey(k => k.Id);
+
+            b.Property(p => p.Id).ValueGeneratedNever();
+
+            if (limitableMaxLength > 0)
             {
-                b.ToTableWithSharding(shardingManager);
+                b.Property(p => p.Id).HasMaxLength(limitableMaxLength);
 
-                b.HasIndex(i => new { i.TableName, i.EntityId, i.StateName }).HasDatabaseName().IsUnique();
+                b.Property(p => p.EntityId).HasMaxLength(limitableMaxLength).IsRequired();
+                b.Property(p => p.TableName).HasMaxLength(limitableMaxLength).IsRequired();
+                b.Property(p => p.StateName).HasMaxLength(limitableMaxLength);
+                b.Property(p => p.EntityTypeName).HasMaxLength(limitableMaxLength);
+            }
+        });
 
-                b.HasKey(k => k.Id);
+        modelBuilder.Entity<AuditProperty>(b =>
+        {
+            b.ToTableWithSharding(dataAccessor.ShardingManager);
 
-                b.Property(p => p.Id).ValueGeneratedNever();
+            b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
 
-                if (limitableMaxLength > 0)
-                {
-                    b.Property(p => p.Id).HasMaxLength(limitableMaxLength);
+            b.HasKey(k => k.Id);
 
-                    b.Property(p => p.EntityId).HasMaxLength(limitableMaxLength).IsRequired();
-                    b.Property(p => p.TableName).HasMaxLength(limitableMaxLength).IsRequired();
-                    b.Property(p => p.StateName).HasMaxLength(limitableMaxLength);
-                    b.Property(p => p.EntityTypeName).HasMaxLength(limitableMaxLength);
-                }
-            });
+            b.Property(x => x.Id).ValueGeneratedNever();
 
-            modelBuilder.Entity<AuditProperty>(b =>
+            if (limitableMaxLength > 0)
             {
-                b.ToTableWithSharding(shardingManager);
+                b.Property(p => p.AuditId).HasMaxLength(limitableMaxLength).IsRequired();
+                b.Property(p => p.PropertyName).HasMaxLength(limitableMaxLength);
+                b.Property(p => p.PropertyTypeName).HasMaxLength(limitableMaxLength);
+            }
 
-                b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
+            // MaxLength
+            b.Property(p => p.OldValue);
+            b.Property(p => p.NewValue);
+        });
 
-                b.HasKey(k => k.Id);
-
-                b.Property(x => x.Id).ValueGeneratedNever();
-
-                if (limitableMaxLength > 0)
-                {
-                    b.Property(p => p.AuditId).HasMaxLength(limitableMaxLength).IsRequired();
-                    b.Property(p => p.PropertyName).HasMaxLength(limitableMaxLength);
-                    b.Property(p => p.PropertyTypeName).HasMaxLength(limitableMaxLength);
-                }
-
-                // MaxLength
-                b.Property(p => p.OldValue);
-                b.Property(p => p.NewValue);
-            });
-
-            return modelBuilder;
-        }
-
+        return modelBuilder;
     }
+
 }

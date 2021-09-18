@@ -10,46 +10,45 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象标识符接口。
+/// </summary>
+public interface IObjectIdentifier
 {
     /// <summary>
-    /// 定义对象标识符接口。
+    /// 标识类型。
     /// </summary>
-    public interface IObjectIdentifier
-    {
-        /// <summary>
-        /// 标识类型。
-        /// </summary>
-        Type IdType { get; }
+    Type IdType { get; }
 
 
-        /// <summary>
-        /// 获取对象标识。
-        /// </summary>
-        /// <returns>返回对象标识（兼容各种引用与值类型标识）。</returns>
-        object GetObjectId();
+    /// <summary>
+    /// 获取对象标识。
+    /// </summary>
+    /// <returns>返回对象标识（兼容各种引用与值类型标识）。</returns>
+    object GetObjectId();
 
-        /// <summary>
-        /// 异步获取对象标识。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含对象标识（兼容各种引用与值类型标识）的异步操作。</returns>
-        ValueTask<object> GetObjectIdAsync(CancellationToken cancellationToken = default);
+    /// <summary>
+    /// 异步获取对象标识。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含对象标识（兼容各种引用与值类型标识）的异步操作。</returns>
+    ValueTask<object> GetObjectIdAsync(CancellationToken cancellationToken = default);
 
 
-        /// <summary>
-        /// 设置对象标识。
-        /// </summary>
-        /// <param name="newId">给定的新标识对象。</param>
-        /// <returns>返回对象标识（兼容各种引用与值类型标识）。</returns>
-        object SetObjectId(object newId);
+    /// <summary>
+    /// 设置对象标识。
+    /// </summary>
+    /// <param name="newId">给定的新标识对象。</param>
+    /// <returns>返回对象标识（兼容各种引用与值类型标识）。</returns>
+    object SetObjectId(object newId);
 
-        /// <summary>
-        /// 异步设置对象标识。
-        /// </summary>
-        /// <param name="newId">给定的新标识对象。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含对象标识（兼容各种引用与值类型标识）的异步操作。</returns>
-        ValueTask<object> SetObjectIdAsync(object newId, CancellationToken cancellationToken = default);
-    }
+    /// <summary>
+    /// 异步设置对象标识。
+    /// </summary>
+    /// <param name="newId">给定的新标识对象。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含对象标识（兼容各种引用与值类型标识）的异步操作。</returns>
+    ValueTask<object> SetObjectIdAsync(object newId, CancellationToken cancellationToken = default);
 }

@@ -10,14 +10,13 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义泛型增量式标识符接口。
+/// </summary>
+/// <typeparam name="TIncremId">指定的增量式标识类型（如：整数型标识）。</typeparam>
+public interface IIncrementalIdentifier<TIncremId> : IIdentifier<TIncremId>
+    where TIncremId : IEquatable<TIncremId>
 {
-    /// <summary>
-    /// 定义泛型增量式标识符接口。
-    /// </summary>
-    /// <typeparam name="TIncremId">指定的增量式标识类型（如：整数型标识）。</typeparam>
-    public interface IIncrementalIdentifier<TIncremId> : IIdentifier<TIncremId>
-        where TIncremId : IEquatable<TIncremId>
-    {
-    }
 }

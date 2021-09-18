@@ -10,19 +10,16 @@
 
 #endregion
 
-using Microsoft.Extensions.FileProviders;
+namespace Librame.Extensions.Core.Storage;
 
-namespace Librame.Extensions.Core.Storage
+/// <summary>
+/// 定义存储文件信息。
+/// </summary>
+public interface IStorageFileInfo : IFileInfo
 {
     /// <summary>
-    /// 定义存储文件信息。
+    /// 创建写入流。
     /// </summary>
-    public interface IStorageFileInfo : IFileInfo
-    {
-        /// <summary>
-        /// 创建写入流。
-        /// </summary>
-        /// <returns>返回 <see cref="Stream"/>。</returns>
-        Stream CreateWriteStream();
-    }
+    /// <returns>返回 <see cref="Stream"/>。</returns>
+    Stream CreateWriteStream();
 }

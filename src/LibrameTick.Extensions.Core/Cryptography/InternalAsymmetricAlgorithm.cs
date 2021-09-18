@@ -10,23 +10,22 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography
+namespace Librame.Extensions.Core.Cryptography;
+
+class InternalAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
 {
-    class InternalAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
+    private CoreExtensionOptions _options;
+
+
+    public InternalAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        CoreExtensionOptions options)
+        : base(parameterGenerator, options)
     {
-        private CoreExtensionOptions _options;
-
-
-        public InternalAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-            CoreExtensionOptions options)
-            : base(parameterGenerator, options)
-        {
-            _options = options;
-        }
-
-
-        protected override SigningCredentialsOptions DefaultRsaOptions
-            => _options.Algorithm.Rsa;
-
+        _options = options;
     }
+
+
+    protected override SigningCredentialsOptions DefaultRsaOptions
+        => _options.Algorithm.Rsa;
+
 }

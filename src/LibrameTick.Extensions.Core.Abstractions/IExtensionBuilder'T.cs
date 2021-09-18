@@ -10,18 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Core
+namespace Librame.Extensions.Core;
+
+/// <summary>
+/// 定义扩展构建器接口。
+/// </summary>
+/// <typeparam name="TOptions">指定的扩展选项类型。</typeparam>
+public interface IExtensionBuilder<TOptions> : IExtensionBuilder
+    where TOptions : IExtensionOptions
 {
     /// <summary>
-    /// 定义扩展构建器接口。
+    /// 扩展选项。
     /// </summary>
-    /// <typeparam name="TOptions">指定的扩展选项类型。</typeparam>
-    public interface IExtensionBuilder<TOptions> : IExtensionBuilder
-        where TOptions : IExtensionOptions
-    {
-        /// <summary>
-        /// 扩展选项。
-        /// </summary>
-        new TOptions Options { get; }
-    }
+    new TOptions Options { get; }
 }

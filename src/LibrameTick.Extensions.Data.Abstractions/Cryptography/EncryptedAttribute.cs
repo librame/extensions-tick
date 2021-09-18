@@ -10,13 +10,12 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Cryptography
+namespace Librame.Extensions.Data.Cryptography;
+
+/// <summary>
+/// 定义表示此属性已加密的特性。
+/// </summary>
+[AttributeUsage(AttributeTargets.Property, Inherited = false)]
+public class EncryptedAttribute : Attribute
 {
-    /// <summary>
-    /// 定义表示此属性已加密的特性。
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property, Inherited = false)]
-    public class EncryptedAttribute : Attribute
-    {
-    }
 }

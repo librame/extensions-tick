@@ -10,29 +10,28 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography
+namespace Librame.Extensions.Core.Cryptography;
+
+class InternalSymmetricAlgorithm : AbstractSymmetricAlgorithm
 {
-    class InternalSymmetricAlgorithm : AbstractSymmetricAlgorithm
+    private CoreExtensionOptions _options;
+
+
+    public InternalSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        CoreExtensionOptions options)
+        : base(parameterGenerator, options)
     {
-        private CoreExtensionOptions _options;
-
-
-        public InternalSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-            CoreExtensionOptions options)
-            : base(parameterGenerator, options)
-        {
-            _options = options;
-        }
-
-
-        protected override KeyNonceOptions DefaultAesOptions
-            => _options.Algorithm.Aes;
-
-        protected override KeyNonceTagOptions DefaultAesCcmOptions
-            => _options.Algorithm.AesCcm;
-
-        protected override KeyNonceTagOptions DefaultAesGcmOptions
-            => _options.Algorithm.AesGcm;
-
+        _options = options;
     }
+
+
+    protected override KeyNonceOptions DefaultAesOptions
+        => _options.Algorithm.Aes;
+
+    protected override KeyNonceTagOptions DefaultAesCcmOptions
+        => _options.Algorithm.AesCcm;
+
+    protected override KeyNonceTagOptions DefaultAesGcmOptions
+        => _options.Algorithm.AesGcm;
+
 }

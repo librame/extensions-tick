@@ -10,17 +10,16 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义泛型状态接口。
+/// </summary>
+/// <typeparam name="TStatus">指定的状态类型（兼容不支持枚举类型的实体框架）。</typeparam>
+public interface IState<TStatus> : IEquatable<IState<TStatus>>, IObjectState
 {
     /// <summary>
-    /// 定义泛型状态接口。
+    /// 状态。
     /// </summary>
-    /// <typeparam name="TStatus">指定的状态类型（兼容不支持枚举类型的实体框架）。</typeparam>
-    public interface IState<TStatus> : IEquatable<IState<TStatus>>, IObjectState
-    {
-        /// <summary>
-        /// 状态。
-        /// </summary>
-        TStatus Status { get; set; }
-    }
+    TStatus Status { get; set; }
 }

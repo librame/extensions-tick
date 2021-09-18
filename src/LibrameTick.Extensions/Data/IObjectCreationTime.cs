@@ -10,46 +10,45 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象创建时间接口。
+/// </summary>
+public interface IObjectCreationTime
 {
     /// <summary>
-    /// 定义对象创建时间接口。
+    /// 创建时间类型。
     /// </summary>
-    public interface IObjectCreationTime
-    {
-        /// <summary>
-        /// 创建时间类型。
-        /// </summary>
-        Type CreatedTimeType { get; }
+    Type CreatedTimeType { get; }
 
 
-        /// <summary>
-        /// 获取对象创建时间。
-        /// </summary>
-        /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
-        object GetObjectCreatedTime();
+    /// <summary>
+    /// 获取对象创建时间。
+    /// </summary>
+    /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
+    object GetObjectCreatedTime();
 
-        /// <summary>
-        /// 异步获取对象创建时间。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-        ValueTask<object> GetObjectCreatedTimeAsync(CancellationToken cancellationToken = default);
+    /// <summary>
+    /// 异步获取对象创建时间。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
+    ValueTask<object> GetObjectCreatedTimeAsync(CancellationToken cancellationToken = default);
 
 
-        /// <summary>
-        /// 设置对象创建时间。
-        /// </summary>
-        /// <param name="newCreatedTime">给定的新创建时间对象。</param>
-        /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
-        object SetObjectCreatedTime(object newCreatedTime);
+    /// <summary>
+    /// 设置对象创建时间。
+    /// </summary>
+    /// <param name="newCreatedTime">给定的新创建时间对象。</param>
+    /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
+    object SetObjectCreatedTime(object newCreatedTime);
 
-        /// <summary>
-        /// 异步设置对象创建时间。
-        /// </summary>
-        /// <param name="newCreatedTime">给定的新创建时间对象。</param>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-        ValueTask<object> SetObjectCreatedTimeAsync(object newCreatedTime, CancellationToken cancellationToken = default);
-    }
+    /// <summary>
+    /// 异步设置对象创建时间。
+    /// </summary>
+    /// <param name="newCreatedTime">给定的新创建时间对象。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
+    ValueTask<object> SetObjectCreatedTimeAsync(object newCreatedTime, CancellationToken cancellationToken = default);
 }

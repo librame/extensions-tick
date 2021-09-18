@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象更新标识符接口。
+/// </summary>
+public interface IObjectUpdationIdentifier : IObjectUpdation, IObjectIdentifier
 {
-    /// <summary>
-    /// 定义对象更新标识符接口。
-    /// </summary>
-    public interface IObjectUpdationIdentifier : IObjectUpdation, IObjectIdentifier
-    {
-    }
 }

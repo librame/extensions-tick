@@ -11,34 +11,34 @@
 #endregion
 
 using Librame.Extensions.Core;
+using Librame.Extensions.Drawing;
 
-namespace Librame.Extensions.Drawing
+namespace Microsoft.Extensions.DependencyInjection;
+
+/// <summary>
+/// <see cref="DrawingExtensionBuilder"/> 静态扩展。
+/// </summary>
+public static class DrawingExtensionBuilderExtensions
 {
+
     /// <summary>
-    /// <see cref="DrawingExtensionBuilder"/> 静态扩展。
+    /// 添加 <see cref="DrawingExtensionBuilder"/>。
     /// </summary>
-    public static class DrawingExtensionBuilderExtensions
+    /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
+    /// <param name="setupAction">给定的配置选项动作（可选）。</param>
+    /// <param name="tryLoadOptionsFromJson">尝试从本地 JSON 文件中加载选项配置（可选；默认不加载）。</param>
+    /// <returns>返回 <see cref="DrawingExtensionBuilder"/>。</returns>
+    public static DrawingExtensionBuilder AddDrawing(this IExtensionBuilder parentBuilder,
+        Action<DrawingExtensionOptions>? setupAction = null, bool tryLoadOptionsFromJson = false)
     {
+        var options = new DrawingExtensionOptions(parentBuilder.Options);
 
-        /// <summary>
-        /// 添加 <see cref="DrawingExtensionBuilder"/>。
-        /// </summary>
-        /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
-        /// <param name="setupAction">给定的配置选项动作（可选）。</param>
-        /// <param name="tryLoadOptionsFromJson">尝试从本地 JSON 文件中加载选项配置（可选；默认不加载）。</param>
-        /// <returns>返回 <see cref="DrawingExtensionBuilder"/>。</returns>
-        public static DrawingExtensionBuilder AddDrawing(this IExtensionBuilder parentBuilder,
-            Action<DrawingExtensionOptions>? setupAction = null, bool tryLoadOptionsFromJson = false)
-        {
-            var options = new DrawingExtensionOptions(parentBuilder.Options);
+        if (tryLoadOptionsFromJson)
+            options.TryLoadOptionsFromJson(); // 强迫症，默认不初始创建暂不需要的文件夹
 
-            if (tryLoadOptionsFromJson)
-                options.TryLoadOptionsFromJson(); // 强迫症，默认不初始创建暂不需要的文件夹
+        setupAction?.Invoke(options);
 
-            setupAction?.Invoke(options);
-
-            return new DrawingExtensionBuilder(parentBuilder, options);
-        }
-
+        return new DrawingExtensionBuilder(parentBuilder, options);
     }
+
 }

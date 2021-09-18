@@ -1,5 +1,5 @@
-﻿using Librame.Extensions.Core;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Librame.Extensions.Drawing
 {

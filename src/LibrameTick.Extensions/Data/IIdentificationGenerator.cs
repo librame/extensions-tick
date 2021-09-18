@@ -10,25 +10,25 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义泛型标识生成器接口。
+/// </summary>
+/// <typeparam name="TId">指定的标识类型。</typeparam>
+public interface IIdentificationGenerator<TId> : IObjectIdentificationGenerator
+    where TId : IEquatable<TId>
 {
     /// <summary>
-    /// 定义泛型标识生成器接口。
+    /// 生成标识。
     /// </summary>
-    /// <typeparam name="TId">指定的标识类型。</typeparam>
-    public interface IIdentificationGenerator<TId> : IObjectIdentificationGenerator
-    {
-        /// <summary>
-        /// 生成标识。
-        /// </summary>
-        /// <returns>返回 <typeparamref name="TId"/>。</returns>
-        TId GenerateId();
+    /// <returns>返回 <typeparamref name="TId"/>。</returns>
+    TId GenerateId();
 
-        /// <summary>
-        /// 异步生成标识。
-        /// </summary>
-        /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-        /// <returns>返回一个包含 <typeparamref name="TId"/> 的异步操作。</returns>
-        Task<TId> GenerateIdAsync(CancellationToken cancellationToken = default);
-    }
+    /// <summary>
+    /// 异步生成标识。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <typeparamref name="TId"/> 的异步操作。</returns>
+    Task<TId> GenerateIdAsync(CancellationToken cancellationToken = default);
 }

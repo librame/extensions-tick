@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义对象发表接口。
+/// </summary>
+public interface IObjectPublication : IObjectPublisher, IObjectPublicationTime, IObjectCreation
 {
-    /// <summary>
-    /// 定义对象发表接口。
-    /// </summary>
-    public interface IObjectPublication : IObjectPublisher, IObjectPublicationTime, IObjectCreation
-    {
-    }
 }

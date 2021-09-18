@@ -10,26 +10,25 @@
 
 #endregion
 
-namespace Librame.Extensions.Core
+namespace Librame.Extensions.Core;
+
+/// <summary>
+/// 定义 <see cref="IProcessor"/> 管理器接口。
+/// </summary>
+public interface IProcessorManager
 {
     /// <summary>
-    /// 定义 <see cref="IProcessor"/> 管理器接口。
+    /// 使用处理器。
     /// </summary>
-    public interface IProcessorManager
-    {
-        /// <summary>
-        /// 使用处理器。
-        /// </summary>
-        /// <typeparam name="TProcessor">指定的处理器类型。</typeparam>
-        /// <returns>返回 <typeparamref name="TProcessor"/>。</returns>
-        TProcessor UseProcessor<TProcessor>()
-            where TProcessor : IProcessor;
+    /// <typeparam name="TProcessor">指定的处理器类型。</typeparam>
+    /// <returns>返回 <typeparamref name="TProcessor"/>。</returns>
+    TProcessor UseProcessor<TProcessor>()
+        where TProcessor : IProcessor;
 
-        /// <summary>
-        /// 使用处理器。
-        /// </summary>
-        /// <param name="processorType">给定的处理器类型。</param>
-        /// <returns>返回 <see cref="IProcessor"/>。</returns>
-        IProcessor UseProcessor(Type processorType);
-    }
+    /// <summary>
+    /// 使用处理器。
+    /// </summary>
+    /// <param name="processorType">给定的处理器类型。</param>
+    /// <returns>返回 <see cref="IProcessor"/>。</returns>
+    IProcessor UseProcessor(Type processorType);
 }

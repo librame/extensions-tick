@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Drawing.Processing
+namespace Librame.Extensions.Drawing.Processing;
+
+/// <summary>
+/// 定义实现 <see cref="IDrawableProcessor"/> 的可绘制缩放处理器接口。
+/// </summary>
+public interface IScalingDrawableProcessor : IDrawableProcessor
 {
-    /// <summary>
-    /// 定义实现 <see cref="IDrawableProcessor"/> 的可绘制缩放处理器接口。
-    /// </summary>
-    public interface IScalingDrawableProcessor : IDrawableProcessor
-    {
-    }
 }

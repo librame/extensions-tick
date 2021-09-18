@@ -10,48 +10,47 @@
 
 #endregion
 
-namespace Librame.Extensions.Collections
+namespace Librame.Extensions.Collections;
+
+/// <summary>
+/// 定义分页信息接口。
+/// </summary>
+public interface IPagingInfo
 {
     /// <summary>
-    /// 定义分页信息接口。
+    /// 总条数。
     /// </summary>
-    public interface IPagingInfo
-    {
-        /// <summary>
-        /// 总条数。
-        /// </summary>
-        long Total { get; }
+    long Total { get; }
 
-        /// <summary>
-        /// 页数。
-        /// </summary>
-        long Pages { get; }
+    /// <summary>
+    /// 页数。
+    /// </summary>
+    long Pages { get; }
 
-        /// <summary>
-        /// 是否已分页。
-        /// </summary>
-        bool IsPaged { get; }
+    /// <summary>
+    /// 是否已分页。
+    /// </summary>
+    bool IsPaged { get; }
 
 
-        /// <summary>
-        /// 取得的条数。
-        /// </summary>
-        int Take { get; }
+    /// <summary>
+    /// 取得的条数。
+    /// </summary>
+    int Take { get; }
 
-        /// <summary>
-        /// 跳过的条数。
-        /// </summary>
-        int Skip { get; }
+    /// <summary>
+    /// 跳过的条数。
+    /// </summary>
+    int Skip { get; }
 
 
-        /// <summary>
-        /// 页大小。
-        /// </summary>
-        int Size { get; }
+    /// <summary>
+    /// 页大小。
+    /// </summary>
+    int Size { get; }
 
-        /// <summary>
-        /// 页索引。
-        /// </summary>
-        int Index { get; }
-    }
+    /// <summary>
+    /// 页索引。
+    /// </summary>
+    int Index { get; }
 }

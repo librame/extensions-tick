@@ -1,5 +1,4 @@
-﻿using Librame.Extensions.Data.Sharding;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Librame.Extensions.Data.Accessing
 {
@@ -7,11 +6,11 @@ namespace Librame.Extensions.Data.Accessing
     {
 
         public static ModelBuilder CreateUserModel(this ModelBuilder modelBuilder,
-            IShardingManager shardingManager)
+            ITestAccessor testAccessor)
         {
             modelBuilder.Entity<User>(b =>
             {
-                b.ToTableWithSharding(shardingManager);
+                b.ToTableWithSharding(testAccessor.ShardingManager);
 
                 b.HasKey(k => k.Id);
 

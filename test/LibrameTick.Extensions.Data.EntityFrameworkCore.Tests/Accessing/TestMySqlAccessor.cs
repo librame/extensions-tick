@@ -1,5 +1,4 @@
-﻿using Librame.Extensions.Data.Sharding;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Librame.Extensions.Data.Accessing
 {
@@ -19,12 +18,11 @@ namespace Librame.Extensions.Data.Accessing
         public DbSet<User> Users { get; set; }
 
 
-        protected override void OnDataModelCreating(ModelBuilder modelBuilder,
-            IShardingManager shardingManager, DataExtensionOptions dataOptions)
+        protected override void OnDataModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnDataModelCreating(modelBuilder, shardingManager, dataOptions);
+            base.OnDataModelCreating(modelBuilder);
 
-            modelBuilder.CreateUserModel(shardingManager);
+            modelBuilder.CreateUserModel(this);
         }
 
     }

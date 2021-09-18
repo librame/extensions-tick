@@ -10,57 +10,56 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Accessing
+namespace Librame.Extensions.Data.Accessing;
+
+/// <summary>
+/// 抽象实现 <see cref="IAccessorAggregator"/>。
+/// </summary>
+/// <typeparam name="TAccessor">指定实现 <see cref="IAccessor"/> 的访问器类型。</typeparam>
+public abstract class AbstractAccessorAggregator<TAccessor> : IAccessorAggregator
+    where TAccessor : class, IAccessor
 {
     /// <summary>
-    /// 抽象实现 <see cref="IAccessorAggregator"/>。
+    /// 访问器类型。
     /// </summary>
-    /// <typeparam name="TAccessor">指定实现 <see cref="IAccessor"/> 的访问器类型。</typeparam>
-    public abstract class AbstractAccessorAggregator<TAccessor> : IAccessorAggregator
-        where TAccessor : class, IAccessor
+    public virtual Type AccessorType
+        => typeof(TAccessor);
+
+
+    /// <summary>
+    /// 创建访问器集合链。
+    /// </summary>
+    /// <param name="accessors">给定的 <see cref="IEnumerable{TAccessor}"/>。</param>
+    /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
+    /// <returns>返回 <typeparamref name="TAccessor"/>。</returns>
+    protected abstract TAccessor CreateChain(IEnumerable<TAccessor> accessors,
+        AccessMode interaction);
+
+
+    /// <summary>
+    /// 聚合访问器集合。
+    /// </summary>
+    /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
+    /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
+    /// <returns>返回 <see cref="IAccessor"/>。</returns>
+    public virtual IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
+        AccessMode interaction)
     {
-        /// <summary>
-        /// 访问器类型。
-        /// </summary>
-        public virtual Type AccessorType
-            => typeof(TAccessor);
-
-
-        /// <summary>
-        /// 创建访问器集合链。
-        /// </summary>
-        /// <param name="accessors">给定的 <see cref="IEnumerable{TAccessor}"/>。</param>
-        /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
-        /// <returns>返回 <typeparamref name="TAccessor"/>。</returns>
-        protected abstract TAccessor CreateChain(IEnumerable<TAccessor> accessors,
-            AccessMode interaction);
-
-
-        /// <summary>
-        /// 聚合访问器集合。
-        /// </summary>
-        /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
-        /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
-        /// <returns>返回 <see cref="IAccessor"/>。</returns>
-        public virtual IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
-            AccessMode interaction)
+        if (descriptors.Count is 1)
         {
-            if (descriptors.Count == 1)
-            {
-                // 只有单个访问器时不进行过滤
-                return descriptors[0].Accessor;
-            }
-            else if (descriptors.Count > 1)
-            {
-                var accessors = descriptors.SelectAccessors(interaction).OfType<TAccessor>();
-
-                return CreateChain(accessors, interaction);
-            }
-            else
-            {
-                return null;
-            }
+            // 只有单个访问器时不进行过滤
+            return descriptors[0].Accessor;
         }
+        else if (descriptors.Count > 1)
+        {
+            var accessors = descriptors.SelectAccessors(interaction).OfType<TAccessor>();
 
+            return CreateChain(accessors, interaction);
+        }
+        else
+        {
+            return null;
+        }
     }
+
 }

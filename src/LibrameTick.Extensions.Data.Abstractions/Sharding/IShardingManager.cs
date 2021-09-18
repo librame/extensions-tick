@@ -10,18 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Sharding
+namespace Librame.Extensions.Data.Sharding;
+
+/// <summary>
+/// 定义分片管理器接口。
+/// </summary>
+public interface IShardingManager
 {
     /// <summary>
-    /// 定义分片管理器接口。
+    /// 获取指定策略类型的分片策略。
     /// </summary>
-    public interface IShardingManager
-    {
-        /// <summary>
-        /// 获取指定策略类型的分片策略。
-        /// </summary>
-        /// <param name="strategyType">给定的策略类型。</param>
-        /// <returns>返回 <see cref="IShardingStrategy"/>。</returns>
-        IShardingStrategy? GetStrategy(Type strategyType);
-    }
+    /// <param name="strategyType">给定的策略类型。</param>
+    /// <returns>返回 <see cref="IShardingStrategy"/>。</returns>
+    IShardingStrategy? GetStrategy(Type strategyType);
 }

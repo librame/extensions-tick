@@ -10,12 +10,11 @@
 
 #endregion
 
-namespace Librame.Extensions.Core
+namespace Librame.Extensions.Core;
+
+/// <summary>
+/// 定义实现 <see cref="IDisposable"/> 的处理器接口。
+/// </summary>
+public interface IProcessor : IDisposable
 {
-    /// <summary>
-    /// 定义实现 <see cref="IDisposable"/> 的处理器接口。
-    /// </summary>
-    public interface IProcessor : IDisposable
-    {
-    }
 }

@@ -1,5 +1,6 @@
 ﻿using Librame.Extensions.Core;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 using Xunit;
 
 namespace Librame.Extensions.Drawing.Processing

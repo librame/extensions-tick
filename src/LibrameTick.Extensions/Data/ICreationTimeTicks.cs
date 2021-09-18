@@ -10,19 +10,18 @@
 
 #endregion
 
-namespace Librame.Extensions.Data
+namespace Librame.Extensions.Data;
+
+/// <summary>
+/// 定义创建时间周期数接口。
+/// </summary>
+/// <remarks>
+/// 主要用于解决 <see cref="DateTimeOffset"/> 在不同数据库中 LINQ 查询的兼容性问题。
+/// </remarks>
+public interface ICreationTimeTicks
 {
     /// <summary>
-    /// 定义创建时间周期数接口。
+    /// 创建时间周期数。
     /// </summary>
-    /// <remarks>
-    /// 主要用于解决 <see cref="DateTimeOffset"/> 在不同数据库中 LINQ 查询的兼容性问题。
-    /// </remarks>
-    public interface ICreationTimeTicks
-    {
-        /// <summary>
-        /// 创建时间周期数。
-        /// </summary>
-        long CreatedTimeTicks { get; set; }
-    }
+    long CreatedTimeTicks { get; set; }
 }
