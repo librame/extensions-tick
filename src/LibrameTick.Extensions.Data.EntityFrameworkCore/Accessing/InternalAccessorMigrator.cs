@@ -14,21 +14,21 @@ namespace Librame.Extensions.Data.Accessing;
 
 class InternalAccessorMigrator : IAccessorMigrator
 {
-    public void Migrate(IReadOnlyList<AccessorDescriptor> descriptors)
+    public void Migrate(IReadOnlyList<IAccessor> accessors)
     {
-        foreach (var descr in descriptors)
+        foreach (var accessor in accessors)
         {
-            var context = (DbContext)descr.Accessor;
+            var context = (DbContext)accessor;
             context.Database.Migrate();
         }
     }
 
-    public async Task MigrateAsync(IReadOnlyList<AccessorDescriptor> descriptors,
+    public async Task MigrateAsync(IReadOnlyList<IAccessor> accessors,
         CancellationToken cancellationToken = default)
     {
-        foreach (var descr in descriptors)
+        foreach (var accessor in accessors)
         {
-            var context = (DbContext)descr.Accessor;
+            var context = (DbContext)accessor;
             await context.Database.MigrateAsync(cancellationToken);
         }
     }

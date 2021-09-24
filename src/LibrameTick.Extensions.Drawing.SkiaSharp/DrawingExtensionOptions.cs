@@ -78,7 +78,7 @@ public class DrawingExtensionOptions : AbstractExtensionOptions<DrawingExtension
     /// </summary>
     public string ImageDirectory
     {
-        get => Notifier.GetOrAddDirectory(nameof(ImageDirectory), string.Empty);
+        get => Notifier.GetOrAdd(nameof(ImageDirectory), string.Empty);
         set => Notifier.AddOrUpdate(nameof(ImageDirectory), value);
     }
 

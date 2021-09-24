@@ -14,7 +14,7 @@ namespace Librame.Extensions.Data.Accessing;
 
 class InternalAccessorSlicer : AbstractAccessorSlicer<IAccessor>
 {
-    protected override IAccessor CreateSharding(IEnumerable<IAccessor> accessors)
+    protected override IAccessor CreateSlice(IEnumerable<IAccessor> accessors)
         => accessors.First();
 
 }

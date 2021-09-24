@@ -19,17 +19,12 @@ public static class AccessorDescriptorExtensions
 {
 
     /// <summary>
-    /// 选择访问器集合。
+    /// 按指定的访问模式过滤访问器集合（支持访问模式的位与运算）。
     /// </summary>
-    /// <param name="descriptors">给定的 <see cref="IEnumerable{AccessorDescriptor}"/>。</param>
-    /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
+    /// <param name="accessors">给定的 <see cref="IEnumerable{IAccessor}"/>。</param>
+    /// <param name="access">给定的 <see cref="AccessMode"/>。</param>
     /// <returns>返回 <see cref="IEnumerable{IAccessor}"/>。</returns>
-    public static IEnumerable<IAccessor> SelectAccessors(this IEnumerable<AccessorDescriptor> descriptors,
-        AccessMode interaction)
-    {
-        // 支持交互形式的位与运算
-        return descriptors.Where(p => (interaction & p.Access) == p.Access)
-            .Select(s => s.Accessor);
-    }
+    public static IEnumerable<IAccessor> FilterAccessors(this IEnumerable<IAccessor> accessors, AccessMode access)
+        => accessors.Where(p => (access & p.AccessorDescriptor?.Access) == p.AccessorDescriptor?.Access);
 
 }

@@ -79,40 +79,40 @@ public class AccessorDbContextOptionsBuilder
 
 
     /// <summary>
-    /// 配置分片命名特性。
+    /// 配置分片特性。
     /// </summary>
     /// <typeparam name="TStrategy">指定的分库策略类型。</typeparam>
     /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
     /// <param name="configureAction">给定的分片命名特性配置动作（可选）。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithShardingNaming<TStrategy>(string suffix,
+    public virtual AccessorDbContextOptionsBuilder WithSharding<TStrategy>(string suffix,
         Action<ShardedAttribute>? configureAction = null)
         where TStrategy : IShardingStrategy
-        => WithShardingNaming(typeof(TStrategy), suffix, configureAction);
+        => WithSharding(typeof(TStrategy), suffix, configureAction);
 
     /// <summary>
-    /// 配置分片命名特性。
+    /// 配置分片特性。
     /// </summary>
     /// <param name="strategyType">给定的策略类型。</param>
     /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
     /// <param name="configureAction">给定的分片命名特性配置动作（可选）。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithShardingNaming(Type strategyType, string suffix,
+    public virtual AccessorDbContextOptionsBuilder WithSharding(Type strategyType, string suffix,
         Action<ShardedAttribute>? configureAction = null)
     {
         var attribute = new ShardedAttribute(strategyType, suffix);
         configureAction?.Invoke(attribute);
 
-        return WithShardingNaming(attribute);
+        return WithSharding(attribute);
     }
 
     /// <summary>
-    /// 配置分片命名特性。
+    /// 配置分片特性。
     /// </summary>
-    /// <param name="shardingNaming">给定的 <see cref="ShardedAttribute"/>。</param>
+    /// <param name="sharded">给定的 <see cref="ShardedAttribute"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithShardingNaming(ShardedAttribute shardingNaming)
-        => WithOption(e => e.WithShardingNaming(shardingNaming));
+    public virtual AccessorDbContextOptionsBuilder WithSharding(ShardedAttribute sharded)
+        => WithOption(e => e.WithSharding(sharded));
 
 
     /// <summary>

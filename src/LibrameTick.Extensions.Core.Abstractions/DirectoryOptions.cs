@@ -61,7 +61,7 @@ public class DirectoryOptions : AbstractOptions
     /// </summary>
     public string ConfigDirectory
     {
-        get => Notifier.GetOrAddDirectory(nameof(ConfigDirectory), string.Empty);
+        get => Notifier.GetOrAdd(nameof(ConfigDirectory), string.Empty);
         set => Notifier.AddOrUpdate(nameof(ConfigDirectory), value);
     }
 
@@ -70,7 +70,7 @@ public class DirectoryOptions : AbstractOptions
     /// </summary>
     public string ReportDirectory
     {
-        get => Notifier.GetOrAddDirectory(nameof(ReportDirectory), string.Empty);
+        get => Notifier.GetOrAdd(nameof(ReportDirectory), string.Empty);
         set => Notifier.AddOrUpdate(nameof(ReportDirectory), value);
     }
 
@@ -79,7 +79,7 @@ public class DirectoryOptions : AbstractOptions
     /// </summary>
     public string ResourceDirectory
     {
-        get => Notifier.GetOrAddDirectory(nameof(ResourceDirectory), string.Empty);
+        get => Notifier.GetOrAdd(nameof(ResourceDirectory), string.Empty);
         set => Notifier.AddOrUpdate(nameof(ResourceDirectory), value);
     }
 

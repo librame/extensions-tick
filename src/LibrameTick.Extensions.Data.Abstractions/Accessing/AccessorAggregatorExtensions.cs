@@ -21,20 +21,20 @@ public static class AccessorAggregatorExtensions
     /// 聚合读取访问器集合。
     /// </summary>
     /// <param name="aggregator">给定的 <see cref="IAccessorAggregator"/>。</param>
-    /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
+    /// <param name="accessors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
     public static IAccessor? AggregateReadAccessors(this IAccessorAggregator aggregator,
-        IReadOnlyList<AccessorDescriptor> descriptors)
-        => aggregator.AggregateAccessors(descriptors, AccessMode.Read | AccessMode.ReadWrite);
+        IReadOnlyList<IAccessor> accessors)
+        => aggregator.AggregateAccessors(accessors, AccessMode.Read | AccessMode.ReadWrite);
 
     /// <summary>
     /// 聚合写入访问器集合。
     /// </summary>
     /// <param name="aggregator">给定的 <see cref="IAccessorAggregator"/>。</param>
-    /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
+    /// <param name="accessors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
     public static IAccessor? AggregateWriteAccessors(this IAccessorAggregator aggregator,
-        IReadOnlyList<AccessorDescriptor> descriptors)
-        => aggregator.AggregateAccessors(descriptors, AccessMode.Write | AccessMode.ReadWrite);
+        IReadOnlyList<IAccessor> accessors)
+        => aggregator.AggregateAccessors(accessors, AccessMode.Write | AccessMode.ReadWrite);
 
 }

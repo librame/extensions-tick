@@ -18,6 +18,12 @@ namespace Librame.Extensions.Data.Accessing;
 public interface IAccessorInitializer
 {
     /// <summary>
+    /// 是否已填充。
+    /// </summary>
+    bool IsPopulated { get; }
+
+
+    /// <summary>
     /// 初始化访问器。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>

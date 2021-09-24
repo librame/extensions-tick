@@ -75,7 +75,7 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     /// </summary>
     public long DataCenterId
     {
-        get => Notifier.GetOrAdd(nameof(DataCenterId), 1);
+        get => Notifier.GetOrAdd(nameof(DataCenterId), 1L);
         set => Notifier.AddOrUpdate(nameof(DataCenterId), value);
     }
 
@@ -84,7 +84,7 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     /// </summary>
     public long MachineId
     {
-        get => Notifier.GetOrAdd(nameof(MachineId), 1);
+        get => Notifier.GetOrAdd(nameof(MachineId), 1L);
         set => Notifier.AddOrUpdate(nameof(MachineId), value);
     }
 

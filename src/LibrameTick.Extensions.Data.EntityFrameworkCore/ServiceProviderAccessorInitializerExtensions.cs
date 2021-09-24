@@ -27,7 +27,7 @@ public static class ServiceProviderAccessorInitializerExtensions
     /// <returns>返回 <see cref="IServiceProvider"/>。</returns>
     public static IServiceProvider UseAccessorInitializer(this IServiceProvider services)
     {
-        var initializers = services.GetRequiredService<IEnumerable<IAccessorInitializer>>();
+        var initializers = services.GetServices<IAccessorInitializer>();
         initializers.ForEach(a => a.Initialize(services));
 
         return services;

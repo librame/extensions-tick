@@ -18,9 +18,9 @@ namespace Librame.Extensions.Data.Accessing;
 public interface IAccessorManager
 {
     /// <summary>
-    /// 已注册的描述器列表。
+    /// 已注册的访问器列表。
     /// </summary>
-    IReadOnlyList<AccessorDescriptor> Descriptors { get; }
+    IReadOnlyList<IAccessor> Accessors { get; }
 
 
     /// <summary>

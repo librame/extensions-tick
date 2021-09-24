@@ -19,14 +19,14 @@ namespace Librame.Extensions.Data.Accessing;
 sealed class InternalCompositeAccessor : IAccessor
 {
     private readonly IAccessor[] _accessors;
-    private readonly AccessMode _interaction;
+    private readonly AccessMode _access;
 
 
     public InternalCompositeAccessor(IEnumerable<IAccessor> accessors,
-        AccessMode interaction)
+        AccessMode access)
     {
         _accessors = accessors.ToArray();
-        _interaction = interaction;
+        _access = access;
     }
 
 
@@ -86,14 +86,111 @@ sealed class InternalCompositeAccessor : IAccessor
     #endregion
 
 
-    public IShardingManager ShardingManager
-        => ChainingAccessorsByException(a => a.ShardingManager);
-
     public string AccessorId
         => _accessors.Select(s => s.AccessorId).JoinString(',');
 
     public Type AccessorType
         => typeof(InternalCompositeAccessor);
+
+    /// <summary>
+    /// 访问器描述符。
+    /// </summary>
+    public AccessorDescriptor? AccessorDescriptor
+        => ChainingAccessorsByException(a => a.AccessorDescriptor);
+
+
+    #region IShardable
+
+    public IShardingManager ShardingManager
+        => ChainingAccessorsByException(a => a.ShardingManager);
+
+    #endregion
+
+
+    #region IConnectable<IAccessor>
+
+    public string? CurrentConnectionString
+        => ChainingAccessorsByException(a => a.CurrentConnectionString);
+
+    public Action<IAccessor>? ChangingAction
+    {
+        get => ChainingAccessorsByException(a => a.ChangingAction);
+        set => ChainingAccessorsByException(a => a.ChangingAction = value);
+    }
+
+    public Action<IAccessor>? ChangedAction
+    {
+        get => ChainingAccessorsByException(a => a.ChangedAction);
+        set => ChainingAccessorsByException(a => a.ChangedAction = value);
+    }
+
+
+    public IAccessor ChangeConnection(string newConnectionString)
+        => ChainingAccessorsByException(a => a.ChangeConnection(newConnectionString));
+
+    public bool TryCreateDatabase()
+        => ChainingAccessorsByException(a => a.TryCreateDatabase());
+
+    public Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
+        => ChainingAccessorsByException(a => a.TryCreateDatabaseAsync(cancellationToken));
+
+    #endregion
+
+
+    #region ISaveChangeable
+
+    public int SaveChanges()
+        => SaveChanges(acceptAllChangesOnSuccess: true);
+
+    public int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        if (_access is AccessMode.Read)
+            throw new NotSupportedException($"{nameof(IAccessor)} in read interaction, the {nameof(SaveChanges)} is not supported.");
+
+        return BatchingAccessors(a => a.SaveChanges(acceptAllChangesOnSuccess));
+    }
+
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => SaveChangesAsync(acceptAllChangesOnSuccess: true, cancellationToken);
+
+    public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        if (_access is AccessMode.Read)
+            throw new NotSupportedException($"{nameof(IAccessor)} in read interaction, the {nameof(SaveChangesAsync)} is not supported.");
+
+        return BatchingAccessors(a => a.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken))!;
+    }
+
+    #endregion
+
+
+    #region ISortable
+
+    public float Priority
+        => 0;
+
+    public int CompareTo(ISortable? other)
+        => Priority.CompareTo(other?.Priority ?? 0);
+
+    #endregion
+
+
+    #region IDisposable
+
+    public void Dispose()
+        => BatchingAccessors(a => a.Dispose());
+
+    #endregion
+
+
+    #region IAsyncDisposable
+
+    public ValueTask DisposeAsync()
+        => BatchingAccessors(a => a.DisposeAsync());
+
+    #endregion
 
 
     #region Exists
@@ -269,92 +366,6 @@ sealed class InternalCompositeAccessor : IAccessor
 
     public void UpdateRange(IEnumerable<object> entities)
         => BatchingAccessors(a => a.UpdateRange(entities));
-
-    #endregion
-
-
-    #region IConnectable<IAccessor>
-
-    public string? CurrentConnectionString
-        => ChainingAccessorsByException(a => a.CurrentConnectionString);
-
-    public Action<IAccessor>? ChangingAction
-    {
-        get => ChainingAccessorsByException(a => a.ChangingAction);
-        set => ChainingAccessorsByException(a => a.ChangingAction = value);
-    }
-
-    public Action<IAccessor>? ChangedAction
-    {
-        get => ChainingAccessorsByException(a => a.ChangedAction);
-        set => ChainingAccessorsByException(a => a.ChangedAction = value);
-    }
-
-
-    public IAccessor ChangeConnection(string newConnectionString)
-        => ChainingAccessorsByException(a => a.ChangeConnection(newConnectionString));
-
-    public bool TryCreateDatabase()
-        => ChainingAccessorsByException(a => a.TryCreateDatabase());
-
-    public Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
-        => ChainingAccessorsByException(a => a.TryCreateDatabaseAsync(cancellationToken));
-
-    #endregion
-
-
-    #region ISaveChangeable
-
-    public int SaveChanges()
-        => SaveChanges(acceptAllChangesOnSuccess: true);
-
-    public int SaveChanges(bool acceptAllChangesOnSuccess)
-    {
-        if (_interaction is AccessMode.Read)
-            throw new NotSupportedException($"{nameof(IAccessor)} in read interaction, the {nameof(SaveChanges)} is not supported.");
-
-        return BatchingAccessors(a => a.SaveChanges(acceptAllChangesOnSuccess));
-    }
-
-
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-        => SaveChangesAsync(acceptAllChangesOnSuccess: true, cancellationToken);
-
-    public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
-        CancellationToken cancellationToken = default)
-    {
-        if (_interaction is AccessMode.Read)
-            throw new NotSupportedException($"{nameof(IAccessor)} in read interaction, the {nameof(SaveChangesAsync)} is not supported.");
-
-        return BatchingAccessors(a => a.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken))!;
-    }
-
-    #endregion
-
-
-    #region ISortable
-
-    public float Priority
-        => 0;
-
-    public int CompareTo(ISortable? other)
-        => Priority.CompareTo(other?.Priority ?? 0);
-
-    #endregion
-
-
-    #region IDisposable
-
-    public void Dispose()
-        => BatchingAccessors(a => a.Dispose());
-
-    #endregion
-
-
-    #region IAsyncDisposable
-
-    public ValueTask DisposeAsync()
-        => BatchingAccessors(a => a.DisposeAsync());
 
     #endregion
 

@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Cryptography;
 using Librame.Extensions.Data.Sharding;
 
@@ -19,7 +18,6 @@ namespace Librame.Extensions.Data
     /// <summary>
     /// 用户模型。
     /// </summary>
-    [Audited]
     [Sharded(typeof(CultureInfoShardingStrategy), "%c")]
     public class User : AbstractCreationIdentifier<long, long>
     {

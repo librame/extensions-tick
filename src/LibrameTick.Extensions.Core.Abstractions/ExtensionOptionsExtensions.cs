@@ -19,7 +19,7 @@ public static class ExtensionOptionsExtensions
 {
 
     /// <summary>
-    /// 构建扩展选项的 JSON 文件路径。
+    /// 构建扩展选项的 JSON 文件路径（默认以扩展选项程序集名称为文件名）。
     /// </summary>
     /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
     /// <returns>返回字符串。</returns>

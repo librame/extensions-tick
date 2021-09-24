@@ -30,7 +30,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <param name="pooling">是否池化。</param>
     /// <param name="priority">给定的优先级。</param>
     /// <param name="algorithm">给定的算法选项。</param>
-    /// <param name="shardingNaming">给定的分库命名特性。</param>
+    /// <param name="sharded">给定的分库特性。</param>
     public AccessorDescriptor(IAccessor accessor,
         Type serviceType,
         int group,
@@ -38,7 +38,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
         bool pooling,
         float priority,
         AlgorithmOptions algorithm,
-        ShardedAttribute? shardingNaming)
+        ShardedAttribute? sharded)
     {
         Accessor = accessor;
         ServiceType = serviceType;
@@ -47,7 +47,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
         Pooling = pooling;
         Priority = priority;
         Algorithm = algorithm;
-        ShardingNaming = shardingNaming;
+        Sharded = sharded;
     }
 
 
@@ -87,9 +87,9 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     public AlgorithmOptions Algorithm { get; init; }
 
     /// <summary>
-    /// 分库命名特性。
+    /// 分库特性。
     /// </summary>
-    public ShardedAttribute? ShardingNaming { get; init; }
+    public ShardedAttribute? Sharded { get; init; }
 
 
     /// <summary>

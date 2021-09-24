@@ -30,7 +30,7 @@ public static class ServiceProviderAutoloaderActivatorExtensions
         var activator = services.GetRequiredService<CoreExtensionBuilder>().AutoloaderActivator;
         if (activator is null)
             throw new ArgumentException($"The {nameof(CoreExtensionBuilder)}.{nameof(CoreExtensionBuilder.AutoloaderActivator)} is null. You need enable ${nameof(CoreExtensionOptions)}.{nameof(CoreExtensionOptions.EnableAutoloaderActivator)}.");
-            
+        
         activator.ApplyServiceProvider(services);
 
         activateAction.Invoke(activator);

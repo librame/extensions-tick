@@ -31,6 +31,11 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     /// </summary>
     Type AccessorType { get; }
 
+    /// <summary>
+    /// 访问器描述符。
+    /// </summary>
+    AccessorDescriptor? AccessorDescriptor { get; }
+
 
     #region Exists
 

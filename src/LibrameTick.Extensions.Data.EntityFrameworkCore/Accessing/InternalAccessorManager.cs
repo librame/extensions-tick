@@ -41,42 +41,42 @@ class InternalAccessorManager : IAccessorManager
         _options = options.Access;
         _shardingManager = shardingManager;
 
-        Descriptors = resolver.ResolveDescriptors();
-        if (Descriptors.Count < 1)
-            throw new ArgumentNullException($"The accessor descriptor not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
+        Accessors = resolver.ResolveAccessors();
+        if (Accessors.Count < 1)
+            throw new ArgumentNullException($"The accessors not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
 
         InitializeAccessors();
     }
 
 
-    public IReadOnlyList<AccessorDescriptor> Descriptors { get; init; }
+    public IReadOnlyList<IAccessor> Accessors { get; init; }
 
 
     private void InitializeAccessors()
     {
-        if (Descriptors.Count is 1)
+        if (Accessors.Count is 1)
         {
-            _readAccessor = _writeAccessor = Descriptors[0].Accessor;
+            _readAccessor = _writeAccessor = Accessors[0];
         }
         else
         {
-            foreach (var group in Descriptors.GroupBy(descr => descr.Group))
+            foreach (var group in Accessors.GroupBy(a => a.AccessorDescriptor?.Group))
             {
                 var groupList = group.ToList();
 
-                _readGroupAccessors.Add(group.Key, _aggregator.AggregateReadAccessors(groupList));
-                _writeGroupAccessors.Add(group.Key, _aggregator.AggregateWriteAccessors(groupList));
+                _readGroupAccessors.Add(group.Key ?? 0, _aggregator.AggregateReadAccessors(groupList));
+                _writeGroupAccessors.Add(group.Key ?? 0, _aggregator.AggregateWriteAccessors(groupList));
             }
 
-            _readAccessor = _readGroupAccessors.FirstOrDefault().Value ?? Descriptors[0].Accessor;
-            _writeAccessor = _writeGroupAccessors.FirstOrDefault().Value ?? Descriptors[0].Accessor;
+            _readAccessor = _readGroupAccessors.FirstOrDefault().Value ?? Accessors[0];
+            _writeAccessor = _writeGroupAccessors.FirstOrDefault().Value ?? Accessors[0];
         }
     }
 
     private void OnAutomaticMigration()
     {
         if (_options.AutomaticMigration)
-            _migrator.Migrate(Descriptors);
+            _migrator.Migrate(Accessors);
     }
 
 
@@ -84,7 +84,7 @@ class InternalAccessorManager : IAccessorManager
     {
         OnAutomaticMigration();
 
-        return GetAccessor().ShardingDatabase(_shardingManager, Descriptors, basis);
+        return GetAccessor().ShardingDatabase(_shardingManager, basis);
 
         IAccessor GetAccessor()
         {
@@ -99,7 +99,7 @@ class InternalAccessorManager : IAccessorManager
     {
         OnAutomaticMigration();
 
-        return GetAccessor().ShardingDatabase(_shardingManager, Descriptors, basis);
+        return GetAccessor().ShardingDatabase(_shardingManager, basis);
 
         IAccessor GetAccessor()
         {

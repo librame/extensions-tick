@@ -20,6 +20,16 @@ namespace Librame.Extensions
         }
 
         [Fact]
+        public void SetBasePathTest()
+        {
+            var str = "relativePath";
+            Assert.NotEqual(str, str.SetBasePath());
+        }
+
+
+        #region FileRead & FileWrite
+
+        [Fact]
         public void FileReadAndWriteTest()
         {
             var byteArray = Guid.NewGuid().ToByteArray();
@@ -34,12 +44,7 @@ namespace Librame.Extensions
             path.FileDelete();
         }
 
-        [Fact]
-        public void SetBasePathTest()
-        {
-            var str = "relativePath";
-            Assert.NotEqual(str, str.SetBasePath());
-        }
+        #endregion
 
 
         #region CombinePath

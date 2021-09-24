@@ -210,4 +210,67 @@ public class ServiceCharacteristicCollection : Dictionary<Type, ServiceCharacter
         return this;
     }
 
+
+    /// <summary>
+    /// 修改服务特征。
+    /// </summary>
+    /// <typeparam name="TService">指定的服务类型。</typeparam>
+    /// <param name="changeAction">修改服务特征的动作。</param>
+    /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+    /// <exception cref="ArgumentException">The specified service type was not found.</exception>
+    public ServiceCharacteristicCollection Change<TService>(Action<ServiceCharacteristic> changeAction)
+        => Change(typeof(TService), changeAction);
+
+    /// <summary>
+    /// 修改服务特征。
+    /// </summary>
+    /// <param name="serviceType">给定的服务类型。</param>
+    /// <param name="changeAction">修改服务特征的动作。</param>
+    /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+    /// <exception cref="ArgumentException">The specified service type was not found.</exception>
+    public ServiceCharacteristicCollection Change(Type serviceType, Action<ServiceCharacteristic> changeAction)
+    {
+        if (TryGetValue(serviceType, out var characteristic))
+            changeAction.Invoke(characteristic);
+        else
+            throw new ArgumentException($"The specified service type '{serviceType}' was not found.");
+
+        return this;
+    }
+
+
+    /// <summary>
+    /// 替换相同服务类型的服务特征。
+    /// </summary>
+    /// <param name="characteristic">给定的 <see cref="ServiceCharacteristic"/>。</param>
+    /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+    public ServiceCharacteristicCollection Replace(ServiceCharacteristic characteristic)
+    {
+        Remove(characteristic.ServiceType);
+        return Add(characteristic);
+    }
+
+    /// <summary>
+    /// 替换指定服务类型的服务特征。
+    /// </summary>
+    /// <param name="serviceType">给定的服务类型。</param>
+    /// <param name="characteristicFunc">给定的 <see cref="ServiceCharacteristic"/> 方法。</param>
+    /// <returns>返回 <see cref="ServiceCharacteristicCollection"/>。</returns>
+    /// <exception cref="ArgumentException"></exception>
+    public ServiceCharacteristicCollection Replace(Type serviceType,
+        Func<ServiceCharacteristic, ServiceCharacteristic> characteristicFunc)
+    {
+        if (TryGetValue(serviceType, out var characteristic))
+        {
+            Remove(characteristic.ServiceType);
+            Add(characteristicFunc.Invoke(characteristic));
+        }
+        else
+        {
+            throw new ArgumentException($"The specified service type '{serviceType}' was not found.");
+        }
+
+        return this;
+    }
+
 }

@@ -66,6 +66,8 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
         SavedChanges += AbstractDataAccessor_SavedChanges;
     }
 
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
+
 
     private void AbstractDataAccessor_SavedChanges(object? sender, SavedChangesEventArgs e)
     {
@@ -78,7 +80,7 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
     {
         var accessor = (sender as AbstractDataAccessor)!;
         var auditOptions = accessor.DataOptions.Audit;
-        var auditingManager = accessor.GetRequiredScopeService<IAuditingManager>();
+        var auditingManager = accessor.GetService<IAuditingManager>();
 
 #pragma warning disable EF1001 // Internal EF Core API usage.
 
@@ -97,8 +99,6 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
             accessor.AuditProperties.AddRange(accessor._audits.SelectMany(s => s.Properties));
         }
     }
-
-#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑声明为可以为 null。
 
 
     /// <summary>
@@ -129,10 +129,10 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
 
         OnDataModelCreating(modelBuilder);
 
-        var converterFactory = GetRequiredScopeService<IEncryptionConverterFactory>();
+        var converterFactory = this.GetService<IEncryptionConverterFactory>();
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            entityType.UseEncryption(converterFactory, AccessorType);
+            entityType.UseEncryption(converterFactory, this);
             entityType.UseQueryFilters(DataOptions.QueryFilters, this);
 
             ModelCreatingPostAction?.Invoke(entityType);
@@ -144,8 +144,6 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
     protected virtual void OnDataModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.CreateDataModel(this);
-    }
+        => modelBuilder.CreateDataModel(this);
 
 }

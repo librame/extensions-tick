@@ -28,7 +28,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     private bool _pooling; // 默认为 FALSE；表示是否为 DbContextPool。
     private float _priority = -1; // 默认为 -1；表示使用访问器实现 ISortable 的优先级属性值
     private AlgorithmOptions? _algorithm; // 默认为 NULL；表示使用 CoreExtensionOptions.Algorithm 全局配置，提供对数据字段值的加解密功能
-    private ShardedAttribute? _shardingNaming; // 默认为 NULL；表示不分库
+    private ShardedAttribute? _sharded; // 默认为 NULL；表示不分库
     private Type? _serviceType;
 
     private DbContextOptionsExtensionInfo? _info;
@@ -52,7 +52,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         _pooling = copyFrom.Pooling;
         _priority = copyFrom.Priority;
         _algorithm = copyFrom.Algorithm;
-        _shardingNaming = copyFrom.ShardingNaming;
+        _sharded = copyFrom.Sharded;
         _serviceType = copyFrom.ServiceType;
     }
 
@@ -88,10 +88,10 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         => _algorithm;
 
     /// <summary>
-    /// 分库命名特性。
+    /// 分库特性。
     /// </summary>
-    public virtual ShardedAttribute? ShardingNaming
-        => _shardingNaming;
+    public virtual ShardedAttribute? Sharded
+        => _sharded;
 
     /// <summary>
     /// 服务类型。
@@ -186,15 +186,15 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     }
 
     /// <summary>
-    /// 使用指定的分片命名特性创建一个选项扩展实例副本。
+    /// 使用指定的分片特性创建一个选项扩展实例副本。
     /// </summary>
-    /// <param name="shardingNaming">给定的 <see cref="ShardedAttribute"/>。</param>
+    /// <param name="sharded">给定的 <see cref="ShardedAttribute"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-    public virtual AccessorDbContextOptionsExtension WithShardingNaming(ShardedAttribute shardingNaming)
+    public virtual AccessorDbContextOptionsExtension WithSharding(ShardedAttribute sharded)
     {
         var clone = Clone();
 
-        clone._shardingNaming = shardingNaming;
+        clone._sharded = sharded;
 
         return clone;
     }
@@ -279,9 +279,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                         builder.Append(Extension.Algorithm).Append(' ');
                     }
 
-                    if (Extension.ShardingNaming is not null)
+                    if (Extension.Sharded is not null)
                     {
-                        builder.Append("ShardingNaming: ").Append(Extension.ShardingNaming).Append(' ');
+                        builder.Append("ShardingNaming: ").Append(Extension.Sharded).Append(' ');
                     }
 
                     if (Extension.ServiceType is not null)
@@ -310,8 +310,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 if (Extension._algorithm is not null)
                     hashCode.Add(Extension._algorithm);
 
-                if (Extension._shardingNaming is not null)
-                    hashCode.Add(Extension._shardingNaming);
+                if (Extension._sharded is not null)
+                    hashCode.Add(Extension._sharded);
 
                 if (Extension._serviceType is not null)
                     hashCode.Add(Extension._serviceType);
@@ -329,7 +329,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 && Extension._pooling == otherInfo.Extension._pooling
                 && Extension._priority == otherInfo.Extension._priority
                 && Extension._algorithm?.ToString() == otherInfo.Extension._algorithm?.ToString()
-                && Extension._shardingNaming?.ToString() == otherInfo.Extension._shardingNaming?.ToString()
+                && Extension._sharded?.ToString() == otherInfo.Extension._sharded?.ToString()
                 && Extension._serviceType == otherInfo.Extension._serviceType;
 
         public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
@@ -349,8 +349,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             debugInfo["Accessor:" + nameof(Extension.Algorithm)] =
                 (Extension.Algorithm?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
-            debugInfo["Accessor:" + nameof(Extension.ShardingNaming)] =
-                (Extension.ShardingNaming?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
+            debugInfo["Accessor:" + nameof(Extension.Sharded)] =
+                (Extension.Sharded?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
             debugInfo["Accessor:" + nameof(Extension.ServiceType)] =
                 (Extension.ServiceType?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);

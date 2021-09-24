@@ -47,7 +47,7 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
         // 异构数据源数据同步功能的标识必须使用统一的生成方案
         AddIdGenerator(CombIdentificationGenerator.ForSqlServer(CoreOptions.Clock));
 
-        ServiceCharacteristics.AddScope<IAuditingManager>();
+        ServiceCharacteristics.AddSingleton<IAuditingManager>();
         ServiceCharacteristics.AddSingleton<IIdentificationGeneratorFactory>();
 
         // Accessing
@@ -64,13 +64,14 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
         ShardingStrategies.Add(new DateTimeShardingStrategy(CoreOptions.Clock));
         ShardingStrategies.Add(new DateTimeOffsetShardingStrategy(CoreOptions.Clock));
         ShardingStrategies.Add(new CultureInfoShardingStrategy());
-        ServiceCharacteristics.AddScope<IShardingManager>();
+
+        ServiceCharacteristics.AddSingleton<IShardingManager>();
 
         // Storing
         ServiceCharacteristics.AddScope(typeof(IStore<>));
 
         // ValueConversion
-        ServiceCharacteristics.AddScope<IEncryptionConverterFactory>();
+        ServiceCharacteristics.AddSingleton<IEncryptionConverterFactory>();
     }
 
 

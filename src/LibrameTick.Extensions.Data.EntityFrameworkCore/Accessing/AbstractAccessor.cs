@@ -50,6 +50,10 @@ public abstract class AbstractAccessor<TAccessor> : AbstractAccessor
 /// </summary>
 public abstract class AbstractAccessor : DbContext, IAccessor
 {
+    private readonly AccessorDbContextOptionsExtension? _accessorExtension;
+    private readonly RelationalOptionsExtension? _relationalExtension;
+
+
     /// <summary>
     /// 使用指定的数据库上下文选项构造一个 <see cref="AbstractAccessor"/> 实例。
     /// </summary>
@@ -57,35 +61,12 @@ public abstract class AbstractAccessor : DbContext, IAccessor
     protected AbstractAccessor(DbContextOptions options)
         : base(options)
     {
-        OptionsExtension = options.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault();
-
+        _accessorExtension = options.FindExtension<AccessorDbContextOptionsExtension>();
+        _relationalExtension = options.Extensions.OfType<RelationalOptionsExtension>().FirstOrDefault();
+        
         // 当启用分库功能时，需在切换到分库后尝试创建数据库
         ChangedAction = accessor => accessor.TryCreateDatabase();
     }
-
-
-    /// <summary>
-    /// 核心选项扩展。
-    /// </summary>
-    protected CoreOptionsExtension? OptionsExtension { get; init; }
-
-    /// <summary>
-    /// 关系连接。
-    /// </summary>
-    protected IRelationalConnection? RelationalConnection
-        => GetScopeService<IRelationalConnection>();
-
-    /// <summary>
-    /// 数据扩展选项。
-    /// </summary>
-    public DataExtensionOptions DataOptions
-        => GetRequiredScopeService<DataExtensionOptions>();
-
-    /// <summary>
-    /// 分片管理器。
-    /// </summary>
-    public IShardingManager ShardingManager
-        => GetRequiredScopeService<IShardingManager>();
 
 
     /// <summary>
@@ -100,57 +81,129 @@ public abstract class AbstractAccessor : DbContext, IAccessor
     public virtual Type AccessorType
         => GetType();
 
-
-    #region GetScopeService
+    /// <summary>
+    /// 访问器描述符。
+    /// </summary>
+    public virtual AccessorDescriptor? AccessorDescriptor
+        => _accessorExtension is not null ? _accessorExtension.ToDescriptor(this) : null;
 
     /// <summary>
-    /// 获取范围服务。
+    /// 数据扩展选项。
     /// </summary>
-    /// <typeparam name="TService">指定的服务类型</typeparam>
-    /// <param name="serviceType">给定的服务类型（可选；默认使用指定的泛型服务类型）。</param>
-    /// <returns>返回 <typeparamref name="TService"/>。</returns>
-    public virtual TService GetRequiredScopeService<TService>(Type? serviceType = null)
-        => (TService)GetRequiredScopeService(serviceType ?? typeof(TService));
+    public DataExtensionOptions DataOptions
+        => this.GetService<DataExtensionOptions>();
+
+
+    #region IConnectable<IAccessor>
 
     /// <summary>
-    /// 获取范围服务。
+    /// 关系连接接口。
     /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <returns>返回对象。</returns>
-    public virtual object GetRequiredScopeService(Type serviceType)
+    protected IRelationalConnection RelationalConnection
+        => this.GetService<IRelationalConnection>();
+
+    /// <summary>
+    /// 当前连接字符串。
+    /// </summary>
+    public virtual string? CurrentConnectionString
+        => RelationalConnection?.ConnectionString;
+
+    /// <summary>
+    /// 改变时动作。
+    /// </summary>
+    public Action<IAccessor>? ChangingAction { get; set; }
+
+    /// <summary>
+    /// 改变后动作（默认连接改变后会尝试创建数据库）。
+    /// </summary>
+    public Action<IAccessor>? ChangedAction { get; set; }
+
+
+    /// <summary>
+    /// 改变数据库连接。
+    /// </summary>
+    /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
+    /// <returns>返回 <see cref="IAccessor"/>。</returns>
+    public virtual IAccessor ChangeConnection(string newConnectionString)
     {
-        var service = GetScopeService(serviceType);
-        if (service is null)
-            throw new ArgumentException($"The scope instance of the service type '{serviceType}' is null.");
-            
-        return service;
+        var connection = _relationalExtension?.Connection
+            ?? RelationalConnection.DbConnection;
+
+        if (connection is not null)
+        {
+            ChangingAction?.Invoke(this);
+
+            connection.ConnectionString = newConnectionString;
+
+            ChangedAction?.Invoke(this);
+        }
+
+        return this;
     }
 
 
     /// <summary>
-    /// 获取范围服务。
+    /// 尝试创建数据库（已集成是否需要先删除数据库功能）。
     /// </summary>
-    /// <typeparam name="TService">指定的服务类型</typeparam>
-    /// <param name="serviceType">给定的服务类型（可选；默认使用指定的泛型服务类型）。</param>
-    /// <returns>返回 <typeparamref name="TService"/>。</returns>
-    public virtual TService? GetScopeService<TService>(Type? serviceType = null)
-        => (TService?)GetScopeService(serviceType ?? typeof(TService));
+    /// <returns>返回布尔值。</returns>
+    public virtual bool TryCreateDatabase()
+    {
+        if (DataOptions.Access.EnsureDatabaseDeleted)
+            Database.EnsureDeleted();
+
+        if (DataOptions.Access.EnsureDatabaseCreated)
+            return Database.EnsureCreated();
+
+        return false;
+    }
 
     /// <summary>
-    /// 获取范围服务。
+    /// 异步尝试创建数据库（已集成是否需要先删除数据库功能）。
     /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <returns>返回对象。</returns>
-    public virtual object? GetScopeService(Type serviceType)
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含布尔值的异步操作。</returns>
+    public virtual async Task<bool> TryCreateDatabaseAsync(
+        CancellationToken cancellationToken = default)
     {
-        // this.GetService<T>() 即 InfrastructureExtensions.GetService<T>() 这种方法可能会抛出 internalServiceProvider 不是范围服务，
-        // 而内部使用的 internalServiceProvider.GetService<IDbContextOptions>()?.Extensions.OfType<CoreOptionsExtension>().FirstOrDefault()
-        // 方式获取到的实例可能为空，而直接通过 DbContext 构造函数的 DbContextOptions 参数获取到的服务实例则正常
+        if (DataOptions.Access.EnsureDatabaseDeleted)
+            await Database.EnsureDeletedAsync(cancellationToken);
 
-        // OptionsExtension?.ApplicationServiceProvider 此处是范围服务
-        return ((IInfrastructure<IServiceProvider>)this).Instance.GetService(serviceType)
-            ?? OptionsExtension?.ApplicationServiceProvider?.GetService(serviceType);
+        if (DataOptions.Access.EnsureDatabaseCreated)
+            await Database.EnsureCreatedAsync(cancellationToken);
+
+        return false;
     }
+
+    #endregion
+
+
+    #region IShardable
+
+    /// <summary>
+    /// 分片管理器。
+    /// </summary>
+    public IShardingManager ShardingManager
+        => this.GetService<IShardingManager>();
+
+    #endregion
+
+
+    #region ISortable
+
+    /// <summary>
+    /// 排序优先级（数值越小越优先）。
+    /// </summary>
+    public virtual float Priority
+        => 1;
+
+
+    /// <summary>
+    /// 与指定的 <see cref="ISortable"/> 比较大小。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="ISortable"/>。</param>
+    /// <returns>返回整数。</returns>
+    public virtual int CompareTo(ISortable? other)
+        => Priority.CompareTo(other?.Priority ?? 0);
 
     #endregion
 
@@ -415,101 +468,6 @@ public abstract class AbstractAccessor : DbContext, IAccessor
         base.Update(entity);
         return entity;
     }
-
-    #endregion
-
-
-    #region IConnectable<IAccessor>
-
-    /// <summary>
-    /// 当前连接字符串。
-    /// </summary>
-    public virtual string? CurrentConnectionString
-        => RelationalConnection?.ConnectionString;
-
-    /// <summary>
-    /// 改变时动作。
-    /// </summary>
-    public Action<IAccessor>? ChangingAction { get; set; }
-
-    /// <summary>
-    /// 改变后动作（默认连接改变后会尝试创建数据库）。
-    /// </summary>
-    public Action<IAccessor>? ChangedAction { get; set; }
-
-
-    /// <summary>
-    /// 改变数据库连接。
-    /// </summary>
-    /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
-    /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    public virtual IAccessor ChangeConnection(string newConnectionString)
-    {
-        var connection = RelationalConnection?.DbConnection;
-        if (connection is not null)
-        {
-            ChangingAction?.Invoke(this);
-
-            connection.ConnectionString = newConnectionString;
-
-            ChangedAction?.Invoke(this);
-        }
-
-        return this;
-    }
-
-
-    /// <summary>
-    /// 尝试创建数据库（已集成是否需要先删除数据库功能）。
-    /// </summary>
-    /// <returns>返回布尔值。</returns>
-    public virtual bool TryCreateDatabase()
-    {
-        if (DataOptions.Access.EnsureDatabaseDeleted)
-            Database.EnsureDeleted();
-
-        if (DataOptions.Access.EnsureDatabaseCreated)
-            return Database.EnsureCreated();
-
-        return false;
-    }
-
-    /// <summary>
-    /// 异步尝试创建数据库（已集成是否需要先删除数据库功能）。
-    /// </summary>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含布尔值的异步操作。</returns>
-    public virtual async Task<bool> TryCreateDatabaseAsync(
-        CancellationToken cancellationToken = default)
-    {
-        if (DataOptions.Access.EnsureDatabaseDeleted)
-            await Database.EnsureDeletedAsync(cancellationToken);
-
-        if (DataOptions.Access.EnsureDatabaseCreated)
-            await Database.EnsureCreatedAsync(cancellationToken);
-
-        return false;
-    }
-
-    #endregion
-
-
-    #region ISortable
-
-    /// <summary>
-    /// 排序优先级（数值越小越优先）。
-    /// </summary>
-    public virtual float Priority
-        => 1;
-
-
-    /// <summary>
-    /// 与指定的 <see cref="ISortable"/> 比较大小。
-    /// </summary>
-    /// <param name="other">给定的 <see cref="ISortable"/>。</param>
-    /// <returns>返回整数。</returns>
-    public virtual int CompareTo(ISortable? other)
-        => Priority.CompareTo(other?.Priority ?? 0);
 
     #endregion
 

@@ -19,9 +19,6 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public abstract class AbstractAccessorSeeder : IAccessorSeeder
 {
-    private object? _initialUserId;
-
-
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessorSeeder"/>。
     /// </summary>
@@ -53,25 +50,24 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
 
 
     /// <summary>
-    /// 获取初始用户标识。
+    /// 播种。
     /// </summary>
-    /// <typeparam name="TId">指定的标识类型。</typeparam>
-    /// <returns>返回 <typeparamref name="TId"/>。</returns>
-    public virtual TId GetInitialUserId<TId>()
-        => (TId)GetInitialUserId(typeof(TId));
+    /// <typeparam name="TValue">指定的值类型。</typeparam>
+    /// <param name="key">给定的键。</param>
+    /// <param name="valueFactory">给定的值工厂方法。</param>
+    /// <returns>返回 <typeparamref name="TValue"/>。</returns>
+    public virtual TValue Seed<TValue>(string key, Func<string, TValue> valueFactory)
+        => (TValue)SeedBank.GetOrAdd(key, k => valueFactory.Invoke(k)
+            ?? throw new ArgumentException("The result of a value factory called is null."));
 
     /// <summary>
-    /// 获取初始用户标识。
+    /// 播种。
     /// </summary>
-    /// <param name="idType">给定的标识类型。</param>
-    /// <returns>返回标识对象。</returns>
-    public virtual object GetInitialUserId(Type idType)
-    {
-        if (_initialUserId is null)
-            _initialUserId = IdGeneratorFactory.GetNewId(idType);
-
-        return _initialUserId;
-    }
+    /// <param name="key">给定的键。</param>
+    /// <param name="valueFactory">给定的值工厂方法。</param>
+    /// <returns>返回对象。</returns>
+    public virtual object Seed(string key, Func<string, object> valueFactory)
+        => SeedBank.GetOrAdd(key, valueFactory.Invoke(key));
 
 
     /// <summary>

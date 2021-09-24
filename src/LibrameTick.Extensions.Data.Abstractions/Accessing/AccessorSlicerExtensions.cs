@@ -21,22 +21,22 @@ public static class AccessorSlicerExtensions
     /// 切片读取访问器集合（可用于读/写分库）。
     /// </summary>
     /// <param name="slicer">给定的 <see cref="IAccessorSlicer"/>。</param>
-    /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
+    /// <param name="accessors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
     /// <param name="customSliceFunc">给定的自定义切片方法（可选；支持参数分库）。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
     public static IAccessor? SliceReadAccessors(this IAccessorSlicer slicer,
-        IReadOnlyList<AccessorDescriptor> descriptors, Func<IAccessor, bool>? customSliceFunc = null)
-        => slicer.SliceAccessors(descriptors, AccessMode.Read | AccessMode.ReadWrite, customSliceFunc);
+        IReadOnlyList<IAccessor> accessors, Func<IAccessor, bool>? customSliceFunc = null)
+        => slicer.SliceAccessors(accessors, AccessMode.Read | AccessMode.ReadWrite, customSliceFunc);
 
     /// <summary>
     /// 切片写入访问器集合（可用于读/写分库）。
     /// </summary>
     /// <param name="slicer">给定的 <see cref="IAccessorSlicer"/>。</param>
-    /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
+    /// <param name="accessors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
     /// <param name="customSliceFunc">给定的自定义切片方法（可选；支持参数分库）。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
     public static IAccessor? SliceWriteAccessors(this IAccessorSlicer slicer,
-        IReadOnlyList<AccessorDescriptor> descriptors, Func<IAccessor, bool>? customSliceFunc = null)
-        => slicer.SliceAccessors(descriptors, AccessMode.Write | AccessMode.ReadWrite, customSliceFunc);
+        IReadOnlyList<IAccessor> accessors, Func<IAccessor, bool>? customSliceFunc = null)
+        => slicer.SliceAccessors(accessors, AccessMode.Write | AccessMode.ReadWrite, customSliceFunc);
 
 }

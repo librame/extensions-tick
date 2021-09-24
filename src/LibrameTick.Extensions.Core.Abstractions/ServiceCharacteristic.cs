@@ -40,19 +40,19 @@ public class ServiceCharacteristic : IEquatable<ServiceCharacteristic>
     public Type ServiceType { get; init; }
 
     /// <summary>
-    /// 添加实现类型。如果启用，则在默认添加服务类型的基础上，再添加实现类型（此项对添加服务集合无效）。
+    /// 添加实现类型本身。如果启用，则在添加服务类型的基础上，再添加实现类型作为服务类型（此项对添加服务集合无效）。
     /// </summary>
-    public bool AddImplementationType { get; init; }
+    public bool AddImplementationType { get; set; }
 
     /// <summary>
     /// 是否替换已存在的服务。
     /// </summary>
-    public bool ReplaceIfExists { get; init; }
+    public bool ReplaceIfExists { get; set; }
 
     /// <summary>
     /// 服务的生命周期。
     /// </summary>
-    public ServiceLifetime Lifetime { get; init; }
+    public ServiceLifetime Lifetime { get; set; }
 
 
     /// <summary>

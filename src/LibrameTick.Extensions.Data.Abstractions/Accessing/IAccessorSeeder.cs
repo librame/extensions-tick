@@ -10,8 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Core;
-
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
@@ -20,27 +18,19 @@ namespace Librame.Extensions.Data.Accessing;
 public interface IAccessorSeeder
 {
     /// <summary>
-    /// 时钟。
+    /// 播种。
     /// </summary>
-    IClock Clock { get; }
+    /// <typeparam name="TValue">指定的值类型。</typeparam>
+    /// <param name="key">给定的键。</param>
+    /// <param name="valueFactory">给定的值工厂方法。</param>
+    /// <returns>返回 <typeparamref name="TValue"/>。</returns>
+    TValue Seed<TValue>(string key, Func<string, TValue> valueFactory);
 
     /// <summary>
-    /// 标识生成器工厂。
+    /// 播种。
     /// </summary>
-    IIdentificationGeneratorFactory IdGeneratorFactory { get; }
-
-
-    /// <summary>
-    /// 获取初始用户标识。
-    /// </summary>
-    /// <typeparam name="TId">指定的标识类型。</typeparam>
-    /// <returns>返回 <typeparamref name="TId"/>。</returns>
-    TId GetInitialUserId<TId>();
-
-    /// <summary>
-    /// 获取初始用户标识。
-    /// </summary>
-    /// <param name="idType">给定的标识类型。</param>
-    /// <returns>返回标识对象。</returns>
-    object GetInitialUserId(Type idType);
+    /// <param name="key">给定的键。</param>
+    /// <param name="valueFactory">给定的值工厂方法。</param>
+    /// <returns>返回对象。</returns>
+    object Seed(string key, Func<string, object> valueFactory);
 }

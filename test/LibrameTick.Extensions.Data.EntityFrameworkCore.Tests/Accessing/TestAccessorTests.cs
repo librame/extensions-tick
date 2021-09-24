@@ -13,20 +13,22 @@ namespace Librame.Extensions.Data.Accessing
         [Fact]
         public void AllTest()
         {
+            var modelAssemblyName = typeof(User).Assembly.FullName;
+
             var services = new ServiceCollection();
 
-            services.AddDbContext<TestMySqlAccessor>(opts =>
-            {
-                opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
-                    a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
+            //services.AddDbContext<TestMySqlAccessor>(opts =>
+            //{
+            //    opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
+            //        a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(1));
-            });
-            
+            //    opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(1));
+            //});
+
             services.AddDbContextPool<TestSqlServerAccessor>(opts =>
             {
                 opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;",
-                    a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
+                    a => a.MigrationsAssembly(modelAssemblyName));
 
                 opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPooling().WithPriority(2));
             });
@@ -34,9 +36,9 @@ namespace Librame.Extensions.Data.Accessing
             services.AddDbContext<TestSqliteAccessor>(opts =>
             {
                 opts.UseSqlite("Data Source=librame_extensions.db",
-                    a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
+                    a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.Read)); //.WithShardingNaming<DateTimeShardingStrategy>("%y")
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Read)); //.WithSharding<DateTimeShardingStrategy>("%y")
             });
 
             services.AddLibrame()
@@ -49,13 +51,15 @@ namespace Librame.Extensions.Data.Accessing
                     opts.PropertyChangedAction = (o, e) => o.SaveOptionsAsJson();
                 })
                 .AddSeeder<InternalTestAccessorSeeder>()
-                .AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
+                //.AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqlServerAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>()
                 .SaveOptionsAsJson(); // 首次保存选项为 JSON 文件
 
             var provider = services.BuildServiceProvider();
-            
+
+            var accessor = provider.GetService<TestSqlServerAccessor>();
+
             provider.UseAccessorInitializer();
 
             var store = provider.GetRequiredService<IStore<User>>();

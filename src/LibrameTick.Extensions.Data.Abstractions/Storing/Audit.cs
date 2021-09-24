@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 
 namespace Librame.Extensions.Data.Storing;
@@ -17,6 +18,7 @@ namespace Librame.Extensions.Data.Storing;
 /// <summary>
 /// 定义实现 <see cref="IIdentifier{String}"/> 的数据审计。
 /// </summary>
+[NotAudited]
 [Sharded(typeof(DateTimeShardingStrategy), "%y")]
 public class Audit : AbstractIdentifier<string>
 {

@@ -26,9 +26,8 @@ public interface IAccessorAggregator
     /// <summary>
     /// 聚合访问器集合。
     /// </summary>
-    /// <param name="descriptors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
-    /// <param name="interaction">给定的 <see cref="AccessMode"/>。</param>
+    /// <param name="accessors">给定的 <see cref="IReadOnlyList{IAccessor}"/>。</param>
+    /// <param name="access">给定的 <see cref="AccessMode"/>。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    IAccessor? AggregateAccessors(IReadOnlyList<AccessorDescriptor> descriptors,
-        AccessMode interaction);
+    IAccessor? AggregateAccessors(IReadOnlyList<IAccessor> accessors, AccessMode access);
 }

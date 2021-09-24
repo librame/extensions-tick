@@ -4,42 +4,25 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    class InternalTestAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor>
+    class InternalTestAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor, InternalTestAccessorSeeder>
         where TAccessor : AbstractAccessor, ITestAccessor
     {
-        private InternalTestAccessorSeeder _seeder;
-
-
-        public InternalTestAccessorInitializer(TAccessor accessor, InternalTestAccessorSeeder seeder)
-            : base(accessor)
+        public InternalTestAccessorInitializer(TAccessor accessor, IAccessorSeeder seeder)
+            : base(accessor, seeder)
         {
-            _seeder = seeder;
         }
 
 
-        protected override void Populate(IServiceProvider services, DataExtensionOptions options)
+        protected override void Populate(IServiceProvider services)
         {
-            if (!Accessor.Users.LocalOrDbAny())
-            {
-                var users = _seeder.GetUsers();
-
-                Accessor.Users.AddRange(users);
-
-                Accessor.SaveChanges();
-            }
+            TryPopulateDbSet(Seeder.GetUsers, accssor => accssor.Users);
         }
 
-        protected override async Task PopulateAsync(IServiceProvider services, DataExtensionOptions options,
+        protected override async Task PopulateAsync(IServiceProvider services,
             CancellationToken cancellationToken = default)
         {
-            if (!await Accessor.Users.LocalOrDbAnyAsync(cancellationToken: cancellationToken))
-            {
-                var users = await _seeder.GetUsersAsync(cancellationToken);
-
-                await Accessor.Users.AddRangeAsync(users, cancellationToken);
-
-                await Accessor.SaveChangesAsync();
-            }
+            await TryPopulateDbSetAsync(async token => await Seeder.GetUsersAsync(token),
+                accessor => accessor.Users, cancellationToken);
         }
 
     }

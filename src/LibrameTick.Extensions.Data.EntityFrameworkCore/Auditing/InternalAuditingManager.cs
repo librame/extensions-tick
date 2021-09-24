@@ -16,8 +16,7 @@ namespace Librame.Extensions.Data.Auditing;
 
 class InternalAuditingManager : IAuditingManager
 {
-    private readonly Type _attributeType = typeof(AuditedAttribute);
-    private readonly Type _auditableType = typeof(IAuditable);
+    private readonly Type _notAuditedType = typeof(NotAuditedAttribute);
 
     private readonly IIdentificationGeneratorFactory _idGeneratorFactory;
 
@@ -34,14 +33,9 @@ class InternalAuditingManager : IAuditingManager
 
         foreach (var entry in entityEntries)
         {
-            var entityType = entry.Metadata.ClrType;
-
-            // 对标记审记特性或实现可审计接口的实体进行审计管理
-            if (!entityType.IsDefined(_attributeType, inherit: false)
-                || !entityType.IsImplementedType(_auditableType))
-            {
+            // 过滤标记不审计特性的实体
+            if (entry.Metadata.ClrType.IsDefined(_notAuditedType, inherit: false))
                 continue;
-            }
 
             var audit = new Audit();
 

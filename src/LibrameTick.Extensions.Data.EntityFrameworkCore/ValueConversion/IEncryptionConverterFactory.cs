@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Accessing;
+
 namespace Librame.Extensions.Data.ValueConversion;
 
 /// <summary>
@@ -20,8 +22,8 @@ public interface IEncryptionConverterFactory
     /// <summary>
     /// 获取指定访问器的属性类型值转换器。
     /// </summary>
-    /// <param name="accessorType">给定的访问器类型。</param>
+    /// <param name="accessor">给定的 <see cref="IDataAccessor"/>。</param>
     /// <param name="propertyType">给定的属性类型。</param>
     /// <returns>返回 <see cref="ValueConverter"/>。</returns>
-    ValueConverter GetConverter(Type accessorType, Type propertyType);
+    ValueConverter GetConverter(IDataAccessor accessor, Type propertyType);
 }

@@ -7,9 +7,6 @@ namespace Librame.Extensions.Data.Accessing
 {
     class InternalTestAccessorSeeder : AbstractAccessorSeeder
     {
-        private const string GetUsersKey = "GetTestUsers";
-
-
         public InternalTestAccessorSeeder(CoreExtensionOptions options, IIdentificationGeneratorFactory idGeneratorFactory)
             : base(options.Clock, idGeneratorFactory)
         {
@@ -18,7 +15,7 @@ namespace Librame.Extensions.Data.Accessing
 
         public User[] GetUsers()
         {
-            return (User[])SeedBank.GetOrAdd(GetUsersKey, key =>
+            return Seed(nameof(GetUsers), key =>
             {
                 var users = new User[10];
 

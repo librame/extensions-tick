@@ -38,6 +38,17 @@ public static class PathExtensions
     public static DirectoryInfo CreateDirectory(this string path)
         => Directory.CreateDirectory(path);
 
+    /// <summary>
+    /// 确保目录已存在。
+    /// </summary>
+    /// <param name="directory">给定的目录。</param>
+    /// <returns>返回目录字符串。</returns>
+    public static string EnsureDirectory(string directory)
+    {
+        directory.CreateDirectory();
+        return directory;
+    }
+
 
     /// <summary>
     /// 删除目录。
@@ -69,55 +80,6 @@ public static class PathExtensions
     /// <returns>返回布尔值。</returns>
     public static bool FileExists(this string path)
         => File.Exists(path);
-
-
-    /// <summary>
-    /// 文件读取。
-    /// </summary>
-    /// <param name="path">给定的文件路径。</param>
-    /// <returns>返回字节数组。</returns>
-    public static byte[] FileRead(this string path)
-        => path.FileRead(0L);
-
-    /// <summary>
-    /// 文件读取。
-    /// </summary>
-    /// <param name="path">给定的文件路径。</param>
-    /// <param name="fileOffset">给定的读取偏移量。</param>
-    /// <returns>返回字节数组。</returns>
-    public static byte[] FileRead(this string path, long fileOffset)
-    {
-        using (var handle = File.OpenHandle(path))
-        {
-            var length = RandomAccess.GetLength(handle);
-            var buffer = new byte[length - fileOffset];
-
-            var readLength = RandomAccess.Read(handle, buffer, fileOffset);
-            return buffer;
-        }
-    }
-
-    /// <summary>
-    /// 文件写入。
-    /// </summary>
-    /// <param name="path">给定的文件路径。</param>
-    /// <param name="buffer">给定的字节数组。</param>
-    public static void FileWrite(this string path, byte[] buffer)
-        => path.FileWrite(buffer, 0L);
-
-    /// <summary>
-    /// 文件写入。
-    /// </summary>
-    /// <param name="path">给定的文件路径。</param>
-    /// <param name="buffer">给定的字节数组。</param>
-    /// <param name="fileOffset">给定的读取偏移量。</param>
-    public static void FileWrite(this string path, byte[] buffer, long fileOffset)
-    {
-        using (var handle = File.OpenHandle(path, FileMode.Create, FileAccess.Write, FileShare.Read))
-        {
-            RandomAccess.Write(handle, buffer, fileOffset);
-        }
-    }
 
 
     /// <summary>
@@ -196,6 +158,59 @@ public static class PathExtensions
             return $"{separator}{folderName}";
 
         return $"{folderName}{separator}";
+    }
+
+    #endregion
+
+
+    #region FileRead & FileWrite
+
+    /// <summary>
+    /// 文件读取。
+    /// </summary>
+    /// <param name="path">给定的文件路径。</param>
+    /// <returns>返回字节数组。</returns>
+    public static byte[] FileRead(this string path)
+        => path.FileRead(0L);
+
+    /// <summary>
+    /// 文件读取。
+    /// </summary>
+    /// <param name="path">给定的文件路径。</param>
+    /// <param name="fileOffset">给定的读取偏移量。</param>
+    /// <returns>返回字节数组。</returns>
+    public static byte[] FileRead(this string path, long fileOffset)
+    {
+        using (var handle = File.OpenHandle(path))
+        {
+            var length = RandomAccess.GetLength(handle);
+            var buffer = new byte[length - fileOffset];
+
+            var readLength = RandomAccess.Read(handle, buffer, fileOffset);
+            return buffer;
+        }
+    }
+
+    /// <summary>
+    /// 文件写入。
+    /// </summary>
+    /// <param name="path">给定的文件路径。</param>
+    /// <param name="buffer">给定的字节数组。</param>
+    public static void FileWrite(this string path, byte[] buffer)
+        => path.FileWrite(buffer, 0L);
+
+    /// <summary>
+    /// 文件写入。
+    /// </summary>
+    /// <param name="path">给定的文件路径。</param>
+    /// <param name="buffer">给定的字节数组。</param>
+    /// <param name="fileOffset">给定的读取偏移量。</param>
+    public static void FileWrite(this string path, byte[] buffer, long fileOffset)
+    {
+        using (var handle = File.OpenHandle(path, FileMode.Create, FileAccess.Write, FileShare.Read))
+        {
+            RandomAccess.Write(handle, buffer, fileOffset);
+        }
     }
 
     #endregion

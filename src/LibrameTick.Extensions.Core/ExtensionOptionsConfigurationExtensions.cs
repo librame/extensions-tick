@@ -42,6 +42,7 @@ public static class ExtensionOptionsConfigurationExtensions
                 .AddJsonFile(jsonPath) // default(optional: false, reloadOnChange: false)
                 .Build();
 
+            // 默认从配置根对象的第一个子配置部分加载
             var section = root.GetChildren().FirstOrDefault();
             if (section is not null)
             {
