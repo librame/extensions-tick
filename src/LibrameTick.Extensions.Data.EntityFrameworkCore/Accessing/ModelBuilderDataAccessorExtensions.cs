@@ -34,7 +34,7 @@ public static class ModelBuilderDataAccessorExtensions
         {
             b.ToTableWithSharding(dataAccessor.ShardingManager);
 
-            b.HasIndex(i => new { i.TableName, i.EntityId, i.StateName }).HasDatabaseName().IsUnique();
+            b.HasIndex(i => new { i.TableName, i.EntityId, i.StateName }).HasDatabaseName();
 
             b.HasKey(k => k.Id);
 

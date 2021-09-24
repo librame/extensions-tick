@@ -124,9 +124,6 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // DbContext.OnModelCreating()
-        base.OnModelCreating(modelBuilder);
-
         OnDataModelCreating(modelBuilder);
 
         var converterFactory = this.GetService<IEncryptionConverterFactory>();
