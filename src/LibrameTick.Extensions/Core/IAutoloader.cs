@@ -18,19 +18,19 @@ namespace Librame.Extensions.Core;
 public interface IAutoloader
 {
     /// <summary>
-    /// 是否已自启动实例。
+    /// 是否已自启动。
     /// </summary>
     bool IsAutoloaded { get; }
 
 
     /// <summary>
-    /// 自启动实例。
+    /// 自启动。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     void Autoload(IServiceProvider services);
 
     /// <summary>
-    /// 异步自启动实例。
+    /// 异步自启动。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>

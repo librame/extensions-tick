@@ -57,9 +57,8 @@ public class DateTimeOffsetShardingStrategy : AbstractShardingStrategy
     /// 格式化后缀核心。
     /// </summary>
     /// <param name="suffix">给定的后缀。</param>
-    /// <param name="basis">给定的分片依据。</param>
     /// <returns>返回字符串。</returns>
-    protected override string FormatSuffixCore(string suffix, object? basis)
+    protected override string FormatSuffixCore(string suffix)
     {
         var now = Clock.GetUtcNow();
 

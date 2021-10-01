@@ -11,103 +11,71 @@
 #endregion
 
 using Librame.Extensions.Data.Sharding;
+using Librame.Extensions.Data.Specification;
 
 namespace Librame.Extensions.Data.Accessing;
 
 class InternalAccessorManager : IAccessorManager
 {
-    private readonly IAccessorAggregator _aggregator;
-    //private readonly IAccessorSlicer _slicer;
+    private readonly AccessOptions _options;
     private readonly IAccessorMigrator _migrator;
     private readonly IShardingManager _shardingManager;
-    private readonly AccessOptions _options;
 
-    private IAccessor? _readAccessor;
-    private IAccessor? _writeAccessor;
-
-    private readonly Dictionary<int, IAccessor?> _readGroupAccessors
-        = new Dictionary<int, IAccessor?>();
-
-    private readonly Dictionary<int, IAccessor?> _writeGroupAccessors
-        = new Dictionary<int, IAccessor?>();
+    private IAccessor? _defaultReadAccessor;
+    private IAccessor? _defaultWriteAccessor;
 
 
     public InternalAccessorManager(DataExtensionOptions options,
-        IAccessorResolver resolver, IAccessorAggregator aggregator,
-        IAccessorMigrator migrator, IShardingManager shardingManager)
+        IAccessorMigrator migrator, IAccessorResolver resolver,
+        IShardingManager shardingManager)
     {
-        _aggregator = aggregator;
         _migrator = migrator;
-        _options = options.Access;
         _shardingManager = shardingManager;
+        _options = options.Access;
 
         Accessors = resolver.ResolveAccessors();
         if (Accessors.Count < 1)
             throw new ArgumentNullException($"The accessors not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
-
-        InitializeAccessors();
     }
 
 
     public IReadOnlyList<IAccessor> Accessors { get; init; }
 
 
-    private void InitializeAccessors()
-    {
-        if (Accessors.Count is 1)
-        {
-            _readAccessor = _writeAccessor = Accessors[0];
-        }
-        else
-        {
-            foreach (var group in Accessors.GroupBy(a => a.AccessorDescriptor?.Group))
-            {
-                var groupList = group.ToList();
-
-                _readGroupAccessors.Add(group.Key ?? 0, _aggregator.AggregateReadAccessors(groupList));
-                _writeGroupAccessors.Add(group.Key ?? 0, _aggregator.AggregateWriteAccessors(groupList));
-            }
-
-            _readAccessor = _readGroupAccessors.FirstOrDefault().Value ?? Accessors[0];
-            _writeAccessor = _writeGroupAccessors.FirstOrDefault().Value ?? Accessors[0];
-        }
-    }
-
-    private void OnAutomaticMigration()
+    public IAccessor GetAccessor(IAccessorSpecification specification)
     {
         if (_options.AutomaticMigration)
             _migrator.Migrate(Accessors);
+
+        var accessor = specification.IssueEvaluate(Accessors);
+
+        return _shardingManager.ShardDatabase(accessor);
     }
 
-
-    public IAccessor GetReadAccessor(int? group = null, object? basis = null)
+    public IAccessor GetReadAccessor(IAccessorSpecification? specification = null)
     {
-        OnAutomaticMigration();
-
-        return GetAccessor().ShardingDatabase(_shardingManager, basis);
-
-        IAccessor GetAccessor()
+        if (specification is null)
         {
-            if (group.HasValue && _readGroupAccessors.TryGetValue(group.Value, out var accessor))
-                return accessor ?? _readAccessor!;
+            if (_defaultReadAccessor is null)
+                _defaultReadAccessor = GetAccessor(AccessorSpecifications.Read);
 
-            return _readAccessor!;
+            return _defaultReadAccessor;
         }
+
+        return GetAccessor(specification);
     }
 
-    public IAccessor GetWriteAccessor(int? group = null, object? basis = null)
+    public IAccessor GetWriteAccessor(IAccessorSpecification? specification = null)
     {
-        OnAutomaticMigration();
-
-        return GetAccessor().ShardingDatabase(_shardingManager, basis);
-
-        IAccessor GetAccessor()
+        if (specification is null)
         {
-            if (group.HasValue && _writeGroupAccessors.TryGetValue(group.Value, out var accessor))
-                return accessor ?? _writeAccessor!;
+            if (_defaultWriteAccessor is null)
+                _defaultWriteAccessor = GetAccessor(AccessorSpecifications.Write);
 
-            return _writeAccessor!;
+            return _defaultWriteAccessor;
         }
+
+        return GetAccessor(specification);
     }
 
 }

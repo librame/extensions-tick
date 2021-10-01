@@ -51,11 +51,9 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
         ServiceCharacteristics.AddSingleton<IIdentificationGeneratorFactory>();
 
         // Accessing
-        ServiceCharacteristics.AddScope<IAccessorAggregator>();
         ServiceCharacteristics.AddScope<IAccessorManager>();
-        ServiceCharacteristics.AddScope<IAccessorResolver>();
-        ServiceCharacteristics.AddScope<IAccessorSlicer>();
         ServiceCharacteristics.AddScope<IAccessorMigrator>();
+        ServiceCharacteristics.AddScope<IAccessorResolver>();
 
         ServiceCharacteristics.AddScope<IAccessorSeeder>(addImplementationType: true);
         ServiceCharacteristics.AddScope<IAccessorInitializer>();

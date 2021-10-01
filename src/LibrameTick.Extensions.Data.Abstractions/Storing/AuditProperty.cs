@@ -25,8 +25,7 @@ public class AuditProperty : AbstractIdentifier<string>
     /// <summary>
     /// 审计标识。
     /// </summary>
-    public virtual string AuditId { get; set; }
-        = string.Empty;
+    public virtual long AuditId { get; set; }
 
     /// <summary>
     /// 属性名称。
@@ -49,6 +48,13 @@ public class AuditProperty : AbstractIdentifier<string>
     /// 新值。
     /// </summary>
     public virtual string? NewValue { get; set; }
+
+
+    /// <summary>
+    /// 审计。
+    /// </summary>
+    [JsonIgnore]
+    public virtual Audit? Audit { get; set; }
 
 
     /// <summary>

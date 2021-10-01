@@ -39,8 +39,6 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
         ServiceCharacteristics.AddSingleton<IFileManager>();
         ServiceCharacteristics.AddSingleton<IFilePermission>();
         ServiceCharacteristics.AddSingleton<IFileTransmission>();
-
-        ServiceCharacteristics.AddScope<IProcessorManager>();
     }
 
 
@@ -61,7 +59,7 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
 
 
     /// <summary>
-    /// 时钟。
+    /// 时钟（默认使用本地时钟）。
     /// </summary>
     [JsonIgnore]
     public IClock Clock
@@ -71,7 +69,7 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     }
 
     /// <summary>
-    /// 机器中心标识。
+    /// 机器中心标识（默认 1）。
     /// </summary>
     public long DataCenterId
     {
@@ -80,7 +78,7 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     }
 
     /// <summary>
-    /// 机器标识。
+    /// 机器标识（默认 1）。
     /// </summary>
     public long MachineId
     {
@@ -89,7 +87,7 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     }
 
     /// <summary>
-    /// 启用 <see cref="IAutoloader"/> 激活器。
+    /// 启用 <see cref="IAutoloader"/> 激活器（默认不启用）。
     /// </summary>
     public bool EnableAutoloaderActivator
     {

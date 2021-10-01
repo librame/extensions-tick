@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Specification;
+
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
@@ -24,18 +26,23 @@ public interface IAccessorManager
 
 
     /// <summary>
+    /// 获取指定规约的访问器。
+    /// </summary>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>。</param>
+    /// <returns>返回 <see cref="IAccessor"/>。</returns>
+    IAccessor GetAccessor(IAccessorSpecification specification);
+
+    /// <summary>
     /// 获取读取访问器。
     /// </summary>
-    /// <param name="group">给定的所属群组（可选；默认返回初始访问器）。</param>
-    /// <param name="basis">给定的分片依据（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    IAccessor GetReadAccessor(int? group = null, object? basis = null);
+    IAccessor GetReadAccessor(IAccessorSpecification? specification = null);
 
     /// <summary>
     /// 获取写入访问器。
     /// </summary>
-    /// <param name="group">给定的所属群组（可选；默认返回初始访问器）。</param>
-    /// <param name="basis">给定的分片依据（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    IAccessor GetWriteAccessor(int? group = null, object? basis = null);
+    IAccessor GetWriteAccessor(IAccessorSpecification? specification = null);
 }

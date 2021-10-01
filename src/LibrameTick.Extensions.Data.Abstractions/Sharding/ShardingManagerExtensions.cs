@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Accessing;
+
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
@@ -17,6 +19,9 @@ namespace Librame.Extensions.Data.Sharding;
 /// </summary>
 public static class ShardingManagerExtensions
 {
+
+    #region GetDescriptor
+
     /// <summary>
     /// 默认已支持的数据库键集合。
     /// </summary>
@@ -35,14 +40,13 @@ public static class ShardingManagerExtensions
     /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="connectionString">给定的连接字符串。</param>
     /// <param name="attribute">给定的 <see cref="ShardedAttribute"/>。</param>
-    /// <param name="basis">给定的分片依据。</param>
     /// <param name="separator">给定的数据库键值连接符（可选；默认使用 <see cref="DefaultSeparator"/>）。</param>
     /// <param name="supportedDatabaseKeys">给定支持的数据库键集合（可选；默认使用 <see cref="DefaultSupportedKeys"/>）。</param>
     /// <returns>返回 <see cref="ShardDescriptor"/>。</returns>
     public static ShardDescriptor GetDescriptorFromConnectionString(this IShardingManager manager,
-        string connectionString, ShardedAttribute attribute, object? basis,
+        string connectionString, ShardedAttribute attribute,
         string? separator = null, string[]? supportedDatabaseKeys = null)
-        => manager.GetDescriptorFromConnectionString(connectionString, attribute, basis,
+        => manager.GetDescriptorFromConnectionString(connectionString, attribute,
             out _, separator, supportedDatabaseKeys);
 
     /// <summary>
@@ -51,13 +55,12 @@ public static class ShardingManagerExtensions
     /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="connectionString">给定的连接字符串。</param>
     /// <param name="attribute">给定的 <see cref="ShardedAttribute"/>。</param>
-    /// <param name="basis">给定的分片依据。</param>
     /// <param name="segments">输出连接字符串各部分的字典集合。</param>
     /// <param name="separator">给定的数据库键值连接符（可选；默认使用 <see cref="DefaultSeparator"/>）。</param>
     /// <param name="supportedDatabaseKeys">给定支持的数据库键集合（可选；默认使用 <see cref="DefaultSupportedKeys"/>）。</param>
     /// <returns>返回 <see cref="ShardDescriptor"/>。</returns>
     public static ShardDescriptor GetDescriptorFromConnectionString(this IShardingManager manager,
-        string connectionString, ShardedAttribute attribute, object? basis,
+        string connectionString, ShardedAttribute attribute,
         [MaybeNullWhen(false)] out Dictionary<string, string>? segments,
         string? separator = null, string[]? supportedDatabaseKeys = null)
     {
@@ -104,7 +107,7 @@ public static class ShardingManagerExtensions
             segments = null;
         }
             
-        return manager.GetDescriptor(attribute, basis);
+        return manager.GetDescriptor(attribute);
     }
 
     /// <summary>
@@ -112,10 +115,8 @@ public static class ShardingManagerExtensions
     /// </summary>
     /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="basis">给定的分片依据。</param>
     /// <returns>返回 <see cref="ShardDescriptor"/>。</returns>
-    public static ShardDescriptor GetDescriptorFromEntity(this IShardingManager manager,
-        Type entityType, object? basis)
+    public static ShardDescriptor GetDescriptorFromEntity(this IShardingManager manager, Type entityType)
     {
         if (!entityType.TryGetAttribute<ShardedAttribute>(out var attribute))
             throw new NotSupportedException($"Unsupported entity type '{entityType}'. You need to label entity type with attribute '[{nameof(ShardedAttribute)}]'.");
@@ -123,7 +124,7 @@ public static class ShardingManagerExtensions
         if (string.IsNullOrEmpty(attribute.BaseName))
             attribute.BaseName = entityType.Name.AsPluralize();
 
-        return manager.GetDescriptor(attribute, basis);
+        return manager.GetDescriptor(attribute);
     }
 
     /// <summary>
@@ -131,10 +132,8 @@ public static class ShardingManagerExtensions
     /// </summary>
     /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="attribute">给定的 <see cref="ShardedAttribute"/>。</param>
-    /// <param name="basis">给定的分片依据。</param>
     /// <returns>返回 <see cref="ShardDescriptor"/>。</returns>
-    public static ShardDescriptor GetDescriptor(this IShardingManager manager,
-        ShardedAttribute attribute, object? basis)
+    public static ShardDescriptor GetDescriptor(this IShardingManager manager, ShardedAttribute attribute)
     {
         if (string.IsNullOrEmpty(attribute.BaseName))
             throw new ArgumentException($"The {nameof(attribute)}.{nameof(attribute.BaseName)} is null or empty.");
@@ -144,10 +143,37 @@ public static class ShardingManagerExtensions
             throw new NotSupportedException($"Unsupported sharding strategy type '{attribute.StrategyType}'.");
 
         var suffix = attribute.Suffix;
-        if (strategy.Enabling(basis))
-            suffix = strategy.FormatSuffix(suffix, basis);
+        if (strategy.Enabling())
+            suffix = strategy.FormatSuffix(suffix);
 
         return new ShardDescriptor(attribute.BaseName, suffix, attribute.SuffixConnector);
+    }
+
+    #endregion
+
+
+    /// <summary>
+    /// 对访问器进行分库。
+    /// </summary>
+    /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
+    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    /// <returns>返回 <see cref="IAccessor"/>。</returns>
+    public static IAccessor ShardDatabase(this IShardingManager shardingManager, IAccessor accessor)
+    {
+        if (accessor.AccessorDescriptor?.Sharded is null || string.IsNullOrEmpty(accessor.CurrentConnectionString))
+            return accessor;
+
+        var shardDescriptor = shardingManager.GetDescriptorFromConnectionString(accessor.CurrentConnectionString,
+            accessor.AccessorDescriptor.Sharded);
+
+        var shardName = shardDescriptor.ToString();
+        if (!shardName.Equals(shardDescriptor.BaseName))
+        {
+            var newConnectionString = accessor.CurrentConnectionString.Replace(shardDescriptor.BaseName!, shardName);
+            accessor.ChangeConnection(newConnectionString);
+        }
+
+        return accessor;
     }
 
 }

@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
-/// 定义分片管理器接口。
+/// 定义可用于分库分表的分片管理器接口。
 /// </summary>
 public interface IShardingManager
 {

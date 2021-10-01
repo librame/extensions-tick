@@ -11,7 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Drawing.Processing;
+using Librame.Extensions.Drawing.Drawers;
 using Librame.Extensions.Drawing.Verification;
 
 namespace Librame.Extensions.Drawing;
@@ -33,9 +33,9 @@ public class DrawingExtensionBuilder : AbstractExtensionBuilder<DrawingExtension
         : base(parentBuilder, options)
     {
         // Processing
-        TryAddOrReplaceService<ISavingDrawableProcessor, InternalSavingDrawableProcessor>();
-        TryAddOrReplaceService<IScalingDrawableProcessor, InternalScaleDrawableProcessor>();
-        TryAddOrReplaceService<IWatermarkDrawableProcessor, InternalWatermarkDrawableProcessor>();
+        TryAddOrReplaceService<ISavingDrawer, InternalSavingDrawer>();
+        TryAddOrReplaceService<IScalingDrawer, InternalScaleDrawer>();
+        TryAddOrReplaceService<IWatermarkDrawer, InternalWatermarkDrawer>();
 
         // ValueConversion
         TryAddOrReplaceService<ICaptchaGenerator, InternalCaptchaGenerator>();

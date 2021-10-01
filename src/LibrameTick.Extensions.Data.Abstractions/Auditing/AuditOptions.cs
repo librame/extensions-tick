@@ -40,6 +40,15 @@ public class AuditOptions : AbstractOptions
 
 
     /// <summary>
+    /// 启用审计（默认启用）。
+    /// </summary>
+    public bool Enabling
+    {
+        get => Notifier.GetOrAdd(nameof(Enabling), true);
+        set => Notifier.AddOrUpdate(nameof(Enabling), value);
+    }
+
+    /// <summary>
     /// 启用对实体添加状态的审计（默认启用）。
     /// </summary>
     public bool AddedState

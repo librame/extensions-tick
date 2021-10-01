@@ -80,6 +80,10 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
     {
         var accessor = (sender as AbstractDataAccessor)!;
         var auditOptions = accessor.DataOptions.Audit;
+
+        if (!auditOptions.Enabling)
+            return;
+
         var auditingManager = accessor.GetService<IAuditingManager>();
 
 #pragma warning disable EF1001 // Internal EF Core API usage.
@@ -94,10 +98,7 @@ public abstract class AbstractDataAccessor : AbstractAccessor, IDataAccessor
 
         // 保存审计数据
         if (accessor._audits.Count > 0 && auditOptions.SaveAudits)
-        {
             accessor.Audits.AddRange(accessor._audits);
-            accessor.AuditProperties.AddRange(accessor._audits.SelectMany(s => s.Properties));
-        }
     }
 
 

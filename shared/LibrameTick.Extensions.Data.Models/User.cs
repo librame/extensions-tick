@@ -19,7 +19,7 @@ namespace Librame.Extensions.Data
     /// 用户模型。
     /// </summary>
     [Sharded(typeof(CultureInfoShardingStrategy), "%c")]
-    public class User : AbstractCreationIdentifier<long, long>
+    public class User : AbstractCreationIdentifier<string, string>
     {
         /// <summary>
         /// 名称。

@@ -33,9 +33,8 @@ public abstract class AbstractShardingStrategy : IShardingStrategy
     /// <summary>
     /// 启动分片（默认启用）。
     /// </summary>
-    /// <param name="basis">给定的分片依据。</param>
     /// <returns>返回布尔值。</returns>
-    public virtual bool Enabling(object? basis)
+    public virtual bool Enabling()
         => true;
 
 
@@ -43,23 +42,21 @@ public abstract class AbstractShardingStrategy : IShardingStrategy
     /// 格式化后缀。
     /// </summary>
     /// <param name="suffix">给定的后缀。</param>
-    /// <param name="basis">给定的分片依据。</param>
     /// <returns>返回字符串。</returns>
-    public virtual string FormatSuffix(string suffix, object? basis)
+    public virtual string FormatSuffix(string suffix)
     {
         if (string.IsNullOrEmpty(suffix))
             return suffix;
 
-        return FormatSuffixCore(suffix, basis);
+        return FormatSuffixCore(suffix);
     }
 
     /// <summary>
     /// 格式化后缀核心。
     /// </summary>
     /// <param name="suffix">给定的后缀。</param>
-    /// <param name="basis">给定的分片依据。</param>
     /// <returns>返回字符串。</returns>
-    protected abstract string FormatSuffixCore(string suffix, object? basis);
+    protected abstract string FormatSuffixCore(string suffix);
 
 
     /// <summary>

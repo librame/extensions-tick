@@ -39,11 +39,9 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionOption
         TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
 
         // Accessing
-        TryAddOrReplaceService<IAccessorAggregator, InternalAccessorAggregator>();
         TryAddOrReplaceService<IAccessorManager, InternalAccessorManager>();
         TryAddOrReplaceService<IAccessorMigrator, InternalAccessorMigrator>();
         TryAddOrReplaceService<IAccessorResolver, InternalAccessorResolver>();
-        TryAddOrReplaceService<IAccessorSlicer, InternalAccessorSlicer>();
 
         // Sharding
         TryAddOrReplaceService<IShardingManager, InternalShardingManager>();

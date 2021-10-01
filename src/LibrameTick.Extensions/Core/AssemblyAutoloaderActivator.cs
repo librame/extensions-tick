@@ -17,8 +17,7 @@ namespace Librame.Extensions.Core;
 /// </summary>
 public class AssemblyAutoloaderActivator
 {
-    private readonly Type _baseType = typeof(IAutoloader);
-    private readonly Type[]? _availableTypes;
+    private readonly Type[]? _autoloaderTypes;
     private IServiceProvider? _serviceProvider;
 
 
@@ -28,16 +27,22 @@ public class AssemblyAutoloaderActivator
     /// <param name="options">给定的 <see cref="AssemblyLoadingOptions"/>（可选）。</param>
     public AssemblyAutoloaderActivator(AssemblyLoadingOptions? options = null)
     {
-        _availableTypes = AssemblyLoader.LoadInstantiableTypesByAssemblies(_baseType, options);
+        _autoloaderTypes = AssemblyLoader.LoadInstantiableTypesByAssemblies(typeof(IAutoloader), options);
     }
 
 
     /// <summary>
     /// 可用的自加载器类型列表。
     /// </summary>
-    public IReadOnlyList<Type>? AvailableTypes
-        => _availableTypes;
+    public IReadOnlyList<Type>? AutoloaderTypes
+        => _autoloaderTypes;
 
+
+    private void VerifyServiceProvider()
+    {
+        if (_serviceProvider is null)
+            throw new ArgumentException($"{nameof(_serviceProvider)} is null. You may need to call the {nameof(ApplyServiceProvider)}() method.");
+    }
 
     /// <summary>
     /// 激活自加载器。
@@ -47,12 +52,12 @@ public class AssemblyAutoloaderActivator
     public AssemblyAutoloaderActivator Activate<TAutoloader>()
         where TAutoloader : IAutoloader
     {
-        if (AvailableTypes is not null)
+        if (AutoloaderTypes is not null)
         {
             VerifyServiceProvider();
 
             var autoloaderType = typeof(TAutoloader);
-            var filterTypes = AvailableTypes.Where(p => p.IsAssignableToBaseType(autoloaderType));
+            var filterTypes = AutoloaderTypes.Where(p => p.IsAssignableToBaseType(autoloaderType));
 
             foreach (var type in filterTypes)
             {
@@ -73,12 +78,12 @@ public class AssemblyAutoloaderActivator
     public async Task<AssemblyAutoloaderActivator> ActivateAsync<TAutoloader>(CancellationToken cancellationToken = default)
         where TAutoloader : IAutoloader
     {
-        if (AvailableTypes is not null)
+        if (AutoloaderTypes is not null)
         {
             VerifyServiceProvider();
 
             var autoloaderType = typeof(TAutoloader);
-            var filterTypes = AvailableTypes.Where(p => p.IsAssignableToBaseType(autoloaderType));
+            var filterTypes = AutoloaderTypes.Where(p => p.IsAssignableToBaseType(autoloaderType));
 
             foreach (var type in filterTypes)
             {
@@ -89,13 +94,6 @@ public class AssemblyAutoloaderActivator
         }
 
         return this;
-    }
-
-
-    private void VerifyServiceProvider()
-    {
-        if (_serviceProvider is null)
-            throw new ArgumentException($"{nameof(_serviceProvider)} is null. You may need to call the {nameof(ApplyServiceProvider)}() method.");
     }
 
 
@@ -118,9 +116,9 @@ public class AssemblyAutoloaderActivator
     /// <returns>返回 <see cref="AssemblyAutoloaderActivator"/>。</returns>
     public AssemblyAutoloaderActivator RegisterContainer(Action<Type> registerAction)
     {
-        if (AvailableTypes is not null)
+        if (AutoloaderTypes is not null)
         {
-            foreach (var type in AvailableTypes)
+            foreach (var type in AutoloaderTypes)
             {
                 registerAction.Invoke(type);
             }

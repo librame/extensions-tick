@@ -39,11 +39,11 @@ public class StoreOptions : AbstractOptions
 
 
     /// <summary>
-    /// 映射关系（默认不启用）。
+    /// 映射关系（默认启用）。
     /// </summary>
     public bool MapRelationship
     {
-        get => Notifier.GetOrAdd(nameof(MapRelationship), false);
+        get => Notifier.GetOrAdd(nameof(MapRelationship), true);
         set => Notifier.AddOrUpdate(nameof(MapRelationship), value);
     }
 

@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Collections;
+using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Specification;
 
@@ -244,23 +245,23 @@ public abstract class AbstractAccessor : DbContext, IAccessor
     /// 查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-    public virtual IList<TEntity> FindListWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+    public virtual IList<TEntity> FindListWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
         where TEntity : class
-        => SpecificationEvaluator.EvaluateList(GetQueryable<TEntity>(), specification);
+        => GetQueryable<TEntity>().EvaluateList(specification);
 
     /// <summary>
     /// 异步查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
-    public virtual Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(ISpecification<TEntity>? specification = null,
+    public virtual Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
         CancellationToken cancellationToken = default)
         where TEntity : class
-        => SpecificationEvaluator.EvaluateListAsync(GetQueryable<TEntity>(), specification, cancellationToken);
+        => GetQueryable<TEntity>().EvaluateListAsync(specification, cancellationToken);
 
 
     /// <summary>
@@ -291,25 +292,25 @@ public abstract class AbstractAccessor : DbContext, IAccessor
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
     public virtual IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        ISpecification<TEntity>? specification = null)
+        IEntitySpecification<TEntity>? specification = null)
         where TEntity : class
-        => SpecificationEvaluator.EvaluatePagingList(GetQueryable<TEntity>(), pageAction, specification);
+        => GetQueryable<TEntity>().EvaluatePagingList(pageAction, specification);
 
     /// <summary>
     /// 异步查找带有规约的实体分页集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
     public virtual Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
+        IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
-        => SpecificationEvaluator.EvaluatePagingListAsync(GetQueryable<TEntity>(), pageAction, specification, cancellationToken);
+        => GetQueryable<TEntity>().EvaluatePagingListAsync(pageAction, specification, cancellationToken);
 
     #endregion
 

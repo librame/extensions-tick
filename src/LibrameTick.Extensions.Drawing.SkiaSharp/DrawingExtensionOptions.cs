@@ -11,8 +11,8 @@
 #endregion
 
 using Librame.Extensions.Core;
+using Librame.Extensions.Drawing.Drawers;
 using Librame.Extensions.Drawing.Verification;
-using Librame.Extensions.Drawing.Processing;
 
 namespace Librame.Extensions.Drawing;
 
@@ -37,9 +37,9 @@ public class DrawingExtensionOptions : AbstractExtensionOptions<DrawingExtension
         ImageDirectory = Directories.BaseDirectory.CombinePath("images");
 
         // Processing
-        ServiceCharacteristics.AddSingleton<ISavingDrawableProcessor>();
-        ServiceCharacteristics.AddSingleton<IScalingDrawableProcessor>();
-        ServiceCharacteristics.AddSingleton<IWatermarkDrawableProcessor>();
+        ServiceCharacteristics.AddSingleton<ISavingDrawer>();
+        ServiceCharacteristics.AddSingleton<IScalingDrawer>();
+        ServiceCharacteristics.AddSingleton<IWatermarkDrawer>();
 
         // Verification
         ServiceCharacteristics.AddScope<ICaptchaGenerator>();

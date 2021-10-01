@@ -7,9 +7,21 @@ namespace Librame.Extensions.Data.Accessing
 {
     class InternalTestAccessorSeeder : AbstractAccessorSeeder
     {
+        private string? _initialUserId;
+
+
         public InternalTestAccessorSeeder(CoreExtensionOptions options, IIdentificationGeneratorFactory idGeneratorFactory)
             : base(options.Clock, idGeneratorFactory)
         {
+        }
+
+
+        public virtual string GetInitialUserId()
+        {
+            if (string.IsNullOrEmpty(_initialUserId))
+                _initialUserId = IdGeneratorFactory.GetNewId<string>();
+
+            return _initialUserId;
         }
 
 
@@ -27,8 +39,8 @@ namespace Librame.Extensions.Data.Accessing
                         Passwd = "123456"
                     };
 
-                    user.Id = IdGeneratorFactory.GetNewId<long>();
-                    user.PopulateCreation(0, DateTimeOffset.UtcNow);
+                    user.Id = i is 0 ? GetInitialUserId() : IdGeneratorFactory.GetNewId<string>();
+                    user.PopulateCreation(GetInitialUserId(), DateTimeOffset.UtcNow);
 
                     users[i] = user;
                 }

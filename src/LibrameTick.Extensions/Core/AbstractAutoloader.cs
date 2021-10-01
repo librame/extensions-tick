@@ -18,27 +18,27 @@ namespace Librame.Extensions.Core;
 public abstract class AbstractAutoloader : IAutoloader
 {
     /// <summary>
-    /// 是否已自启动实例。
+    /// 是否已自启动。
     /// </summary>
     public bool IsAutoloaded { get; private set; }
 
 
     /// <summary>
-    /// 自启动实例。
+    /// 自启动。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     public virtual void Autoload(IServiceProvider services)
     {
         if (!IsAutoloaded)
         {
-            OnAutoload(services);
+            AutoloadCore(services);
 
             IsAutoloaded = true;
         }
     }
 
     /// <summary>
-    /// 异步自启动实例。
+    /// 异步自启动。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
@@ -48,7 +48,7 @@ public abstract class AbstractAutoloader : IAutoloader
     {
         if (!IsAutoloaded)
         {
-            await OnAutoloadAsync(services, cancellationToken);
+            await AutoloadCoreAsync(services, cancellationToken);
 
             IsAutoloaded = true;
         }
@@ -56,17 +56,17 @@ public abstract class AbstractAutoloader : IAutoloader
 
 
     /// <summary>
-    /// 在自启动实例。
+    /// 自启动核心。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    protected abstract void OnAutoload(IServiceProvider services);
+    protected abstract void AutoloadCore(IServiceProvider services);
 
     /// <summary>
-    /// 异步在自启动实例。
+    /// 异步自启动核心。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个异步操作。</returns>
-    protected abstract Task OnAutoloadAsync(IServiceProvider services,
+    protected abstract Task AutoloadCoreAsync(IServiceProvider services,
         CancellationToken cancellationToken = default);
 }

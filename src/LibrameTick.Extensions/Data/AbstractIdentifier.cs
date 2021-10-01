@@ -74,7 +74,7 @@ public abstract class AbstractIdentifier<TId> : IIdentifier<TId>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
     public virtual ValueTask<object> GetObjectIdAsync(CancellationToken cancellationToken)
-        => cancellationToken.RunValueTask(() => (object)Id);
+        => cancellationToken.RunValueTask(GetObjectId);
 
 
     /// <summary>

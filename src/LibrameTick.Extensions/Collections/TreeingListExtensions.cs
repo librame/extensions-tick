@@ -60,7 +60,13 @@ public static class TreeingListExtensions
         var nodes = new List<TreeingNode<TItem, TId>>();
 
         // 提取当前父标识的父元素集合
-        var parents = items.Where(p => p.ParentId.Equals(currentParentId)).ToList();
+        List<TItem> parents;
+
+        if (currentParentId is null)
+            parents = items.Where(p => p.ParentId is null).ToList();
+        else
+            parents = items.Where(p => p.ParentId is not null && p.ParentId.Equals(currentParentId)).ToList();
+
         if (parents.Count < 1)
             return nodes;
 

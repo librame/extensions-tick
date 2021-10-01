@@ -47,8 +47,6 @@ public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionOption
         TryAddOrReplaceService<IFilePermission, InternalFilePermission>();
         TryAddOrReplaceService<IFileTransmission, InternalFileTransmission>();
 
-        TryAddOrReplaceService<IProcessorManager, InternalProcessorManager>();
-
         if (options.EnableAutoloaderActivator)
         {
             AutoloaderActivator = new AssemblyAutoloaderActivator(options.AssemblyLoading);

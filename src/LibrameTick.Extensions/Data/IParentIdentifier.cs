@@ -22,5 +22,5 @@ public interface IParentIdentifier<TId> : IIdentifier<TId>, IObjectParentIdentif
     /// <summary>
     /// 父标识。
     /// </summary>
-    TId ParentId { get; set; }
+    TId? ParentId { get; set; }
 }

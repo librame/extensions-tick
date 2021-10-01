@@ -28,7 +28,7 @@ public static class EntityTypeBuilderExtensions
     public static EntityTypeBuilder<TEntity> ToTable<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class
         => builder.ToTable(schema: null);
-
+    
     /// <summary>
     /// 通过复数化实体类型名称映射表名（此方法仅支持关系型数据库）。
     /// </summary>
@@ -52,12 +52,11 @@ public static class EntityTypeBuilderExtensions
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
     /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="basis">给定的分片依据（可选）。</param>
     /// <returns>返回 <see cref="EntityTypeBuilder{TEntity}"/>。</returns>
     public static EntityTypeBuilder<TEntity> ToTableWithSharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
-        IShardingManager shardingManager, object? basis = null)
+        IShardingManager shardingManager)
         where TEntity : class
-        => builder.ToTableWithSharding(shardingManager, schema: null, basis);
+        => builder.ToTableWithSharding(shardingManager, schema: null);
 
     /// <summary>
     /// 通过带分片与复数化实体类型名称映射表名（此方法仅支持关系型数据库，同时要求实体添加 <see cref="ShardedAttribute"/> 特性）。
@@ -66,13 +65,12 @@ public static class EntityTypeBuilderExtensions
     /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
     /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="schema">给定的架构。</param>
-    /// <param name="basis">给定的分片依据（可选）。</param>
     /// <returns>返回 <see cref="EntityTypeBuilder{TEntity}"/>。</returns>
     public static EntityTypeBuilder<TEntity> ToTableWithSharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
-        IShardingManager shardingManager, string? schema, object? basis = null)
+        IShardingManager shardingManager, string? schema)
         where TEntity : class
     {
-        var shardingNaming = shardingManager.GetDescriptorFromEntity(typeof(TEntity), basis);
+        var shardingNaming = shardingManager.GetDescriptorFromEntity(typeof(TEntity));
 
         builder.Metadata.SetTableName(shardingNaming);
         builder.Metadata.SetSchema(schema);

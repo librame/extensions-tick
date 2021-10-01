@@ -20,8 +20,17 @@ namespace Librame.Extensions.Data.Storing;
 /// </summary>
 [NotAudited]
 [Sharded(typeof(DateTimeShardingStrategy), "%y")]
-public class Audit : AbstractIdentifier<string>
+public class Audit : AbstractIdentifier<long>
 {
+    /// <summary>
+    /// 构造一个 <see cref="Audit"/>。
+    /// </summary>
+    public Audit()
+    {
+        Properties = new List<AuditProperty>();
+    }
+
+
     /// <summary>
     /// 表名。
     /// </summary>
@@ -48,11 +57,9 @@ public class Audit : AbstractIdentifier<string>
 
 
     /// <summary>
-    /// 审计属性列表。
+    /// 审计属性集合。
     /// </summary>
-    [NotMapped]
-    public virtual List<AuditProperty> Properties { get; set; }
-        = new List<AuditProperty>();
+    public virtual ICollection<AuditProperty> Properties { get; set; }
 
 
     /// <summary>

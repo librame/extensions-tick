@@ -19,11 +19,14 @@ class InternalAuditingManager : IAuditingManager
     private readonly Type _notAuditedType = typeof(NotAuditedAttribute);
 
     private readonly IIdentificationGeneratorFactory _idGeneratorFactory;
+    private readonly DataExtensionOptions _options;
 
 
-    public InternalAuditingManager(IIdentificationGeneratorFactory idGeneratorFactory)
+    public InternalAuditingManager(IIdentificationGeneratorFactory idGeneratorFactory,
+        DataExtensionOptions options)
     {
         _idGeneratorFactory = idGeneratorFactory;
+        _options = options;
     }
 
 
@@ -39,7 +42,7 @@ class InternalAuditingManager : IAuditingManager
 
             var audit = new Audit();
 
-            audit.Id = _idGeneratorFactory.GetNewId<string>();
+            audit.Id = _idGeneratorFactory.GetNewId<long>();
             audit.TableName = GetEntityTableName(entry.Metadata);
             audit.EntityTypeName = GetTypeName(entry.Metadata.ClrType);
             audit.EntityId = GetEntityId(entry);
@@ -60,41 +63,59 @@ class InternalAuditingManager : IAuditingManager
             if (property.IsConcurrencyToken)
                 continue;
 
+            (var newValue, var oldValue) = GetValues(property, entityEntry);
+
+            // 当前属性的新值与旧值均为空时，则不被审计
+            if (string.IsNullOrEmpty(newValue) && string.IsNullOrEmpty(oldValue))
+                continue;
+
             var auditProperty = new AuditProperty();
 
             auditProperty.Id = _idGeneratorFactory.GetNewId<string>();
-            auditProperty.AuditId = audit.Id;
             auditProperty.PropertyName = property.Name;
             auditProperty.PropertyTypeName = GetTypeName(property.ClrType);
+            auditProperty.NewValue = newValue;
+            auditProperty.OldValue = oldValue;
 
-            switch (entityEntry.State)
-            {
-                case EntityState.Added:
-                    auditProperty.NewValue = entityEntry.Property(property.Name).CurrentValue?.ToString();
-                    break;
+            if (!_options.Store.MapRelationship)
+                auditProperty.AuditId = audit.Id;
+            else
+                auditProperty.Audit = audit;
 
-                case EntityState.Deleted:
-                    auditProperty.OldValue = entityEntry.Property(property.Name).OriginalValue?.ToString();
-                    break;
-
-                case EntityState.Modified:
-                    {
-                        var currentValue = entityEntry.Property(property.Name).CurrentValue?.ToString();
-                        var originalValue = entityEntry.Property(property.Name).OriginalValue?.ToString();
-
-                        if (currentValue != originalValue)
-                        {
-                            auditProperty.NewValue = currentValue;
-                            auditProperty.OldValue = originalValue;
-                        }
-                    }
-                    break;
-            }
-
-            // 当前属性的新值与旧值均为空时，则不被审计
-            if (!(string.IsNullOrEmpty(auditProperty.NewValue) && string.IsNullOrEmpty(auditProperty.OldValue)))
-                audit.Properties.Add(auditProperty);
+            audit.Properties.Add(auditProperty);
         }
+    }
+
+    private (string? newValue, string? oldValue) GetValues(IProperty property, EntityEntry entityEntry)
+    {
+        string? newValue = null;
+        string? oldValue = null;
+
+        switch (entityEntry.State)
+        {
+            case EntityState.Added:
+                newValue = entityEntry.Property(property.Name).CurrentValue?.ToString();
+                break;
+
+            case EntityState.Deleted:
+                oldValue = entityEntry.Property(property.Name).OriginalValue?.ToString();
+                break;
+
+            case EntityState.Modified:
+                {
+                    var currentValue = entityEntry.Property(property.Name).CurrentValue?.ToString();
+                    var originalValue = entityEntry.Property(property.Name).OriginalValue?.ToString();
+
+                    if (currentValue != originalValue)
+                    {
+                        newValue = currentValue;
+                        oldValue = originalValue;
+                    }
+                }
+                break;
+        }
+
+        return (newValue, oldValue);
     }
         
     private string GetEntityTableName(IEntityType entityType)

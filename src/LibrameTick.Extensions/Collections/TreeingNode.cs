@@ -83,7 +83,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// <summary>
     /// 获取或设置节点项父标识。
     /// </summary>
-    public override TId ParentId
+    public override TId? ParentId
     {
         get => Item.ParentId;
         set => Item.ParentId = value;
@@ -110,7 +110,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// 获取对象标识。
     /// </summary>
     /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-    public override object GetObjectParentId()
+    public override object? GetObjectParentId()
         => Item.GetObjectParentId();
 
     /// <summary>
@@ -118,7 +118,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    public override ValueTask<object> GetObjectParentIdAsync(CancellationToken cancellationToken)
+    public override ValueTask<object?> GetObjectParentIdAsync(CancellationToken cancellationToken)
         => Item.GetObjectParentIdAsync(cancellationToken);
 
 
@@ -146,7 +146,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// </summary>
     /// <param name="newParentId">给定的新对象标识。</param>
     /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-    public override object SetObjectParentId(object newParentId)
+    public override object? SetObjectParentId(object? newParentId)
         => Item.SetObjectParentId(newParentId);
 
     /// <summary>
@@ -155,7 +155,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// <param name="newParentId">给定的新对象标识。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    public override ValueTask<object> SetObjectParentIdAsync(object newParentId,
+    public override ValueTask<object?> SetObjectParentIdAsync(object? newParentId,
         CancellationToken cancellationToken = default)
         => Item.SetObjectParentIdAsync(newParentId, cancellationToken);
 
@@ -201,12 +201,15 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// </summary>
     /// <param name="parentId">给定的子节点父编号。</param>
     /// <returns>返回 <see cref="TreeingNode{TItem, TId}"/> 列表。</returns>
-    public virtual List<TreeingNode<TItem, TId>>? GetChildrenByParentId(TId parentId)
+    public virtual List<TreeingNode<TItem, TId>>? GetChildrenByParentId(TId? parentId)
     {
         if (Children.Count < 1)
             return null;
 
-        return Children.Where(p => p.ParentId.Equals(parentId)).ToList();
+        if (parentId is null)
+            return Children.Where(p => p.ParentId is null).ToList();
+
+        return Children.Where(p => p.ParentId is not null && p.ParentId.Equals(parentId)).ToList();
     }
 
 
@@ -229,7 +232,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// </summary>
     /// <returns>返回此实例的哈希代码。</returns>
     public override int GetHashCode()
-        => Id.GetHashCode() ^ ParentId.GetHashCode();
+        => Id.GetHashCode() ^ ParentId?.GetHashCode() ?? 0;
 
 
     /// <summary>

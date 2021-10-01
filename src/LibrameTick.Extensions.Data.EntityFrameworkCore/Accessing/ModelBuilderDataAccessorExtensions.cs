@@ -29,12 +29,13 @@ public static class ModelBuilderDataAccessorExtensions
     public static ModelBuilder CreateDataModel(this ModelBuilder modelBuilder, IDataAccessor dataAccessor)
     {
         var limitableMaxLength = dataAccessor.DataOptions.Store.LimitableMaxLengthOfProperty;
+        var mapRelationship = dataAccessor.DataOptions.Store.MapRelationship;
 
         modelBuilder.Entity<Audit>(b =>
         {
             b.ToTableWithSharding(dataAccessor.ShardingManager);
 
-            b.HasIndex(i => new { i.TableName, i.EntityId, i.StateName }).HasDatabaseName();
+            b.HasIndex(i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
             b.HasKey(k => k.Id);
 
@@ -42,10 +43,8 @@ public static class ModelBuilderDataAccessorExtensions
 
             if (limitableMaxLength > 0)
             {
-                b.Property(p => p.Id).HasMaxLength(limitableMaxLength);
-
-                b.Property(p => p.EntityId).HasMaxLength(limitableMaxLength).IsRequired();
                 b.Property(p => p.TableName).HasMaxLength(limitableMaxLength).IsRequired();
+                b.Property(p => p.EntityId).HasMaxLength(limitableMaxLength).IsRequired();
                 b.Property(p => p.StateName).HasMaxLength(limitableMaxLength);
                 b.Property(p => p.EntityTypeName).HasMaxLength(limitableMaxLength);
             }
@@ -71,6 +70,11 @@ public static class ModelBuilderDataAccessorExtensions
             // MaxLength
             b.Property(p => p.OldValue);
             b.Property(p => p.NewValue);
+
+            if (mapRelationship)
+            {
+                b.HasOne(f => f.Audit).WithMany(p => p.Properties).HasForeignKey(fk => fk.AuditId);
+            }
         });
 
         return modelBuilder;

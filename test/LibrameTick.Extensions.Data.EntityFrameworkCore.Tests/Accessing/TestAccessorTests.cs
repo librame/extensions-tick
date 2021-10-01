@@ -1,8 +1,10 @@
 using Librame.Extensions.Core;
+using Librame.Extensions.Data.Specification;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using Xunit;
 
 namespace Librame.Extensions.Data.Accessing
@@ -38,7 +40,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlite("Data Source=librame_extensions.db",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.Read)); //.WithSharding<DateTimeShardingStrategy>("%y")
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Read)); //.WithSharding<DateTimeOffsetShardingStrategy>("%y")
             });
 
             services.AddLibrame()
@@ -57,8 +59,6 @@ namespace Librame.Extensions.Data.Accessing
                 .SaveOptionsAsJson(); // 首次保存选项为 JSON 文件
 
             var provider = services.BuildServiceProvider();
-
-            var accessor = provider.GetService<TestSqlServerAccessor>();
 
             provider.UseAccessorInitializer();
 
@@ -88,8 +88,8 @@ namespace Librame.Extensions.Data.Accessing
                     Passwd = "123456"
                 };
 
-                user.Id = store.IdGeneratorFactory.GetNewId<long>();
-                user.PopulateCreation(0, DateTimeOffset.UtcNow);
+                user.Id = store.IdGeneratorFactory.GetNewId<string>();
+                user.PopulateCreation(pagingUsers.First().Id, DateTimeOffset.UtcNow);
 
                 addUsers[i] = user;
             }
@@ -104,7 +104,7 @@ namespace Librame.Extensions.Data.Accessing
             Assert.Empty(users);
 
             // 修改：强制从写入访问器查询（MySQL/SQL Server）
-            users = store.FindList(p => p.Name!.StartsWith("Update"), fromWriteAccessor: true);
+            users = store.FindList(p => p.Name!.StartsWith("Update"), AccessorSpecifications.Write);
             Assert.NotEmpty(users);
 
             // 新增：读取访问器（Sqlite）数据无变化
@@ -112,7 +112,7 @@ namespace Librame.Extensions.Data.Accessing
             Assert.Empty(users);
 
             // 新增：强制从写入访问器查询（MySQL/SQL Server）
-            users = store.FindList(p => p.Name!.StartsWith("Add"), fromWriteAccessor: true);
+            users = store.FindList(p => p.Name!.StartsWith("Add"), AccessorSpecifications.Write);
             Assert.NotEmpty(users);
         }
 
