@@ -3,12 +3,16 @@
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Core</RootNamespace>
     <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\bin\</OutputPath>
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <LangVersion>latest</LangVersion>
+    <Description>Based on LibrameTick.Extensions.Core.Abstractions and Microsoft.Extensions libraries build of the core extension library. This library contains implementations for functions such as cryptography, storage, and resources.
+
+基于 LibrameTick.Extensions.Core.Abstractions 库构建的核心扩展库。该库包含了对密码学、存储和资源等功能的实现。</Description>
   </PropertyGroup>
   
   <ItemGroup>

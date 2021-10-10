@@ -13,6 +13,7 @@
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.FileProviders;
+global using Microsoft.Extensions.Localization;
 global using Microsoft.IdentityModel.Tokens;
 global using System;
 global using System.Collections.Generic;
@@ -20,6 +21,7 @@ global using System.ComponentModel;
 global using System.Diagnostics.CodeAnalysis;
 global using System.IO;
 global using System.Linq;
+global using System.Linq.Expressions;
 global using System.Security.Cryptography;
 global using System.Security.Cryptography.X509Certificates;
 global using System.Text;

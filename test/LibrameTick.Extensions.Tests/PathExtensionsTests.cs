@@ -5,6 +5,37 @@ using Xunit;
 
 namespace Librame.Extensions
 {
+    public class BinaryInfo
+    {
+        private int _field1;
+
+        internal int Field2;
+
+        public int Property1 { get; set; }
+
+        protected int Property2 { get; set; }
+
+        public string? Name { get; set; }
+
+
+        public void SetField1(int value)
+            => _field1 = value;
+
+        public void SetField2(int value)
+            => Field2 = value;
+
+        public void SetProperty2(int value)
+            => Property2 = value;
+
+
+        public bool Field1Equals(BinaryInfo other)
+            => _field1 == other._field1;
+
+        public bool Property2Equals(BinaryInfo other)
+            => Property2 == other.Property2;
+    }
+
+
     public class PathExtensionsTests
     {
 
@@ -25,6 +56,33 @@ namespace Librame.Extensions
             var str = "relativePath";
             Assert.NotEqual(str, str.SetBasePath());
         }
+
+
+        #region BinaryFileRead & BinaryFileWrite
+
+        [Fact]
+        public void BinaryFileReadAndBinaryWriteTest()
+        {
+            var info = new BinaryInfo();
+            info.SetField1(1);
+            info.SetField2(2);
+            info.SetProperty2(4);
+            info.Name = nameof(BinaryInfo);
+
+            var path = "binary_test.dat".SetBasePath();
+            path.BinaryFileWrite(info);
+
+            var info1 = path.BinaryFileRead<BinaryInfo>();
+            Assert.True(info.Field1Equals(info1));
+            Assert.True(info.Property2Equals(info1));
+            Assert.Equal(info.Field2, info1.Field2);
+            Assert.Equal(info.Property1, info1.Property1);
+            Assert.Equal(info.Name, info1.Name);
+
+            path.FileDelete();
+        }
+
+        #endregion
 
 
         #region FileRead & FileWrite

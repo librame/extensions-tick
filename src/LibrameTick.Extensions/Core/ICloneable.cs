@@ -10,20 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Resources;
+namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义一个资源接口。
+/// 定义一个实现 <see cref="ICloneable"/> 的泛型可克隆接口。
 /// </summary>
-public interface IResource
+/// <typeparam name="TClone">指定的克隆类型。</typeparam>
+public interface ICloneable<TClone> : ICloneable
 {
     /// <summary>
-    /// 资源名称。
+    /// 创建一个泛型克隆对象（默认支持包含静态在内的所有字段和属性成员集合）。
     /// </summary>
-    string ResourceName { get; }
-
-    /// <summary>
-    /// 资源类型。
-    /// </summary>
-    Type ResourceType { get; }
+    /// <returns>返回 <typeparamref name="TClone"/>。</returns>
+    TClone CloneAs();
 }

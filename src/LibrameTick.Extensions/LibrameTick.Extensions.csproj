@@ -3,12 +3,16 @@
   <PropertyGroup>
     <RootNamespace>Librame.Extensions</RootNamespace>
     <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\bin\</OutputPath>
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <LangVersion>latest</LangVersion>
+    <Description>LibrameTick.Extensions is a series of libraries based on .NET 6 base framework, but also for the original Librame.Extensions series of libraries refactored into the next generation of the base framework series of libraries.
+
+LibrameTick.Extensions 是一个基于 .NET 6 的基础框架系列库，也是针对原 Librame.Extensions 系列库重构而成的下一代基础框架系列库。</Description>
   </PropertyGroup>
 
 </Project>

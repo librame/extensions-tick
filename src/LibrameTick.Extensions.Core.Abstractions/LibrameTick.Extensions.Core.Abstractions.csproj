@@ -3,12 +3,16 @@
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Core</RootNamespace>
     <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\bin\</OutputPath>
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <LangVersion>latest</LangVersion>
+    <Description>Based on LibrameTick.Extensions and Microsoft.Extensions libraries build of the core extension library. This library contains abstractions for functions such as cryptography, storage, and resources.
+
+基于 LibrameTick.Extensions 和 Microsoft.Extensions 库构建的核心扩展库。该库包含了对密码学、存储和资源等功能的抽象。</Description>
   </PropertyGroup>
     
   <ItemGroup>
@@ -18,7 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="6.0.0-rc.1.21451.13" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="6.0.0-rc.1.21452.15" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0-rc.1.21451.13" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.12.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.13.1" />
   </ItemGroup>
     
   <ItemGroup>

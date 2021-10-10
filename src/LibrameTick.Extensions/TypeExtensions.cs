@@ -22,6 +22,35 @@ public static class TypeExtensions
     private static readonly Type _memberGetDelegateTypeDefinition = typeof(MemberGetDelegate<>);
     private static readonly Type _nullableGenericTypeDefinition = typeof(Nullable<>);
 
+    private static readonly Type[] _commonValueTypes = new Type[]
+    {
+        typeof(int),
+        typeof(Guid),
+        typeof(DateTime),
+        typeof(DateTimeOffset),
+        typeof(DateOnly),
+        typeof(TimeOnly),
+        typeof(long),
+        typeof(bool),
+        typeof(double),
+        typeof(short),
+        typeof(float),
+        typeof(byte),
+        typeof(char),
+        typeof(uint),
+        typeof(ushort),
+        typeof(ulong),
+        typeof(sbyte)
+    };
+
+
+    /// <summary>
+    /// 是常见值类型（即整数、全局唯一标识符、日期与时间、布尔、浮点等）。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>返回布尔值。</returns>
+    public static bool IsCommonValueType(this Type type)
+        => _commonValueTypes.Any(t => t == type);
 
     /// <summary>
     /// 是具体类型（即非抽象、接口类型）。
@@ -38,6 +67,39 @@ public static class TypeExtensions
     /// <returns>返回布尔值。</returns>
     public static bool IsNullableType(this Type type)
         => type.IsGenericType && type.GetGenericTypeDefinition() == _nullableGenericTypeDefinition;
+
+    /// <summary>
+    /// 是字符串类型。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>返回布尔值。</returns>
+    public static bool IsStringType(this Type type)
+        => type == typeof(string);
+
+
+    /// <summary>
+    /// 获取所有字段和属性成员集合（私有字段包含属性实现）。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
+    public static FieldInfo[] GetAllFieldsAndProperties(this Type type)
+        => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+    /// <summary>
+    /// 获取包含静态在内的所有字段和属性成员集合（私有字段包含属性实现）。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
+    public static FieldInfo[] GetAllFieldsAndPropertiesWithStatic(this Type type)
+        => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+
+    /// <summary>
+    /// 获取枚举字段成员集合。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
+    public static FieldInfo[] GetEnumFields(this Type type)
+        => type.GetFields(BindingFlags.Public | BindingFlags.Static);
 
 
     /// <summary>

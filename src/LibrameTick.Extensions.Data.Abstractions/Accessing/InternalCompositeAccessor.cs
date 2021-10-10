@@ -17,7 +17,7 @@ using Librame.Extensions.Data.Specification;
 
 namespace Librame.Extensions.Data.Accessing;
 
-sealed class InternalCompositeAccessor : IAccessor
+sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
 {
     private readonly IAccessor[] _accessors;
 
@@ -150,17 +150,6 @@ sealed class InternalCompositeAccessor : IAccessor
     public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = default)
         => BatchingAccessors(a => a.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken))!;
-
-    #endregion
-
-
-    #region ISortable
-
-    public float Priority
-        => 0;
-
-    public int CompareTo(ISortable? other)
-        => Priority.CompareTo(other?.Priority ?? 0);
 
     #endregion
 

@@ -17,33 +17,20 @@ namespace Librame.Extensions.Core;
 /// </summary>
 public static class FileSizeDescriptionExtensions
 {
-    private static readonly Type _attributeType = typeof(FileSizeDescriptionAttribute);
-
     /// <summary>
     /// 文件大小单位描述字典。
     /// </summary>
-    public static readonly IReadOnlyDictionary<string, List<FileSizeDescriptor>> UnitDescriptors
+    public static readonly IReadOnlyDictionary<FileSizeUnit, IEnumerable<FileSizeDescriptor>> UnitDescriptors
         = InitialUnitDescriptors();
 
     private static readonly IEnumerable<FileSizeDescriptor> _reverseUnitDescriptors
         = UnitDescriptors.Reverse().SelectMany(s => s.Value).ToList();
 
 
-    private static Dictionary<string, List<FileSizeDescriptor>> InitialUnitDescriptors()
+    private static Dictionary<FileSizeUnit, IEnumerable<FileSizeDescriptor>> InitialUnitDescriptors()
     {
-        var units = new Dictionary<string, List<FileSizeDescriptor>>();
-
-        var fields = typeof(FileSizeUnit).GetFields(BindingFlags.Static | BindingFlags.Public);
-        foreach (var field in fields)
-        {
-            var attributes = field.GetCustomAttributes(_attributeType, false)
-                .Select(obj => FileSizeDescriptor.FromDescription((FileSizeDescriptionAttribute)obj))
-                .ToList();
-
-            units.Add(field.Name, attributes);
-        }
-
-        return units;
+        return EnumExtensions.GetEnumItemsWithAttributes<FileSizeUnit, int,
+            FileSizeDescriptionAttribute, FileSizeDescriptor>((value, attrib) => FileSizeDescriptor.FromDescription(attrib));
     }
 
 
@@ -93,9 +80,7 @@ public static class FileSizeDescriptionExtensions
     /// <returns>返回格式化字符串。</returns>
     public static string FormatSizeStringWithUnit(this BigInteger fileSize, FileSizeSystem system, FileSizeUnit unit)
     {
-        var unitName = Enum.GetName(typeof(FileSizeUnit), unit);
-
-        if (UnitDescriptors.TryGetValue(unitName!, out var descriptions))
+        if (UnitDescriptors.TryGetValue(unit, out var descriptions))
         {
             var descr = descriptions.FirstOrDefault(s => s.System == system);
             if (descr is null)
