@@ -13,9 +13,9 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义时钟接口。
+/// 定义一个实现 <see cref="IRegisterable"/> 的可注册时钟接口。
 /// </summary>
-public interface IClock
+public interface IRegisterableClock : IRegisterable
 {
     /// <summary>
     /// 获取当前日期和时间。

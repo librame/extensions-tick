@@ -31,7 +31,7 @@ public static class StopwatchExtensions
         if (!_stopwatch.Value!.IsRunning)
             _stopwatch.Value.Restart();
 
-        action.Invoke(_stopwatch.Value);
+        action(_stopwatch.Value);
 
         _stopwatch.Value.Stop();
     }
@@ -47,7 +47,7 @@ public static class StopwatchExtensions
         if (!_stopwatch.Value!.IsRunning)
             _stopwatch.Value.Restart();
 
-        var value = func.Invoke(_stopwatch.Value);
+        var value = func(_stopwatch.Value);
 
         _stopwatch.Value.Stop();
 

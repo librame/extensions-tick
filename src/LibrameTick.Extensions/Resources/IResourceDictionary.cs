@@ -36,6 +36,14 @@ public interface IResourceDictionary : IResource, IEnumerable<KeyValuePair<strin
     /// <returns>返回资源。</returns>
     object Add(string key, object value);
 
+    /// <summary>
+    /// 添加或更新资源。
+    /// </summary>
+    /// <param name="key">给定的键。</param>
+    /// <param name="value">给定的资源。</param>
+    /// <returns>返回资源。</returns>
+    object AddOrSet(string key, object value);
+
 
     /// <summary>
     /// 获取资源。

@@ -653,7 +653,7 @@ public static class ServiceCollectionExtensions
     {
         if (services.TryGetSingle(serviceType, out var oldDescriptor, implementationType))
         {
-            var newDescriptor = newDescriptorFunc.Invoke(oldDescriptor!);
+            var newDescriptor = newDescriptorFunc(oldDescriptor!);
 
             services.Remove(oldDescriptor!);
             services.Add(newDescriptor);

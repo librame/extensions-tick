@@ -10,17 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Core;
+using Librame.Extensions.Resources;
+
+namespace Librame.Extensions.Core.Plugins;
 
 /// <summary>
-/// 定义扩展构建器接口。
+/// 定义一个继承 <see cref="IResourceDictionary"/> 的插件资源接口。
 /// </summary>
-/// <typeparam name="TOptions">指定的扩展选项类型。</typeparam>
-public interface IExtensionBuilder<TOptions> : IExtensionBuilder
-    where TOptions : IExtensionOptions
+public interface IPluginResource : IResourceDictionary
 {
     /// <summary>
-    /// 扩展选项。
+    /// 显示名称。
     /// </summary>
-    new TOptions Options { get; }
+    string DisplayName { get; set; }
 }

@@ -18,86 +18,43 @@ namespace Librame.Extensions.Core;
 public interface IExtensionBuilder : IExtensionInfo
 {
     /// <summary>
+    /// 父级构建器。
+    /// </summary>
+    IExtensionBuilder? ParentBuilder { get; }
+
+    /// <summary>
+    /// 扩展选项类型。
+    /// </summary>
+    Type ExtensionOptionsType { get; }
+
+    /// <summary>
+    /// 替换服务字典集合。
+    /// </summary>
+    IDictionary<Type, Type> ReplacedServices { get; }
+
+    /// <summary>
     /// 服务集合。
     /// </summary>
     IServiceCollection Services { get; }
 
     /// <summary>
-    /// 扩展选项。
+    /// 服务特征集合。
     /// </summary>
-    IExtensionOptions Options { get; }
-
-    /// <summary>
-    /// 父级构建器。
-    /// </summary>
-    IExtensionBuilder? ParentBuilder { get; }
-
-
-    #region TryAddOrReplaceService
-
-    /// <summary>
-    /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    IExtensionBuilder TryAddOrReplaceService<TService, TImplementation>()
-        where TService : class
-        where TImplementation : class, TService;
-
-    /// <summary>
-    /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="implementationType">给定的实现类型。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    IExtensionBuilder TryAddOrReplaceService<TService>(Type implementationType)
-        where TService : class;
-
-    /// <summary>
-    /// 通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="implementationType">给定的实现类型。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    IExtensionBuilder TryAddOrReplaceService(Type serviceType, Type implementationType);
+    ServiceCharacteristicCollection ServiceCharacteristics { get; }
 
 
     /// <summary>
-    /// 通过服务特征实现添加或替换服务。
+    /// 将扩展选项保存为 JSON 文件。
     /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="factory">给定的服务方法。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    IExtensionBuilder TryAddOrReplaceService<TService>(Func<IServiceProvider, TService> factory)
-        where TService : class;
+    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
+    /// <returns>返回保存路径。</returns>
+    string SaveOptionsAsJson(IServiceProvider services);
 
     /// <summary>
-    /// 通过服务特征实现添加或替换服务。
+    /// 将扩展选项保存为 JSON 文件。
     /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="factory">给定的服务方法。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    IExtensionBuilder TryAddOrReplaceService(Type serviceType, Func<IServiceProvider, object> factory);
-
-
-    /// <summary>
-    /// 通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="instance">给定的服务实例。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    IExtensionBuilder TryAddOrReplaceService<TService>(TService instance)
-        where TService : class;
-
-    /// <summary>
-    /// 通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="instance">给定的服务实例。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    IExtensionBuilder TryAddOrReplaceService(Type serviceType, object instance);
-
-    #endregion
-
+    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
+    /// <param name="options">输出 <see cref="IExtensionOptions"/>。</param>
+    /// <returns>返回保存路径。</returns>
+    string SaveOptionsAsJson(IServiceProvider services, out IExtensionOptions options);
 }

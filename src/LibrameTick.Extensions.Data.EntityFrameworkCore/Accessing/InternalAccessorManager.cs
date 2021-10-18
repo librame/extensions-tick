@@ -25,13 +25,13 @@ class InternalAccessorManager : IAccessorManager
     private IAccessor? _defaultWriteAccessor;
 
 
-    public InternalAccessorManager(DataExtensionOptions options,
+    public InternalAccessorManager(IOptionsMonitor<DataExtensionOptions> options,
         IAccessorMigrator migrator, IAccessorResolver resolver,
         IShardingManager shardingManager)
     {
         _migrator = migrator;
         _shardingManager = shardingManager;
-        _options = options.Access;
+        _options = options.CurrentValue.Access;
 
         Accessors = resolver.ResolveAccessors();
         if (Accessors.Count < 1)

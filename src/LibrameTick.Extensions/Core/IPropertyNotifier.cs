@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义表示属性发生变化的通知器接口（扩展自 <see cref="INotifyPropertyChanging"/>、<see cref="INotifyPropertyChanged"/>）。
+/// 定义一个实现 <see cref="INotifyPropertyChanging"/>、<see cref="INotifyPropertyChanged"/> 的属性通知器接口。
 /// </summary>
 public interface IPropertyNotifier : INotifyPropertyChanging, INotifyPropertyChanged
 {

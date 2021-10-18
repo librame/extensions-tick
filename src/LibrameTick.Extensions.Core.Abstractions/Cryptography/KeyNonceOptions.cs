@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的密钥、初始向量（IV）选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的密钥、初始向量（IV）选项。
 /// </summary>
 public class KeyNonceOptions : KeyOptions
 {

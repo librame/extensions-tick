@@ -10,20 +10,34 @@
 
 #endregion
 
+using Librame.Extensions.Core;
+
 namespace Librame.Extensions.Data.Sharding;
 
 class InternalShardingManager : IShardingManager
 {
-    private readonly DataExtensionOptions _options;
+    private readonly List<IShardingStrategy> _strategies = new();
 
 
-    public InternalShardingManager(DataExtensionOptions options)
+    public InternalShardingManager(IOptionsMonitor<DataExtensionOptions> dataOptions,
+        IOptionsMonitor<CoreExtensionOptions> coreOptions)
     {
-        _options = options;
+        if (_strategies.Count < 1)
+        {
+            _strategies.Add(new DateTimeShardingStrategy(coreOptions.CurrentValue.Clock));
+            _strategies.Add(new DateTimeOffsetShardingStrategy(coreOptions.CurrentValue.Clock));
+            _strategies.Add(new CultureInfoShardingStrategy());
+
+            if (dataOptions.CurrentValue.ShardingStrategies.Count > 0)
+            {
+                _strategies.AddRange(dataOptions.CurrentValue.ShardingStrategies);
+                _strategies = _strategies.DistinctBy(ks => ks.StrategyType.FullName).ToList();
+            }
+        }
     }
 
 
     public IShardingStrategy? GetStrategy(Type strategyType)
-        => _options.ShardingStrategies.FirstOrDefault(s => s.StrategyType == strategyType);
+        => _strategies.FirstOrDefault(s => s.StrategyType.SameType(strategyType));
 
 }

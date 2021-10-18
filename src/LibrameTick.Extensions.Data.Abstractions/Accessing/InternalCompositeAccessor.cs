@@ -34,7 +34,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     {
         foreach (var accessor in _accessors)
         {
-            action.Invoke(accessor);
+            action(accessor);
         }
     }
 
@@ -44,7 +44,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
 
         foreach (var accessor in _accessors)
         {
-            result = func.Invoke(accessor);
+            result = func(accessor);
         }
 
         return result;
@@ -55,7 +55,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     {
         try
         {
-            action.Invoke(_accessors[accessorIndex]);
+            action(_accessors[accessorIndex]);
         }
         catch (Exception)
         {
@@ -70,7 +70,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     {
         try
         {
-            return func.Invoke(_accessors[accessorIndex]);
+            return func(_accessors[accessorIndex]);
         }
         catch (Exception)
         {

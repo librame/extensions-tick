@@ -13,9 +13,9 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的密钥选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的密钥选项。
 /// </summary>
-public class KeyOptions : AbstractOptions
+public class KeyOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="KeyOptions"/>（此构造函数适用于独立使用 <see cref="KeyOptions"/> 的情况）。

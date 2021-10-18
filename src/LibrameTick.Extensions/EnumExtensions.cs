@@ -80,7 +80,7 @@ public static class EnumExtensions
             var value = (TValue)field.GetValue(null)!;
 
             var results = field.GetCustomAttributes<TAttribute>()
-                .Select(attrib => resultSelector.Invoke(value, attrib));
+                .Select(attrib => resultSelector(value, attrib));
 
             dict.Add(field.Name, results);
         }
@@ -110,7 +110,7 @@ public static class EnumExtensions
             var value = field.GetValue(null)!;
 
             var results = field.GetCustomAttributes<TAttribute>()
-                .Select(attrib => resultSelector.Invoke((TValue)value, attrib));
+                .Select(attrib => resultSelector((TValue)value, attrib));
 
             dict.Add((TEnum)value, results);
         }

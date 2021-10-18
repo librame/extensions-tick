@@ -19,76 +19,42 @@ public static class ExtensionOptionsExtensions
 {
 
     /// <summary>
-    /// 构建扩展选项的 JSON 文件路径（默认以扩展选项程序集名称为文件名）。
+    /// 获取扩展选项的 JSON 文件名（不包含文件路径；默认以扩展选项程序集名称为文件名）。
+    /// </summary>
+    /// <param name="optionsType">给定的扩展选项类型。</param>
+    /// <returns>返回字符串。</returns>
+    public static string GetJsonFileName(this Type optionsType)
+        => $"{optionsType.GetAssemblyName()}.json";
+
+    /// <summary>
+    /// 构建扩展选项的 JSON 文件路径（默认以扩展选项的配置目录为基础路径，以 <see cref="GetJsonFileName(Type)"/> 为文件名）。
+    /// </summary>
+    /// <param name="optionsType">给定的扩展选项类型。</param>
+    /// <param name="directories">给定的 <see cref="IRegisterableDirectories"/>（可选；默认以 <see cref="Registration.GetRegisterableDirectories()"/> 的配置目录为基础路径）。</param>
+    /// <returns>返回路径字符串。</returns>
+    public static string BuildJsonFilePath(this Type optionsType, IRegisterableDirectories? directories = null)
+        => optionsType.GetJsonFileName().SetBasePath((directories ?? Registration.GetRegisterableDirectories()).ConfigDirectory);
+
+    /// <summary>
+    /// 构建扩展选项的 JSON 文件路径（默认以扩展选项的配置目录为基础路径，以 <see cref="GetJsonFileName(Type)"/> 为文件名）。
     /// </summary>
     /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-    /// <returns>返回字符串。</returns>
-    public static string BuildJsonPath(this IExtensionOptions options)
-        => $"{options.GetType().GetAssemblyName()}.json".SetBasePath(options.Directories.ConfigDirectory);
+    /// <returns>返回路径字符串。</returns>
+    public static string BuildJsonFilePath(this IExtensionOptions options)
+        => options.GetType().GetJsonFileName().SetBasePath(options.Directories.ConfigDirectory);
 
 
     /// <summary>
-    /// 查找指定目标扩展选项（支持链式查找父级扩展选项）。
+    /// 将扩展选项保存为 JSON 文件。
     /// </summary>
-    /// <typeparam name="TTargetOptions">指定的目标扩展选项类型。</typeparam>
-    /// <param name="lastOptions">给定配置的最后一个 <see cref="IExtensionOptions"/>。</param>
-    /// <returns>返回 <typeparamref name="TTargetOptions"/>。</returns>
-    public static TTargetOptions? FindOptions<TTargetOptions>(this IExtensionOptions lastOptions)
-        where TTargetOptions : IExtensionOptions
+    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+    /// <returns>返回保存的路径字符串。</returns>
+    public static string SaveOptionsAsJson(this IExtensionOptions options)
     {
-        if (!(lastOptions is TTargetOptions targetOptions))
-        {
-            if (lastOptions.ParentOptions is not null)
-                return FindOptions<TTargetOptions>(lastOptions.ParentOptions);
+        var jsonPath = options.BuildJsonFilePath();
+        jsonPath.WriteJson(options);
 
-            return default;
-        }
-
-        return targetOptions;
-    }
-
-    /// <summary>
-    /// 获取必需的目标扩展选项（通过 <see cref="FindOptions{TTargetOptions}(IExtensionOptions)"/> 实现，如果未找到则抛出异常）。
-    /// </summary>
-    /// <typeparam name="TTargetOptions">指定的目标扩展选项类型。</typeparam>
-    /// <param name="lastOptions">给定配置的最后一个 <see cref="IExtensionOptions"/>。</param>
-    /// <returns>返回 <typeparamref name="TTargetOptions"/>。</returns>
-    public static TTargetOptions GetRequiredOptions<TTargetOptions>(this IExtensionOptions lastOptions)
-        where TTargetOptions : IExtensionOptions
-    {
-        var targetOptions = lastOptions.FindOptions<TTargetOptions>();
-        if (targetOptions is null)
-            throw new ArgumentException($"Target options instance '{typeof(TTargetOptions)}' not found from current options '{lastOptions.GetType()}'.");
-
-        return targetOptions;
-    }
-
-
-    /// <summary>
-    /// 将当前扩展选项（含父级扩展选项）另存为 JSON 文件。
-    /// </summary>
-    /// <param name="lastOptions">给定配置的最后一个 <see cref="IExtensionOptions"/>。</param>
-    /// <returns>返回 <see cref="Dictionary{String, IExtensionOptions}"/>。</returns>
-    public static Dictionary<string, IExtensionOptions> SaveOptionsAsJson(this IExtensionOptions lastOptions)
-    {
-        var allOptions = new Dictionary<string, IExtensionOptions>();
-
-        SaveOptions(lastOptions, allOptions);
-
-        return allOptions;
-
-        static string SaveOptions(IExtensionOptions current, Dictionary<string, IExtensionOptions> dictionary)
-        {
-            var jsonPath = current.BuildJsonPath();
-
-            jsonPath.WriteJson(current);
-            dictionary.Add(jsonPath, current);
-
-            if (current.ParentOptions is not null)
-                SaveOptions(current.ParentOptions, dictionary);
-
-            return jsonPath;
-        }
+        return jsonPath;
     }
 
 }

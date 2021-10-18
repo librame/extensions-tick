@@ -166,7 +166,7 @@ public static class ExpressionExtensions
         var constant = Expression.Constant(value, propertyType);
 
         // 调用方法（如：Expression.Equal(property, constant);）
-        var body = compareToFunc.Invoke(property, constant);
+        var body = compareToFunc(property, constant);
 
         // p => p.PropertyName is value
         return Expression.Lambda<Func<T, bool>>(body, p);
@@ -235,7 +235,7 @@ public static class ExpressionExtensions
     {
         var newExpression = Expression.New(typeof(T));
         var lambda = Expression.Lambda<Func<T>>(newExpression, parameters: null);
-        return lambda.Compile().Invoke();
+        return lambda.Compile()();
     }
 
     /// <summary>
@@ -300,7 +300,7 @@ public static class ExpressionExtensions
         {
             var newExpression = Expression.New(type);
             var lambda = Expression.Lambda<Func<object>>(newExpression, parameters: null);
-            return lambda.Compile().Invoke();
+            return lambda.Compile()();
         }
         else
         {
@@ -323,7 +323,7 @@ public static class ExpressionExtensions
             var newExpression = Expression.New(constructor, parameterExpressions);
             var lambda = Expression.Lambda<Func<object[], object>>(newExpression, argsExpression);
 
-            return lambda.Compile().Invoke(parameters);
+            return lambda.Compile()(parameters);
         }
     }
 

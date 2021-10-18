@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -12,7 +13,7 @@ namespace Librame.Extensions.Drawing.Verification
         public void DrawFileTest()
         {
             var options = DrawingExtensionBuilderHelper.CurrentServices
-                .GetRequiredService<DrawingExtensionOptions>();
+                .GetRequiredService<IOptions<DrawingExtensionOptions>>().Value;
 
             var generator = DrawingExtensionBuilderHelper.CurrentServices
                 .GetRequiredService<ICaptchaGenerator>();

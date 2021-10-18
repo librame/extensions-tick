@@ -37,7 +37,7 @@ class InternalEncryptionConverterFactory : IEncryptionConverterFactory
 
             // 以字节数组为基础加密提供程序
             var byteArrayProvider = new ByteArrayEncryptionProvider(_symmetric,
-                accessor.AccessorDescriptor?.Algorithm ?? accessor.DataOptions.CoreOptions.Algorithm);
+                accessor.AccessorDescriptor?.Algorithm ?? accessor.CoreOptions.Algorithm);
 
             // 支持对字节数组类型加密
             converters.Add(new EncryptionConverter<byte[]>(byteArrayProvider));
@@ -46,7 +46,7 @@ class InternalEncryptionConverterFactory : IEncryptionConverterFactory
             converters.Add(new EncryptionConverter<string>(new StringEncryptionProvider(byteArrayProvider)));
         }
 
-        var converter = converters.FirstOrDefault(p => p.ModelClrType == propertyType);
+        var converter = converters.FirstOrDefault(p => p.ModelClrType.SameType(propertyType));
         if (converter is null)
             throw new ArgumentException($"The encryption property type '{propertyType}' of the current accessor '{accessor.AccessorType}' is not supported.");
 

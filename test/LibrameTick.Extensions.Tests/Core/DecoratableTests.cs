@@ -8,15 +8,7 @@ namespace Librame.Extensions.Core.Tests
             = 1;
     }
 
-    public class DecoratedInfoExtension : DecoratedInfo
-    {
-        public DecoratedInfoExtension(IDecoratable<DecoratedInfo> decoratable)
-        {
-            Value += decoratable.Source.Value;
-        }
-    }
-
-    public class Decoratable : AbstractDecoratable<DecoratedInfo>
+    public class Decoratable : BaseDecoratable<DecoratedInfo>
     {
         public Decoratable(DecoratedInfo source)
             : base(source)
@@ -36,9 +28,6 @@ namespace Librame.Extensions.Core.Tests
 
             var decoratable = new Decoratable(info);
             Assert.Equal(4, decoratable.Source.Value);
-
-            var infoExtension = new DecoratedInfoExtension(decoratable);
-            Assert.Equal(5, infoExtension.Value);
         }
 
     }

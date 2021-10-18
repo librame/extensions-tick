@@ -94,6 +94,22 @@ public abstract class AbstractResourceDictionary : AbstractResource, IResourceDi
         return value;
     }
 
+    /// <summary>
+    /// 添加或更新资源。
+    /// </summary>
+    /// <param name="key">给定的键。</param>
+    /// <param name="value">给定的资源。</param>
+    /// <returns>返回资源。</returns>
+    public virtual object AddOrSet(string key, object value)
+    {
+        if (Pairs.ContainsKey(key))
+            Pairs[key] = value;
+        else
+            Pairs.Add(key, value);
+
+        return value;
+    }
+
 
     /// <summary>
     /// 获取资源。

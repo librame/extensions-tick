@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 抽象实现 <see cref="IAsymmetricAlgorithm"/>。
+/// 定义抽象实现 <see cref="IAsymmetricAlgorithm"/> 的非对称算法。
 /// </summary>
 public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetricAlgorithm
 {
@@ -21,18 +21,12 @@ public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetr
     /// 构造一个 <see cref="AbstractAsymmetricAlgorithm"/>。
     /// </summary>
     /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
-    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-    public AbstractAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-        IExtensionOptions options)
+    /// <param name="options">给定的 <see cref="AlgorithmOptions"/>。</param>
+    protected AbstractAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        AlgorithmOptions options)
         : base(parameterGenerator, options)
     {
     }
-
-
-    /// <summary>
-    /// 默认 RSA 选项。
-    /// </summary>
-    protected abstract SigningCredentialsOptions DefaultRsaOptions { get; }
 
 
     #region RSA
@@ -53,7 +47,7 @@ public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetr
     public virtual byte[] EncryptRsa(byte[] buffer, SigningCredentialsOptions? options = null)
     {
         if (options is null)
-            options = DefaultRsaOptions;
+            options = Options.Rsa;
 
         var rsa = options.Credentials.AsRsa();
         return rsa.Encrypt(buffer, RsaPadding);
@@ -68,7 +62,7 @@ public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetr
     public virtual byte[] DecryptRsa(byte[] buffer, SigningCredentialsOptions? options = null)
     {
         if (options is null)
-            options = DefaultRsaOptions;
+            options = Options.Rsa;
 
         var rsa = options.Credentials.AsRsa();
         return rsa.Decrypt(buffer, RsaPadding);

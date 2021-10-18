@@ -15,9 +15,9 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Drawing;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的缩放选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的缩放选项。
 /// </summary>
-public class ScaleOptions : AbstractOptions
+public class ScaleOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="ScaleOptions"/>（此构造函数适用于独立使用 <see cref="ScaleOptions"/> 的情况）。
@@ -51,12 +51,11 @@ public class ScaleOptions : AbstractOptions
     /// <summary>
     /// 缩放描述符列表。
     /// </summary>
-    public List<ScaleDescriptor> Descriptors { get; init; }
-        = new List<ScaleDescriptor>
-        {
-            new("-small", new Size(100, 60), AddWatermark: false),
-            new("-medium", new Size(1000, 600), AddWatermark: true),
-            new("-large", new Size(2000, 1200), AddWatermark: false)
-        };
+    public List<ScaleDescriptor> Descriptors { get; init; } = new()
+    {
+        new("-small", new Size(100, 60), AddWatermark: false),
+        new("-medium", new Size(1000, 600), AddWatermark: true),
+        new("-large", new Size(2000, 1200), AddWatermark: false)
+    };
 
 }

@@ -13,56 +13,109 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义抽象实现 <see cref="IExtensionOptions"/>。
+/// 定义抽象实现 <see cref="IExtensionOptions"/> 的泛型扩展选项。
+/// </summary>
+/// <typeparam name="TOptions">指定的扩展选项类型。</typeparam>
+public abstract class AbstractExtensionOptions<TOptions> : AbstractExtensionOptions
+    where TOptions : IExtensionOptions
+{
+    /// <summary>
+    /// 使用 <see cref="Registration.GetRegisterableDirectories()"/> 构造一个 <see cref="AbstractExtensionOptions{TOptions}"/>。
+    /// </summary>
+    protected AbstractExtensionOptions()
+        : base()
+    {
+    }
+
+    /// <summary>
+    /// 构造一个 <see cref="AbstractExtensionOptions{TOptions}"/>。
+    /// </summary>
+    /// <param name="directories">给定的 <see cref="IRegisterableDirectories"/>。</param>
+    protected AbstractExtensionOptions(IRegisterableDirectories directories)
+        : base(directories)
+    {
+    }
+
+
+    /// <summary>
+    /// 扩展类型。
+    /// </summary>
+    [JsonIgnore]
+    public override Type ExtensionType
+        => typeof(TOptions);
+}
+
+
+/// <summary>
+/// 定义抽象实现 <see cref="IExtensionOptions"/>、<see cref="IExtensionInfo"/> 的扩展选项。
 /// </summary>
 public abstract class AbstractExtensionOptions : AbstractExtensionInfo, IExtensionOptions
 {
     /// <summary>
-    /// 构造一个 <see cref="AbstractExtensionOptions"/>。
+    /// 使用 <see cref="Registration.GetRegisterableDirectories()"/> 构造一个 <see cref="AbstractExtensionOptions"/>。
     /// </summary>
-    /// <param name="parentOptions">给定的父级 <see cref="IExtensionOptions"/>（可空；为空则表示当前为父级扩展）。</param>
-    /// <param name="directories">给定的 <see cref="DirectoryOptions"/>（可选；默认尝试从父级扩展选项中获取，如果从父级获取到的实例为空，则新建此实例）。</param>
-    protected AbstractExtensionOptions(IExtensionOptions? parentOptions, DirectoryOptions? directories = null)
-        : base(parentOptions)
+    protected AbstractExtensionOptions()
+        : this(Registration.GetRegisterableDirectories())
     {
-        Notifier = (parentOptions?.Notifier ?? directories?.Notifier)?.WithSource(this)
-            ?? Instantiator.GetPropertyNotifier(this);
-
-        Directories = directories ?? parentOptions?.Directories ?? new DirectoryOptions(Notifier);
-        ParentOptions = parentOptions;
-
-        ReplacedServices = new Dictionary<Type, Type>();
-        ServiceCharacteristics = new ServiceCharacteristicCollection();
     }
 
+    /// <summary>
+    /// 构造一个 <see cref="AbstractExtensionOptions"/>。
+    /// </summary>
+    /// <param name="directories">给定的 <see cref="IRegisterableDirectories"/>。</param>
+    protected AbstractExtensionOptions(IRegisterableDirectories directories)
+    {
+        Directories = directories;
+
+        Notifier.PropertyChanged += Notifier_PropertyChanged;
+        Notifier.PropertyChanging += Notifier_PropertyChanging;
+    }
+
+
+    /// <summary>
+    /// 目录集合。
+    /// </summary>
+    public IRegisterableDirectories Directories { get; init; }
 
     /// <summary>
     /// 属性通知器。
     /// </summary>
     [JsonIgnore]
-    public IPropertyNotifier Notifier { get; init; }
+    public IPropertyNotifier Notifier
+        => new PropertyNotifier(this, ExtensionName);
 
 
     /// <summary>
-    /// 目录选项。
-    /// </summary>
-    public DirectoryOptions Directories { get; init; }
-
-    /// <summary>
-    /// 替换服务字典集合。
+    /// 属性改变后动作。
     /// </summary>
     [JsonIgnore]
-    public IDictionary<Type, Type> ReplacedServices { get; init; }
+    public Action<IExtensionOptions?, NotifyPropertyChangedEventArgs>? PropertyChangedAction { get; set; }
 
     /// <summary>
-    /// 服务特征集合。
+    /// 属性改变时动作。
     /// </summary>
     [JsonIgnore]
-    public ServiceCharacteristicCollection ServiceCharacteristics { get; init; }
+    public Action<IExtensionOptions?, NotifyPropertyChangingEventArgs>? PropertyChangingAction { get; set; }
+
 
     /// <summary>
-    /// 父级选项。
+    /// 属性改变后的事件方法。
     /// </summary>
-    [JsonIgnore]
-    public virtual IExtensionOptions? ParentOptions { get; init; }
+    /// <param name="sender">给定的事件发起者。</param>
+    /// <param name="e">给定的 <see cref="PropertyChangedEventArgs"/>。</param>
+    protected virtual void Notifier_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        PropertyChangedAction?.Invoke((IExtensionOptions?)sender, (NotifyPropertyChangedEventArgs)e);
+    }
+
+    /// <summary>
+    /// 属性改变时的事件方法。
+    /// </summary>
+    /// <param name="sender">给定的事件发起者。</param>
+    /// <param name="e">给定的 <see cref="PropertyChangingEventArgs"/>。</param>
+    protected virtual void Notifier_PropertyChanging(object? sender, PropertyChangingEventArgs e)
+    {
+        PropertyChangingAction?.Invoke((IExtensionOptions?)sender, (NotifyPropertyChangingEventArgs)e);
+    }
+
 }

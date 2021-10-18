@@ -25,7 +25,7 @@ public class MongoIdentificationGenerator : AbstractIdentificationGenerator<stri
     private readonly UTF8Encoding _encoding
         = new UTF8Encoding(false);
 
-    private readonly IClock _clock;
+    private readonly IRegisterableClock _clock;
     private readonly byte[] _machineHash;
     private readonly byte[] _processIdHex;
 
@@ -33,8 +33,8 @@ public class MongoIdentificationGenerator : AbstractIdentificationGenerator<stri
     /// <summary>
     /// 构造一个 <see cref="MongoIdentificationGenerator"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
-    public MongoIdentificationGenerator(IClock clock)
+    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>（如使用本地时钟可参考 <see cref="InternalRegisterableClock"/>）。</param>
+    public MongoIdentificationGenerator(IRegisterableClock clock)
     {
         _clock = clock;
         _machineHash = _encoding.GetBytes(Dns.GetHostName()).AsMd5();

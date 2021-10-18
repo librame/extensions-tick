@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Core;
 using Librame.Extensions.Data.Storing;
 
 namespace Librame.Extensions.Data.Accessing;
@@ -23,6 +24,11 @@ public interface IDataAccessor : IAccessor
     /// 数据扩展选项。
     /// </summary>
     DataExtensionOptions DataOptions { get; }
+
+    /// <summary>
+    /// 核心扩展选项。
+    /// </summary>
+    CoreExtensionOptions CoreOptions { get; }
 
     /// <summary>
     /// 模型创建后置动作。

@@ -14,18 +14,10 @@ namespace Librame.Extensions.Core.Cryptography;
 
 class InternalAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
 {
-    private CoreExtensionOptions _options;
-
-
     public InternalAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-        CoreExtensionOptions options)
-        : base(parameterGenerator, options)
+        IOptionsMonitor<CoreExtensionOptions> options)
+        : base(parameterGenerator, options.CurrentValue.Algorithm)
     {
-        _options = options;
     }
-
-
-    protected override SigningCredentialsOptions DefaultRsaOptions
-        => _options.Algorithm.Rsa;
 
 }

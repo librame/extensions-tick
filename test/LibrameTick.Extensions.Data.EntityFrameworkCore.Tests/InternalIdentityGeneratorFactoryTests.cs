@@ -13,13 +13,25 @@ namespace Librame.Extensions.Data
             var factory = DataExtensionBuilderHelper.CurrentServices
                 .GetRequiredService<IIdentificationGeneratorFactory>();
 
-            var combId = factory.GetNewId<Guid>();
+            var combId = factory.GetCombIdGeneratorForMySql().GenerateId();
             Assert.NotEqual(Guid.Empty, combId);
 
-            var snowflakeId = factory.GetNewId<long>();
+            combId = factory.GetCombIdGeneratorForOracle().GenerateId();
+            Assert.NotEqual(Guid.Empty, combId);
+
+            combId = factory.GetCombIdGeneratorForSqlite().GenerateId();
+            Assert.NotEqual(Guid.Empty, combId);
+
+            combId = factory.GetCombIdGeneratorForSqlServer().GenerateId();
+            Assert.NotEqual(Guid.Empty, combId);
+
+            combId = factory.GetCombSnowflakeIdGenerator().GenerateId();
+            Assert.NotEqual(Guid.Empty, combId);
+
+            var snowflakeId = factory.GetSnowflakeIdGenerator().GenerateId();
             Assert.True(snowflakeId > 0);
 
-            var mongoId = factory.GetNewId<string>();
+            var mongoId = factory.GetMongoIdGenerator().GenerateId();
             Assert.NotEmpty(mongoId);
         }
 

@@ -12,21 +12,16 @@
 
 namespace Librame.Extensions.Core;
 
-class InternalLocalClock : IClock
+class InternalRegisterableClock : IRegisterableClock
 {
     // 定义时钟回流偏移量
     private readonly TimeSpan _refluxOffsetMilliseconds;
 
 
-    public InternalLocalClock()
+    public InternalRegisterableClock()
     {
         // 默认为 100
         _refluxOffsetMilliseconds = TimeSpan.FromMilliseconds(100);
-    }
-
-    public InternalLocalClock(double refluxOffsetMilliseconds)
-    {
-        _refluxOffsetMilliseconds = TimeSpan.FromMilliseconds(refluxOffsetMilliseconds);
     }
 
 

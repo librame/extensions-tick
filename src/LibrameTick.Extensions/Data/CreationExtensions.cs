@@ -133,7 +133,7 @@ public static class CreationExtensions
     public static TCreatedBy? SetCreatedBy<TCreatedBy>(this ICreator<TCreatedBy> creator,
         Func<TCreatedBy?, TCreatedBy?> newCreatedByFactory)
         where TCreatedBy : IEquatable<TCreatedBy>
-        => creator.CreatedBy = newCreatedByFactory.Invoke(creator.CreatedBy);
+        => creator.CreatedBy = newCreatedByFactory(creator.CreatedBy);
 
     /// <summary>
     /// 异步获取创建者。
@@ -146,7 +146,7 @@ public static class CreationExtensions
     public static ValueTask<TCreatedBy?> SetCreatedByAsync<TCreatedBy>(this ICreator<TCreatedBy> creator,
         Func<TCreatedBy?, TCreatedBy?> newCreatedByFactory, CancellationToken cancellationToken = default)
         where TCreatedBy : IEquatable<TCreatedBy>
-        => cancellationToken.RunValueTask(() => creator.CreatedBy = newCreatedByFactory.Invoke(creator.CreatedBy));
+        => cancellationToken.RunValueTask(() => creator.CreatedBy = newCreatedByFactory(creator.CreatedBy));
 
     #endregion
 
@@ -163,7 +163,7 @@ public static class CreationExtensions
     public static TCreatedTime SetCreatedTime<TCreatedTime>(this ICreationTime<TCreatedTime> creationTime,
         Func<TCreatedTime, TCreatedTime> newCreatedTimeFactory)
         where TCreatedTime : struct
-        => creationTime.CreatedTime = newCreatedTimeFactory.Invoke(creationTime.CreatedTime);
+        => creationTime.CreatedTime = newCreatedTimeFactory(creationTime.CreatedTime);
 
     /// <summary>
     /// 异步获取创建时间。
@@ -176,7 +176,7 @@ public static class CreationExtensions
     public static ValueTask<TCreatedTime> SetCreatedTimeAsync<TCreatedTime>(this ICreationTime<TCreatedTime> creationTime,
         Func<TCreatedTime, TCreatedTime> newCreatedTimeFactory, CancellationToken cancellationToken = default)
         where TCreatedTime : struct
-        => cancellationToken.RunValueTask(() => creationTime.CreatedTime = newCreatedTimeFactory.Invoke(creationTime.CreatedTime));
+        => cancellationToken.RunValueTask(() => creationTime.CreatedTime = newCreatedTimeFactory(creationTime.CreatedTime));
 
     #endregion
 
@@ -193,7 +193,7 @@ public static class CreationExtensions
     //    Func<object?, object?> newCreatedByFactory)
     //{
     //    var currentCreatedBy = creator.GetObjectCreatedBy();
-    //    return creator.SetObjectCreatedBy(newCreatedByFactory.Invoke(currentCreatedBy));
+    //    return creator.SetObjectCreatedBy(newCreatedByFactory(currentCreatedBy));
     //}
 
     ///// <summary>
@@ -209,7 +209,7 @@ public static class CreationExtensions
     //    var currentCreatedBy = await creator.GetObjectCreatedByAsync(cancellationToken)
     //        .ConfigureAwaitWithoutContext();
 
-    //    return await creator.SetObjectCreatedByAsync(newCreatedByFactory.Invoke(currentCreatedBy), cancellationToken)
+    //    return await creator.SetObjectCreatedByAsync(newCreatedByFactory(currentCreatedBy), cancellationToken)
     //        .ConfigureAwaitWithoutContext();
     //}
 
@@ -228,7 +228,7 @@ public static class CreationExtensions
     //    Func<object, object> newCreatedTimeFactory)
     //{
     //    var currentCreatedTime = creationTime.GetObjectCreatedTime();
-    //    return creationTime.SetObjectCreatedTime(newCreatedTimeFactory.Invoke(currentCreatedTime));
+    //    return creationTime.SetObjectCreatedTime(newCreatedTimeFactory(currentCreatedTime));
     //}
 
     ///// <summary>
@@ -244,7 +244,7 @@ public static class CreationExtensions
     //    var currentCreatedTime = await creationTime.GetObjectCreatedTimeAsync(cancellationToken)
     //        .ConfigureAwaitWithoutContext();
 
-    //    return await creationTime.SetObjectCreatedTimeAsync(newCreatedTimeFactory.Invoke(currentCreatedTime), cancellationToken)
+    //    return await creationTime.SetObjectCreatedTimeAsync(newCreatedTimeFactory(currentCreatedTime), cancellationToken)
     //        .ConfigureAwaitWithoutContext();
     //}
 

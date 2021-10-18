@@ -44,7 +44,7 @@ public abstract class AbstractDisposable : IDisposable
         if (_disposed)
             throw new ObjectDisposedException(GetType().Name);
 
-        action.Invoke();
+        action();
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public abstract class AbstractDisposable : IDisposable
         if (_disposed)
             throw new ObjectDisposedException(GetType().Name);
 
-        return func.Invoke();
+        return func();
     }
 
 

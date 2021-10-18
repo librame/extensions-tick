@@ -15,9 +15,9 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Drawing;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的色彩选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的色彩选项。
 /// </summary>
-public class ColorOptions : AbstractOptions
+public class ColorOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="ColorOptions"/>（此构造函数适用于独立使用 <see cref="ColorOptions"/> 的情况）。

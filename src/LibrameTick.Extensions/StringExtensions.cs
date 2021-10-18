@@ -172,7 +172,7 @@ public static class StringExtensions
 
         format = "{" + format + "}";
 
-        return formatFactory.Invoke(format, value);
+        return formatFactory(format, value);
     }
 
     #endregion

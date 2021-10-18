@@ -143,7 +143,7 @@ public static class UpdationExtensions
     {
         updator.SetCreatedBy(newUpdatedByFactory);
 
-        return updator.UpdatedBy = newUpdatedByFactory.Invoke(updator.UpdatedBy);
+        return updator.UpdatedBy = newUpdatedByFactory(updator.UpdatedBy);
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ public static class UpdationExtensions
     {
         await updator.SetCreatedByAsync(newUpdatedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
 
-        return updator.UpdatedBy = newUpdatedByFactory.Invoke(updator.UpdatedBy);
+        return updator.UpdatedBy = newUpdatedByFactory(updator.UpdatedBy);
     }
 
     #endregion
@@ -181,7 +181,7 @@ public static class UpdationExtensions
     {
         updationTime.SetCreatedTime(newUpdatedTimeFactory);
 
-        return updationTime.UpdatedTime = newUpdatedTimeFactory.Invoke(updationTime.UpdatedTime);
+        return updationTime.UpdatedTime = newUpdatedTimeFactory(updationTime.UpdatedTime);
     }
 
     /// <summary>
@@ -198,7 +198,7 @@ public static class UpdationExtensions
     {
         await updationTime.SetCreatedTimeAsync(newUpdatedTimeFactory, cancellationToken).ConfigureAwaitWithoutContext();
 
-        return updationTime.UpdatedTime = newUpdatedTimeFactory.Invoke(updationTime.UpdatedTime);
+        return updationTime.UpdatedTime = newUpdatedTimeFactory(updationTime.UpdatedTime);
     }
 
     #endregion
@@ -219,7 +219,7 @@ public static class UpdationExtensions
 
     //    var currentUpdatedBy = updator.GetObjectCreatedBy();
 
-    //    return updator.SetObjectUpdatedBy(newUpdatedByFactory.Invoke(currentUpdatedBy));
+    //    return updator.SetObjectUpdatedBy(newUpdatedByFactory(currentUpdatedBy));
     //}
 
     ///// <summary>
@@ -237,7 +237,7 @@ public static class UpdationExtensions
     //    var currentUpdatedBy = await updator.GetObjectUpdatedByAsync(cancellationToken)
     //        .ConfigureAwaitWithoutContext();
 
-    //    return await updator.SetObjectUpdatedByAsync(newUpdatedByFactory.Invoke(currentUpdatedBy), cancellationToken)
+    //    return await updator.SetObjectUpdatedByAsync(newUpdatedByFactory(currentUpdatedBy), cancellationToken)
     //        .ConfigureAwaitWithoutContext();
     //}
 
@@ -258,7 +258,7 @@ public static class UpdationExtensions
     //    updationTime.SetObjectCreatedTime(newUpdatedTimeFactory);
 
     //    var currentUpdatedTime = updationTime.GetObjectUpdatedTime();
-    //    return updationTime.SetObjectUpdatedTime(newUpdatedTimeFactory.Invoke(currentUpdatedTime));
+    //    return updationTime.SetObjectUpdatedTime(newUpdatedTimeFactory(currentUpdatedTime));
     //}
 
     ///// <summary>
@@ -276,7 +276,7 @@ public static class UpdationExtensions
     //    var currentUpdatedTime = await updationTime.GetObjectUpdatedTimeAsync(cancellationToken)
     //        .ConfigureAwaitWithoutContext();
 
-    //    return await updationTime.SetObjectUpdatedTimeAsync(newUpdatedTimeFactory.Invoke(currentUpdatedTime), cancellationToken)
+    //    return await updationTime.SetObjectUpdatedTimeAsync(newUpdatedTimeFactory(currentUpdatedTime), cancellationToken)
     //        .ConfigureAwaitWithoutContext();
     //}
 

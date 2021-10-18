@@ -23,10 +23,10 @@ class InternalAuditingManager : IAuditingManager
 
 
     public InternalAuditingManager(IIdentificationGeneratorFactory idGeneratorFactory,
-        DataExtensionOptions options)
+        IOptionsMonitor<DataExtensionOptions> options)
     {
         _idGeneratorFactory = idGeneratorFactory;
-        _options = options;
+        _options = options.CurrentValue;
     }
 
 
@@ -42,7 +42,7 @@ class InternalAuditingManager : IAuditingManager
 
             var audit = new Audit();
 
-            audit.Id = _idGeneratorFactory.GetNewId<long>();
+            audit.Id = _idGeneratorFactory.GetSnowflakeIdGenerator().GenerateId();
             audit.TableName = GetEntityTableName(entry.Metadata);
             audit.EntityTypeName = GetTypeName(entry.Metadata.ClrType);
             audit.EntityId = GetEntityId(entry);
@@ -71,7 +71,7 @@ class InternalAuditingManager : IAuditingManager
 
             var auditProperty = new AuditProperty();
 
-            auditProperty.Id = _idGeneratorFactory.GetNewId<string>();
+            auditProperty.Id = _idGeneratorFactory.GetMongoIdGenerator().GenerateId();
             auditProperty.PropertyName = property.Name;
             auditProperty.PropertyTypeName = GetTypeName(property.ClrType);
             auditProperty.NewValue = newValue;

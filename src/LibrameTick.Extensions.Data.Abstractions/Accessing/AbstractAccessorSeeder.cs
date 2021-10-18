@@ -22,9 +22,9 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessorSeeder"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>。</param>
+    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>。</param>
     /// <param name="idGeneratorFactory">给定的 <see cref="IIdentificationGeneratorFactory"/>。</param>
-    protected AbstractAccessorSeeder(IClock clock, IIdentificationGeneratorFactory idGeneratorFactory)
+    protected AbstractAccessorSeeder(IRegisterableClock clock, IIdentificationGeneratorFactory idGeneratorFactory)
     {
         SeedBank = new ConcurrentDictionary<string, object>();
 
@@ -41,7 +41,7 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// <summary>
     /// 时钟。
     /// </summary>
-    public IClock Clock { get; init; }
+    public IRegisterableClock Clock { get; init; }
 
     /// <summary>
     /// 标识生成器工厂。
@@ -57,7 +57,7 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// <param name="valueFactory">给定的值工厂方法。</param>
     /// <returns>返回 <typeparamref name="TValue"/>。</returns>
     public virtual TValue Seed<TValue>(string key, Func<string, TValue> valueFactory)
-        => (TValue)SeedBank.GetOrAdd(key, k => valueFactory.Invoke(k)
+        => (TValue)SeedBank.GetOrAdd(key, k => valueFactory(k)
             ?? throw new ArgumentException("The result of a value factory called is null."));
 
     /// <summary>
@@ -67,7 +67,7 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// <param name="valueFactory">给定的值工厂方法。</param>
     /// <returns>返回对象。</returns>
     public virtual object Seed(string key, Func<string, object> valueFactory)
-        => SeedBank.GetOrAdd(key, valueFactory.Invoke(key));
+        => SeedBank.GetOrAdd(key, valueFactory(key));
 
 
     /// <summary>
@@ -90,7 +90,7 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
         {
             incremId = ++index;
 
-            if (predicate.Invoke(element))
+            if (predicate(element))
                 break;
         }
 

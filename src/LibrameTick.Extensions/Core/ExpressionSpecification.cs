@@ -13,23 +13,23 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义实现 <see cref="IExpressionSpecification{T}"/> 的基础表达式规约。
+/// 定义实现 <see cref="IExpressionSpecification{T}"/> 的表达式规约。
 /// </summary>
 /// <typeparam name="T">指定的类型。</typeparam>
-public class BaseExpressionSpecification<T> : IExpressionSpecification<T>
+public class ExpressionSpecification<T> : IExpressionSpecification<T>
 {
     /// <summary>
-    /// 构造一个默认 <see cref="BaseExpressionSpecification{T}"/> 实例。
+    /// 构造一个默认 <see cref="ExpressionSpecification{T}"/> 实例。
     /// </summary>
-    public BaseExpressionSpecification()
+    public ExpressionSpecification()
     {
     }
 
     /// <summary>
-    /// 使用规约条件构造一个 <see cref="BaseExpressionSpecification{T}"/> 实例。
+    /// 使用规约条件构造一个 <see cref="ExpressionSpecification{T}"/> 实例。
     /// </summary>
     /// <param name="criterion">给定的判断依据表达式。</param>
-    public BaseExpressionSpecification(Expression<Func<T, bool>> criterion)
+    public ExpressionSpecification(Expression<Func<T, bool>> criterion)
     {
         Criterion = criterion;
     }
@@ -84,7 +84,7 @@ public class BaseExpressionSpecification<T> : IExpressionSpecification<T>
     public virtual T Issue(IQueryable<T> queryable)
     {
         if (Provider is not null)
-            return Provider.Invoke(queryable);
+            return Provider(queryable);
 
         return queryable.First();
     }

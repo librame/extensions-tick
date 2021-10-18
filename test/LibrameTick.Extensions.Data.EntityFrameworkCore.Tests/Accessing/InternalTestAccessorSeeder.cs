@@ -1,4 +1,5 @@
 ﻿using Librame.Extensions.Core;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,8 +11,9 @@ namespace Librame.Extensions.Data.Accessing
         private string? _initialUserId;
 
 
-        public InternalTestAccessorSeeder(CoreExtensionOptions options, IIdentificationGeneratorFactory idGeneratorFactory)
-            : base(options.Clock, idGeneratorFactory)
+        public InternalTestAccessorSeeder(IOptionsMonitor<CoreExtensionOptions> options,
+            IIdentificationGeneratorFactory idGeneratorFactory)
+            : base(options.CurrentValue.Clock, idGeneratorFactory)
         {
         }
 
@@ -19,7 +21,7 @@ namespace Librame.Extensions.Data.Accessing
         public virtual string GetInitialUserId()
         {
             if (string.IsNullOrEmpty(_initialUserId))
-                _initialUserId = IdGeneratorFactory.GetNewId<string>();
+                _initialUserId = IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
 
             return _initialUserId;
         }
@@ -39,7 +41,7 @@ namespace Librame.Extensions.Data.Accessing
                         Passwd = "123456"
                     };
 
-                    user.Id = i is 0 ? GetInitialUserId() : IdGeneratorFactory.GetNewId<string>();
+                    user.Id = i is 0 ? GetInitialUserId() : IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
                     user.PopulateCreation(GetInitialUserId(), DateTimeOffset.UtcNow);
 
                     users[i] = user;

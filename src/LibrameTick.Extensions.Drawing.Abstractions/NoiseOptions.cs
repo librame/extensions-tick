@@ -15,9 +15,9 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Drawing;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的噪点选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的噪点选项。
 /// </summary>
-public class NoiseOptions : AbstractOptions
+public class NoiseOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="NoiseOptions"/>（此构造函数适用于独立使用 <see cref="NoiseOptions"/> 的情况）。

@@ -73,11 +73,11 @@ public class PagingList<T> : IPagingList<T>
     {
         if (_current is not null)
         {
-            _current = func.Invoke(_current);
+            _current = func(_current);
             return;
         }
 
-        _current = func.Invoke(_collection!);
+        _current = func(_collection!);
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public class PagingList<T> : IPagingList<T>
     /// <param name="func">给定的筛选方法。</param>
     public void Filtrate(Func<IQueryable<T>, IQueryable<T>> func)
     {
-        _queryable = func.Invoke(_queryable!);
+        _queryable = func(_queryable!);
     }
 
 

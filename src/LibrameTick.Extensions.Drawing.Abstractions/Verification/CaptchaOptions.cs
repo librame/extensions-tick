@@ -15,9 +15,9 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Drawing.Verification;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的验证码选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的验证码选项。
 /// </summary>
-public class CaptchaOptions : AbstractOptions
+public class CaptchaOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="CaptchaOptions"/>（此构造函数适用于独立使用 <see cref="CaptchaOptions"/> 的情况）。
@@ -26,8 +26,8 @@ public class CaptchaOptions : AbstractOptions
     public CaptchaOptions(string sourceAliase)
         : base(sourceAliase)
     {
-        Font = new FontOptions(Notifier, nameof(Font));
-        BackgroundNoise = new NoiseOptions(Notifier, nameof(BackgroundNoise));
+        Font = new(Notifier, nameof(Font));
+        BackgroundNoise = new(Notifier, nameof(BackgroundNoise));
     }
 
     /// <summary>
@@ -38,8 +38,8 @@ public class CaptchaOptions : AbstractOptions
     public CaptchaOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
         : base(parentNotifier, sourceAliase)
     {
-        Font = new FontOptions(Notifier, nameof(Font));
-        BackgroundNoise = new NoiseOptions(Notifier, nameof(BackgroundNoise));
+        Font = new(Notifier, nameof(Font));
+        BackgroundNoise = new(Notifier, nameof(BackgroundNoise));
     }
 
 

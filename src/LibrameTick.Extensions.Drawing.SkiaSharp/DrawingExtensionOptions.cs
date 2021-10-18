@@ -11,7 +11,6 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Drawing.Drawers;
 using Librame.Extensions.Drawing.Verification;
 
 namespace Librame.Extensions.Drawing;
@@ -24,33 +23,14 @@ public class DrawingExtensionOptions : AbstractExtensionOptions<DrawingExtension
     /// <summary>
     /// 构造一个 <see cref="DrawingExtensionOptions"/>。
     /// </summary>
-    /// <param name="parentOptions">给定的父级 <see cref="IExtensionOptions"/>。</param>
-    public DrawingExtensionOptions(IExtensionOptions parentOptions)
-        : base(parentOptions, parentOptions.Directories)
+    public DrawingExtensionOptions()
     {
-        CoreOptions = parentOptions.GetRequiredOptions<CoreExtensionOptions>();
         Colors = ColorOptions.CreateLightOptions(Notifier);
-        Captcha = new CaptchaOptions(Notifier);
-        Scale = new ScaleOptions(Notifier);
-        Watermark = new WatermarkOptions(Notifier);
-
-        ImageDirectory = Directories.BaseDirectory.CombinePath("images");
-
-        // Processing
-        ServiceCharacteristics.AddSingleton<ISavingDrawer>();
-        ServiceCharacteristics.AddSingleton<IScalingDrawer>();
-        ServiceCharacteristics.AddSingleton<IWatermarkDrawer>();
-
-        // Verification
-        ServiceCharacteristics.AddScope<ICaptchaGenerator>();
+        Captcha = new(Notifier);
+        Scale = new(Notifier);
+        Watermark = new(Notifier);
     }
 
-
-    /// <summary>
-    /// 核心扩展选项。
-    /// </summary>
-    [JsonIgnore]
-    public CoreExtensionOptions CoreOptions { get; init; }
 
     /// <summary>
     /// 色彩选项。
@@ -78,7 +58,7 @@ public class DrawingExtensionOptions : AbstractExtensionOptions<DrawingExtension
     /// </summary>
     public string ImageDirectory
     {
-        get => Notifier.GetOrAdd(nameof(ImageDirectory), string.Empty);
+        get => Notifier.GetOrAdd(nameof(ImageDirectory), Directories.ResourceDirectory.CombinePath("images"));
         set => Notifier.AddOrUpdate(nameof(ImageDirectory), value);
     }
 
@@ -112,13 +92,12 @@ public class DrawingExtensionOptions : AbstractExtensionOptions<DrawingExtension
     /// <summary>
     /// 支持的图像扩展名列表。
     /// </summary>
-    public List<string> SupportImageExtensions { get; init; }
-        = new List<string>
-        {
-            ".bmp",
-            ".jpg",
-            ".jpeg",
-            ".png"
-        };
+    public List<string> SupportImageExtensions { get; init; } = new()
+    {
+        ".bmp",
+        ".jpg",
+        ".jpeg",
+        ".png"
+    };
 
 }

@@ -19,18 +19,21 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public class CombIdentificationGenerator : AbstractIdentificationGenerator<Guid>
 {
-    private readonly object _locker = new object();
-    private readonly IClock _clock;
+    private readonly IRegisterableClock _clock;
+    private readonly IRegisterableLocker _locker;
 
 
     /// <summary>
     /// 构造一个 <see cref="CombIdentificationGenerator"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
+    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>（如使用本地时钟可参考 <see cref="Registration.GetRegisterableClock()"/>）。</param>
+    /// <param name="locker">给定的 <see cref="IRegisterableLocker"/>（如使用本地锁定器可参考 <see cref="Registration.GetRegisterableLocker()"/>）。</param>
     /// <param name="generation">给定的 <see cref="CombIdentificationGeneration"/>。</param>
-    public CombIdentificationGenerator(IClock clock, CombIdentificationGeneration generation)
+    public CombIdentificationGenerator(IRegisterableClock clock, IRegisterableLocker locker,
+        CombIdentificationGeneration generation)
     {
         _clock = clock;
+        _locker = locker;
         Generation = generation;
     }
 
@@ -65,7 +68,7 @@ public class CombIdentificationGenerator : AbstractIdentificationGenerator<Guid>
 
     private Guid CreateGuid(byte[] timestampBytes)
     {
-        lock (_locker)
+        return _locker.SpinLock(() =>
         {
             var randomBytes = 10.GenerateByteArray();
             var guidBytes = new byte[16];
@@ -93,7 +96,7 @@ public class CombIdentificationGenerator : AbstractIdentificationGenerator<Guid>
             }
 
             return new Guid(guidBytes);
-        }
+        });
     }
 
 
@@ -118,42 +121,5 @@ public class CombIdentificationGenerator : AbstractIdentificationGenerator<Guid>
 
         return buffer;
     }
-
-
-    #region Static Instances
-
-    /// <summary>
-    /// 支持 MySQL 排序类型的 COMB 标识生成器（char(36)）。
-    /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
-    /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
-    public static CombIdentificationGenerator ForMySql(IClock clock)
-        => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AsString);
-
-    /// <summary>
-    /// 支持 Oracle 排序类型的 COMB 标识生成器（raw(16)）。
-    /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
-    /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
-    public static CombIdentificationGenerator ForOracle(IClock clock)
-        => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AsBinary);
-
-    /// <summary>
-    /// 支持 SQLite 排序类型的 COMB 标识生成器（text）。
-    /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
-    /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
-    public static CombIdentificationGenerator ForSqlite(IClock clock)
-        => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AsString);
-
-    /// <summary>
-    /// 支持 SQL Server 排序类型的 COMB 标识生成器（uniqueidentifier）。
-    /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
-    /// <returns>返回 <see cref="CombIdentificationGenerator"/>。</returns>
-    public static CombIdentificationGenerator ForSqlServer(IClock clock)
-        => new CombIdentificationGenerator(clock, CombIdentificationGeneration.AtEnd);
-
-    #endregion
 
 }

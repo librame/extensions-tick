@@ -13,9 +13,9 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的签名证书选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的签名证书选项。
 /// </summary>
-public class SigningCredentialsOptions : AbstractOptions
+public class SigningCredentialsOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="SigningCredentialsOptions"/>（此构造函数适用于独立使用 <see cref="SigningCredentialsOptions"/> 的情况）。

@@ -28,7 +28,7 @@ public static class RankingExtensions
     public static TRank SetRank<TRank>(this IRanking<TRank> ranking,
         Func<TRank, TRank> newRankFactory)
         where TRank : struct
-        => ranking.Rank = newRankFactory.Invoke(ranking.Rank);
+        => ranking.Rank = newRankFactory(ranking.Rank);
 
     /// <summary>
     /// 异步设置排名。
@@ -41,7 +41,7 @@ public static class RankingExtensions
     public static ValueTask<TRank> SetRankAsync<TRank>(this IRanking<TRank> ranking,
         Func<TRank, TRank> newRankFactory, CancellationToken cancellationToken = default)
         where TRank : struct
-        => cancellationToken.RunValueTask(() => ranking.Rank = newRankFactory.Invoke(ranking.Rank));
+        => cancellationToken.RunValueTask(() => ranking.Rank = newRankFactory(ranking.Rank));
 
 
     /// <summary>
@@ -54,7 +54,7 @@ public static class RankingExtensions
         Func<object, object> newRankFactory)
     {
         var currentRank = ranking.GetObjectRank();
-        return ranking.SetObjectRank(newRankFactory.Invoke(currentRank));
+        return ranking.SetObjectRank(newRankFactory(currentRank));
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public static class RankingExtensions
         var currentRank = await ranking.GetObjectRankAsync(cancellationToken)
             .ConfigureAwaitWithoutContext();
 
-        return await ranking.SetObjectRankAsync(newRankFactory.Invoke(currentRank),
+        return await ranking.SetObjectRankAsync(newRankFactory(currentRank),
             cancellationToken).ConfigureAwaitWithoutContext();
     }
 

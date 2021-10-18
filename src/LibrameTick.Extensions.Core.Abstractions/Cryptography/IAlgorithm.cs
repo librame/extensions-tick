@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义算法接口。
+/// 定义一个算法接口。
 /// </summary>
 public interface IAlgorithm
 {
@@ -23,7 +23,7 @@ public interface IAlgorithm
     IAlgorithmParameterGenerator ParameterGenerator { get; }
 
     /// <summary>
-    /// 扩展选项。
+    /// 算法选项。
     /// </summary>
-    IExtensionOptions Options { get; }
+    AlgorithmOptions Options { get; }
 }

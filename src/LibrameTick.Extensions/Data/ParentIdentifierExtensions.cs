@@ -29,7 +29,7 @@ public static class ParentIdentifierExtensions
     public static ValueTask<TId?> SetParentIdAsync<TId>(this IParentIdentifier<TId> parentIdentifier,
         Func<TId?, TId?> newParentIdFactory, CancellationToken cancellationToken = default)
         where TId : IEquatable<TId>
-        => cancellationToken.RunValueTask(() => parentIdentifier.ParentId = newParentIdFactory.Invoke(parentIdentifier.ParentId));
+        => cancellationToken.RunValueTask(() => parentIdentifier.ParentId = newParentIdFactory(parentIdentifier.ParentId));
 
 
     /// <summary>
@@ -44,7 +44,7 @@ public static class ParentIdentifierExtensions
     {
         var currentParentId = await parentIdentifier.GetObjectParentIdAsync(cancellationToken).ConfigureAwaitWithoutContext();
 
-        return await parentIdentifier.SetObjectParentIdAsync(newParentIdFactory.Invoke(currentParentId), cancellationToken)
+        return await parentIdentifier.SetObjectParentIdAsync(newParentIdFactory(currentParentId), cancellationToken)
             .ConfigureAwaitWithoutContext();
     }
 

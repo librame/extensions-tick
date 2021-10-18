@@ -15,9 +15,9 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Drawing;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的水印选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的水印选项。
 /// </summary>
-public class WatermarkOptions : AbstractOptions
+public class WatermarkOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="WatermarkOptions"/>（此构造函数适用于独立使用 <see cref="WatermarkOptions"/> 的情况）。
@@ -26,7 +26,7 @@ public class WatermarkOptions : AbstractOptions
     public WatermarkOptions(string sourceAliase)
         : base(sourceAliase)
     {
-        Font = new FontOptions(Notifier, nameof(Font)) { Size = 32 };
+        Font = new(Notifier, nameof(Font)) { Size = 32 };
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public class WatermarkOptions : AbstractOptions
     public WatermarkOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
         : base(parentNotifier, sourceAliase)
     {
-        Font = new FontOptions(Notifier, nameof(Font)) { Size = 32 };
+        Font = new(Notifier, nameof(Font)) { Size = 32 };
     }
 
 

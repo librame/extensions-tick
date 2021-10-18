@@ -1,8 +1,9 @@
-﻿using Xunit;
+﻿using Microsoft.Extensions.Localization;
+using Xunit;
 
 namespace Librame.Extensions.Resources
 {
-    public class ResourceDictionaryStringLocalizerTest
+    public class ResourceDictionaryStringLocalizerTests
     {
         [Fact]
         public void AllTest()

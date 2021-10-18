@@ -5,18 +5,19 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageDescription>Based on LibrameTick.Extensions.Drawing.Abstractions and SkiaSharp libraries build of the drawing extension library. This library contains implementations for functions such as drawers, and verification.
+
+      基于 LibrameTick.Extensions.Drawing.Abstractions 和 SkiaSharp 库构建的绘图扩展库。该库包含了绘制器和验证等功能的实现。
+    </PackageDescription>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\bin\</OutputPath>
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <Description>Based on LibrameTick.Extensions.Drawing.Abstractions and SkiaSharp libraries build of the drawing extension library. This library contains implementations for functions such as drawers, and verification.
-
-基于 LibrameTick.Extensions.Drawing.Abstractions 和 SkiaSharp 库构建的绘图扩展库。该库包含了绘制器和验证等功能的实现。</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="2.88.0-preview.145" />
+    <PackageReference Include="SkiaSharp" Version="2.88.0-preview.150" />
   </ItemGroup>
 
   <ItemGroup>

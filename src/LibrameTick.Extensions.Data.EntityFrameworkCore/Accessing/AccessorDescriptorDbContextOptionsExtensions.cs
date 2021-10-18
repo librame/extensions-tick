@@ -29,7 +29,7 @@ public static class AccessorDescriptorDbContextOptionsExtensions
     {
         // 默认使用访问器定义的优先级属性值
         var priority = extension.Priority < 0 ? accessor.Priority : extension.Priority;
-        var algorithms = extension.Algorithm ?? accessor.DataOptions.CoreOptions.Algorithm;
+        var algorithms = extension.Algorithm ?? accessor.CoreOptions.Algorithm;
 
         return new AccessorDescriptor(accessor, extension.ServiceType!, extension.Group,
             extension.Access, extension.Pooling, priority, algorithms, extension.Sharded);

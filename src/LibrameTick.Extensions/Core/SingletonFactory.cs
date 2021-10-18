@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 单例工厂。
+/// 定义单例工厂。
 /// </summary>
 /// <typeparam name="TSingleton">指定的单例类型。</typeparam>
 public sealed class SingletonFactory<TSingleton>
@@ -76,7 +76,7 @@ public sealed class SingletonFactory<TSingleton>
             if (value is not null)
                 return (TSingleton)value;
 
-            return (TSingleton)type.NewByExpression();
+            return ExpressionExtensions.New<TSingleton>();
         }
         catch (MissingMethodException ex)
         {

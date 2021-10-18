@@ -39,27 +39,27 @@ namespace Librame.Extensions
 
             // p => p.CodePage > orginalCodePage
             var greaterThanExpression = codePageName.CreateGreaterThanPropertyExpression<Encoding>(orginalCodePage);
-            Assert.False(greaterThanExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+            Assert.False(greaterThanExpression.Compile()(EncodingExtensions.UTF8Encoding));
 
             // p => p.CodePage >= orginalCodePage
             var greaterThanOrEqualExpression = codePageName.CreateGreaterThanOrEqualPropertyExpression<Encoding>(orginalCodePage);
-            Assert.True(greaterThanOrEqualExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+            Assert.True(greaterThanOrEqualExpression.Compile()(EncodingExtensions.UTF8Encoding));
 
             // p => p.CodePage < orginalCodePage
             var lessThanExpression = codePageName.CreateLessThanPropertyExpression<Encoding>(orginalCodePage);
-            Assert.False(lessThanExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+            Assert.False(lessThanExpression.Compile()(EncodingExtensions.UTF8Encoding));
 
             // p => p.CodePage <= orginalCodePage
             var lessThanOrEqualExpression = codePageName.CreateLessThanOrEqualPropertyExpression<Encoding>(orginalCodePage);
-            Assert.True(lessThanOrEqualExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+            Assert.True(lessThanOrEqualExpression.Compile()(EncodingExtensions.UTF8Encoding));
 
             // p => p.CodePage != orginalCodePage
             var notEqualExpression = codePageName.CreateNotEqualPropertyExpression<Encoding>(orginalCodePage);
-            Assert.False(notEqualExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+            Assert.False(notEqualExpression.Compile()(EncodingExtensions.UTF8Encoding));
 
             // p => p.CodePage is orginalCodePage
             var equalExpression = codePageName.CreateEqualPropertyExpression<Encoding>(orginalCodePage);
-            Assert.True(equalExpression.Compile().Invoke(EncodingExtensions.UTF8Encoding));
+            Assert.True(equalExpression.Compile()(EncodingExtensions.UTF8Encoding));
         }
 
         [Fact]

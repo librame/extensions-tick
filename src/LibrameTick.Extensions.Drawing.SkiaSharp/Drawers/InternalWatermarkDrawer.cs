@@ -19,8 +19,8 @@ class InternalWatermarkDrawer : AbstractDrawer, IWatermarkDrawer
     private SKBitmap? _watermarkBitmap;
 
 
-    public InternalWatermarkDrawer(DrawingExtensionOptions options)
-        : base(options)
+    public InternalWatermarkDrawer(IOptionsMonitor<DrawingExtensionOptions> options)
+        : base(options.CurrentValue)
     {
         _forePaint = Options.Watermark.Font.CreatePaint(Options.Colors.Fore);
         _alternPaint = Options.Watermark.Font.CreatePaint(Options.Colors.Alternate);

@@ -93,7 +93,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
         PropertyChanging?.Invoke(this,
             new NotifyPropertyChangingEventArgs(propertyName, changingValue, oldValue, isUpdate));
 
-        action.Invoke();
+        action();
 
         // 调用属性改变后事件处理程序
         PropertyChanged?.Invoke(this,
@@ -181,7 +181,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
             return propertyValueFunc;
         }
 
-        return AddOrUpdate(propertyName, propertyValueFunc.Invoke());
+        return AddOrUpdate(propertyName, propertyValueFunc());
     }
 
 
@@ -209,7 +209,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
 
         if (_propertyFuncs.ContainsKey(key))
         {
-            var currentValue = (TValue)_propertyFuncs[key].Invoke();
+            var currentValue = (TValue)_propertyFuncs[key]();
             gotAction?.Invoke(currentValue);
 
             return currentValue;
@@ -248,7 +248,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
 
         if (_propertyFuncs.ContainsKey(key))
         {
-            var currentValue = _propertyFuncs[key].Invoke();
+            var currentValue = _propertyFuncs[key]();
             gotAction?.Invoke(currentValue);
 
             return currentValue;
@@ -280,7 +280,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
 
         if (_propertyFuncs.TryGetValue(key, out var factory))
         {
-            propertyValue = factory.Invoke();
+            propertyValue = factory();
             return true;
         }
 
@@ -303,7 +303,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
 
         if (_propertyFuncs.TryRemove(key, out var factory))
         {
-            propertyValue = factory.Invoke();
+            propertyValue = factory();
             return true;
         }
 

@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data.Specification;
 /// 定义实现 <see cref="IEntitySpecification{T}"/> 的基础实体规约。
 /// </summary>
 /// <typeparam name="T">指定的类型。</typeparam>
-public class BaseEntitySpecification<T> : BaseExpressionSpecification<T>, IEntitySpecification<T>
+public class BaseEntitySpecification<T> : ExpressionSpecification<T>, IEntitySpecification<T>
     where T : class
 {
     private readonly List<Expression<Func<T, object>>> _foreignKeys
@@ -26,7 +26,7 @@ public class BaseEntitySpecification<T> : BaseExpressionSpecification<T>, IEntit
 
 
     /// <summary>
-    /// 构造一个默认 <see cref="BaseExpressionSpecification{T}"/> 实例。
+    /// 构造一个默认 <see cref="ExpressionSpecification{T}"/> 实例。
     /// </summary>
     public BaseEntitySpecification()
         : base()
@@ -34,7 +34,7 @@ public class BaseEntitySpecification<T> : BaseExpressionSpecification<T>, IEntit
     }
 
     /// <summary>
-    /// 使用规约条件构造一个 <see cref="BaseExpressionSpecification{T}"/> 实例。
+    /// 使用规约条件构造一个 <see cref="ExpressionSpecification{T}"/> 实例。
     /// </summary>
     /// <param name="criterion">给定的判断依据表达式。</param>
     public BaseEntitySpecification(Expression<Func<T, bool>> criterion)

@@ -93,7 +93,7 @@ public static class EnumerableExtensions
     {
         await foreach (var item in items)
         {
-            action.Invoke(item);
+            action(item);
         }
     }
 
@@ -110,9 +110,9 @@ public static class EnumerableExtensions
     {
         await foreach (var item in items)
         {
-            action.Invoke(item);
+            action(item);
 
-            if (breakFunc.Invoke(item))
+            if (breakFunc(item))
                 break;
         }
     }
@@ -130,7 +130,7 @@ public static class EnumerableExtensions
         var i = 0;
         await foreach (var item in items)
         {
-            action.Invoke(item, i);
+            action(item, i);
             i++;
         }
     }
@@ -149,9 +149,9 @@ public static class EnumerableExtensions
         var i = 0;
         await foreach (var item in items)
         {
-            action.Invoke(item, i);
+            action(item, i);
 
-            if (breakFunc.Invoke(item, i))
+            if (breakFunc(item, i))
                 break;
 
             i++;
@@ -168,7 +168,7 @@ public static class EnumerableExtensions
     public static void ForEach<T>(this IEnumerable<T> items, Action<T> action)
     {
         foreach (var item in items)
-            action.Invoke(item);
+            action(item);
     }
 
     /// <summary>
@@ -183,9 +183,9 @@ public static class EnumerableExtensions
     {
         foreach (var item in items)
         {
-            action.Invoke(item);
+            action(item);
 
-            if (breakFunc.Invoke(item))
+            if (breakFunc(item))
                 break;
         }
     }
@@ -202,7 +202,7 @@ public static class EnumerableExtensions
         var i = 0;
         foreach (var item in items)
         {
-            action.Invoke(item, i);
+            action(item, i);
             i++;
         }
     }
@@ -220,9 +220,9 @@ public static class EnumerableExtensions
         var i = 0;
         foreach (var item in items)
         {
-            action.Invoke(item, i);
+            action(item, i);
 
-            if (breakFunc.Invoke(item, i))
+            if (breakFunc(item, i))
                 break;
 
             i++;
@@ -298,7 +298,7 @@ public static class EnumerableExtensions
         Func<T, bool> isFirstFunc, bool isLoops = true)
     {
         var count = enumerable.Count();
-        if (count > 0 && isFirstFunc.Invoke(enumerable.First()))
+        if (count > 0 && isFirstFunc(enumerable.First()))
         {
             // 修剪初始项
             count--;
@@ -328,7 +328,7 @@ public static class EnumerableExtensions
         Func<T, bool> isLastFunc, bool isLoops = true)
     {
         var count = enumerable.Count();
-        if (count > 0 && isLastFunc.Invoke(enumerable.Last()))
+        if (count > 0 && isLastFunc(enumerable.Last()))
         {
             // 修剪末尾项
             count--;

@@ -19,10 +19,10 @@ class InternalFileManager : IFileManager
     private readonly IStorageFileProvider _fileProvider;
 
 
-    public InternalFileManager(IMemoryCache memoryCache, CoreExtensionOptions options)
+    public InternalFileManager(IMemoryCache memoryCache, IOptionsMonitor<CoreExtensionOptions> options)
     {
         _memoryCache = memoryCache;
-        _options = options;
+        _options = options.CurrentValue;
 
         if (_options.WebRequest.FileProviders.Count < 0)
             throw new ArgumentException($"The {nameof(CoreExtensionOptions)}.{nameof(_options.WebRequest)}.{nameof(_options.WebRequest.FileProviders)} is empty. ex: services.AddLibrame(opts => opts.{nameof(_options.WebRequest)}.{nameof(_options.WebRequest.FileProviders)}.Add(new {nameof(PhysicalStorageFileProvider)}()))");
@@ -94,7 +94,7 @@ class InternalFileManager : IFileManager
                     if (beginSecond != endSecond)
                         processingSpeed = processingSpeed / (endSecond - beginSecond);
 
-                    ProgressAction.Invoke(new StorageProgressDescriptor
+                    ProgressAction(new StorageProgressDescriptor
                     {
                         ContentLength = fileInfo.Length,
                         StartPosition = 0,
@@ -169,7 +169,7 @@ class InternalFileManager : IFileManager
                     if (beginSecond != endSecond)
                         processingSpeed = processingSpeed / (endSecond - beginSecond);
 
-                    ProgressAction.Invoke(new StorageProgressDescriptor
+                    ProgressAction(new StorageProgressDescriptor
                     {
                         ContentLength = fileInfo.Length,
                         StartPosition = 0,

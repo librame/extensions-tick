@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义非对称算法接口。
+/// 定义一个继承 <see cref="IAlgorithm"/> 的非对称算法接口。
 /// </summary>
 public interface IAsymmetricAlgorithm : IAlgorithm
 {

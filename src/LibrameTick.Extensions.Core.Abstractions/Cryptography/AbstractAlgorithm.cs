@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 抽象实现 <see cref="IAlgorithm"/>。
+/// 定义抽象实现 <see cref="IAlgorithm"/> 的算法类。
 /// </summary>
 public abstract class AbstractAlgorithm : IAlgorithm
 {
@@ -21,9 +21,9 @@ public abstract class AbstractAlgorithm : IAlgorithm
     /// 构造一个 <see cref="AbstractAlgorithm"/>。
     /// </summary>
     /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
-    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-    public AbstractAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-        IExtensionOptions options)
+    /// <param name="options">给定的 <see cref="AlgorithmOptions"/>。</param>
+    protected AbstractAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        AlgorithmOptions options)
     {
         ParameterGenerator = parameterGenerator;
         Options = options;
@@ -36,7 +36,7 @@ public abstract class AbstractAlgorithm : IAlgorithm
     public IAlgorithmParameterGenerator ParameterGenerator { get; private set; }
 
     /// <summary>
-    /// 扩展选项。
+    /// 算法选项。
     /// </summary>
-    public IExtensionOptions Options { get; private set; }
+    public AlgorithmOptions Options { get; private set; }
 }

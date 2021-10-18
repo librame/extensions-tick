@@ -10,8 +10,9 @@
 
 #endregion
 
-using Librame.Extensions;
 using Librame.Extensions.Core;
+using Librame.Extensions.Core.Cryptography;
+using Librame.Extensions.Core.Storage;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -22,42 +23,68 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
 {
 
     /// <summary>
-    /// 添加 Librame 核心扩展构建器。
+    /// 注册 Librame 核心扩展构建器。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
-    /// <param name="setupAction">给定的配置选项动作（可选）。</param>
+    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
+    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
+    /// <param name="setupBuilder">给定用于设置构建器的动作（可选；为空则不设置）。</param>
     /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
-    public static CoreExtensionBuilder AddLibrame(this IServiceCollection services,
-        Action<CoreExtensionOptions>? setupAction = null)
+    public static CoreExtensionBuilder AddLibrameCore(this IServiceCollection services,
+        Action<CoreExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null,
+        Action<CoreExtensionBuilder>? setupBuilder = null)
     {
-        var options = new CoreExtensionOptions();
-        options.TryLoadOptionsFromJson();
+        if (configOptions is null)
+            configOptions = typeof(CoreExtensionOptions).GetConfigOptionsFromJson();
 
-        setupAction?.Invoke(options);
+        var builder = new CoreExtensionBuilder(services, setupOptions, configOptions);
+        setupBuilder?.Invoke(builder);
 
-        return new CoreExtensionBuilder(services, options);
+        builder.AddBase().AddCryptography().AddStorage();
+
+        return builder;
+    }
+
+
+    /// <summary>
+    /// 注册基础模块。
+    /// </summary>
+    /// <param name="builder">给定的 <see cref="CoreExtensionBuilder"/>。</param>
+    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
+    public static CoreExtensionBuilder AddBase(this CoreExtensionBuilder builder)
+    {
+        builder.TryAddOrReplaceService(typeof(ICloneable<>), typeof(BaseCloneable<>));
+        builder.TryAddOrReplaceService(typeof(IDecoratable<>), typeof(BaseDecoratable<>));
+
+        return builder;
     }
 
     /// <summary>
-    /// 添加 Librame 扩展构建器。
+    /// 注册密码学模块。
     /// </summary>
-    /// <typeparam name="TBuilder">指定实现 <see cref="IExtensionBuilder"/> 的扩展构建器类型。</typeparam>
-    /// <typeparam name="TOptions">指定实现 <see cref="IExtensionOptions"/> 的扩展选项类型。</typeparam>
-    /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="setupAction">给定的配置选项动作（可选）。</param>
-    /// <returns>返回 <typeparamref name="TBuilder"/>。</returns>
-    public static TBuilder AddLibrameExtension<TBuilder, TOptions>(this IExtensionBuilder parentBuilder,
-        Action<TOptions>? setupAction = null)
-        where TBuilder : class, IExtensionBuilder
-        where TOptions : class, IExtensionOptions
+    /// <param name="builder">给定的 <see cref="CoreExtensionBuilder"/>。</param>
+    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
+    public static CoreExtensionBuilder AddCryptography(this CoreExtensionBuilder builder)
     {
-        var options = ExpressionExtensions.New<TOptions>(parentBuilder.Options, typeof(IExtensionOptions));
-        options.TryLoadOptionsFromJson();
+        builder.TryAddOrReplaceService<IAlgorithmParameterGenerator, InternalAlgorithmParameterGenerator>();
+        builder.TryAddOrReplaceService<IAsymmetricAlgorithm, InternalAsymmetricAlgorithm>();
+        builder.TryAddOrReplaceService<ISymmetricAlgorithm, InternalSymmetricAlgorithm>();
 
-        setupAction?.Invoke(options);
+        return builder;
+    }
 
-        return ExpressionExtensions.New<TBuilder>(new object[] { parentBuilder, options },
-            new Type[] { typeof(IExtensionBuilder), typeof(TOptions) });
+    /// <summary>
+    /// 注册存储模块。
+    /// </summary>
+    /// <param name="builder">给定的 <see cref="CoreExtensionBuilder"/>。</param>
+    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
+    public static CoreExtensionBuilder AddStorage(this CoreExtensionBuilder builder)
+    {
+        builder.TryAddOrReplaceService<IFileManager, InternalFileManager>();
+        builder.TryAddOrReplaceService<IFilePermission, InternalFilePermission>();
+        builder.TryAddOrReplaceService<IFileTransmission, InternalFileTransmission>();
+
+        return builder;
     }
 
 }

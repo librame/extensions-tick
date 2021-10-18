@@ -28,7 +28,7 @@ public static class LockoutExtensions
     public static TLockoutTime? SetLockoutEnd<TLockoutTime>(this ILockout<TLockoutTime> lockout,
         Func<TLockoutTime?, TLockoutTime?> newLockoutFactory)
         where TLockoutTime : struct
-        => lockout.LockoutEnd = newLockoutFactory.Invoke(lockout.LockoutEnd);
+        => lockout.LockoutEnd = newLockoutFactory(lockout.LockoutEnd);
 
     /// <summary>
     /// 异步设置锁定期结束时间。
@@ -41,7 +41,7 @@ public static class LockoutExtensions
     public static ValueTask<TLockoutTime?> SetLockoutEndAsync<TLockoutTime>(this ILockout<TLockoutTime> lockout,
         Func<TLockoutTime?, TLockoutTime?> newLockoutFactory, CancellationToken cancellationToken = default)
         where TLockoutTime : struct
-        => cancellationToken.RunValueTask(() => lockout.LockoutEnd = newLockoutFactory.Invoke(lockout.LockoutEnd));
+        => cancellationToken.RunValueTask(() => lockout.LockoutEnd = newLockoutFactory(lockout.LockoutEnd));
 
 
     /// <summary>
@@ -54,7 +54,7 @@ public static class LockoutExtensions
         Func<object, object> newLockoutEndFactory)
     {
         var currentLockoutEnd = lockout.GetObjectLockoutEnd();
-        return lockout.SetObjectLockoutEnd(newLockoutEndFactory.Invoke(currentLockoutEnd));
+        return lockout.SetObjectLockoutEnd(newLockoutEndFactory(currentLockoutEnd));
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public static class LockoutExtensions
         Func<object, object> newLockoutEndFactory, CancellationToken cancellationToken = default)
     {
         var currentLockoutEnd = await lockout.GetObjectLockoutEndAsync(cancellationToken).ConfigureAwaitWithoutContext();
-        return await lockout.SetObjectLockoutEndAsync(newLockoutEndFactory.Invoke(currentLockoutEnd), cancellationToken)
+        return await lockout.SetObjectLockoutEndAsync(newLockoutEndFactory(currentLockoutEnd), cancellationToken)
             .ConfigureAwaitWithoutContext();
     }
 

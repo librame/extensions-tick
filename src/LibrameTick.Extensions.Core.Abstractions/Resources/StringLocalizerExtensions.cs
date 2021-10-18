@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Resources;
+using Librame.Extensions;
+
+namespace Microsoft.Extensions.Localization;
 
 /// <summary>
 /// <see cref="IStringLocalizer"/> 静态扩展。

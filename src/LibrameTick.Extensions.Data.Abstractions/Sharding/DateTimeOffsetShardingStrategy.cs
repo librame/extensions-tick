@@ -40,8 +40,8 @@ public class DateTimeOffsetShardingStrategy : AbstractShardingStrategy
     /// <summary>
     /// 构造一个 <see cref="DateTimeShardingStrategy"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClock"/>。</param>
-    public DateTimeOffsetShardingStrategy(IClock clock)
+    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>。</param>
+    public DateTimeOffsetShardingStrategy(IRegisterableClock clock)
     {
         Clock = clock;
     }
@@ -50,7 +50,7 @@ public class DateTimeOffsetShardingStrategy : AbstractShardingStrategy
     /// <summary>
     /// 时钟。
     /// </summary>
-    public IClock Clock { get; init; }
+    public IRegisterableClock Clock { get; init; }
 
 
     /// <summary>
@@ -65,7 +65,7 @@ public class DateTimeOffsetShardingStrategy : AbstractShardingStrategy
         foreach (var p in _parameters)
         {
             // 区分大小写
-            suffix = suffix.Replace(p.Key, p.Value.Invoke(now), StringComparison.Ordinal);
+            suffix = suffix.Replace(p.Key, p.Value(now), StringComparison.Ordinal);
         }
 
         return suffix;

@@ -31,7 +31,7 @@ public static class PagingListExtensions
     public static IPagingList<T> AsPaging<T>(this IEnumerable<T> collection, Action<IPagingList<T>> pageAction)
     {
         var list = new PagingList<T>(collection);
-        pageAction.Invoke(list);
+        pageAction(list);
 
         return list;
     }
@@ -49,7 +49,7 @@ public static class PagingListExtensions
     public static IPagingList<T> AsPaging<T>(this IQueryable<T> queryable, Action<IPagingList<T>> pageAction)
     {
         var list = new PagingList<T>(queryable);
-        pageAction.Invoke(list);
+        pageAction(list);
 
         return list;
     }

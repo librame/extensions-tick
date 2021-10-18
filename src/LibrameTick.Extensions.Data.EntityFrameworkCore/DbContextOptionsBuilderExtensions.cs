@@ -48,7 +48,7 @@ public static class DbContextOptionsBuilderExtensions
         Func<TExtension, TExtension> configureFunc)
         where TExtension : class, IDbContextOptionsExtension, new()
     {
-        var extension = configureFunc.Invoke(builder.Options.GetOrDefault<TExtension>());
+        var extension = configureFunc(builder.Options.GetOrDefault<TExtension>());
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
 

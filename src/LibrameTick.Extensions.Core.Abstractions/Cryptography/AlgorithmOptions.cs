@@ -15,9 +15,9 @@ using Librame.Extensions.Serialization;
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的算法选项。
+/// 定义实现 <see cref="IOptionsNotifier"/> 的算法选项。
 /// </summary>
-public class AlgorithmOptions : AbstractOptions
+public class AlgorithmOptions : AbstractOptionsNotifier
 {
     /// <summary>
     /// 构造一个独立属性通知器的 <see cref="AlgorithmOptions"/>（此构造函数适用于独立使用 <see cref="AlgorithmOptions"/> 的情况）。
@@ -26,11 +26,11 @@ public class AlgorithmOptions : AbstractOptions
     public AlgorithmOptions(string sourceAliase)
         : base(sourceAliase)
     {
-        HmacHash = new HmacHashOptions(Notifier);
+        HmacHash = new(Notifier);
         Aes = KeyNonceOptions.CreateAesOptions(Notifier, nameof(Aes));
         AesCcm = KeyNonceTagOptions.CreateAesCcmOptions(Notifier, nameof(AesCcm));
         AesGcm = KeyNonceTagOptions.CreateAesGcmOptions(Notifier, nameof(AesGcm));
-        Rsa = new SigningCredentialsOptions(Notifier);
+        Rsa = new(Notifier);
     }
 
     /// <summary>
@@ -41,11 +41,11 @@ public class AlgorithmOptions : AbstractOptions
     public AlgorithmOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
         : base(parentNotifier, sourceAliase)
     {
-        HmacHash = new HmacHashOptions(Notifier);
+        HmacHash = new(Notifier);
         Aes = KeyNonceOptions.CreateAesOptions(Notifier, nameof(Aes));
         AesCcm = KeyNonceTagOptions.CreateAesCcmOptions(Notifier, nameof(AesCcm));
         AesGcm = KeyNonceTagOptions.CreateAesGcmOptions(Notifier, nameof(AesGcm));
-        Rsa = new SigningCredentialsOptions(Notifier);
+        Rsa = new(Notifier);
     }
 
 

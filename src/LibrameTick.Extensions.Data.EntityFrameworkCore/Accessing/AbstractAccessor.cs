@@ -92,7 +92,13 @@ public abstract class AbstractAccessor : DbContext, IAccessor
     /// 数据扩展选项。
     /// </summary>
     public DataExtensionOptions DataOptions
-        => this.GetService<DataExtensionOptions>();
+        => this.GetService<IOptionsMonitor<DataExtensionOptions>>().CurrentValue;
+
+    /// <summary>
+    /// 核心扩展选项。
+    /// </summary>
+    public CoreExtensionOptions CoreOptions
+        => this.GetService<IOptionsMonitor<CoreExtensionOptions>>().CurrentValue;
 
 
     #region IConnectable<IAccessor>

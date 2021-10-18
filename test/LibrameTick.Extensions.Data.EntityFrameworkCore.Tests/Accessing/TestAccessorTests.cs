@@ -43,22 +43,24 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseAccessor(b => b.WithAccess(AccessMode.Read)); //.WithSharding<DateTimeOffsetShardingStrategy>("%y")
             });
 
-            services.AddLibrame()
+            var builder = services.AddLibrameCore()
                 .AddData(opts =>
                 {
                     // 测试时每次运行需新建数据库
                     opts.Access.EnsureDatabaseDeleted = true;
 
                     // 每次修改选项时自动保存为 JSON 文件
-                    opts.PropertyChangedAction = (o, e) => o.SaveOptionsAsJson();
+                    opts.PropertyChangedAction = (o, e) => o?.SaveOptionsAsJson();
                 })
                 .AddSeeder<InternalTestAccessorSeeder>()
                 //.AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqlServerAccessor>>()
-                .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>()
-                .SaveOptionsAsJson(); // 首次保存选项为 JSON 文件
+                .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>();
 
             var provider = services.BuildServiceProvider();
+
+            // 首次保存所有扩展选项为 JSON 文件
+            var dict = builder.SaveAllOptionsAsJson(provider);
 
             provider.UseAccessorInitializer();
 
@@ -88,7 +90,7 @@ namespace Librame.Extensions.Data.Accessing
                     Passwd = "123456"
                 };
 
-                user.Id = store.IdGeneratorFactory.GetNewId<string>();
+                user.Id = store.IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
                 user.PopulateCreation(pagingUsers.First().Id, DateTimeOffset.UtcNow);
 
                 addUsers[i] = user;

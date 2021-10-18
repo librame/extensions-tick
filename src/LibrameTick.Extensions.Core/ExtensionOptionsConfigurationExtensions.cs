@@ -19,6 +19,35 @@ public static class ExtensionOptionsConfigurationExtensions
 {
 
     /// <summary>
+    /// 从 JSON 文件获取配置选项。
+    /// </summary>
+    /// <param name="optionsType">给定的扩展选项类型。</param>
+    /// <returns>返回 <see cref="IConfiguration"/>。</returns>
+    public static IConfiguration? GetConfigOptionsFromJson(this Type optionsType)
+        => optionsType.BuildJsonFilePath().GetConfigOptionsFromJson();
+
+    /// <summary>
+    /// 从 JSON 文件获取配置选项。
+    /// </summary>
+    /// <param name="jsonPath">给定的 JSON 路径。</param>
+    /// <returns>返回 <see cref="IConfiguration"/>。</returns>
+    public static IConfiguration? GetConfigOptionsFromJson(this string jsonPath)
+    {
+        if (jsonPath.FileExists())
+        {
+            var root = new ConfigurationBuilder()
+                .AddJsonFile(jsonPath) // default(optional: false, reloadOnChange: false)
+                .Build();
+
+            // 默认从配置根对象的第一个子配置部分加载
+            return root.GetChildren().FirstOrDefault();
+        }
+
+        return null;
+    }
+
+
+    /// <summary>
     /// 尝试从 JSON 文件中加载扩展选项。
     /// </summary>
     /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
@@ -35,31 +64,16 @@ public static class ExtensionOptionsConfigurationExtensions
     public static bool TryLoadOptionsFromJson(this IExtensionOptions options,
         [MaybeNullWhen(false)] out string jsonPath)
     {
-        jsonPath = options.BuildJsonPath();
-        if (jsonPath.FileExists())
-        {
-            var root = new ConfigurationBuilder()
-                .AddJsonFile(jsonPath) // default(optional: false, reloadOnChange: false)
-                .Build();
+        jsonPath = options.BuildJsonFilePath();
 
-            // 默认从配置根对象的第一个子配置部分加载
-            var section = root.GetChildren().FirstOrDefault();
-            if (section is not null)
-            {
-                options.LoadOptions(section);
-                return true;
-            }
+        var configuration = jsonPath.GetConfigOptionsFromJson();
+        if (configuration is not null)
+        {
+            configuration.Bind(options);
+            return true;
         }
 
         return false;
     }
-
-    /// <summary>
-    /// 从配置实例中加载扩展选项。
-    /// </summary>
-    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-    /// <param name="configuration">给定的 <see cref="IConfiguration"/>。</param>
-    public static void LoadOptions(this IExtensionOptions options, IConfiguration configuration)
-        => configuration.Bind(options);
 
 }

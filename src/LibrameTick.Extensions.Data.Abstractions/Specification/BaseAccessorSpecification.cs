@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data.Specification;
 /// <summary>
 /// 定义实现 <see cref="IAccessorSpecification"/> 的基础访问器规约（默认按优先级进行升序排列）。
 /// </summary>
-public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessorSpecification
+public class BaseAccessorSpecification : Specification<IAccessor>, IAccessorSpecification
 {
     /// <summary>
     /// 构造一个默认 <see cref="BaseAccessorSpecification"/>。
@@ -90,7 +90,7 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     {
         // 优先出具自定义提供程序
         if (Provider is not null)
-            return Provider.Invoke(enumerable);
+            return Provider(enumerable);
 
         if (Redundancy is not null && enumerable.Count() > 1)
         {

@@ -13,12 +13,8 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 选项接口。
+/// 定义一个选项接口。
 /// </summary>
 public interface IOptions
 {
-    /// <summary>
-    /// 属性通知器。
-    /// </summary>
-    IPropertyNotifier Notifier { get; }
 }

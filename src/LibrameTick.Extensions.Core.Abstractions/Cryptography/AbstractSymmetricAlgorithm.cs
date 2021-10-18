@@ -21,31 +21,12 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
     /// 构造一个 <see cref="AbstractSymmetricAlgorithm"/>。
     /// </summary>
     /// <param name="parameterGenerator">给定的 <see cref="IAlgorithmParameterGenerator"/>。</param>
-    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-    public AbstractSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-        IExtensionOptions options)
+    /// <param name="options">给定的 <see cref="AlgorithmOptions"/>。</param>
+    protected AbstractSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
+        AlgorithmOptions options)
         : base(parameterGenerator, options)
     {
     }
-
-
-    /// <summary>
-    /// 默认 AES 选项。
-    /// </summary>
-    /// <returns>返回 <see cref="KeyNonceOptions"/>。</returns>
-    protected abstract KeyNonceOptions DefaultAesOptions { get; }
-
-    /// <summary>
-    /// 默认 AES-CCM 选项。
-    /// </summary>
-    /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
-    protected abstract KeyNonceTagOptions DefaultAesCcmOptions { get; }
-
-    /// <summary>
-    /// 默认 AES-GCM 选项。
-    /// </summary>
-    /// <returns>返回 <see cref="KeyNonceTagOptions"/>。</returns>
-    protected abstract KeyNonceTagOptions DefaultAesGcmOptions { get; }
 
 
     #region AES
@@ -59,7 +40,7 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
     public virtual byte[] EncryptAes(byte[] buffer, KeyNonceOptions? options = null)
     {
         if (options is null)
-            options = DefaultAesOptions;
+            options = Options.Aes;
             
         var aes = Aes.Create();
         aes.Key = options.Key;
@@ -78,7 +59,7 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
     public virtual byte[] DecryptAes(byte[] buffer, KeyNonceOptions? options = null)
     {
         if (options is null)
-            options = DefaultAesOptions;
+            options = Options.Aes;
 
         var aes = Aes.Create();
         aes.Key = options.Key;
@@ -102,7 +83,7 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
     public virtual byte[] EncryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null)
     {
         if (options is null)
-            options = DefaultAesCcmOptions;
+            options = Options.AesCcm;
             
         var ciphertext = new byte[buffer.Length];
 
@@ -121,7 +102,7 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
     public virtual byte[] DecryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null)
     {
         if (options is null)
-            options = DefaultAesCcmOptions;
+            options = Options.AesCcm;
 
         var plaintext = new byte[buffer.Length];
 
@@ -145,7 +126,7 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
     public virtual byte[] EncryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null)
     {
         if (options is null)
-            options = DefaultAesGcmOptions;
+            options = Options.AesGcm;
 
         var ciphertext = new byte[buffer.Length];
 
@@ -164,7 +145,7 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
     public virtual byte[] DecryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null)
     {
         if (options is null)
-            options = DefaultAesGcmOptions;
+            options = Options.AesGcm;
 
         var plaintext = new byte[buffer.Length];
 

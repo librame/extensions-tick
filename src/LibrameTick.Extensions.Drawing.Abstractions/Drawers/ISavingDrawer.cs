@@ -22,10 +22,10 @@ public interface ISavingDrawer : IDrawer
     /// <summary>
     /// 保存子路径方法。默认以当前本地时间为基础，建立年月和日的相对二级子路径（如：2108\15）。
     /// </summary>
-    Func<IClock, string> SaveSubpathFunc { get; set; }
+    Func<IRegisterableClock, string> SaveSubpathFunc { get; set; }
 
     /// <summary>
     /// 保存文件基础名称方法（即不包含路径和文件扩展名的文件名）。默认如果位图来自于文件，则尝试获取文件基础名，反之则使用当前本地时间的周期毫秒数。
     /// </summary>
-    Func<IClock, BitmapDescriptor, string> SaveFileBaseNameFunc { get; set; }
+    Func<IRegisterableClock, BitmapDescriptor, string> SaveFileBaseNameFunc { get; set; }
 }

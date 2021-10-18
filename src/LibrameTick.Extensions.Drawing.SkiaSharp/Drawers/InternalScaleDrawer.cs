@@ -17,9 +17,9 @@ class InternalScaleDrawer : AbstractDrawer, IScalingDrawer
     private IWatermarkDrawer _watermarkDrawer;
 
 
-    public InternalScaleDrawer(DrawingExtensionOptions options,
+    public InternalScaleDrawer(IOptionsMonitor<DrawingExtensionOptions> options,
         IWatermarkDrawer watermarkDrawer)
-        : base(options)
+        : base(options.CurrentValue)
     {
         _watermarkDrawer = watermarkDrawer;
     }

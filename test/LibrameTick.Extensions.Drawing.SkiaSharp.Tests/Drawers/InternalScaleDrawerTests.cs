@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Linq;
 using Xunit;
 
@@ -12,7 +13,7 @@ namespace Librame.Extensions.Drawing.Drawers
         {
             var services = DrawingExtensionBuilderHelper.CurrentServices;
 
-            var options = services.GetRequiredService<DrawingExtensionOptions>();
+            var options = services.GetRequiredService<IOptions<DrawingExtensionOptions>>().Value;
 
             var scalingDrawer = services.GetScalingDrawer();
             var savingDrawer = services.GetSavingDrawer();

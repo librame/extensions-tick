@@ -29,7 +29,7 @@ public static class IdentifierExtensions
     public static ValueTask<TId> SetIdAsync<TId>(this IIdentifier<TId> identifier,
         Func<TId, TId> newIdFactory, CancellationToken cancellationToken = default)
         where TId : IEquatable<TId>
-        => cancellationToken.RunValueTask(() => identifier.Id = newIdFactory.Invoke(identifier.Id));
+        => cancellationToken.RunValueTask(() => identifier.Id = newIdFactory(identifier.Id));
 
 
     /// <summary>
@@ -44,7 +44,7 @@ public static class IdentifierExtensions
     {
         var currentId = await identifier.GetObjectIdAsync(cancellationToken).ConfigureAwaitWithoutContext();
 
-        return await identifier.SetObjectIdAsync(newIdFactory.Invoke(currentId), cancellationToken)
+        return await identifier.SetObjectIdAsync(newIdFactory(currentId), cancellationToken)
             .ConfigureAwaitWithoutContext();
     }
 

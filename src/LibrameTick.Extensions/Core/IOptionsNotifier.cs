@@ -13,22 +13,12 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义程序集筛选方式。
+/// 定义一个可响应属性变化的选项通知器接口。
 /// </summary>
-public enum AssemblyFiltration
+public interface IOptionsNotifier : IOptions
 {
     /// <summary>
-    /// 表示无筛选。
+    /// 属性通知器。
     /// </summary>
-    None,
-
-    /// <summary>
-    /// 表示排除此程序集。
-    /// </summary>
-    Exclusive,
-
-    /// <summary>
-    /// 表示包含此程序集。
-    /// </summary>
-    Inclusive
+    IPropertyNotifier Notifier { get; }
 }

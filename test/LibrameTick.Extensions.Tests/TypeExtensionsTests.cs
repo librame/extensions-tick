@@ -76,7 +76,7 @@ namespace Librame.Extensions
             Assert.True(type.IsImplementedType<ICryptoTransform>());
 
             Assert.True(type.IsImplementedType<HashAlgorithm>(out Type? resultType));
-            Assert.Equal(typeof(HashAlgorithm), resultType);
+            Assert.Equal(type, resultType);
         }
 
         #endregion

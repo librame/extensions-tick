@@ -231,7 +231,7 @@ public class ServiceCharacteristicCollection : Dictionary<Type, ServiceCharacter
     public ServiceCharacteristicCollection Change(Type serviceType, Action<ServiceCharacteristic> changeAction)
     {
         if (TryGetValue(serviceType, out var characteristic))
-            changeAction.Invoke(characteristic);
+            changeAction(characteristic);
         else
             throw new ArgumentException($"The specified service type '{serviceType}' was not found.");
 
@@ -263,7 +263,7 @@ public class ServiceCharacteristicCollection : Dictionary<Type, ServiceCharacter
         if (TryGetValue(serviceType, out var characteristic))
         {
             Remove(characteristic.ServiceType);
-            Add(characteristicFunc.Invoke(characteristic));
+            Add(characteristicFunc(characteristic));
         }
         else
         {

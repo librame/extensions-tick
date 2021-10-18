@@ -28,7 +28,7 @@ public static class StateExtensions
     public static TStatus SetStatus<TStatus>(this IState<TStatus> state,
         Func<TStatus, TStatus> newStatusFactory)
         where TStatus : struct
-        => state.Status = newStatusFactory.Invoke(state.Status);
+        => state.Status = newStatusFactory(state.Status);
 
     /// <summary>
     /// 异步设置状态。
@@ -41,7 +41,7 @@ public static class StateExtensions
     public static ValueTask<TStatus> SetStatusAsync<TStatus>(this IState<TStatus> state,
         Func<TStatus, TStatus> newStatusFactory, CancellationToken cancellationToken = default)
         where TStatus : struct
-        => cancellationToken.RunValueTask(() => state.Status = newStatusFactory.Invoke(state.Status));
+        => cancellationToken.RunValueTask(() => state.Status = newStatusFactory(state.Status));
 
 
     /// <summary>
@@ -54,7 +54,7 @@ public static class StateExtensions
         Func<object, object> newStatusFactory)
     {
         var currentStatus = state.GetObjectStatus();
-        return state.SetObjectStatus(newStatusFactory.Invoke(currentStatus));
+        return state.SetObjectStatus(newStatusFactory(currentStatus));
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ public static class StateExtensions
         Func<object, object> newStatusFactory, CancellationToken cancellationToken = default)
     {
         var currentStatus = await state.GetObjectStatusAsync(cancellationToken).ConfigureAwaitWithoutContext();
-        return await state.SetObjectStatusAsync(newStatusFactory.Invoke(currentStatus), cancellationToken)
+        return await state.SetObjectStatusAsync(newStatusFactory(currentStatus), cancellationToken)
             .ConfigureAwaitWithoutContext();
     }
 

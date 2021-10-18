@@ -17,62 +17,84 @@ namespace Librame.Extensions.Core;
 /// </summary>
 public static class AssemblyLoader
 {
-
     /// <summary>
-    /// 加载程序集集合。
-    /// </summary>
-    /// <param name="options">给定的 <see cref="AssemblyLoadingOptions"/>（可选）。</param>
-    /// <returns>返回 <see cref="Assembly"/> 数组。</returns>
-    public static Assembly[]? LoadAssemblies(AssemblyLoadingOptions? options = null)
-    {
-        if (options is null)
-            options = new AssemblyLoadingOptions(nameof(AssemblyLoader));
-
-        var assemblyNames = Assembly.GetEntryAssembly()?.GetReferencedAssemblies();
-        if (assemblyNames is null)
-            return null;
-
-        // 如果启用筛选
-        if (options.Filtration != AssemblyFiltration.None && options.Filters.Count > 0)
-        {
-            if (options.Filtration is AssemblyFiltration.Exclusive)
-            {
-                // 排除过滤程序集字符串
-                assemblyNames = assemblyNames.Where(p =>
-                    options.Filters.Any(filter => !p.Name!.Contains(filter))).ToArray();
-            }
-            else
-            {
-                // 包含过滤程序集字符串
-                assemblyNames = assemblyNames.Where(p =>
-                    options.Filters.Any(filter => p.Name!.Contains(filter))).ToArray();
-            }
-        }
-
-        var assemblies = assemblyNames.Select(Assembly.Load);
-        if (options.Others.Count > 0)
-            assemblies = assemblies.Concat(options.Others).DistinctBy(s => s.FullName);
-
-        return assemblies.ToArray();
-    }
-
-    /// <summary>
-    /// 通过程序集集合加载指定基础类型的可实例化类型集合。
+    /// 通过程序集集合加载指定基础类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合（如果存在多个过滤器，将取每个过滤器结果的交集）。
     /// </summary>
     /// <param name="baseType">给定的基础类型。</param>
-    /// <param name="options">给定的 <see cref="AssemblyLoadingOptions"/>（可选）。</param>
+    /// <param name="options">给定的 <see cref="AssemblyLoadingOptions"/>。</param>
     /// <returns>返回 <see cref="Type"/> 数组。</returns>
-    public static Type[]? LoadInstantiableTypesByAssemblies(Type baseType, AssemblyLoadingOptions? options = null)
+    public static Type[]? LoadConcreteTypes(Type baseType, AssemblyLoadingOptions options)
     {
         var assemblies = LoadAssemblies(options);
         if (assemblies is null)
             return null;
 
-        return assemblies.SelectMany(s => s.ExportedTypes)
-            .Where(type => FilterInstantiableType(type, baseType)).ToArray();
+        return LoadConcreteTypes(baseType, assemblies);
     }
 
-    private static bool FilterInstantiableType(Type currentType, Type baseType)
-        => currentType.IsAssignableToBaseType(baseType) && currentType.IsConcreteType();
+    /// <summary>
+    /// 通过程序集集合加载指定基础类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合。
+    /// </summary>
+    /// <param name="baseType">给定的基础类型。</param>
+    /// <param name="assemblies">给定的 <see cref="Assembly"/> 数组。</param>
+    /// <returns>返回 <see cref="Type"/> 数组。</returns>
+    public static Type[]? LoadConcreteTypes(Type baseType, Assembly[] assemblies)
+        => assemblies.Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(s => s.ExportedTypes)
+            .Where(p => p.IsAssignableToBaseType(baseType) && p.IsConcreteType()).ToArray();
+
+
+    /// <summary>
+    /// 加载程序集集合（如果存在多个过滤器，将取每个过滤器结果的交集）。
+    /// </summary>
+    /// <param name="options">给定的 <see cref="AssemblyLoadingOptions"/>。</param>
+    /// <returns>返回 <see cref="Assembly"/> 数组。</returns>
+    public static Assembly[]? LoadAssemblies(AssemblyLoadingOptions options)
+    {
+        var allAssemblies = string.IsNullOrEmpty(options.AssemblyLoadPath)
+            ? AssemblyLoadContext.Default.Assemblies
+            : Directory.EnumerateFiles(options.AssemblyLoadPath, "*.dll").Select(Assembly.LoadFile);
+
+        // 排除系统程序集
+        if (options.ExcludeSystemAssemblies is not null && options.ExcludeSystemAssemblies.Count > 0)
+        {
+            foreach (var regex in options.ExcludeSystemAssemblies)
+            {
+                // 交集处理
+                allAssemblies = allAssemblies.Where(p => !regex.IsMatch(p.FullName!));
+            }
+        }
+
+        if (!allAssemblies.Any())
+            return Array.Empty<Assembly>();
+
+        var filterAssemblies = new List<Assembly>();
+
+        if (options.FilteringDescriptors.Count > 0)
+        {
+            // 根据筛选描述符进行组合筛选
+            foreach (var descriptor in options.FilteringDescriptors)
+            {
+                var currentAssemblies = allAssemblies;
+
+                foreach (var filter in descriptor.Filters)
+                {
+                    // 交集处理
+                    currentAssemblies = filter.FilterBy(currentAssemblies, s => s.FullName!);
+                }
+
+                if (descriptor.Additions is not null && descriptor.Additions.Count > 0)
+                    currentAssemblies = currentAssemblies.Concat(descriptor.Additions).DistinctBy(s => s.FullName);
+
+                filterAssemblies.AddRange(currentAssemblies);
+            }
+        }
+        else
+        {
+            filterAssemblies.AddRange(allAssemblies);
+        }
+
+        return filterAssemblies.ToArray();
+    }
 
 }

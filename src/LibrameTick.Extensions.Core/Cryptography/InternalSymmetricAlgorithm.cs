@@ -14,24 +14,10 @@ namespace Librame.Extensions.Core.Cryptography;
 
 class InternalSymmetricAlgorithm : AbstractSymmetricAlgorithm
 {
-    private CoreExtensionOptions _options;
-
-
     public InternalSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
-        CoreExtensionOptions options)
-        : base(parameterGenerator, options)
+        IOptionsMonitor<CoreExtensionOptions> options)
+        : base(parameterGenerator, options.CurrentValue.Algorithm)
     {
-        _options = options;
     }
-
-
-    protected override KeyNonceOptions DefaultAesOptions
-        => _options.Algorithm.Aes;
-
-    protected override KeyNonceTagOptions DefaultAesCcmOptions
-        => _options.Algorithm.AesCcm;
-
-    protected override KeyNonceTagOptions DefaultAesGcmOptions
-        => _options.Algorithm.AesGcm;
 
 }

@@ -29,7 +29,7 @@ sealed class InternalCompositeStorageFileProvider : IStorageFileProvider
     {
         try
         {
-            action.Invoke(_providers[accessorIndex]);
+            action(_providers[accessorIndex]);
         }
         catch (Exception)
         {
@@ -44,7 +44,7 @@ sealed class InternalCompositeStorageFileProvider : IStorageFileProvider
     {
         try
         {
-            return func.Invoke(_providers[accessorIndex]);
+            return func(_providers[accessorIndex]);
         }
         catch (Exception)
         {

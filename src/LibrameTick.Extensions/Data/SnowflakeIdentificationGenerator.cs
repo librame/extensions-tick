@@ -19,9 +19,8 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public class SnowflakeIdentificationGenerator : AbstractIdentificationGenerator<long>
 {
-    private readonly object _locker = new object();
-
-    private readonly IClock _clock;
+    private readonly IRegisterableClock _clock;
+    private readonly IRegisterableLocker _locker;
     private readonly SnowflakeIdentificationParameters _parameters;
     private readonly long _machineId;
     private readonly long _dataCenterId;
@@ -33,23 +32,24 @@ public class SnowflakeIdentificationGenerator : AbstractIdentificationGenerator<
     /// <summary>
     /// 构造一个 <see cref="SnowflakeIdentificationGenerator"/>。
     /// </summary>
-    /// <param name="machineId">给定的机器标识。</param>
-    /// <param name="dataCenterId">给定的数据中心标识。</param>
-    /// <param name="clock">给定的 <see cref="IClock"/>（如使用本地时钟可参考 <see cref="InternalLocalClock"/>）。</param>
+    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>（如使用本地时钟可参考 <see cref="Registration.GetRegisterableClock()"/>）。</param>
+    /// <param name="locker">给定的 <see cref="IRegisterableLocker"/>（如使用本地锁定器可参考 <see cref="Registration.GetRegisterableLocker()"/>）。</param>
+    /// <param name="options">给定的 <see cref="IdentificationGenerationOptions"/>。</param>
     /// <param name="parameters">给定的 <see cref="SnowflakeIdentificationParameters"/>（可选）。</param>
-    public SnowflakeIdentificationGenerator(long machineId, long dataCenterId,
-        IClock clock, SnowflakeIdentificationParameters? parameters = null)
+    public SnowflakeIdentificationGenerator(IRegisterableClock clock, IRegisterableLocker locker,
+        IdentificationGenerationOptions options, SnowflakeIdentificationParameters? parameters = null)
     {
         _clock = clock;
+        _locker = locker;
         _parameters = parameters ?? new SnowflakeIdentificationParameters();
 
-        if (machineId >= 0)
-            _machineId = machineId.NotGreater(_parameters.GetMaxMachineId(), nameof(machineId));
+        if (options.MachineId >= 0)
+            _machineId = options.MachineId.NotGreater(_parameters.GetMaxMachineId(), nameof(options.MachineId));
         else
             _machineId = _parameters.InitialMachineId;
 
-        if (dataCenterId >= 0)
-            _dataCenterId = dataCenterId.NotGreater(_parameters.GetMaxDataCenterId(), nameof(dataCenterId));
+        if (options.DataCenterId >= 0)
+            _dataCenterId = options.DataCenterId.NotGreater(_parameters.GetMaxDataCenterId(), nameof(options.DataCenterId));
         else
             _dataCenterId = _parameters.InitialDataCenterId;
     }
@@ -118,7 +118,7 @@ public class SnowflakeIdentificationGenerator : AbstractIdentificationGenerator<
             throw new Exception($"Clock moved backwards. Refusing to generate id for {_lastTimestamp - timestamp} milliseconds");
         }
 
-        lock (_locker)
+        return _locker.SpinLock(() =>
         {
             var nextId = (timestamp - _parameters.Twepoch << _parameters.GetTimestampLeftShift())
                 | (_dataCenterId << _parameters.GetDataCenterIdShift())
@@ -128,7 +128,7 @@ public class SnowflakeIdentificationGenerator : AbstractIdentificationGenerator<
             _lastTimestamp = timestamp;
 
             return nextId;
-        }
+        });
     }
 
 

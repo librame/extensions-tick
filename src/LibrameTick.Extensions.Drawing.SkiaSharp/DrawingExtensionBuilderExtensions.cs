@@ -12,6 +12,8 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Drawing;
+using Librame.Extensions.Drawing.Drawers;
+using Librame.Extensions.Drawing.Verification;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -22,13 +24,53 @@ public static class DrawingExtensionBuilderExtensions
 {
 
     /// <summary>
-    /// 添加 <see cref="DrawingExtensionBuilder"/>。
+    /// 注册 Librame 图画扩展构建器。
     /// </summary>
-    /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="setupAction">给定的配置选项动作（可选）。</param>
-    /// <returns>返回 <see cref="DrawingExtensionBuilder"/>。</returns>
+    /// <param name="parentBuilder">给定的 <see cref="IExtensionBuilder"/>。</param>
+    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
+    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
+    /// <param name="setupBuilder">给定用于设置构建器的动作（可选；为空则不设置）。</param>
+    /// <returns>返回 <see cref="DrawingExtensionOptions"/>。</returns>
     public static DrawingExtensionBuilder AddDrawing(this IExtensionBuilder parentBuilder,
-        Action<DrawingExtensionOptions>? setupAction = null)
-        => parentBuilder.AddLibrameExtension<DrawingExtensionBuilder, DrawingExtensionOptions>(setupAction);
+        Action<DrawingExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null,
+        Action<DrawingExtensionBuilder>? setupBuilder = null)
+    {
+        if (configOptions is null)
+            configOptions = typeof(DrawingExtensionOptions).GetConfigOptionsFromJson();
+
+        var builder = new DrawingExtensionBuilder(parentBuilder, setupOptions, configOptions);
+        setupBuilder?.Invoke(builder);
+
+        builder.AddDrawers().AddVerification();
+
+        return builder;
+    }
+
+
+    /// <summary>
+    /// 注册绘制器模块。
+    /// </summary>
+    /// <param name="builder">给定的 <see cref="DrawingExtensionBuilder"/>。</param>
+    /// <returns>返回 <see cref="DrawingExtensionBuilder"/>。</returns>
+    public static DrawingExtensionBuilder AddDrawers(this DrawingExtensionBuilder builder)
+    {
+        builder.TryAddOrReplaceService<ISavingDrawer, InternalSavingDrawer>();
+        builder.TryAddOrReplaceService<IScalingDrawer, InternalScaleDrawer>();
+        builder.TryAddOrReplaceService<IWatermarkDrawer, InternalWatermarkDrawer>();
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 注册验证模块。
+    /// </summary>
+    /// <param name="builder">给定的 <see cref="DrawingExtensionBuilder"/>。</param>
+    /// <returns>返回 <see cref="DrawingExtensionBuilder"/>。</returns>
+    public static DrawingExtensionBuilder AddVerification(this DrawingExtensionBuilder builder)
+    {
+        builder.TryAddOrReplaceService<ICaptchaGenerator, InternalCaptchaGenerator>();
+
+        return builder;
+    }
 
 }

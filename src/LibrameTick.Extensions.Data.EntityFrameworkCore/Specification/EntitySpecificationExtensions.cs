@@ -81,7 +81,7 @@ public static class EntitySpecificationExtensions
         if (specification is not null)
             list.Filtrate(query => specification.Evaluate(queryable));
 
-        pageAction.Invoke(list);
+        pageAction(list);
 
         return list;
     }
@@ -107,7 +107,7 @@ public static class EntitySpecificationExtensions
 
         return cancellationToken.RunTask(() =>
         {
-            pageAction.Invoke(list);
+            pageAction(list);
 
             return list;
         });

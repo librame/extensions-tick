@@ -16,20 +16,20 @@ namespace Librame.Extensions.Core;
 /// 定义实现 <see cref="ISpecification{T}"/> 的基础规约。
 /// </summary>
 /// <typeparam name="T">指定的类型。</typeparam>
-public class BaseSpecification<T> : ISpecification<T>
+public class Specification<T> : ISpecification<T>
 {
     /// <summary>
-    /// 构造一个默认 <see cref="BaseSpecification{T}"/>。
+    /// 构造一个默认 <see cref="Specification{T}"/>。
     /// </summary>
-    public BaseSpecification()
+    public Specification()
     {
     }
 
     /// <summary>
-    /// 使用指定的判断依据构造一个 <see cref="BaseSpecification{T}"/>。
+    /// 使用指定的判断依据构造一个 <see cref="Specification{T}"/>。
     /// </summary>
     /// <param name="criterion">给定的判断依据。</param>
-    public BaseSpecification(Func<T, bool> criterion)
+    public Specification(Func<T, bool> criterion)
     {
         Criterion = criterion;
     }
@@ -84,7 +84,7 @@ public class BaseSpecification<T> : ISpecification<T>
     public virtual T Issue(IEnumerable<T> enumerable)
     {
         if (Provider is not null)
-            return Provider.Invoke(enumerable);
+            return Provider(enumerable);
 
         return enumerable.First();
     }

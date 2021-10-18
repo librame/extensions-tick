@@ -25,15 +25,15 @@ class InternalCaptchaGenerator : AbstractDisposable, ICaptchaGenerator
     private SKPaint _noisePaint;
 
 
-    public InternalCaptchaGenerator(DrawingExtensionOptions options)
+    public InternalCaptchaGenerator(IOptionsMonitor<DrawingExtensionOptions> options)
     {
-        _options = options;
-        _imageFormat = options.ImageFormat.AsEncodedImageFormat();
-        _backgroundColor = options.Colors.Background.AsColor();
+        _options = options.CurrentValue;
+        _imageFormat = _options.ImageFormat.AsEncodedImageFormat();
+        _backgroundColor = _options.Colors.Background.AsColor();
 
-        _forePaint = options.Watermark.Font.CreatePaint(options.Colors.Fore);
-        _alternPaint = options.Watermark.Font.CreatePaint(options.Colors.Alternate);
-        _noisePaint = options.Captcha.BackgroundNoise.CreatePaint(options.Colors.Interference);
+        _forePaint = _options.Watermark.Font.CreatePaint(_options.Colors.Fore);
+        _alternPaint = _options.Watermark.Font.CreatePaint(_options.Colors.Alternate);
+        _noisePaint = _options.Captcha.BackgroundNoise.CreatePaint(_options.Colors.Interference);
     }
 
 
@@ -113,7 +113,7 @@ class InternalCaptchaGenerator : AbstractDisposable, ICaptchaGenerator
             using (var img = SKImage.FromBitmap(bmp))
             using (var data = img.Encode(_imageFormat, _options.EncodeQuality))
             {
-                postAction.Invoke(data);
+                postAction(data);
             }
         }
     }

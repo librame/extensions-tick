@@ -50,6 +50,6 @@ public static class ObjectExtensions
     /// <param name="defaultValueFunc">给定的默认值方法。</param>
     /// <returns>返回 <typeparamref name="TValue"/>。</returns>
     public static TValue AsOrDefault<TValue>([NotNullWhen(true)] this object? obj, Func<TValue> defaultValueFunc)
-        => obj is null ? defaultValueFunc.Invoke() : (TValue)obj;
+        => obj is null ? defaultValueFunc() : (TValue)obj;
 
 }

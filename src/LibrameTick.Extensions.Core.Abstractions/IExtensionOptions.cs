@@ -13,27 +13,12 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义实现 <see cref="IExtensionInfo"/>、<see cref="IOptions"/> 的扩展选项接口。
+/// 定义实现 <see cref="IExtensionInfo"/>、<see cref="IOptionsNotifier"/> 的扩展选项接口。
 /// </summary>
-public interface IExtensionOptions : IExtensionInfo, IOptions
+public interface IExtensionOptions : IExtensionInfo, IOptionsNotifier
 {
     /// <summary>
-    /// 目录选项。
+    /// 目录集合。
     /// </summary>
-    DirectoryOptions Directories { get; }
-
-    /// <summary>
-    /// 替换服务字典集合。
-    /// </summary>
-    IDictionary<Type, Type> ReplacedServices { get; }
-
-    /// <summary>
-    /// 服务特征集合。
-    /// </summary>
-    ServiceCharacteristicCollection ServiceCharacteristics { get; }
-
-    /// <summary>
-    /// 父级选项。
-    /// </summary>
-    IExtensionOptions? ParentOptions { get; }
+    IRegisterableDirectories Directories { get; }
 }

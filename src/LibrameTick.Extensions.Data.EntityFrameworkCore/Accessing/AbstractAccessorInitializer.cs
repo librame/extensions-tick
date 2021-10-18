@@ -130,10 +130,10 @@ public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitiali
         Func<TAccessor, DbSet<TEntity>> dbSetFunc)
         where TEntity : class
     {
-        var dbSet = dbSetFunc.Invoke(Accessor);
+        var dbSet = dbSetFunc(Accessor);
         if (!dbSet.LocalOrDbAny())
         {
-            dbSet.AddRange(initialFunc.Invoke());
+            dbSet.AddRange(initialFunc());
 
             if (!IsPopulated)
                 IsPopulated = true;
@@ -151,10 +151,10 @@ public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitiali
         Func<TAccessor, DbSet<TEntity>> dbSetFunc, CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var dbSet = dbSetFunc.Invoke(Accessor);
+        var dbSet = dbSetFunc(Accessor);
         if (!await dbSet.LocalOrDbAnyAsync(cancellationToken: cancellationToken))
         {
-            var initial = await initialFunc.Invoke(cancellationToken);
+            var initial = await initialFunc(cancellationToken);
             await dbSet.AddRangeAsync(initial, cancellationToken);
 
             if (!IsPopulated)

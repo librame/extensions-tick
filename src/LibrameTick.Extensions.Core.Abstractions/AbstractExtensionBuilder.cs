@@ -13,6 +13,42 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
+/// 定义抽象实现 <see cref="IExtensionBuilder"/> 并自动注册当前扩展构建器实例。
+/// </summary>
+/// <typeparam name="TBuilder">指定的扩展构建器类型。</typeparam>
+public abstract class AbstractExtensionBuilder<TBuilder> : AbstractExtensionBuilder
+    where TBuilder : IExtensionBuilder
+{
+    /// <summary>
+    /// 构造一个父级 <see cref="AbstractExtensionBuilder{TBuilder}"/>。
+    /// </summary>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="services"/> 为空。
+    /// </exception>
+    /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
+    protected AbstractExtensionBuilder(IServiceCollection services)
+        : base(services)
+    {
+        Services.AddSingleton(typeof(TBuilder), this);
+    }
+
+    /// <summary>
+    /// 构造一个子级 <see cref="AbstractExtensionBuilder{TBuilder}"/>。
+    /// </summary>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="parentBuilder"/> 为空。
+    /// </exception>
+    /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
+    protected AbstractExtensionBuilder(IExtensionBuilder parentBuilder)
+        : base(parentBuilder)
+    {
+        Services.AddSingleton(typeof(TBuilder), this);
+    }
+
+}
+
+
+/// <summary>
 /// 定义抽象实现 <see cref="IExtensionBuilder"/>。
 /// </summary>
 public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensionBuilder
@@ -21,33 +57,46 @@ public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensi
     /// 构造一个父级 <see cref="AbstractExtensionBuilder"/>。
     /// </summary>
     /// <exception cref="ArgumentNullException">
-    /// <paramref name="services"/> 或 <paramref name="options"/> 为空。
+    /// <paramref name="services"/> 为空。
     /// </exception>
     /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
-    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-    protected AbstractExtensionBuilder(IServiceCollection services, IExtensionOptions options)
-        : base(parentInfo: null)
+    protected AbstractExtensionBuilder(IServiceCollection services)
     {
         Services = services;
-        Options = options;
+        ServiceCharacteristics = new ServiceCharacteristicCollection();
+        ReplacedServices = new Dictionary<Type, Type>();
     }
 
     /// <summary>
     /// 构造一个子级 <see cref="AbstractExtensionBuilder"/>。
     /// </summary>
     /// <exception cref="ArgumentNullException">
-    /// <paramref name="parentBuilder"/> 或 <paramref name="options"/> 为空。
+    /// <paramref name="parentBuilder"/> 为空。
     /// </exception>
     /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
-    protected AbstractExtensionBuilder(IExtensionBuilder parentBuilder, IExtensionOptions options)
-        : base(parentBuilder)
+    protected AbstractExtensionBuilder(IExtensionBuilder parentBuilder)
     {
         ParentBuilder = parentBuilder;
         Services = parentBuilder.Services;
-        Options = options;
+        ServiceCharacteristics = new ServiceCharacteristicCollection();
+        ReplacedServices = new Dictionary<Type, Type>();
     }
 
+
+    /// <summary>
+    /// 父级构建器。
+    /// </summary>
+    public IExtensionBuilder? ParentBuilder { get; init; }
+
+    /// <summary>
+    /// 扩展选项类型。
+    /// </summary>
+    public abstract Type ExtensionOptionsType { get; }
+
+    /// <summary>
+    /// 替换服务字典集合。
+    /// </summary>
+    public IDictionary<Type, Type> ReplacedServices { get; init; }
 
     /// <summary>
     /// 服务集合。
@@ -55,366 +104,23 @@ public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensi
     public IServiceCollection Services { get; init; }
 
     /// <summary>
-    /// 扩展选项。
+    /// 服务特征集合。
     /// </summary>
-    public IExtensionOptions Options { get; init; }
-
-    /// <summary>
-    /// 父级构建器。
-    /// </summary>
-    public IExtensionBuilder? ParentBuilder { get; init; }
-
-
-    #region TryAddOrReplaceService
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>()
-        where TService : class
-        => TryAddOrReplaceService<TService>(out _);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>(out ServiceDescriptor descriptor)
-        where TService : class
-    {
-        var serviceType = typeof(TService);
-        return TryAddOrReplaceService(serviceType, serviceType, out descriptor);
-    }
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <typeparam name="TImplementation">指定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService, TImplementation>()
-        where TService : class
-        where TImplementation : class, TService
-        => TryAddOrReplaceService<TService, TImplementation>(out _);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <typeparam name="TImplementation">指定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</typeparam>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService, TImplementation>(out ServiceDescriptor descriptor)
-        where TService : class
-        where TImplementation : class, TService
-        => TryAddOrReplaceService(typeof(TService), typeof(TImplementation), out descriptor);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>(Type implementationType)
-        where TService : class
-        => TryAddOrReplaceService<TService>(implementationType, out _);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>(Type implementationType,
-        out ServiceDescriptor descriptor)
-        where TService : class
-        => TryAddOrReplaceService(typeof(TService), implementationType, out descriptor);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService(Type serviceType, Type implementationType)
-        => TryAddOrReplaceService(serviceType, implementationType, out _);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务（支持扩展选项的替换服务字典集合）。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="implementationType">给定的实现类型（如果扩展选项的替换服务字典集合中存在此服务实现类型，则优先使用扩展选项中的服务实现类型）。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService(Type serviceType, Type implementationType,
-        out ServiceDescriptor descriptor)
-    {
-        if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-            characteristic = ServiceCharacteristic.Singleton(serviceType);
-
-        if (Options.ReplacedServices.TryGetValue(serviceType, out var replacedType))
-            implementationType = replacedType;
-
-        descriptor = ServiceDescriptor.Describe(serviceType, implementationType, characteristic.Lifetime);
-        Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
-
-        if (characteristic.AddImplementationType && descriptor.ImplementationType is not null)
-        {
-            Services.Add(new ServiceDescriptor(descriptor.ImplementationType,
-                sp => sp.GetRequiredService(serviceType), descriptor.Lifetime));
-        }
-
-        return this;
-    }
+    public ServiceCharacteristicCollection ServiceCharacteristics { get; init; }
 
 
     /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
+    /// 将扩展选项保存为 JSON 文件。
     /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="factory">给定的服务方法。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>(
-        Func<IServiceProvider, TService> factory)
-        where TService : class
-        => TryAddOrReplaceService(factory, out _);
+    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
+    /// <returns>返回保存路径。</returns>
+    public abstract string SaveOptionsAsJson(IServiceProvider services);
 
     /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
+    /// 将扩展选项保存为 JSON 文件。
     /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="factory">给定的服务方法。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>(
-        Func<IServiceProvider, TService> factory, out ServiceDescriptor descriptor)
-        where TService : class
-        => TryAddOrReplaceService(typeof(TService), factory, out descriptor);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="factory">给定的服务方法。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService(Type serviceType,
-        Func<IServiceProvider, object> factory)
-        => TryAddOrReplaceService(serviceType, factory, out _);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="factory">给定的服务方法。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService(Type serviceType,
-        Func<IServiceProvider, object> factory, out ServiceDescriptor descriptor)
-    {
-        if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-            characteristic = ServiceCharacteristic.Singleton(serviceType);
-
-        descriptor = ServiceDescriptor.Singleton(serviceType, factory);
-        Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
-
-        if (characteristic.AddImplementationType && descriptor.ImplementationType is not null)
-        {
-            Services.Add(new ServiceDescriptor(descriptor.ImplementationType,
-                sp => sp.GetRequiredService(serviceType), descriptor.Lifetime));
-        }
-
-        return this;
-    }
-
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="instance">给定的服务实例。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>(TService instance)
-        where TService : class
-        => TryAddOrReplaceService(instance, out _);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="instance">给定的服务实例。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService<TService>(TService instance,
-        out ServiceDescriptor descriptor)
-        where TService : class
-        => TryAddOrReplaceService(typeof(TService), instance, out descriptor);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="instance">给定的服务实例。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService(Type serviceType, object instance)
-        => TryAddOrReplaceService(serviceType, instance, out _);
-
-    /// <summary>
-    /// 尝试通过服务特征实现添加或替换服务。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="instance">给定的服务实例。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
-    public virtual IExtensionBuilder TryAddOrReplaceService(Type serviceType, object instance,
-        out ServiceDescriptor descriptor)
-    {
-        // 虽然对象服务实例都是单例，但此处需要使用服务特征的是否替换功能
-        if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-            characteristic = ServiceCharacteristic.Singleton(serviceType);
-
-        descriptor = ServiceDescriptor.Singleton(serviceType, instance);
-        Services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
-
-        if (characteristic.AddImplementationType && descriptor.ImplementationType is not null)
-        {
-            Services.Add(new ServiceDescriptor(descriptor.ImplementationType,
-                sp => sp.GetRequiredService(serviceType), descriptor.Lifetime));
-        }
-
-        return this;
-    }
-
-    #endregion
-
-
-    #region TryAddEnumerableServices
-
-    /// <summary>
-    /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices<TService, TImplementation>()
-        where TService : class
-        where TImplementation : TService
-        => TryAddEnumerableServices<TService, TImplementation>(out _);
-
-    /// <summary>
-    /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <typeparam name="TImplementation">指定的实现类型。</typeparam>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices<TService, TImplementation>(out ServiceDescriptor descriptor)
-        where TService : class
-        where TImplementation : TService
-        => TryAddEnumerableServices(typeof(TService), typeof(TImplementation), out descriptor);
-
-    /// <summary>
-    /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="implementationType">给定的实现类型。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices<TService>(Type implementationType)
-        where TService : class
-        => TryAddEnumerableServices<TService>(implementationType, out _);
-
-    /// <summary>
-    /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="implementationType">给定的实现类型。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices<TService>(Type implementationType,
-        out ServiceDescriptor descriptor)
-        where TService : class
-        => TryAddEnumerableServices(typeof(TService), implementationType, out descriptor);
-
-    /// <summary>
-    /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="implementationType">给定的实现类型。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices(Type serviceType, Type implementationType)
-        => TryAddEnumerableServices(serviceType, implementationType, out _);
-
-    /// <summary>
-    /// 尝试通过特征尝试将单个服务添加为可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="implementationType">给定的实现类型。</param>
-    /// <param name="descriptor">输出 <see cref="ServiceDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices(Type serviceType, Type implementationType,
-        out ServiceDescriptor descriptor)
-    {
-        if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-            characteristic = ServiceCharacteristic.Singleton(serviceType);
-
-        Services.TryAddEnumerableByCharacteristic(characteristic, implementationType, out descriptor);
-
-        return this;
-    }
-
-
-    /// <summary>
-    /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="implementationTypes">给定的实现类型集合。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices<TService>(IEnumerable<Type> implementationTypes)
-        where TService : class
-        => TryAddEnumerableServices<TService>(implementationTypes, out _);
-
-    /// <summary>
-    /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
-    /// </summary>
-    /// <typeparam name="TService">指定的服务类型。</typeparam>
-    /// <param name="implementationTypes">给定的实现类型集合。</param>
-    /// <param name="descriptors">输出 <see cref="IEnumerable{ServiceDescriptor}"/>。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices<TService>(IEnumerable<Type> implementationTypes,
-        out IEnumerable<ServiceDescriptor> descriptors)
-        where TService : class
-        => TryAddEnumerableServices(typeof(TService), implementationTypes, out descriptors);
-
-    /// <summary>
-    /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="implementationTypes">给定的实现类型集合。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices(Type serviceType, IEnumerable<Type> implementationTypes)
-        => TryAddEnumerableServices(serviceType, implementationTypes, out _);
-
-    /// <summary>
-    /// 尝试通过特征尝试添加可枚举服务集合（默认会忽略已注册的服务类型与实现类型）。如果特征不存在此服务类型，则默认使用单例注册服务。
-    /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
-    /// <param name="implementationTypes">给定的实现类型集合。</param>
-    /// <param name="descriptors">输出 <see cref="IEnumerable{ServiceDescriptor}"/>。</param>
-    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
-    public IExtensionBuilder TryAddEnumerableServices(Type serviceType, IEnumerable<Type> implementationTypes,
-        out IEnumerable<ServiceDescriptor> descriptors)
-    {
-        if (!Options.ServiceCharacteristics.TryGetValue(serviceType, out var characteristic))
-            characteristic = ServiceCharacteristic.Singleton(serviceType);
-
-        Services.TryAddEnumerableByCharacteristic(characteristic, implementationTypes, out descriptors);
-
-        return this;
-    }
-
-    #endregion
-
+    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
+    /// <param name="options">输出 <see cref="IExtensionOptions"/>。</param>
+    /// <returns>返回保存路径。</returns>
+    public abstract string SaveOptionsAsJson(IServiceProvider services, out IExtensionOptions options);
 }

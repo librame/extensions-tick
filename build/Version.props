@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <FileVersion>6.0.1.328</FileVersion>
-    <Version>6.0.1-rc.1.328.2</Version>
+    <FileVersion>6.0.1.336</FileVersion>
+    <Version>6.0.1-rc.2.336.1</Version>
   </PropertyGroup>
 </Project>

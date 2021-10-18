@@ -143,7 +143,7 @@ public static class PublicationExtensions
     {
         publisher.SetCreatedBy(newPublishedByFactory);
 
-        return publisher.PublishedBy = newPublishedByFactory.Invoke(publisher.PublishedBy);
+        return publisher.PublishedBy = newPublishedByFactory(publisher.PublishedBy);
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ public static class PublicationExtensions
     {
         await publisher.SetCreatedByAsync(newPublishedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
 
-        return publisher.PublishedBy = newPublishedByFactory.Invoke(publisher.PublishedBy);
+        return publisher.PublishedBy = newPublishedByFactory(publisher.PublishedBy);
     }
 
     #endregion
@@ -181,7 +181,7 @@ public static class PublicationExtensions
     {
         publicationTime.SetCreatedTime(newPublishedTimeFactory);
 
-        return publicationTime.PublishedTime = newPublishedTimeFactory.Invoke(publicationTime.PublishedTime);
+        return publicationTime.PublishedTime = newPublishedTimeFactory(publicationTime.PublishedTime);
     }
 
     /// <summary>
@@ -198,7 +198,7 @@ public static class PublicationExtensions
     {
         await publicationTime.SetCreatedTimeAsync(newPublishedTimeFactory, cancellationToken).ConfigureAwaitWithoutContext();
 
-        return publicationTime.PublishedTime = newPublishedTimeFactory.Invoke(publicationTime.PublishedTime);
+        return publicationTime.PublishedTime = newPublishedTimeFactory(publicationTime.PublishedTime);
     }
 
     #endregion
@@ -219,7 +219,7 @@ public static class PublicationExtensions
 
         var currentPublishedBy = publisher.GetObjectCreatedBy();
 
-        return publisher.SetObjectPublishedBy(newPublishedByFactory.Invoke(currentPublishedBy));
+        return publisher.SetObjectPublishedBy(newPublishedByFactory(currentPublishedBy));
     }
 
     /// <summary>
@@ -237,7 +237,7 @@ public static class PublicationExtensions
         var currentPublishedBy = await publisher.GetObjectPublishedByAsync(cancellationToken)
             .ConfigureAwaitWithoutContext();
 
-        return await publisher.SetObjectPublishedByAsync(newPublishedByFactory.Invoke(currentPublishedBy), cancellationToken)
+        return await publisher.SetObjectPublishedByAsync(newPublishedByFactory(currentPublishedBy), cancellationToken)
             .ConfigureAwaitWithoutContext();
     }
 
@@ -258,7 +258,7 @@ public static class PublicationExtensions
         publicationTime.SetObjectCreatedTime(newPublishedTimeFactory);
 
         var currentPublishedTime = publicationTime.GetObjectPublishedTime();
-        return publicationTime.SetObjectPublishedTime(newPublishedTimeFactory.Invoke(currentPublishedTime));
+        return publicationTime.SetObjectPublishedTime(newPublishedTimeFactory(currentPublishedTime));
     }
 
     /// <summary>
@@ -276,7 +276,7 @@ public static class PublicationExtensions
         var currentPublishedTime = await publicationTime.GetObjectPublishedTimeAsync(cancellationToken)
             .ConfigureAwaitWithoutContext();
 
-        return await publicationTime.SetObjectPublishedTimeAsync(newPublishedTimeFactory.Invoke(currentPublishedTime), cancellationToken)
+        return await publicationTime.SetObjectPublishedTimeAsync(newPublishedTimeFactory(currentPublishedTime), cancellationToken)
             .ConfigureAwaitWithoutContext();
     }
 

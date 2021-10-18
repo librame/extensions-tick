@@ -20,11 +20,11 @@ class InternalFileTransmission : IFileTransmission
 
 
     public InternalFileTransmission(IFilePermission permission,
-        IHttpClientFactory factory, CoreExtensionOptions options)
+        IHttpClientFactory factory, IOptionsMonitor<CoreExtensionOptions> options)
     {
         _permission = permission;
         _factory = factory;
-        _options = options;
+        _options = options.CurrentValue;
 
         Encoding = _options.Algorithm.Encoding;
         BufferSize = _options.WebRequest.BufferSize;
@@ -98,7 +98,7 @@ class InternalFileTransmission : IFileTransmission
                         if (beginSecond != endSecond)
                             processingSpeed = processingSpeed / (endSecond - beginSecond);
 
-                        ProgressAction.Invoke(new StorageProgressDescriptor
+                        ProgressAction(new StorageProgressDescriptor
                         {
                             ContentLength = contentLength.Value,
                             StartPosition = startPosition,

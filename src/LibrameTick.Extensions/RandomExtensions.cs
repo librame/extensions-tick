@@ -83,7 +83,7 @@ public static class RandomExtensions
     /// </summary>
     /// <param name="action">给定的动作。</param>
     public static void Run(this Action<Random> action)
-        => action.Invoke(Random.Shared);
+        => action(Random.Shared);
 
     /// <summary>
     /// 运行伪随机数生成器，并返回值。
@@ -92,6 +92,6 @@ public static class RandomExtensions
     /// <param name="func">给定的值方法。</param>
     /// <returns>返回 <typeparamref name="TValue"/>。</returns>
     public static TValue Run<TValue>(this Func<Random, TValue> func)
-        => func.Invoke(Random.Shared);
+        => func(Random.Shared);
 
 }

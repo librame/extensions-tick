@@ -20,62 +20,42 @@ using Librame.Extensions.Data.ValueConversion;
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 数据扩展构建器。
+/// 定义实现 <see cref="IExtensionBuilder"/> 的数据扩展构建器。
 /// </summary>
-public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionOptions, DataExtensionBuilder>
+public class DataExtensionBuilder : BaseExtensionBuilder<DataExtensionBuilder, DataExtensionOptions>
 {
     /// <summary>
     /// 构造一个 <see cref="DataExtensionBuilder"/>。
     /// </summary>
     /// <exception cref="ArgumentNullException">
-    /// <paramref name="parentBuilder"/> 或 <paramref name="options"/> 为空。
+    /// <paramref name="parentBuilder"/> 为空。
     /// </exception>
     /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="options">给定的 <see cref="DataExtensionOptions"/>。</param>
-    public DataExtensionBuilder(IExtensionBuilder parentBuilder, DataExtensionOptions options)
-        : base(parentBuilder, options)
+    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
+    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
+    public DataExtensionBuilder(IExtensionBuilder parentBuilder,
+        Action<DataExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null)
+        : base(parentBuilder, setupOptions, configOptions)
     {
-        TryAddOrReplaceService<IAuditingManager, InternalAuditingManager>();
-        TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
+        ServiceCharacteristics.AddSingleton<IIdentificationGeneratorFactory>();
+        ServiceCharacteristics.AddSingleton<IAuditingManager>();
 
         // Accessing
-        TryAddOrReplaceService<IAccessorManager, InternalAccessorManager>();
-        TryAddOrReplaceService<IAccessorMigrator, InternalAccessorMigrator>();
-        TryAddOrReplaceService<IAccessorResolver, InternalAccessorResolver>();
+        ServiceCharacteristics.AddScope<IAccessorManager>();
+        ServiceCharacteristics.AddScope<IAccessorMigrator>();
+        ServiceCharacteristics.AddScope<IAccessorResolver>();
+
+        ServiceCharacteristics.AddScope<IAccessorSeeder>(addImplementationType: true);
+        ServiceCharacteristics.AddScope<IAccessorInitializer>();
 
         // Sharding
-        TryAddOrReplaceService<IShardingManager, InternalShardingManager>();
+        ServiceCharacteristics.AddSingleton<IShardingManager>();
 
         // Storing
-        TryAddOrReplaceService(typeof(IStore<>), typeof(BaseStore<>));
+        ServiceCharacteristics.AddScope(typeof(IStore<>));
 
         // ValueConversion
-        TryAddOrReplaceService<IEncryptionConverterFactory, InternalEncryptionConverterFactory>();
-    }
-
-
-    /// <summary>
-    /// 添加 <see cref="IAccessorInitializer"/>。
-    /// </summary>
-    /// <typeparam name="TInitializer">指定的初始化器类型。</typeparam>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public DataExtensionBuilder AddInitializer<TInitializer>()
-        where TInitializer : class, IAccessorInitializer
-    {
-        TryAddEnumerableServices<IAccessorInitializer, TInitializer>();
-        return this;
-    }
-
-    /// <summary>
-    /// 添加 <typeparamref name="TSeeder"/>。
-    /// </summary>
-    /// <typeparam name="TSeeder">指定的种子机类型。</typeparam>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public DataExtensionBuilder AddSeeder<TSeeder>()
-        where TSeeder : class, IAccessorSeeder
-    {
-        TryAddOrReplaceService<IAccessorSeeder, TSeeder>();
-        return this;
+        ServiceCharacteristics.AddSingleton<IEncryptionConverterFactory>();
     }
 
 }

@@ -22,38 +22,21 @@ public static class TypeExtensions
     private static readonly Type _memberGetDelegateTypeDefinition = typeof(MemberGetDelegate<>);
     private static readonly Type _nullableGenericTypeDefinition = typeof(Nullable<>);
 
-    private static readonly Type[] _commonValueTypes = new Type[]
-    {
-        typeof(int),
-        typeof(Guid),
-        typeof(DateTime),
-        typeof(DateTimeOffset),
-        typeof(DateOnly),
-        typeof(TimeOnly),
-        typeof(long),
-        typeof(bool),
-        typeof(double),
-        typeof(short),
-        typeof(float),
-        typeof(byte),
-        typeof(char),
-        typeof(uint),
-        typeof(ushort),
-        typeof(ulong),
-        typeof(sbyte)
-    };
-
 
     /// <summary>
-    /// 是常见值类型（即整数、全局唯一标识符、日期与时间、布尔、浮点等）。
+    /// 是相同类型。
     /// </summary>
-    /// <param name="type">给定的类型。</param>
+    /// <remarks>
+    /// 说明：默认的 == 比较符以及 Equals 比较方法是比较引用实例是否相同，会出现相同类型不同引用实例不相等的情况，所以在此直接使用类型的程序集引用名称字符串是否相等来确定是否为相同类型。
+    /// </remarks>
+    /// <param name="currentType">给定的当前类型。</param>
+    /// <param name="compareType">给定的比较类型。</param>
     /// <returns>返回布尔值。</returns>
-    public static bool IsCommonValueType(this Type type)
-        => _commonValueTypes.Any(t => t == type);
+    public static bool SameType(this Type currentType, Type compareType)
+        => currentType.AssemblyQualifiedName == compareType.AssemblyQualifiedName;
 
     /// <summary>
-    /// 是具体类型（即非抽象、接口类型）。
+    /// 是具实类型（即非抽象、非接口、可实例化的类型）。
     /// </summary>
     /// <param name="type">给定的类型。</param>
     /// <returns>返回布尔值。</returns>
@@ -74,7 +57,7 @@ public static class TypeExtensions
     /// <param name="type">给定的类型。</param>
     /// <returns>返回布尔值。</returns>
     public static bool IsStringType(this Type type)
-        => type == typeof(string);
+        => type.SameType(typeof(string));
 
 
     /// <summary>
@@ -114,19 +97,50 @@ public static class TypeExtensions
     /// <summary>
     /// 获取基础类型集合。
     /// </summary>
-    /// <param name="type">给定的类型。</param>
+    /// <param name="currentType">给定的当前类型。</param>
+    /// <param name="containsCurrentType">是否包含当前类型（可选；默认不包含当前类型）。</param>
     /// <returns>返回 <see cref="IEnumerable{Type}"/>。</returns>
-    public static IEnumerable<Type> GetBaseTypes([NotNullWhen(true)] this Type? type)
+    public static IEnumerable<Type> GetBaseTypes([NotNullWhen(true)] this Type? currentType,
+        bool containsCurrentType = false)
     {
+        if (containsCurrentType && currentType is not null)
+            yield return currentType;
+
         // 当前基类（Object 为最顶层基类，接口会直接返回 NULL）
-        type = type?.BaseType;
+        currentType = currentType?.BaseType;
 
-        while (type is not null)
+        while (currentType is not null)
         {
-            yield return type;
+            yield return currentType;
 
-            type = type.BaseType;
+            currentType = currentType.BaseType;
         }
+    }
+
+    /// <summary>
+    /// 检测基础类型是否包含指定的类型。
+    /// </summary>
+    /// <param name="currentType">给定的当前类型。</param>
+    /// <param name="compareType">给定的比较类型。</param>
+    /// <param name="compareCurrentType">是否比较当前类型（可选；默认不比较当前类型）。</param>
+    /// <returns>返回是否包含的布尔值。</returns>
+    public static bool HasBaseType(this Type? currentType, Type compareType,
+        bool compareCurrentType = false)
+    {
+        if (compareCurrentType && currentType is not null && compareType.SameType(currentType))
+            return true;
+        
+        currentType = currentType?.BaseType;
+
+        while (currentType is not null)
+        {
+            if (currentType.SameType(compareType))
+                return true;
+
+            currentType = currentType.BaseType;
+        }
+
+        return false;
     }
 
 
@@ -147,44 +161,14 @@ public static class TypeExtensions
         var getMemberDelegate = (MemberGetDelegate<TSource>)Delegate
             .CreateDelegate(_memberGetDelegateTypeDefinition.MakeGenericType(typeof(TSource)), method);
             
-        return getMemberDelegate.Invoke(source);
-    }
-
-
-    /// <summary>
-    /// 尝试获取特性。
-    /// </summary>
-    /// <typeparam name="TAttribute">指定的特性类型。</typeparam>
-    /// <param name="sourceType">给定的源类型。</param>
-    /// <param name="attribute">输出取得的特性。</param>
-    /// <returns>返回布尔值。</returns>
-    public static bool TryGetAttribute<TAttribute>(this Type sourceType,
-        [MaybeNullWhen(false)] out TAttribute attribute)
-        where TAttribute : Attribute
-    {
-        attribute = sourceType.GetCustomAttribute<TAttribute>();
-        return attribute is not null;
-    }
-
-    /// <summary>
-    /// 尝试获取特性。
-    /// </summary>
-    /// <param name="sourceType">给定的源类型。</param>
-    /// <param name="attributeType">给定要取得的特性类型。</param>
-    /// <param name="attribute">输出取得的特性。</param>
-    /// <returns>返回布尔值。</returns>
-    public static bool TryGetAttribute(this Type sourceType, Type attributeType,
-        [MaybeNullWhen(false)] out Attribute attribute)
-    {
-        attribute = sourceType.GetCustomAttribute(attributeType);
-        return attribute is not null;
+        return getMemberDelegate(source);
     }
 
 
     #region IsAssignableType
 
     /// <summary>
-    /// 是否可以从目标类型分配。
+    /// 是否可以从目标类型分配（支持基础类型、接口、泛型类型定义等）。
     /// </summary>
     /// <remarks>
     /// 详情参考 <see cref="Type.IsAssignableFrom(Type)"/>。
@@ -196,7 +180,7 @@ public static class TypeExtensions
         => baseType.IsAssignableFromTargetType(typeof(TTarget));
 
     /// <summary>
-    /// 是否可以从目标类型分配。
+    /// 是否可以从目标类型分配（支持基础类型、接口、泛型类型定义等）。
     /// </summary>
     /// <remarks>
     /// 详情参考 <see cref="Type.IsAssignableFrom(Type)"/>。
@@ -205,16 +189,11 @@ public static class TypeExtensions
     /// <param name="targetType">给定的目标类型。</param>
     /// <returns>返回布尔值。</returns>
     public static bool IsAssignableFromTargetType(this Type baseType, Type targetType)
-    {
-        // 对泛型类型定义提供支持
-        return baseType.IsGenericTypeDefinition
-            ? targetType.IsImplementedType(baseType)
-            : baseType.IsAssignableFrom(targetType);
-    }
+        => targetType.IsImplementedType(baseType);
 
 
     /// <summary>
-    /// 是否可以分配给基础类型。
+    /// 是否可以分配给基础类型（支持基础类型、接口、泛型类型定义等）。
     /// </summary>
     /// <remarks>
     /// 与 <see cref="IsAssignableFromTargetType(Type, Type)"/> 参数相反。
@@ -226,7 +205,7 @@ public static class TypeExtensions
         => targetType.IsAssignableToBaseType(typeof(TBase));
 
     /// <summary>
-    /// 是否可以分配给基础类型。
+    /// 是否可以分配给基础类型（支持基础类型、接口、泛型类型定义等）。
     /// </summary>
     /// <remarks>
     /// 与 <see cref="IsAssignableFromTargetType(Type, Type)"/> 参数相反。
@@ -334,17 +313,25 @@ public static class TypeExtensions
     {
         var allImplementedTypes = implementedType.IsInterface
             ? currentType.GetInterfaces()
-            : currentType.GetBaseTypes(); // Extensions
+            : currentType.GetBaseTypes(containsCurrentType: true).ToArray();
 
-        // 如果已实现类型是泛型定义
+        // 如果已实现类型是泛型定义则比较类型定义
         if (implementedType.IsGenericTypeDefinition)
         {
             resultType = allImplementedTypes.Where(type => type.IsGenericType)
                 .FirstOrDefault(type => type.GetGenericTypeDefinition() == implementedType);
         }
+        // 如果是接口类型则直接比较
+        else if (implementedType.IsInterface)
+        {
+            resultType = allImplementedTypes.FirstOrDefault(type
+                => type.SameType(implementedType));
+        }
         else
         {
-            resultType = allImplementedTypes.FirstOrDefault(type => type == implementedType);
+            // 如果包含基类则比较基础类型
+            resultType = allImplementedTypes.FirstOrDefault(type
+                => type.HasBaseType(implementedType, compareCurrentType: true));
         }
 
         return resultType is not null;
