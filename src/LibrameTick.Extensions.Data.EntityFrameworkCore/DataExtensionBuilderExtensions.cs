@@ -51,12 +51,7 @@ public static class DataExtensionBuilderExtensions
     }
 
 
-    /// <summary>
-    /// 注册访问模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public static DataExtensionBuilder AddAccessing(this DataExtensionBuilder builder)
+    private static DataExtensionBuilder AddAccessing(this DataExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IAccessorManager, InternalAccessorManager>();
         builder.TryAddOrReplaceService<IAccessorMigrator, InternalAccessorMigrator>();
@@ -65,60 +60,35 @@ public static class DataExtensionBuilderExtensions
         return builder;
     }
 
-    /// <summary>
-    /// 注册审计模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public static DataExtensionBuilder AddAuditing(this DataExtensionBuilder builder)
+    private static DataExtensionBuilder AddAuditing(this DataExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IAuditingManager, InternalAuditingManager>();
 
         return builder;
     }
 
-    /// <summary>
-    /// 注册标识模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public static DataExtensionBuilder AddIdentification(this DataExtensionBuilder builder)
+    private static DataExtensionBuilder AddIdentification(this DataExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
 
         return builder;
     }
 
-    /// <summary>
-    /// 注册分片模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public static DataExtensionBuilder AddSharding(this DataExtensionBuilder builder)
+    private static DataExtensionBuilder AddSharding(this DataExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IShardingManager, InternalShardingManager>();
 
         return builder;
     }
 
-    /// <summary>
-    /// 注册商店模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public static DataExtensionBuilder AddStoring(this DataExtensionBuilder builder)
+    private static DataExtensionBuilder AddStoring(this DataExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService(typeof(IStore<>), typeof(BaseStore<>));
 
         return builder;
     }
 
-    /// <summary>
-    /// 注册值转换模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public static DataExtensionBuilder AddValueConversion(this DataExtensionBuilder builder)
+    private static DataExtensionBuilder AddValueConversion(this DataExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IEncryptionConverterFactory, InternalEncryptionConverterFactory>();
 

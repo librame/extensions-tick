@@ -46,12 +46,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
     }
 
 
-    /// <summary>
-    /// 注册基础模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="CoreExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
-    public static CoreExtensionBuilder AddBase(this CoreExtensionBuilder builder)
+    private static CoreExtensionBuilder AddBase(this CoreExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService(typeof(ICloneable<>), typeof(BaseCloneable<>));
         builder.TryAddOrReplaceService(typeof(IDecoratable<>), typeof(BaseDecoratable<>));
@@ -59,12 +54,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         return builder;
     }
 
-    /// <summary>
-    /// 注册密码学模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="CoreExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
-    public static CoreExtensionBuilder AddCryptography(this CoreExtensionBuilder builder)
+    private static CoreExtensionBuilder AddCryptography(this CoreExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IAlgorithmParameterGenerator, InternalAlgorithmParameterGenerator>();
         builder.TryAddOrReplaceService<IAsymmetricAlgorithm, InternalAsymmetricAlgorithm>();
@@ -73,12 +63,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         return builder;
     }
 
-    /// <summary>
-    /// 注册存储模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="CoreExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
-    public static CoreExtensionBuilder AddStorage(this CoreExtensionBuilder builder)
+    private static CoreExtensionBuilder AddStorage(this CoreExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IFileManager, InternalFileManager>();
         builder.TryAddOrReplaceService<IFilePermission, InternalFilePermission>();

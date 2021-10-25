@@ -47,12 +47,7 @@ public static class DrawingExtensionBuilderExtensions
     }
 
 
-    /// <summary>
-    /// 注册绘制器模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DrawingExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DrawingExtensionBuilder"/>。</returns>
-    public static DrawingExtensionBuilder AddDrawers(this DrawingExtensionBuilder builder)
+    private static DrawingExtensionBuilder AddDrawers(this DrawingExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<ISavingDrawer, InternalSavingDrawer>();
         builder.TryAddOrReplaceService<IScalingDrawer, InternalScaleDrawer>();
@@ -61,12 +56,7 @@ public static class DrawingExtensionBuilderExtensions
         return builder;
     }
 
-    /// <summary>
-    /// 注册验证模块。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DrawingExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="DrawingExtensionBuilder"/>。</returns>
-    public static DrawingExtensionBuilder AddVerification(this DrawingExtensionBuilder builder)
+    private static DrawingExtensionBuilder AddVerification(this DrawingExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<ICaptchaGenerator, InternalCaptchaGenerator>();
 

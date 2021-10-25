@@ -18,6 +18,32 @@ namespace Librame.Extensions.Core;
 public static class AssemblyLoader
 {
     /// <summary>
+    /// 通过程序集集合加载实现指定特性类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合（如果存在多个过滤器，将取每个过滤器结果的交集）。
+    /// </summary>
+    /// <param name="attributeType">给定的特性类型。</param>
+    /// <param name="options">给定的 <see cref="AssemblyLoadingOptions"/>。</param>
+    /// <returns>返回 <see cref="Type"/> 数组。</returns>
+    public static Type[]? LoadConcreteTypesByAttribute(Type attributeType, AssemblyLoadingOptions options)
+    {
+        var assemblies = LoadAssemblies(options);
+        if (assemblies is null)
+            return null;
+
+        return LoadConcreteTypesByAttribute(attributeType, assemblies);
+    }
+
+    /// <summary>
+    /// 通过程序集集合加载实现指定特性类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合。
+    /// </summary>
+    /// <param name="attributeType">给定的特性类型。</param>
+    /// <param name="assemblies">给定的 <see cref="Assembly"/> 数组。</param>
+    /// <returns>返回 <see cref="Type"/> 数组。</returns>
+    public static Type[]? LoadConcreteTypesByAttribute(Type attributeType, Assembly[] assemblies)
+        => assemblies.Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(s => s.ExportedTypes)
+            .Where(p => p.IsDefined(attributeType) && p.IsConcreteType()).ToArray();
+
+    /// <summary>
     /// 通过程序集集合加载指定基础类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合（如果存在多个过滤器，将取每个过滤器结果的交集）。
     /// </summary>
     /// <param name="baseType">给定的基础类型。</param>

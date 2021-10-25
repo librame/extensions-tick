@@ -73,7 +73,8 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// <param name="other">给定的 <see cref="TypeNamedKey"/>。</param>
     /// <returns>返回布尔值。</returns>
     public bool Equals(TypeNamedKey? other)
-        => other is not null && SourceType.Equals(other.SourceType) && SourceAliase == other.SourceAliase;
+        => other is not null && SourceType.SameType(other.SourceType)
+            && SourceAliase == other.SourceAliase;
 
 
     /// <summary>
