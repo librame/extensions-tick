@@ -14,10 +14,10 @@ namespace Librame.Extensions.Core
         {
             if (_builder is null)
             {
-                var fileProvider = new PhysicalStorageFileProvider(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath);
+                var fileProvider = new PhysicalStorableFileProvider(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath);
 
                 var services = new ServiceCollection();
-                _builder = services.AddLibrameCore(opts => opts.WebRequest.FileProviders.Add(fileProvider));
+                _builder = services.AddLibrameCore(opts => opts.WebFile.FileProviders.Add(fileProvider));
             }
 
             if (_services is null)

@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Serialization;
+using Librame.Extensions.JsonConverters;
 
 namespace Librame.Extensions.Core.Cryptography;
 

@@ -163,226 +163,23 @@ public static class PathExtensions
     #endregion
 
 
-    #region BinaryFileRead & BinaryFileWrite
+    #region BinaryFile
 
     /// <summary>
-    /// 二进制文件读取（此方法的类型仅支持包含常见的值类型和字符串类型成员）。
-    /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="path">给定的文件路径。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
-    /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
-    /// <returns>返回 <typeparamref name="T"/>。</returns>
-    public static T BinaryFileRead<T>(this string path, Encoding? encoding = null, BindingFlags? flags = null)
-        => (T)path.BinaryFileRead(typeof(T), encoding, flags);
-
-    /// <summary>
-    /// 二进制文件读取（此方法的对象仅支持包含常见的值类型和字符串类型成员）。
-    /// </summary>
-    /// <param name="path">给定的文件路径。</param>
-    /// <param name="objType">给定要读取的对象类型。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
-    /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
-    /// <returns>返回对象。</returns>
-    public static object BinaryFileRead(this string path, Type objType, Encoding? encoding = null, BindingFlags? flags = null)
-    {
-        var obj = objType.NewByExpression();
-
-        var fields = flags is null ? objType.GetAllFieldsAndPropertiesWithStatic() : objType.GetFields(flags.Value);
-
-        using (var input = File.Open(path, FileMode.Open))
-        using (var reader = new BinaryReader(input, encoding ?? EncodingExtensions.UTF8Encoding))
-        {
-            foreach (var field in fields)
-            {
-                field.SetValue(obj, ReadValue(reader, field.FieldType));
-            }
-        }
-
-        return obj;
-
-        object ReadValue(BinaryReader reader, Type type)
-        {
-            switch (type.FullName)
-            {
-                case "System.Boolean":
-                    return reader.ReadBoolean();
-
-                case "System.Byte":
-                    return reader.ReadByte();
-
-                //case "System.Byte[]":
-                //    return reader.ReadBytes(?);
-
-                case "System.Char":
-                    return reader.ReadChar();
-
-                //case "System.Char[]":
-                //    return reader.ReadChars(?);
-
-                case "System.Decimal":
-                    return reader.ReadDecimal();
-
-                case "System.Double":
-                    return reader.ReadDouble();
-
-                case "System.Half":
-                    return reader.ReadHalf();
-
-                case "System.Int16":
-                    return reader.ReadInt16();
-
-                case "System.Int32":
-                    return reader.ReadInt32();
-
-                case "System.Int64":
-                    return reader.ReadInt64();
-
-                case "System.SByte":
-                    return reader.ReadSByte();
-
-                case "System.Single":
-                    return reader.ReadSingle();
-
-                case "System.String":
-                    return reader.ReadString();
-
-                case "System.UInt16":
-                    return reader.ReadUInt16();
-
-                case "System.UInt32":
-                    return reader.ReadUInt32();
-
-                case "System.UInt64":
-                    return reader.ReadUInt64();
-
-                default:
-                    throw new NotSupportedException($"The current type '{type}' of reading is not supported.");
-            }
-        }
-    }
-
-
-    /// <summary>
-    /// 二进制文件写入（此方法的对象仅支持包含常见的值类型和字符串类型成员）。
-    /// </summary>
-    /// <param name="path">给定的文件路径。</param>
-    /// <param name="obj">给定要写入文件的对象。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
-    /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
-    public static void BinaryFileWrite(this string path, object obj, Encoding? encoding = null, BindingFlags? flags = null)
-    {
-        var objType = obj.GetType();
-
-        var fields = flags is null ? objType.GetAllFieldsAndPropertiesWithStatic() : objType.GetFields(flags.Value);
-
-        using (var output = File.Open(path, FileMode.Create))
-        using (var writer = new BinaryWriter(output, encoding ?? EncodingExtensions.UTF8Encoding))
-        {
-            foreach (var field in fields)
-            {
-                WriteValue(writer, field.FieldType, field.GetValue(obj));
-            }
-        }
-
-        void WriteValue(BinaryWriter writer, Type type, object? value)
-        {
-            switch (type.FullName)
-            {
-                case "System.Boolean":
-                    writer.Write((bool)value!);
-                    break;
-
-                case "System.Byte":
-                    writer.Write((byte)value!);
-                    break;
-
-                //case "System.Byte[]":
-                //    writer.Write((byte[])value);
-                //    break;
-
-                case "System.Char":
-                    writer.Write((char)value!);
-                    break;
-
-                //case "System.Char[]":
-                //    writer.Write((char[])value);
-                //    break;
-
-                case "System.Decimal":
-                    writer.Write((decimal)value!);
-                    break;
-
-                case "System.Double":
-                    writer.Write((double)value!);
-                    break;
-
-                case "System.Half":
-                    writer.Write((Half)value!);
-                    break;
-
-                case "System.Int16":
-                    writer.Write((short)value!);
-                    break;
-
-                case "System.Int32":
-                    writer.Write((int)value!);
-                    break;
-
-                case "System.Int64":
-                    writer.Write((long)value!);
-                    break;
-
-                case "System.SByte":
-                    writer.Write((sbyte)value!);
-                    break;
-
-                case "System.Single":
-                    writer.Write((float)value!);
-                    break;
-
-                case "System.String":
-                    writer.Write(value?.ToString() ?? string.Empty);
-                    break;
-
-                case "System.UInt16":
-                    writer.Write((ushort)value!);
-                    break;
-
-                case "System.UInt32":
-                    writer.Write((uint)value!);
-                    break;
-
-                case "System.UInt64":
-                    writer.Write((ulong)value!);
-                    break;
-
-                default:
-                    throw new NotSupportedException($"The current type '{type}' of writing is not supported.");
-            }
-        }
-    }
-
-    #endregion
-
-
-    #region FileRead & FileWrite
-
-    /// <summary>
-    /// 文件读取。
+    /// 读取二进制文件。
     /// </summary>
     /// <param name="path">给定的文件路径。</param>
     /// <returns>返回字节数组。</returns>
-    public static byte[] FileRead(this string path)
-        => path.FileRead(0L);
+    public static byte[] ReadBinaryFile(this string path)
+        => path.ReadBinaryFile(0L);
 
     /// <summary>
-    /// 文件读取。
+    /// 读取二进制文件。
     /// </summary>
     /// <param name="path">给定的文件路径。</param>
     /// <param name="fileOffset">给定的读取偏移量。</param>
     /// <returns>返回字节数组。</returns>
-    public static byte[] FileRead(this string path, long fileOffset)
+    public static byte[] ReadBinaryFile(this string path, long fileOffset)
     {
         using (var handle = File.OpenHandle(path))
         {
@@ -395,25 +192,87 @@ public static class PathExtensions
     }
 
     /// <summary>
-    /// 文件写入。
+    /// 写入二进制文件。
     /// </summary>
     /// <param name="path">给定的文件路径。</param>
     /// <param name="buffer">给定的字节数组。</param>
-    public static void FileWrite(this string path, byte[] buffer)
-        => path.FileWrite(buffer, 0L);
+    public static void WriteBinaryFile(this string path, byte[] buffer)
+        => path.WriteBinaryFile(buffer, 0L);
 
     /// <summary>
-    /// 文件写入。
+    /// 写入二进制文件。
     /// </summary>
     /// <param name="path">给定的文件路径。</param>
     /// <param name="buffer">给定的字节数组。</param>
     /// <param name="fileOffset">给定的读取偏移量。</param>
-    public static void FileWrite(this string path, byte[] buffer, long fileOffset)
+    public static void WriteBinaryFile(this string path, byte[] buffer, long fileOffset)
     {
         using (var handle = File.OpenHandle(path, FileMode.Create, FileAccess.Write, FileShare.Read))
         {
             RandomAccess.Write(handle, buffer, fileOffset);
         }
+    }
+
+    #endregion
+
+
+    #region IniFile
+
+    [DllImport(DllImportExtensions.Kernel32DllName)]
+    private static extern int GetPrivateProfileString(string section, string key,
+        string defValue, StringBuilder retValue, int size, string filePath);
+
+    [DllImport(DllImportExtensions.Kernel32DllName)]
+    private static extern long WritePrivateProfileString(string section, string key,
+        string value, string filePath);
+
+
+    /// <summary>
+    /// 读取 INI 文件。
+    /// </summary>
+    /// <param name="filePath">给定的文件路径。</param>
+    /// <param name="section">给定要读取的节点。</param>
+    /// <param name="key">给定要读取的键。</param>
+    /// <param name="lineLength">给定的行长度（可选）。</param>
+    /// <returns>返回值字符串。</returns>
+    public static string ReadIniFile(this string filePath, string section, string key,
+        int? lineLength = null)
+    {
+        if (lineLength is null)
+            lineLength = 500;
+
+        var sb = new StringBuilder(lineLength.Value);
+        GetPrivateProfileString(section, key, string.Empty, sb, lineLength.Value, filePath);
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// 移除 INI 文件节点所有键集合。
+    /// </summary>
+    /// <param name="filePath">给定的文件路径。</param>
+    /// <param name="section">给定要读取的节点。</param>
+    public static void RemoveIniFileKeys(this string filePath, string section)
+        => filePath.WriteIniFile(section, key: string.Empty, value: string.Empty);
+
+    /// <summary>
+    /// 清空 INI 文件。
+    /// </summary>
+    /// <param name="filePath">给定的文件路径。</param>
+    public static void ClearIniFile(this string filePath)
+        => filePath.WriteIniFile(section: string.Empty, key: string.Empty, value: string.Empty);
+
+    /// <summary>
+    /// 写入 INI 文件。
+    /// </summary>
+    /// <param name="filePath">给定的文件路径。</param>
+    /// <param name="section">给定要写入的节点。</param>
+    /// <param name="key">给定要写入的键。</param>
+    /// <param name="value">给定要写入的值。</param>
+    /// <returns>返回值字符串。</returns>
+    public static string WriteIniFile(this string filePath, string section, string key, string value)
+    {
+        WritePrivateProfileString(section, key, value, filePath);
+        return value;
     }
 
     #endregion

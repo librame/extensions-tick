@@ -17,6 +17,7 @@ global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.FileProviders.Internal;
 global using Microsoft.Extensions.FileProviders.Physical;
 global using Microsoft.Extensions.Localization;
+global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.Extensions.Primitives;
 global using System;

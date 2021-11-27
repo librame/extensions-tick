@@ -88,9 +88,9 @@ public static class AccessorsExtensions
     public static void BatchingWithTransaction(this IEnumerable<IAccessor> accessors,
         Action<IAccessor> action, bool disposing = false)
     {
-        using (var transaction = new TransactionScope())
+        try
         {
-            try
+            using (var transaction = new TransactionScope())
             {
                 foreach (var accessor in accessors)
                 {
@@ -99,12 +99,12 @@ public static class AccessorsExtensions
 
                 transaction.Complete();
             }
-            catch (Exception)
-            {
-                throw;
-            }
         }
-
+        catch (Exception)
+        {
+            throw;
+        }
+        
         if (disposing)
             accessors.ForEach(a => a.Dispose());
     }
@@ -122,9 +122,9 @@ public static class AccessorsExtensions
     {
         var results = new List<TResult>();
 
-        using (var transaction = new TransactionScope())
+        try
         {
-            try
+            using (var transaction = new TransactionScope())
             {
                 foreach (var accessor in accessors)
                 {
@@ -133,10 +133,10 @@ public static class AccessorsExtensions
 
                 transaction.Complete();
             }
-            catch (Exception)
-            {
-                throw;
-            }
+        }
+        catch (Exception)
+        {
+            throw;
         }
 
         if (disposing)
@@ -158,9 +158,9 @@ public static class AccessorsExtensions
     {
         TResult? result = default;
 
-        using (var transaction = new TransactionScope())
+        try
         {
-            try
+            using (var transaction = new TransactionScope())
             {
                 var index = 0;
                 foreach (var accessor in accessors)
@@ -173,12 +173,12 @@ public static class AccessorsExtensions
 
                 transaction.Complete();
             }
-            catch (Exception)
-            {
-                throw;
-            }
         }
-
+        catch (Exception)
+        {
+            throw;
+        }
+        
         if (disposing)
             accessors.ForEach(a => a.Dispose());
 

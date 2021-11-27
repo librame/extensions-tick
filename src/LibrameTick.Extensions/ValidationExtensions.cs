@@ -13,7 +13,7 @@
 namespace Librame.Extensions;
 
 /// <summary>
-/// 验证静态扩展。
+/// 定义用于验证的静态扩展。
 /// </summary>
 public static class ValidationExtensions
 {

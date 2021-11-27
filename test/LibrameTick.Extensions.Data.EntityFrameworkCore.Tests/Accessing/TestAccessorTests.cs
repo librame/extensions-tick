@@ -19,13 +19,13 @@ namespace Librame.Extensions.Data.Accessing
 
             var services = new ServiceCollection();
 
-            //services.AddDbContext<TestMySqlAccessor>(opts =>
-            //{
-            //    opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
-            //        a => a.MigrationsAssembly(modelAssemblyName));
+            services.AddDbContext<TestMySqlAccessor>(opts =>
+            {
+                opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
+                    a => a.MigrationsAssembly(modelAssemblyName));
 
-            //    opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(1));
-            //});
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(1));
+            });
 
             services.AddDbContextPool<TestSqlServerAccessor>(opts =>
             {
@@ -53,7 +53,7 @@ namespace Librame.Extensions.Data.Accessing
                     opts.PropertyChangedAction = (o, e) => o?.SaveOptionsAsJson();
                 })
                 .AddSeeder<InternalTestAccessorSeeder>()
-                //.AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
+                .AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqlServerAccessor>>()
                 .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>();
 

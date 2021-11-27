@@ -24,7 +24,7 @@ public static class FileSystemInfoExtensions
     /// <param name="directory">给定的本地目录字符串。</param>
     /// <param name="filters">给定的 <see cref="ExclusionFilters"/>。</param>
     /// <returns>返回 <see cref="IEnumerable{IStorageFileInfo}"/>。</returns>
-    public static IEnumerable<IStorageFileInfo> EnumerateStorageFileInfos(this string directory, ExclusionFilters filters)
+    public static IEnumerable<IStorableFileInfo> EnumerateStorageFileInfos(this string directory, ExclusionFilters filters)
         => new DirectoryInfo(directory).EnumerateStorageFileInfos(filters);
 
     /// <summary>
@@ -33,21 +33,21 @@ public static class FileSystemInfoExtensions
     /// <param name="directory">给定的本地 <see cref="DirectoryInfo"/>。</param>
     /// <param name="filters">给定的 <see cref="ExclusionFilters"/>。</param>
     /// <returns>返回 <see cref="IEnumerable{IStorageFileInfo}"/>。</returns>
-    public static IEnumerable<IStorageFileInfo> EnumerateStorageFileInfos(this DirectoryInfo directory, ExclusionFilters filters)
+    public static IEnumerable<IStorableFileInfo> EnumerateStorageFileInfos(this DirectoryInfo directory, ExclusionFilters filters)
     {
         try
         {
             return directory.EnumerateFileSystemInfos()
                 .Where(info => !info.IsExcluded(filters)) // 不被排除的文件系统信息
-                .Select<FileSystemInfo, IStorageFileInfo>(info =>
+                .Select<FileSystemInfo, IStorableFileInfo>(info =>
                 {
                     if (info is FileInfo file)
                     {
-                        return new PhysicalStorageFileInfo(file);
+                        return new PhysicalStorableFileInfo(file);
                     }
                     else if (info is DirectoryInfo dir)
                     {
-                        return new PhysicalStorageDirectoryInfo(dir);
+                        return new PhysicalStorableDirectoryInfo(dir);
                     }
                     // shouldn't happen unless BCL introduces new implementation of base type
                     throw new InvalidOperationException("Unexpected type of FileSystemInfo");
@@ -55,7 +55,7 @@ public static class FileSystemInfoExtensions
         }
         catch (Exception ex) when (ex is DirectoryNotFoundException || ex is IOException)
         {
-            return Enumerable.Empty<IStorageFileInfo>();
+            return Enumerable.Empty<IStorableFileInfo>();
         }
     }
 

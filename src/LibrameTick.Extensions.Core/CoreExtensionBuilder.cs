@@ -49,8 +49,8 @@ public class CoreExtensionBuilder : BaseExtensionBuilder<CoreExtensionBuilder, C
         ServiceCharacteristics.AddSingleton<IPluginResolver>();
 
         // Storage
-        ServiceCharacteristics.AddSingleton<IFileManager>();
-        ServiceCharacteristics.AddSingleton<IFilePermission>();
-        ServiceCharacteristics.AddSingleton<IFileTransmission>();
+        ServiceCharacteristics.AddSingleton<IStorableFileManager>();
+        ServiceCharacteristics.AddSingleton<IWebFilePermission>();
+        ServiceCharacteristics.AddSingleton<IWebStorableFileTransfer>();
     }
 }

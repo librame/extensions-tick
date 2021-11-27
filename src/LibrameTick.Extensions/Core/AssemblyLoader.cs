@@ -28,7 +28,7 @@ public static class AssemblyLoader
         var assemblies = LoadAssemblies(options);
         if (assemblies is null)
             return null;
-
+        
         return LoadConcreteTypesByAttribute(attributeType, assemblies);
     }
 

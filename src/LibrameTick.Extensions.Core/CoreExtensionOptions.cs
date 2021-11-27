@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core.Cryptography;
+using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
 
 namespace Librame.Extensions.Core;
@@ -26,7 +27,8 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     public CoreExtensionOptions()
     {
         Algorithm = new(Notifier);
-        WebRequest = new(Notifier);
+        Request = new(Notifier);
+        WebFile = new(Notifier);
     }
 
 
@@ -36,9 +38,14 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     public AlgorithmOptions Algorithm { get; init; }
 
     /// <summary>
-    /// Web 请求选项。
+    /// HTTP 客户端请求选项。
     /// </summary>
-    public WebRequestOptions WebRequest { get; init; }
+    public HttpClientRequestOptions Request { get; init; }
+
+    /// <summary>
+    /// Web 文件选项。
+    /// </summary>
+    public WebFileOptions WebFile { get; init; }
 
 
     /// <summary>

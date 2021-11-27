@@ -12,6 +12,7 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Core.Cryptography;
+using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -40,7 +41,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         var builder = new CoreExtensionBuilder(services, setupOptions, configOptions);
         setupBuilder?.Invoke(builder);
 
-        builder.AddBase().AddCryptography().AddStorage();
+        builder.AddBase().AddCryptography().AddNetwork().AddStorage();
 
         return builder;
     }
@@ -63,11 +64,19 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         return builder;
     }
 
+    private static CoreExtensionBuilder AddNetwork(this CoreExtensionBuilder builder)
+    {
+        builder.TryAddOrReplaceService<IHttpClientInvokerFactory, InternalHttpClientInvokerFactory>();
+        builder.TryAddOrReplaceService<IHttpEndpointsInvoker, InternalHttpEndpointsInvoker>();
+
+        return builder;
+    }
+
     private static CoreExtensionBuilder AddStorage(this CoreExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService<IFileManager, InternalFileManager>();
-        builder.TryAddOrReplaceService<IFilePermission, InternalFilePermission>();
-        builder.TryAddOrReplaceService<IFileTransmission, InternalFileTransmission>();
+        builder.TryAddOrReplaceService<IStorableFileManager, InternalStorableFileManager>();
+        builder.TryAddOrReplaceService<IWebFilePermission, InternalWebFilePermission>();
+        builder.TryAddOrReplaceService<IWebStorableFileTransfer, InternalWebStorableFileTransfer>();
 
         return builder;
     }

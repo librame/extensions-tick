@@ -42,7 +42,7 @@ public class TemporaryRsaKey
     /// <returns>返回 <see cref="TemporaryRsaKey"/>。</returns>
     public static TemporaryRsaKey LoadOrCreateFile(string keyFile)
     {
-        var key = keyFile.ReadJson<TemporaryRsaKey>();
+        var key = keyFile.DeserializeJsonFile<TemporaryRsaKey>();
         if (key is null)
         {
             key = new TemporaryRsaKey
@@ -50,7 +50,7 @@ public class TemporaryRsaKey
                 KeyId = GenerateKeyId(),
                 Parameters = RSA.Create().ExportParameters(true).FromParameters()
             };
-            keyFile.WriteJson(key);
+            keyFile.SerializeJsonFile(key);
         }
 
         return key;

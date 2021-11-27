@@ -52,7 +52,7 @@ public static class ExtensionOptionsExtensions
     public static string SaveOptionsAsJson(this IExtensionOptions options)
     {
         var jsonPath = options.BuildJsonFilePath();
-        jsonPath.WriteJson(options);
+        jsonPath.SerializeJsonFile(options);
 
         return jsonPath;
     }

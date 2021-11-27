@@ -64,13 +64,13 @@ public static class AlgorithmExtensions
                     AesIV = RandomExtensions.GenerateByteArray(16)
                 };
 
-                keyFile.WriteJson(keys);
+                keyFile.SerializeJsonFile(keys);
 
                 return keys;
             }
             else
             {
-                var keys = keyFile.ReadJson<AlgorithmKeys>();
+                var keys = keyFile.DeserializeJsonFile<AlgorithmKeys>();
                 if (keys is null)
                     throw new InvalidOperationException($"The key file '{keyFile}' format is error.");
 

@@ -198,4 +198,34 @@ public static class ByteExtensions
 
     #endregion
 
+
+    #region ImageBase64String
+
+    /// <summary>
+    /// 将图像字节数组转换为 BASE64 字符串形式。
+    /// </summary>
+    /// <param name="buffer">给定的图像字节数组。</param>
+    /// <param name="imageType">给定的图像类型（如：image/jpeg）。</param>
+    /// <returns>返回字符串。</returns>
+    public static string AsImageBase64String(this byte[] buffer, string imageType)
+        => $"data:{imageType};base64,{buffer.AsBase64String()}";
+
+    /// <summary>
+    /// 从 BASE64 字符串还原图像类型与字节数组。
+    /// </summary>
+    /// <param name="base64String">给定的图像 BASE64 字符串。</param>
+    /// <returns>返回包含图像类型与字节数组的元组。</returns>
+    /// <exception cref="ArgumentException">
+    /// Invalid image base64 format string <paramref name="base64String"/>.
+    /// </exception>
+    public static (string imageType, byte[] buffer) FromImageBase64String(string base64String)
+    {
+        if (!base64String.TrySplitPair(';', out var pair))
+            throw new ArgumentException($"Invalid image base64 format string '{base64String}'.");
+
+        return (pair.Key.TrimStart("data:"), pair.Value.TrimStart("base64,").FromBase64String());
+    }
+
+    #endregion
+
 }
