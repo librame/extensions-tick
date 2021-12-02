@@ -2,7 +2,7 @@ LibrameTick.Extensions 系列
 =========================
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/librame/extensions-tick/blob/main/LICENSE)
-[![Available on NuGet https://www.nuget.org/packages?q=LibrameTick.Extensions](https://img.shields.io/nuget/v/LibrameTick.Extensions.svg?style=flat-square)](https://www.nuget.org/packages?q=LibrameTick.Extensions)
+[![Available on NuGet https://www.nuget.org/packages?q=LibrameTick.Extensions](https://img.shields.io/nuget/v/LibrameTick.Extensions.svg?style=flat-square)](https://www.nuget.org/packages?q=LibrameTick.Extensions) [![Join the chat at https://gitter.im/librame/extensions-tick](https://badges.gitter.im/librame/extensions-tick.svg)](https://gitter.im/librame/extensions-tick?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 简体中文
 
