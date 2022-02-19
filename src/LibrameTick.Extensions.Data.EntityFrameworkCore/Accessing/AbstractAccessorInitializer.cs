@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Specifications;
+
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
@@ -131,7 +133,7 @@ public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitiali
         where TEntity : class
     {
         var dbSet = dbSetFunc(Accessor);
-        if (!dbSet.LocalOrDbAny())
+        if (!dbSet.Exists(predicate: null))
         {
             dbSet.AddRange(initialFunc());
 
@@ -152,7 +154,7 @@ public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitiali
         where TEntity : class
     {
         var dbSet = dbSetFunc(Accessor);
-        if (!await dbSet.LocalOrDbAnyAsync(cancellationToken: cancellationToken))
+        if (!await dbSet.ExistsAsync(predicate: null, cancellationToken: cancellationToken))
         {
             var initial = await initialFunc(cancellationToken);
             await dbSet.AddRangeAsync(initial, cancellationToken);

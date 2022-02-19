@@ -18,6 +18,21 @@ namespace Librame.Extensions;
 public static class EnumerableExtensions
 {
 
+    /// <summary>
+    /// 得到非枚举的集合数量，如果不支持将使用 <see cref="Enumerable.Count{TSource}(IEnumerable{TSource})"/> 取得。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="source">给定的源集合。</param>
+    /// <returns>返回整数。</returns>
+    public static int NonEnumeratedCount<T>(this IEnumerable<T> source)
+    {
+        if (!source.TryGetNonEnumeratedCount(out var count))
+            return source.Count();
+
+        return count;
+    }
+
+
     #region AsEnumerable
 
     /// <summary>
@@ -60,21 +75,29 @@ public static class EnumerableExtensions
     #region AsReadOnlyList
 
     /// <summary>
-    /// 转换为只读列表集合。
+    /// 转换为只读集合。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <returns>返回 <see cref="ReadOnlyCollection{T}"/>。</returns>
-    public static ReadOnlyCollection<T> AsReadOnlyList<T>(this IEnumerable<T> enumerable)
-        => enumerable.ToList().AsReadOnly();
+    public static ReadOnlyCollection<T> AsReadOnlyCollection<T>(this IEnumerable<T> enumerable)
+    {
+        if (enumerable is ReadOnlyCollection<T> collection)
+            return collection;
+
+        if (enumerable is IList<T> list)
+            return list.AsReadOnlyCollection();
+
+        return enumerable.ToList().AsReadOnly();
+    }
 
     /// <summary>
-    /// 转换为只读列表集合。
+    /// 转换为只读集合。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="list">给定的 <see cref="IList{T}"/>。</param>
     /// <returns>返回 <see cref="ReadOnlyCollection{T}"/>。</returns>
-    public static ReadOnlyCollection<T> AsReadOnlyList<T>(this IList<T> list)
+    public static ReadOnlyCollection<T> AsReadOnlyCollection<T>(this IList<T> list)
         => new ReadOnlyCollection<T>(list);
 
     #endregion
@@ -297,7 +320,7 @@ public static class EnumerableExtensions
     public static IEnumerable<T> TrimFirst<T>(this IEnumerable<T> enumerable,
         Func<T, bool> isFirstFunc, bool isLoops = true)
     {
-        var count = enumerable.Count();
+        var count = enumerable.NonEnumeratedCount();
         if (count > 0 && isFirstFunc(enumerable.First()))
         {
             // 修剪初始项
@@ -327,7 +350,7 @@ public static class EnumerableExtensions
     public static IEnumerable<T> TrimLast<T>(this IEnumerable<T> enumerable,
         Func<T, bool> isLastFunc, bool isLoops = true)
     {
-        var count = enumerable.Count();
+        var count = enumerable.NonEnumeratedCount();
         if (count > 0 && isLastFunc(enumerable.Last()))
         {
             // 修剪末尾项

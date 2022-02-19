@@ -252,7 +252,7 @@ public static class ServiceCollectionExtensions
         [MaybeNullWhen(false)] out IReadOnlyList<ServiceDescriptor> descriptors, Type? implementationType = null)
     {
         // 存在多个相同服务与实现类型的服务集合
-        descriptors = services.Where(GetPredicateDescriptor(serviceType, implementationType)).AsReadOnlyList();
+        descriptors = services.Where(GetPredicateDescriptor(serviceType, implementationType)).AsReadOnlyCollection();
         return descriptors.Count > 0;
     }
 

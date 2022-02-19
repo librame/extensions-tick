@@ -13,7 +13,7 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.Specification;
+using Librame.Extensions.Data.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -227,7 +227,7 @@ public abstract class AbstractAccessor : DbContext, IAccessor
     public virtual bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true)
         where TEntity : class
-        => base.Set<TEntity>().LocalOrDbAny(predicate, checkLocal);
+        => base.Set<TEntity>().Exists(predicate, checkLocal);
 
     /// <summary>
     /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
@@ -240,7 +240,7 @@ public abstract class AbstractAccessor : DbContext, IAccessor
     public virtual Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true, CancellationToken cancellationToken = default)
         where TEntity : class
-        => base.Set<TEntity>().LocalOrDbAnyAsync(predicate, checkLocal, cancellationToken);
+        => base.Set<TEntity>().ExistsAsync(predicate, checkLocal, cancellationToken);
 
     #endregion
 

@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -22,9 +22,9 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessorSeeder"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>。</param>
     /// <param name="idGeneratorFactory">给定的 <see cref="IIdentificationGeneratorFactory"/>。</param>
-    protected AbstractAccessorSeeder(IRegisterableClock clock, IIdentificationGeneratorFactory idGeneratorFactory)
+    protected AbstractAccessorSeeder(IClockBootstrap clock, IIdentificationGeneratorFactory idGeneratorFactory)
     {
         SeedBank = new ConcurrentDictionary<string, object>();
 
@@ -41,7 +41,7 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// <summary>
     /// 时钟。
     /// </summary>
-    public IRegisterableClock Clock { get; init; }
+    public IClockBootstrap Clock { get; init; }
 
     /// <summary>
     /// 标识生成器工厂。

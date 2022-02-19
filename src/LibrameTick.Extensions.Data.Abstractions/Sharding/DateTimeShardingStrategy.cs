@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Data.Sharding;
 
@@ -40,8 +40,8 @@ public class DateTimeShardingStrategy : AbstractShardingStrategy
     /// <summary>
     /// 构造一个 <see cref="DateTimeShardingStrategy"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>。</param>
-    public DateTimeShardingStrategy(IRegisterableClock clock)
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>。</param>
+    public DateTimeShardingStrategy(IClockBootstrap clock)
     {
         Clock = clock;
     }
@@ -50,7 +50,7 @@ public class DateTimeShardingStrategy : AbstractShardingStrategy
     /// <summary>
     /// 时钟。
     /// </summary>
-    public IRegisterableClock Clock { get; init; }
+    public IClockBootstrap Clock { get; init; }
 
 
     /// <summary>

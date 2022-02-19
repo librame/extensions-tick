@@ -23,7 +23,7 @@ namespace Librame.Extensions
             var items = Enumerable.Range(1, 10);
             items = items.TrimFirst(1);
 
-            Assert.Equal(9, items.Count());
+            Assert.Equal(9, items.NonEnumeratedCount());
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Librame.Extensions
             var items = Enumerable.Range(1, 10);
             items = items.TrimLast(10);
 
-            Assert.Equal(9, items.Count());
+            Assert.Equal(9, items.NonEnumeratedCount());
         }
 
         #endregion

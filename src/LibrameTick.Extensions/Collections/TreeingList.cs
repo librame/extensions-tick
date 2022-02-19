@@ -99,7 +99,7 @@ public class TreeingList<TItem, TId> : ITreeingList<TItem, TId>
     /// 节点数。
     /// </summary>
     public int Count
-        => _nodes.Count();
+        => _nodes.Count;
 
     /// <summary>
     /// 是只读列表。

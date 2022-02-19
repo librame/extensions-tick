@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Data;
 
@@ -25,7 +25,7 @@ public class MongoIdentificationGenerator : AbstractIdentificationGenerator<stri
     private readonly UTF8Encoding _encoding
         = new UTF8Encoding(false);
 
-    private readonly IRegisterableClock _clock;
+    private readonly IClockBootstrap _clock;
     private readonly byte[] _machineHash;
     private readonly byte[] _processIdHex;
 
@@ -33,8 +33,8 @@ public class MongoIdentificationGenerator : AbstractIdentificationGenerator<stri
     /// <summary>
     /// 构造一个 <see cref="MongoIdentificationGenerator"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>（如使用本地时钟可参考 <see cref="InternalRegisterableClock"/>）。</param>
-    public MongoIdentificationGenerator(IRegisterableClock clock)
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="InternalClockBootstrap"/>）。</param>
+    public MongoIdentificationGenerator(IClockBootstrap clock)
     {
         _clock = clock;
         _machineHash = _encoding.GetBytes(Dns.GetHostName()).AsMd5();

@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Data;
 
@@ -19,8 +19,8 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public class CombSnowflakeIdentificationGenerator : AbstractIdentificationGenerator<Guid>
 {
-    private readonly IRegisterableClock _clock;
-    private readonly IRegisterableLocker _locker;
+    private readonly IClockBootstrap _clock;
+    private readonly ILockerBootstrap _locker;
 
     private readonly uint _workId;
     private int _a;
@@ -32,10 +32,10 @@ public class CombSnowflakeIdentificationGenerator : AbstractIdentificationGenera
     /// <summary>
     /// 构造一个 <see cref="CombIdentificationGenerator"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>（如使用本地时钟可参考 <see cref="Registration.GetRegisterableClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="IRegisterableLocker"/>（如使用本地锁定器可参考 <see cref="Registration.GetRegisterableLocker()"/>）。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
+    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
     /// <param name="options">给定的 <see cref="IdentificationGenerationOptions"/>。</param>
-    public CombSnowflakeIdentificationGenerator(IRegisterableClock clock, IRegisterableLocker locker,
+    public CombSnowflakeIdentificationGenerator(IClockBootstrap clock, ILockerBootstrap locker,
         IdentificationGenerationOptions options)
     {
         _clock = clock;
@@ -114,9 +114,9 @@ public class CombSnowflakeIdentificationGenerator : AbstractIdentificationGenera
     /// 获取标识包含的日期与时间。
     /// </summary>
     /// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
-    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>。</param>
     /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public static DateTimeOffset GetDateTime(Guid combSnowflakeId, IRegisterableClock clock)
+    public static DateTimeOffset GetDateTime(Guid combSnowflakeId, IClockBootstrap clock)
     {
         var bytes = combSnowflakeId.ToByteArray();
 

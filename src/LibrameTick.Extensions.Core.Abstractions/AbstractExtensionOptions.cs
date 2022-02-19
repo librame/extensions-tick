@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Bootstraps;
+
 namespace Librame.Extensions.Core;
 
 /// <summary>
@@ -20,7 +22,7 @@ public abstract class AbstractExtensionOptions<TOptions> : AbstractExtensionOpti
     where TOptions : IExtensionOptions
 {
     /// <summary>
-    /// 使用 <see cref="Registration.GetRegisterableDirectories()"/> 构造一个 <see cref="AbstractExtensionOptions{TOptions}"/>。
+    /// 使用 <see cref="Bootstrapper.GetDirectories()"/> 构造一个 <see cref="AbstractExtensionOptions{TOptions}"/>。
     /// </summary>
     protected AbstractExtensionOptions()
         : base()
@@ -30,8 +32,8 @@ public abstract class AbstractExtensionOptions<TOptions> : AbstractExtensionOpti
     /// <summary>
     /// 构造一个 <see cref="AbstractExtensionOptions{TOptions}"/>。
     /// </summary>
-    /// <param name="directories">给定的 <see cref="IRegisterableDirectories"/>。</param>
-    protected AbstractExtensionOptions(IRegisterableDirectories directories)
+    /// <param name="directories">给定的 <see cref="IDirectoryStructureBootstrap"/>。</param>
+    protected AbstractExtensionOptions(IDirectoryStructureBootstrap directories)
         : base(directories)
     {
     }
@@ -52,18 +54,18 @@ public abstract class AbstractExtensionOptions<TOptions> : AbstractExtensionOpti
 public abstract class AbstractExtensionOptions : AbstractExtensionInfo, IExtensionOptions
 {
     /// <summary>
-    /// 使用 <see cref="Registration.GetRegisterableDirectories()"/> 构造一个 <see cref="AbstractExtensionOptions"/>。
+    /// 使用 <see cref="Bootstrapper.GetDirectories()"/> 构造一个 <see cref="AbstractExtensionOptions"/>。
     /// </summary>
     protected AbstractExtensionOptions()
-        : this(Registration.GetRegisterableDirectories())
+        : this(Bootstrapper.GetDirectories())
     {
     }
 
     /// <summary>
     /// 构造一个 <see cref="AbstractExtensionOptions"/>。
     /// </summary>
-    /// <param name="directories">给定的 <see cref="IRegisterableDirectories"/>。</param>
-    protected AbstractExtensionOptions(IRegisterableDirectories directories)
+    /// <param name="directories">给定的 <see cref="IDirectoryStructureBootstrap"/>。</param>
+    protected AbstractExtensionOptions(IDirectoryStructureBootstrap directories)
     {
         Directories = directories;
 
@@ -75,7 +77,7 @@ public abstract class AbstractExtensionOptions : AbstractExtensionInfo, IExtensi
     /// <summary>
     /// 目录集合。
     /// </summary>
-    public IRegisterableDirectories Directories { get; init; }
+    public IDirectoryStructureBootstrap Directories { get; init; }
 
     /// <summary>
     /// 属性通知器。

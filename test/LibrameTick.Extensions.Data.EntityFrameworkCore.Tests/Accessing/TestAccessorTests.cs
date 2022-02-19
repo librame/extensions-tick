@@ -1,5 +1,5 @@
 using Librame.Extensions.Core;
-using Librame.Extensions.Data.Specification;
+using Librame.Extensions.Data.Specifications;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

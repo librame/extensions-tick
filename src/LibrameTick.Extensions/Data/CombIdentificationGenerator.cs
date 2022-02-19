@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Data;
 
@@ -19,17 +19,17 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public class CombIdentificationGenerator : AbstractIdentificationGenerator<Guid>
 {
-    private readonly IRegisterableClock _clock;
-    private readonly IRegisterableLocker _locker;
+    private readonly IClockBootstrap _clock;
+    private readonly ILockerBootstrap _locker;
 
 
     /// <summary>
     /// 构造一个 <see cref="CombIdentificationGenerator"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>（如使用本地时钟可参考 <see cref="Registration.GetRegisterableClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="IRegisterableLocker"/>（如使用本地锁定器可参考 <see cref="Registration.GetRegisterableLocker()"/>）。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
+    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
     /// <param name="generation">给定的 <see cref="CombIdentificationGeneration"/>。</param>
-    public CombIdentificationGenerator(IRegisterableClock clock, IRegisterableLocker locker,
+    public CombIdentificationGenerator(IClockBootstrap clock, ILockerBootstrap locker,
         CombIdentificationGeneration generation)
     {
         _clock = clock;

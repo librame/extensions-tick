@@ -13,6 +13,7 @@
 using Librame.Extensions.Core.Cryptography;
 using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
+using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Core;
 
@@ -52,9 +53,9 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     /// 时钟（默认使用本地时钟）。
     /// </summary>
     [JsonIgnore]
-    public IRegisterableClock Clock
+    public IClockBootstrap Clock
     {
-        get => Notifier.GetOrAdd(nameof(Clock), Registration.GetRegisterableClock());
+        get => Notifier.GetOrAdd(nameof(Clock), Bootstrapper.GetClock());
         set => Notifier.AddOrUpdate(nameof(Clock), value);
     }
 
@@ -62,9 +63,9 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     /// 时钟（默认使用本地锁定器）。
     /// </summary>
     [JsonIgnore]
-    public IRegisterableLocker Locker
+    public ILockerBootstrap Locker
     {
-        get => Notifier.GetOrAdd(nameof(Locker), Registration.GetRegisterableLocker());
+        get => Notifier.GetOrAdd(nameof(Locker), Bootstrapper.GetLocker());
         set => Notifier.AddOrUpdate(nameof(Locker), value);
     }
 

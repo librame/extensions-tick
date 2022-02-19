@@ -24,12 +24,27 @@ public class PagingList<T> : IPagingList<T>
     public readonly static IPagingList<T> Empty
         = new PagingList<T>(Enumerable.Empty<T>());
 
-    private readonly List<T>? _collection;
+    private readonly IEnumerable<T>? _collection;
     private readonly PagingInfo _info;
 
     private IQueryable<T>? _queryable;
-    private IEnumerable<T>? _current;
+    private IEnumerable<T>? _filter;
 
+
+    /// <summary>
+    /// 使用 <see cref="IEnumerable{T}"/> 可枚举内存集合的副本构造一个 <see cref="PagingList{T}"/>。
+    /// </summary>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="collection"/> is null.
+    /// </exception>
+    /// <param name="collection">给定的 <see cref="IEnumerable{T}"/>。</param>
+    public PagingList(IEnumerable<T> collection)
+    {
+        // 默认使用副本集合
+        var copy = new List<T>(collection);
+        _info = new PagingInfo(copy.Count);
+        _collection = copy;
+    }
 
     /// <summary>
     /// 使用 <see cref="IEnumerable{T}"/> 可枚举内存集合构造一个 <see cref="PagingList{T}"/>。
@@ -38,11 +53,18 @@ public class PagingList<T> : IPagingList<T>
     /// <paramref name="collection"/> is null.
     /// </exception>
     /// <param name="collection">给定的 <see cref="IEnumerable{T}"/>。</param>
-    public PagingList(IEnumerable<T> collection)
+    /// <param name="total">给定的总数据条数。</param>
+    /// <param name="useCopy">使用副本集合。</param>
+    public PagingList(IEnumerable<T> collection, long total, bool useCopy)
     {
-        _collection = new List<T>(collection); // 使用副本集合
-        _info = new PagingInfo(_collection.Count);
+        if (useCopy)
+            _collection = new List<T>(collection);
+        else
+            _collection = collection;
+
+        _info = new PagingInfo(total);
     }
+
 
     /// <summary>
     /// 使用 <see cref="IQueryable{T}"/> 可查询集合构造一个 <see cref="PagingList{T}"/>。
@@ -54,7 +76,18 @@ public class PagingList<T> : IPagingList<T>
     public PagingList(IQueryable<T> queryable)
     {
         _queryable = queryable;
-        _info = new PagingInfo(queryable.Count());
+        _info = new PagingInfo(queryable.NonEnumeratedCount());
+    }
+
+    /// <summary>
+    /// 使用 <see cref="IQueryable{T}"/> 可查询集合构造一个 <see cref="PagingList{T}"/>。
+    /// </summary>
+    /// <param name="queryable">给定的 <see cref="IQueryable{T}"/>。</param>
+    /// <param name="total">给定的总数据条数。</param>
+    public PagingList(IQueryable<T> queryable, long total)
+    {
+        _queryable = queryable;
+        _info = new PagingInfo(total);
     }
 
 
@@ -71,13 +104,13 @@ public class PagingList<T> : IPagingList<T>
     /// <param name="func">给定的筛选方法。</param>
     public void Filtrate(Func<IEnumerable<T>, IEnumerable<T>> func)
     {
-        if (_current is not null)
+        if (_filter is not null)
         {
-            _current = func(_current);
+            _filter = func(_filter);
             return;
         }
 
-        _current = func(_collection!);
+        _filter = func(_collection!);
     }
 
     /// <summary>
@@ -128,13 +161,13 @@ public class PagingList<T> : IPagingList<T>
             // 如果需要分页
             if (_info.Total > _info.Size)
             {
-                _current = (_current ?? _collection)
+                _filter = (_filter ?? _collection)
                     .Skip(_info.Skip)
                     .Take(_info.Size);
             }
             else
             {
-                _current = _current ?? _collection;
+                _filter = _filter ?? _collection;
             }
         }
 
@@ -144,14 +177,14 @@ public class PagingList<T> : IPagingList<T>
             // 如果需要分页
             if (_info.Total > _info.Size)
             {
-                _current = _queryable
+                _filter = _queryable
                     .Skip(_info.Skip)
                     .Take(_info.Size)
                     .ToList();
             }
             else
             {
-                _current = _queryable.ToList();
+                _filter = _queryable.ToList();
             }
         }
     }
@@ -165,10 +198,10 @@ public class PagingList<T> : IPagingList<T>
     /// <returns>返回枚举器。</returns>
     public IEnumerator<T> GetEnumerator()
     {
-        if (_current is null)
+        if (_filter is null)
             throw new InvalidOperationException($"You need to run the '${nameof(PageByIndex)}()' or '${nameof(PageBySkip)}()' method first.");
 
-        return _current.GetEnumerator();
+        return _filter.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()

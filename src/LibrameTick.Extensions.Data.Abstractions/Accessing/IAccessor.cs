@@ -13,7 +13,7 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.Specification;
+using Librame.Extensions.Data.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 

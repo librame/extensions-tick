@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Bootstraps;
+
 namespace Librame.Extensions.Core;
 
 /// <summary>
@@ -30,10 +32,10 @@ public static class ExtensionOptionsExtensions
     /// 构建扩展选项的 JSON 文件路径（默认以扩展选项的配置目录为基础路径，以 <see cref="GetJsonFileName(Type)"/> 为文件名）。
     /// </summary>
     /// <param name="optionsType">给定的扩展选项类型。</param>
-    /// <param name="directories">给定的 <see cref="IRegisterableDirectories"/>（可选；默认以 <see cref="Registration.GetRegisterableDirectories()"/> 的配置目录为基础路径）。</param>
+    /// <param name="directories">给定的 <see cref="IDirectoryStructureBootstrap"/>（可选；默认以 <see cref="Bootstrapper.GetDirectories()"/> 的配置目录为基础路径）。</param>
     /// <returns>返回路径字符串。</returns>
-    public static string BuildJsonFilePath(this Type optionsType, IRegisterableDirectories? directories = null)
-        => optionsType.GetJsonFileName().SetBasePath((directories ?? Registration.GetRegisterableDirectories()).ConfigDirectory);
+    public static string BuildJsonFilePath(this Type optionsType, IDirectoryStructureBootstrap? directories = null)
+        => optionsType.GetJsonFileName().SetBasePath((directories ?? Bootstrapper.GetDirectories()).ConfigDirectory);
 
     /// <summary>
     /// 构建扩展选项的 JSON 文件路径（默认以扩展选项的配置目录为基础路径，以 <see cref="GetJsonFileName(Type)"/> 为文件名）。

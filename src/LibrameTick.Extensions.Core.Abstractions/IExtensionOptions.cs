@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Bootstraps;
+
 namespace Librame.Extensions.Core;
 
 /// <summary>
@@ -20,5 +22,5 @@ public interface IExtensionOptions : IExtensionInfo, IOptionsNotifier
     /// <summary>
     /// 目录集合。
     /// </summary>
-    IRegisterableDirectories Directories { get; }
+    IDirectoryStructureBootstrap Directories { get; }
 }

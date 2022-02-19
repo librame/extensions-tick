@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Data;
 
@@ -19,8 +19,8 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public class SnowflakeIdentificationGenerator : AbstractIdentificationGenerator<long>
 {
-    private readonly IRegisterableClock _clock;
-    private readonly IRegisterableLocker _locker;
+    private readonly IClockBootstrap _clock;
+    private readonly ILockerBootstrap _locker;
     private readonly SnowflakeIdentificationParameters _parameters;
     private readonly long _machineId;
     private readonly long _dataCenterId;
@@ -32,11 +32,11 @@ public class SnowflakeIdentificationGenerator : AbstractIdentificationGenerator<
     /// <summary>
     /// 构造一个 <see cref="SnowflakeIdentificationGenerator"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IRegisterableClock"/>（如使用本地时钟可参考 <see cref="Registration.GetRegisterableClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="IRegisterableLocker"/>（如使用本地锁定器可参考 <see cref="Registration.GetRegisterableLocker()"/>）。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
+    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
     /// <param name="options">给定的 <see cref="IdentificationGenerationOptions"/>。</param>
     /// <param name="parameters">给定的 <see cref="SnowflakeIdentificationParameters"/>（可选）。</param>
-    public SnowflakeIdentificationGenerator(IRegisterableClock clock, IRegisterableLocker locker,
+    public SnowflakeIdentificationGenerator(IClockBootstrap clock, ILockerBootstrap locker,
         IdentificationGenerationOptions options, SnowflakeIdentificationParameters? parameters = null)
     {
         _clock = clock;

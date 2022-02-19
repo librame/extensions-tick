@@ -10,13 +10,14 @@
 
 #endregion
 
+using Librame.Extensions.Bootstraps;
 using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Drawing.Drawers;
 
 class InternalSavingDrawer : AbstractDrawer, ISavingDrawer
 {
-    private readonly IRegisterableClock _clock;
+    private readonly IClockBootstrap _clock;
     private readonly SKEncodedImageFormat _imageFormat;
 
 
@@ -29,7 +30,7 @@ class InternalSavingDrawer : AbstractDrawer, ISavingDrawer
     }
 
 
-    public Func<IRegisterableClock, string> SaveSubpathFunc { get; set; }
+    public Func<IClockBootstrap, string> SaveSubpathFunc { get; set; }
         = clock =>
         {
             var now = clock.GetNow();
@@ -37,7 +38,7 @@ class InternalSavingDrawer : AbstractDrawer, ISavingDrawer
             return folderNames.CombineRelativeSubpath();
         };
 
-    public Func<IRegisterableClock, BitmapDescriptor, string> SaveFileBaseNameFunc { get; set; }
+    public Func<IClockBootstrap, BitmapDescriptor, string> SaveFileBaseNameFunc { get; set; }
         = (clock, descr) =>
         {
             var fileBaseName = string.Empty;

@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Data.Specification;
+using Librame.Extensions.Data.Specifications;
 
 namespace Librame.Extensions.Data.Storing;
 

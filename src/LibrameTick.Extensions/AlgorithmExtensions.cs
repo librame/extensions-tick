@@ -17,70 +17,14 @@ namespace Librame.Extensions;
 /// </summary>
 public static class AlgorithmExtensions
 {
-    private static readonly AlgorithmKeys _keys;
+    private static readonly Core.Autokey _keys;
 
 
     static AlgorithmExtensions()
     {
         if (_keys is null)
-            _keys = AlgorithmKeys.LoadOrCreateFile();
+            _keys = Bootstraps.Bootstrapper.GetAutokey().GetAutokey();
     }
-
-
-    #region AlgorithmKeys
-
-    class AlgorithmKeys
-    {
-        public byte[]? Id { get; set; }
-
-        public byte[]? HmacMd5Key { get; set; }
-
-        public byte[]? HmacSha256Key { get; set; }
-
-        public byte[]? HmacSha384Key { get; set; }
-
-        public byte[]? HmacSha512Key { get; set; }
-
-        public byte[]? AesKey { get; set; }
-
-        public byte[]? AesIV { get; set; }
-
-
-        public static AlgorithmKeys LoadOrCreateFile()
-        {
-            // bin 目录禁止访问
-            var keyFile = $"{typeof(AlgorithmExtensions).GetAssemblyName()}.keys"
-                .SetBasePath(PathExtensions.CurrentDirectory);
-            if (!keyFile.FileExists())
-            {
-                var keys = new AlgorithmKeys
-                {
-                    Id = RandomExtensions.GenerateByteArray(16),
-                    HmacMd5Key = RandomExtensions.GenerateByteArray(8),
-                    HmacSha256Key = RandomExtensions.GenerateByteArray(8),
-                    HmacSha384Key = RandomExtensions.GenerateByteArray(16),
-                    HmacSha512Key = RandomExtensions.GenerateByteArray(16),
-                    AesKey = RandomExtensions.GenerateByteArray(32),
-                    AesIV = RandomExtensions.GenerateByteArray(16)
-                };
-
-                keyFile.SerializeJsonFile(keys);
-
-                return keys;
-            }
-            else
-            {
-                var keys = keyFile.DeserializeJsonFile<AlgorithmKeys>();
-                if (keys is null)
-                    throw new InvalidOperationException($"The key file '{keyFile}' format is error.");
-
-                return keys;
-            }
-        }
-
-    }
-
-    #endregion
 
 
     #region Hash

@@ -13,35 +13,35 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.Specification;
+using Librame.Extensions.Data.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 
 sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
 {
-    private readonly IAccessor[] _accessors;
+    private readonly IEquilizer<IAccessor> _equilizer;
 
 
     public InternalCompositeAccessor(IEnumerable<IAccessor> accessors)
     {
-        _accessors = accessors.ToArray();
+        _equilizer = new TransactionEquilizer<IAccessor>(accessors);
     }
 
 
     public string AccessorId
-        => _accessors.Joining(a => a.AccessorId);
+        => _equilizer.Invoke(a => a.AccessorId).JoinString(',');
 
     public Type AccessorType
         => typeof(InternalCompositeAccessor);
 
     public AccessorDescriptor? AccessorDescriptor
-        => _accessors.ChainingByException(a => a.AccessorDescriptor);
+        => null;
 
 
     #region IShardable
 
     public IShardingManager ShardingManager
-        => _accessors.ChainingByException(a => a.ShardingManager);
+        => _equilizer.First().ShardingManager;
 
     #endregion
 
@@ -49,29 +49,29 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #region IConnectable<IAccessor>
 
     public string? CurrentConnectionString
-        => _accessors.Joining(a => a.CurrentConnectionString);
+        => _equilizer.Invoke(a => a.CurrentConnectionString).JoinString(',');
 
     public Action<IAccessor>? ChangingAction
     {
-        get => _accessors.ChainingByException(a => a.ChangingAction);
-        set => _accessors.BatchingFirst(a => a.ChangingAction = value);
+        get => _equilizer.Invoke(a => a.ChangingAction).First();
+        set => _equilizer.Invoke(a => a.ChangingAction = value);
     }
 
     public Action<IAccessor>? ChangedAction
     {
-        get => _accessors.ChainingByException(a => a.ChangedAction);
-        set => _accessors.BatchingFirst(a => a.ChangedAction = value);
+        get => _equilizer.Invoke(a => a.ChangedAction).First();
+        set => _equilizer.Invoke(a => a.ChangedAction = value);
     }
 
 
     public IAccessor ChangeConnection(string newConnectionString)
-        => _accessors.Batching(a => a.ChangeConnection(newConnectionString)).First();
+        => _equilizer.Invoke(a => a.ChangeConnection(newConnectionString)).First();
 
     public bool TryCreateDatabase()
-        => _accessors.BatchingFirstWithTransaction(a => a.TryCreateDatabase());
+        => _equilizer.Invoke(a => a.TryCreateDatabase()).First();
 
     public Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
-        => _accessors.BatchingFirstWithTransaction(a => a.TryCreateDatabaseAsync(cancellationToken));
+        => _equilizer.Invoke(a => a.TryCreateDatabaseAsync(cancellationToken)).First();
 
     #endregion
 
@@ -82,7 +82,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
         => SaveChanges(acceptAllChangesOnSuccess: true);
 
     public int SaveChanges(bool acceptAllChangesOnSuccess)
-        => _accessors.BatchingFirstWithTransaction(a => a.SaveChanges(acceptAllChangesOnSuccess));
+        => _equilizer.Invoke(a => a.SaveChanges(acceptAllChangesOnSuccess)).First();
 
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -90,7 +90,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
 
     public Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = default)
-        => _accessors.BatchingFirstWithTransaction(a => a.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken))!;
+        => _equilizer.Invoke(a => a.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken)).First();
 
     #endregion
 
@@ -98,7 +98,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #region IDisposable
 
     public void Dispose()
-        => _accessors.Batching(a => a.Dispose());
+        => _equilizer.Invoke(a => a.Dispose());
 
     #endregion
 
@@ -106,7 +106,7 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #region IAsyncDisposable
 
     public ValueTask DisposeAsync()
-        => _accessors.BatchingFirst(a => a.DisposeAsync());
+        => _equilizer.Invoke(a => a.DisposeAsync()).First();
 
     #endregion
 
@@ -116,12 +116,12 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     public bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.Exists(predicate));
+        => _equilizer.Invoke(a => a.Exists(predicate)).First();
 
     public Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true, CancellationToken cancellationToken = default)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.ExistsAsync(predicate, checkLocal, cancellationToken));
+        => _equilizer.Invoke(a => a.ExistsAsync(predicate, checkLocal, cancellationToken)).First();
 
     #endregion
 
@@ -130,55 +130,55 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
 
     public TEntity? Find<TEntity>(params object?[]? keyValues)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.Find<TEntity>(keyValues));
+        => _equilizer.Invoke(a => a.Find<TEntity>(keyValues)).First();
 
     public object? Find(Type entityType, params object?[]? keyValues)
-        => _accessors.ChainingByException(a => a.Find(entityType, keyValues));
+        => _equilizer.Invoke(a => a.Find(entityType, keyValues));
 
     public ValueTask<TEntity?> FindAsync<TEntity>(object?[]? keyValues, CancellationToken cancellationToken)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindAsync<TEntity>(keyValues, cancellationToken));
+        => _equilizer.Invoke(a => a.FindAsync<TEntity>(keyValues, cancellationToken)).First();
 
     public ValueTask<object?> FindAsync(Type entityType, params object?[]? keyValues)
-        => _accessors.ChainingByException(a => a.FindAsync(entityType, keyValues));
+        => _equilizer.Invoke(a => a.FindAsync(entityType, keyValues)).First();
 
     public ValueTask<object?> FindAsync(Type entityType, object?[]? keyValues, CancellationToken cancellationToken)
-        => _accessors.ChainingByException(a => a.FindAsync(entityType, keyValues, cancellationToken));
+        => _equilizer.Invoke(a => a.FindAsync(entityType, keyValues, cancellationToken)).First();
 
     public ValueTask<TEntity?> FindAsync<TEntity>(params object?[]? keyValues)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindAsync<TEntity>(keyValues));
+        => _equilizer.Invoke(a => a.FindAsync<TEntity>(keyValues)).First();
 
 
     public IList<TEntity> FindListWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindListWithSpecification(specification));
+        => _equilizer.Invoke(a => a.FindListWithSpecification(specification)).First();
 
     public Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
         CancellationToken cancellationToken = default)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindListWithSpecificationAsync(specification, cancellationToken));
+        => _equilizer.Invoke(a => a.FindListWithSpecificationAsync(specification, cancellationToken)).First();
 
 
     public IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindPagingList(pageAction));
+        => _equilizer.Invoke(a => a.FindPagingList(pageAction)).First();
 
     public Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
         CancellationToken cancellationToken = default)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindPagingListAsync(pageAction, cancellationToken));
+        => _equilizer.Invoke(a => a.FindPagingListAsync(pageAction, cancellationToken)).First();
 
 
     public IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
         IEntitySpecification<TEntity>? specification = null)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindPagingListWithSpecification(pageAction, specification));
+        => _equilizer.Invoke(a => a.FindPagingListWithSpecification(pageAction, specification)).First();
 
     public Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
         IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
+        => _equilizer.Invoke(a => a.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken)).First();
 
     #endregion
 
@@ -186,16 +186,16 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #region GetQueryable
 
     public IQueryable<TResult> FromExpression<TResult>(Expression<Func<IQueryable<TResult>>> expression)
-        => _accessors.ChainingByException(a => a.FromExpression(expression));
+        => _equilizer.Invoke(a => a.FromExpression(expression)).First();
 
 
     public IQueryable<TEntity> GetQueryable<TEntity>()
         where TEntity : class
-        => _accessors.ChainingByException(a => a.GetQueryable<TEntity>());
+        => _equilizer.Invoke(a => a.GetQueryable<TEntity>()).First();
 
     public IQueryable<TEntity> GetQueryable<TEntity>(string name)
         where TEntity : class
-        => _accessors.ChainingByException(a => a.GetQueryable<TEntity>(name));
+        => _equilizer.Invoke(a => a.GetQueryable<TEntity>(name)).First();
 
     #endregion
 
@@ -205,28 +205,28 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     public TEntity AddIfNotExists<TEntity>(TEntity entity,
         Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
         where TEntity : class
-        => _accessors.BatchingFirstWithTransaction(a => a.AddIfNotExists(entity, predicate, checkLocal))!;
+        => _equilizer.Invoke(a => a.AddIfNotExists(entity, predicate, checkLocal)).First();
         
     public object Add(object entity)
-        => _accessors.BatchingFirstWithTransaction(a => a.Add(entity))!;
+        => _equilizer.Invoke(a => a.Add(entity))!;
 
     public TEntity Add<TEntity>(TEntity entity)
         where TEntity : class
-        => _accessors.BatchingFirstWithTransaction(a => a.Add(entity))!;
+        => _equilizer.Invoke(a => a.Add(entity)).First();
 
 
     public void AddRange(IEnumerable<object> entities)
-        => _accessors.BatchingWithTransaction(a => a.AddRange(entities));
+        => _equilizer.Invoke(a => a.AddRange(entities));
 
     public void AddRange(params object[] entities)
-        => _accessors.BatchingWithTransaction(a => a.AddRange(entities));
+        => _equilizer.Invoke(a => a.AddRange(entities));
 
     public Task AddRangeAsync(IEnumerable<object> entities,
         CancellationToken cancellationToken = default)
-        => _accessors.BatchingFirstWithTransaction(a => a.AddRangeAsync(entities, cancellationToken))!;
+        => _equilizer.Invoke(a => a.AddRangeAsync(entities, cancellationToken)).First();
 
     public Task AddRangeAsync(params object[] entities)
-        => _accessors.BatchingFirstWithTransaction(a => a.AddRangeAsync(entities))!;
+        => _equilizer.Invoke(a => a.AddRangeAsync(entities)).First();
 
     #endregion
 
@@ -234,18 +234,18 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #region Attach
 
     public object Attach(object entity)
-        => _accessors.BatchingFirstWithTransaction(a => a.Attach(entity))!;
+        => _equilizer.Invoke(a => a.Attach(entity))!;
 
     public TEntity Attach<TEntity>(TEntity entity)
         where TEntity : class
-        => _accessors.BatchingFirstWithTransaction(a => a.Attach(entity))!;
+        => _equilizer.Invoke(a => a.Attach(entity)).First();
 
 
     public void AttachRange(params object[] entities)
-        => _accessors.BatchingWithTransaction(a => a.AttachRange(entities));
+        => _equilizer.Invoke(a => a.AttachRange(entities));
 
     public void AttachRange(IEnumerable<object> entities)
-        => _accessors.BatchingWithTransaction(a => a.AttachRange(entities));
+        => _equilizer.Invoke(a => a.AttachRange(entities));
 
     #endregion
 
@@ -253,18 +253,18 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #region Remove
 
     public object Remove(object entity)
-        => _accessors.BatchingFirstWithTransaction(a => a.Remove(entity))!;
+        => _equilizer.Invoke(a => a.Remove(entity))!;
 
     public TEntity Remove<TEntity>(TEntity entity)
         where TEntity : class
-        => _accessors.BatchingFirstWithTransaction(a => a.Remove(entity))!;
+        => _equilizer.Invoke(a => a.Remove(entity)).First();
 
 
     public void RemoveRange(params object[] entities)
-        => _accessors.BatchingWithTransaction(a => a.RemoveRange(entities));
+        => _equilizer.Invoke(a => a.RemoveRange(entities));
 
     public void RemoveRange(IEnumerable<object> entities)
-        => _accessors.BatchingWithTransaction(a => a.RemoveRange(entities));
+        => _equilizer.Invoke(a => a.RemoveRange(entities));
 
     #endregion
 
@@ -272,18 +272,18 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #region Update
 
     public object Update(object entity)
-        => _accessors.BatchingFirstWithTransaction(a => a.Update(entity))!;
+        => _equilizer.Invoke(a => a.Update(entity))!;
 
     public TEntity Update<TEntity>(TEntity entity)
         where TEntity : class
-        => _accessors.BatchingFirstWithTransaction(a => a.Update(entity))!;
+        => _equilizer.Invoke(a => a.Update(entity)).First();
 
 
     public void UpdateRange(params object[] entities)
-        => _accessors.BatchingWithTransaction(a => a.UpdateRange(entities));
+        => _equilizer.Invoke(a => a.UpdateRange(entities));
 
     public void UpdateRange(IEnumerable<object> entities)
-        => _accessors.BatchingWithTransaction(a => a.UpdateRange(entities));
+        => _equilizer.Invoke(a => a.UpdateRange(entities));
 
     #endregion
 
