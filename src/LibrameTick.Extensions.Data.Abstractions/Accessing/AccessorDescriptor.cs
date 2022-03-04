@@ -16,14 +16,14 @@ using Librame.Extensions.Data.Sharding;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义访问器描述符。
+/// 定义存取器描述符。
 /// </summary>
 public class AccessorDescriptor : IEquatable<AccessorDescriptor>
 {
     /// <summary>
     /// 构造一个 <see cref="AccessorDescriptor"/>。
     /// </summary>
-    /// <param name="accessor">给定的访问器实例。</param>
+    /// <param name="accessor">给定的存取器实例。</param>
     /// <param name="serviceType">给定的服务类型。</param>
     /// <param name="group">给定的所属群组。</param>
     /// <param name="access">给定的访问模式。</param>
@@ -57,7 +57,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     public Type ServiceType { get; init; }
 
     /// <summary>
-    /// 访问器实例。
+    /// 存取器实例。
     /// </summary>
     public IAccessor Accessor { get; init; }
 
@@ -93,7 +93,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
 
 
     /// <summary>
-    /// 比较访问器描述符的服务类型相等。
+    /// 比较存取器描述符的服务类型相等。
     /// </summary>
     /// <param name="other">给定的 <see cref="AccessorDescriptor"/>。</param>
     /// <returns>返回布尔值。</returns>

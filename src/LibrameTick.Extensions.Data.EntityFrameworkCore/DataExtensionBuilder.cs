@@ -22,7 +22,7 @@ namespace Librame.Extensions.Data;
 /// <summary>
 /// 定义实现 <see cref="IExtensionBuilder"/> 的数据扩展构建器。
 /// </summary>
-public class DataExtensionBuilder : BaseExtensionBuilder<DataExtensionBuilder, DataExtensionOptions>
+public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilder>
 {
     /// <summary>
     /// 构造一个 <see cref="DataExtensionBuilder"/>。
@@ -31,13 +31,10 @@ public class DataExtensionBuilder : BaseExtensionBuilder<DataExtensionBuilder, D
     /// <paramref name="parentBuilder"/> 为空。
     /// </exception>
     /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
-    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
-    public DataExtensionBuilder(IExtensionBuilder parentBuilder,
-        Action<DataExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null)
-        : base(parentBuilder, setupOptions, configOptions)
+    public DataExtensionBuilder(IExtensionBuilder parentBuilder)
+        : base(parentBuilder)
     {
-        ServiceCharacteristics.AddSingleton<IIdentificationGeneratorFactory>();
+        ServiceCharacteristics.AddSingleton<IIdGeneratorFactory>();
         ServiceCharacteristics.AddSingleton<IAuditingManager>();
 
         // Accessing

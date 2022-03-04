@@ -16,17 +16,17 @@ using Librame.Extensions.Data.Sharding;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义实现 <see cref="IDbContextOptionsExtension"/> 接口的访问器选项扩展。
+/// 定义实现 <see cref="IDbContextOptionsExtension"/> 接口的存取器选项扩展。
 /// </summary>
 public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 {
     // 异构数据源数据同步功能的标识必须使用统一的生成方案
     //private IIdentificationGenerator<Guid>? _guidGenerator;
 
-    private int _group; // 默认为 0；表示所有访问器在同一组，配置访问模式实现对应的功能
-    private AccessMode _access = AccessMode.ReadWrite; // 默认为读/写模式；表示访问器可以进行读/写数据库操作
+    private int _group; // 默认为 0；表示所有存取器在同一组，配置访问模式实现对应的功能
+    private AccessMode _access = AccessMode.ReadWrite; // 默认为读/写模式；表示存取器可以进行读/写数据库操作
     private bool _pooling; // 默认为 FALSE；表示是否为 DbContextPool。
-    private float _priority = -1; // 默认为 -1；表示使用访问器实现 ISortable 的优先级属性值
+    private float _priority = -1; // 默认为 -1；表示使用存取器实现 ISortable 的优先级属性值
     private AlgorithmOptions? _algorithm; // 默认为 NULL；表示使用 CoreExtensionOptions.Algorithm 全局配置，提供对数据字段值的加解密功能
     private ShardedAttribute? _sharded; // 默认为 NULL；表示不分库
     private Type? _serviceType;
@@ -76,7 +76,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         => _pooling;
 
     /// <summary>
-    /// 访问器优先级。
+    /// 存取器优先级。
     /// </summary>
     public virtual float Priority
         => _priority;

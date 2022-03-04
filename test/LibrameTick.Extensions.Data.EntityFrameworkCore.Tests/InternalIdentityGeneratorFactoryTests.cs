@@ -11,7 +11,7 @@ namespace Librame.Extensions.Data
         public void AllTest()
         {
             var factory = DataExtensionBuilderHelper.CurrentServices
-                .GetRequiredService<IIdentificationGeneratorFactory>();
+                .GetRequiredService<IIdGeneratorFactory>();
 
             var combId = factory.GetCombIdGeneratorForMySql().GenerateId();
             Assert.NotEqual(Guid.Empty, combId);

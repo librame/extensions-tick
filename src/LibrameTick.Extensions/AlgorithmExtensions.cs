@@ -17,13 +17,20 @@ namespace Librame.Extensions;
 /// </summary>
 public static class AlgorithmExtensions
 {
-    private static readonly Core.Autokey _keys;
+    // 使用自动密钥作为默认的通用密钥基础设施（CKI）
+    private static readonly Autokeys.CkiOptions DefaultCki
+        = Bootstraps.Bootstrapper.GetAutokey().Get().Cki;
 
 
-    static AlgorithmExtensions()
+    /// <summary>
+    /// 使用自动密钥作为默认的通用密钥基础设施（CKI）选项填充当前实例。
+    /// </summary>
+    /// <param name="options">给定的 <see cref="Autokeys.CkiOptions"/>。</param>
+    /// <returns>返回 <see cref="Autokeys.CkiOptions"/>。</returns>
+    public static Autokeys.CkiOptions PopulateDefaultCki(this Autokeys.CkiOptions options)
     {
-        if (_keys is null)
-            _keys = Bootstraps.Bootstrapper.GetAutokey().GetAutokey();
+        options.PopulateAll(DefaultCki);
+        return options;
     }
 
 
@@ -31,6 +38,9 @@ public static class AlgorithmExtensions
 
     private static readonly Lazy<MD5> _md5 =
         new Lazy<MD5>(MD5.Create());
+
+    private static readonly Lazy<SHA1> _sha1 =
+        new Lazy<SHA1>(SHA1.Create());
 
     private static readonly Lazy<SHA256> _sha256 =
         new Lazy<SHA256>(SHA256.Create());
@@ -50,6 +60,15 @@ public static class AlgorithmExtensions
     /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
     public static string AsMd5Base64String(this string plaintext, Encoding? encoding = null)
         => plaintext.FromEncodingString(encoding).AsMd5().AsBase64String();
+
+    /// <summary>
+    /// 计算 SHA1 哈希值，并返回 BASE64 字符串形式。
+    /// </summary>
+    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
+    public static string AsSha1Base64String(this string plaintext, Encoding? encoding = null)
+        => plaintext.FromEncodingString(encoding).AsSha1().AsBase64String();
 
     /// <summary>
     /// 计算 SHA256 哈希值，并返回 BASE64 字符串形式。
@@ -88,6 +107,14 @@ public static class AlgorithmExtensions
         => _md5.Value.ComputeHash(buffer);
 
     /// <summary>
+    /// 计算 SHA1 哈希值。
+    /// </summary>
+    /// <param name="buffer">给定要计算的字节数组。</param>
+    /// <returns>返回经过计算的字节数组。</returns>
+    public static byte[] AsSha1(this byte[] buffer)
+        => _sha1.Value.ComputeHash(buffer);
+
+    /// <summary>
     /// 计算 SHA256 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
@@ -117,29 +144,19 @@ public static class AlgorithmExtensions
     #region HMAC Hash
 
     private static readonly Lazy<HMACMD5> _hmacMd5 =
-        new Lazy<HMACMD5>(InitialHmacMd5);
+        new Lazy<HMACMD5>(() => new HMACMD5(DefaultCki.HmacHash.Md5.Key!));
+
+    private static readonly Lazy<HMACSHA1> _hmacSha1 =
+        new Lazy<HMACSHA1>(() => new HMACSHA1(DefaultCki.HmacHash.Sha1.Key!));
 
     private static readonly Lazy<HMACSHA256> _hmacSha256 =
-        new Lazy<HMACSHA256>(InitialHmacSha256);
+        new Lazy<HMACSHA256>(() => new HMACSHA256(DefaultCki.HmacHash.Sha256.Key!));
 
     private static readonly Lazy<HMACSHA384> _hmacSha384 =
-        new Lazy<HMACSHA384>(InitialHmacSha384);
+        new Lazy<HMACSHA384>(() => new HMACSHA384(DefaultCki.HmacHash.Sha384.Key!));
 
     private static readonly Lazy<HMACSHA512> _hmacSha512 =
-        new Lazy<HMACSHA512>(InitialHmacSha512);
-
-
-    private static HMACMD5 InitialHmacMd5()
-        => new HMACMD5(_keys.HmacMd5Key!);
-
-    private static HMACSHA256 InitialHmacSha256()
-        => new HMACSHA256(_keys.HmacSha256Key!);
-
-    private static HMACSHA384 InitialHmacSha384()
-        => new HMACSHA384(_keys.HmacSha384Key!);
-
-    private static HMACSHA512 InitialHmacSha512()
-        => new HMACSHA512(_keys.HmacSha512Key!);
+        new Lazy<HMACSHA512>(() => new HMACSHA512(DefaultCki.HmacHash.Sha512.Key!));
 
 
     /// <summary>
@@ -151,6 +168,16 @@ public static class AlgorithmExtensions
     public static string AsHmacMd5Base64String(this string plaintext,
         Encoding? encoding = null)
         => plaintext.FromEncodingString(encoding).AsHmacMd5().AsBase64String();
+
+    /// <summary>
+    /// 计算 HMACSHA1 哈希值，并返回 BASE64 字符串形式。
+    /// </summary>
+    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
+    public static string AsHmacSha1Base64String(this string plaintext,
+        Encoding? encoding = null)
+        => plaintext.FromEncodingString(encoding).AsHmacSha1().AsBase64String();
 
     /// <summary>
     /// 计算 HMACSHA256 哈希值，并返回 BASE64 字符串形式。
@@ -192,6 +219,14 @@ public static class AlgorithmExtensions
         => _hmacMd5.Value.ComputeHash(buffer);
 
     /// <summary>
+    /// 计算 HMACSHA1 哈希值。
+    /// </summary>
+    /// <param name="buffer">给定要计算的字节数组。</param>
+    /// <returns>返回经过计算的字节数组。</returns>
+    public static byte[] AsHmacSha1(this byte[] buffer)
+        => _hmacSha1.Value.ComputeHash(buffer);
+
+    /// <summary>
     /// 计算 HMACSHA256 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
@@ -215,35 +250,6 @@ public static class AlgorithmExtensions
     public static byte[] AsHmacSha512(this byte[] buffer)
         => _hmacSha512.Value.ComputeHash(buffer);
 
-
-    /// <summary>
-    /// 获取 HMACMD5 哈希密钥。
-    /// </summary>
-    /// <returns>返回包含密钥和向量的元组。</returns>
-    public static byte[] GetHmacMd5Key()
-        => _hmacMd5.Value.Key;
-
-    /// <summary>
-    /// 获取 HMACSHA256 哈希密钥。
-    /// </summary>
-    /// <returns>返回包含密钥和向量的元组。</returns>
-    public static byte[] GetHmacSha256Key()
-        => _hmacSha256.Value.Key;
-
-    /// <summary>
-    /// 获取 HMACSHA384 哈希密钥。
-    /// </summary>
-    /// <returns>返回包含密钥和向量的元组。</returns>
-    public static byte[] GetHmacSha384Key()
-        => _hmacSha384.Value.Key;
-
-    /// <summary>
-    /// 获取 HMACSHA512 哈希密钥。
-    /// </summary>
-    /// <returns>返回包含密钥和向量的元组。</returns>
-    public static byte[] GetHmacSha512Key()
-        => _hmacSha512.Value.Key;
-
     #endregion
 
 
@@ -256,8 +262,8 @@ public static class AlgorithmExtensions
     {
         var aes = Aes.Create();
 
-        aes.Key = _keys.AesKey!;
-        aes.IV = _keys.AesIV!;
+        aes.Key = DefaultCki.Aes.Key!;
+        aes.IV = DefaultCki.Aes.Nonce!;
 
         return aes;
     }
@@ -304,13 +310,121 @@ public static class AlgorithmExtensions
         return transform.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
     }
 
+    #endregion
+
+
+    #region AES-CCM
+
+    private static readonly Lazy<AesCcm> _aesCcm =
+        new Lazy<AesCcm>(() => new AesCcm(DefaultCki.AesCcm.Key!));
+
 
     /// <summary>
-    /// 获取 AES 密钥和向量。
+    /// AES-CCM 加密 BASE64 字符串形式。
     /// </summary>
-    /// <returns>返回包含密钥和向量的元组。</returns>
-    public static (byte[] key, byte[] iv) GetAesKeyAndIV()
-        => (_aes.Value.Key, _aes.Value.IV);
+    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
+    public static string AsAesCcmWithBase64String(this string plaintext, Encoding? encoding = null)
+        => plaintext.FromEncodingString(encoding).AsAesCcm().AsBase64String();
+
+    /// <summary>
+    /// AES-CCM 解密 BASE64 字符串形式。
+    /// </summary>
+    /// <param name="ciphertext">给定的密文。</param>
+    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <returns>返回经过 BASE64 解码的解密字符串。</returns>
+    public static string FromAesCcmWithBase64String(this string ciphertext, Encoding? encoding = null)
+        => ciphertext.FromBase64String().FromAesCcm().AsEncodingString(encoding);
+
+
+    /// <summary>
+    /// AES-CCM 加密。
+    /// </summary>
+    /// <param name="plaintext">给定的明文。</param>
+    /// <returns>返回经过加密的字节数组。</returns>
+    public static byte[] AsAesCcm(this byte[] plaintext)
+    {
+        var ciphertext = new byte[plaintext.Length];
+
+        _aesCcm.Value.Encrypt(DefaultCki.AesCcm.Nonce!,
+            plaintext, ciphertext, DefaultCki.AesCcm.Tag!);
+
+        return ciphertext;
+    }
+
+    /// <summary>
+    /// AES-CCM 解密。
+    /// </summary>
+    /// <param name="ciphertext">给定的密文。</param>
+    /// <returns>返回经过解密的字节数组。</returns>
+    public static byte[] FromAesCcm(this byte[] ciphertext)
+    {
+        var plaintext = new byte[ciphertext.Length];
+
+        _aesCcm.Value.Decrypt(DefaultCki.AesCcm.Nonce!,
+            ciphertext, DefaultCki.AesCcm.Tag!, plaintext);
+
+        return plaintext;
+    }
+
+    #endregion
+
+
+    #region AES-GCM
+
+    private static readonly Lazy<AesGcm> _aesGcm =
+        new Lazy<AesGcm>(() => new AesGcm(DefaultCki.AesGcm.Key!));
+
+
+    /// <summary>
+    /// AES-GCM 加密 BASE64 字符串形式。
+    /// </summary>
+    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
+    public static string AsAesGcmWithBase64String(this string plaintext, Encoding? encoding = null)
+        => plaintext.FromEncodingString(encoding).AsAesGcm().AsBase64String();
+
+    /// <summary>
+    /// AES-GCM 解密 BASE64 字符串形式。
+    /// </summary>
+    /// <param name="ciphertext">给定的密文。</param>
+    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认使用 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <returns>返回经过 BASE64 解码的解密字符串。</returns>
+    public static string FromAesGcmWithBase64String(this string ciphertext, Encoding? encoding = null)
+        => ciphertext.FromBase64String().FromAesGcm().AsEncodingString(encoding);
+
+
+    /// <summary>
+    /// AES-GCM 加密。
+    /// </summary>
+    /// <param name="plaintext">给定的明文。</param>
+    /// <returns>返回经过加密的字节数组。</returns>
+    public static byte[] AsAesGcm(this byte[] plaintext)
+    {
+        var ciphertext = new byte[plaintext.Length];
+
+        _aesGcm.Value.Encrypt(DefaultCki.AesGcm.Nonce!,
+            plaintext, ciphertext, DefaultCki.AesGcm.Tag!);
+
+        return ciphertext;
+    }
+
+    /// <summary>
+    /// AES-GCM 解密。
+    /// </summary>
+    /// <param name="ciphertext">给定的密文。</param>
+    /// <returns>返回经过解密的字节数组。</returns>
+    public static byte[] FromAesGcm(this byte[] ciphertext)
+    {
+        var plaintext = new byte[ciphertext.Length];
+
+        _aesGcm.Value.Decrypt(DefaultCki.AesGcm.Nonce!,
+            ciphertext, DefaultCki.AesGcm.Tag!, plaintext);
+
+        return plaintext;
+    }
 
     #endregion
 

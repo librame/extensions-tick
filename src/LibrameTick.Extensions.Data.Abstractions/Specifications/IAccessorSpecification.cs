@@ -16,7 +16,7 @@ using Librame.Extensions.Specifications;
 namespace Librame.Extensions.Data.Specifications;
 
 /// <summary>
-/// 定义一个访问器规约接口。
+/// 定义一个存取器规约接口。
 /// </summary>
 public interface IAccessorSpecification : ISpecification<IAccessor>
 {

@@ -6,11 +6,11 @@ namespace Librame.Extensions.Data.Accessing
     {
 
         public static ModelBuilder CreateUserModel(this ModelBuilder modelBuilder,
-            ITestAccessor testAccessor)
+            AbstractDbContextAccessor accessor)
         {
             modelBuilder.Entity<User>(b =>
             {
-                b.ToTableWithSharding(testAccessor.ShardingManager);
+                b.ToTableWithSharding(accessor.ShardingManager);
 
                 b.HasKey(k => k.Id);
 

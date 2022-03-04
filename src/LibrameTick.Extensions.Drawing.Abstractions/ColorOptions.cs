@@ -15,102 +15,37 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Drawing;
 
 /// <summary>
-/// 定义实现 <see cref="IOptionsNotifier"/> 的色彩选项。
+/// 定义实现 <see cref="IOptions"/> 的色彩选项。
 /// </summary>
-public class ColorOptions : AbstractOptionsNotifier
+public class ColorOptions : IOptions
 {
     /// <summary>
-    /// 构造一个独立属性通知器的 <see cref="ColorOptions"/>（此构造函数适用于独立使用 <see cref="ColorOptions"/> 的情况）。
+    /// 前景色（默认为“#0066cc”）。
     /// </summary>
-    /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
-    public ColorOptions(string sourceAliase)
-        : base(sourceAliase)
-    {
-    }
+    public string Fore { get; set; } = "#0066cc";
 
     /// <summary>
-    /// 构造一个 <see cref="ColorOptions"/>。
+    /// 背景色（默认为“#ccffff”）。
     /// </summary>
-    /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-    /// <param name="sourceAliase">给定的源别名。</param>
-    public ColorOptions(IPropertyNotifier parentNotifier, string sourceAliase)
-        : base(parentNotifier, sourceAliase)
-    {
-    }
-
+    public string Background { get; set; } = "#ccffff";
 
     /// <summary>
-    /// 前景色。
+    /// 交替色（默认为“#993366”）。
     /// </summary>
-    public string Fore
-    {
-        get => Notifier.GetOrAdd(nameof(Fore), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Fore), value);
-    }
+    public string Alternate { get; set; } = "#993366";
 
     /// <summary>
-    /// 背景色。
+    /// 干扰色（默认为“#99ccff”）。
     /// </summary>
-    public string Background
-    {
-        get => Notifier.GetOrAdd(nameof(Background), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Background), value);
-    }
+    public string Interference { get; set; } = "#99ccff";
 
     /// <summary>
-    /// 交替色。
+    /// 阴影色（默认为“#ccffff”）。
     /// </summary>
-    public string Alternate
-    {
-        get => Notifier.GetOrAdd(nameof(Alternate), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Alternate), value);
-    }
+    public string Shadow { get; set; } = "#ccffff";
 
     /// <summary>
-    /// 干扰色。
+    /// 水印色（默认为“#ffffff”）。
     /// </summary>
-    public string Interference
-    {
-        get => Notifier.GetOrAdd(nameof(Interference), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Interference), value);
-    }
-
-    /// <summary>
-    /// 阴影色。
-    /// </summary>
-    public string Shadow
-    {
-        get => Notifier.GetOrAdd(nameof(Shadow), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Shadow), value);
-    }
-
-    /// <summary>
-    /// 水印色。
-    /// </summary>
-    public string Watermark
-    {
-        get => Notifier.GetOrAdd(nameof(Watermark), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Watermark), value);
-    }
-
-
-    /// <summary>
-    /// 创建明亮色彩选项。
-    /// </summary>
-    /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-    /// <returns>返回 <see cref="ColorOptions"/>。</returns>
-    public static ColorOptions CreateLightOptions(IPropertyNotifier parentNotifier)
-    {
-        var options = new ColorOptions(parentNotifier, "LightScheme");
-
-        options.Fore = "#0066cc";
-        options.Background = "#ccffff";
-        options.Alternate = "#993366";
-        options.Interference = "#99ccff";
-        options.Shadow = "#ccffff";
-        options.Watermark = "#ffffff";
-
-        return options;
-    }
-
+    public string Watermark { get; set; } = "#ffffff";
 }

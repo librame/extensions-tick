@@ -2,8 +2,8 @@
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public interface ITestAccessor : IDataAccessor
-    {
-        DbSet<User> Users { get; set; }
-    }
+    //public interface ITestAccessor : IDataAccessor
+    //{
+    //    DbSet<User> Users { get; set; }
+    //}
 }

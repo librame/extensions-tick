@@ -56,10 +56,40 @@ namespace Librame.Extensions
 
             var plaintext = ciphertext.FromAesWithBase64String();
             Assert.Equal(str, plaintext);
+        }
 
-            (byte[] key, byte[] iv) = AlgorithmExtensions.GetAesKeyAndIV();
-            Assert.NotEmpty(key);
-            Assert.NotEmpty(iv);
+        #endregion
+
+
+        #region AES-CCM
+
+        [Fact]
+        public void AsAesCcmAndFromAesCcmTest()
+        {
+            var str = nameof(AlgorithmExtensionsTests);
+
+            var ciphertext = str.AsAesCcmWithBase64String();
+            Assert.NotEmpty(ciphertext);
+
+            var plaintext = ciphertext.FromAesCcmWithBase64String();
+            Assert.Equal(str, plaintext);
+        }
+
+        #endregion
+
+
+        #region AES-GCM
+
+        [Fact]
+        public void AsAesGcmAndFromAesGcmTest()
+        {
+            var str = nameof(AlgorithmExtensionsTests);
+
+            var ciphertext = str.AsAesGcmWithBase64String();
+            Assert.NotEmpty(ciphertext);
+
+            var plaintext = ciphertext.FromAesGcmWithBase64String();
+            Assert.Equal(str, plaintext);
         }
 
         #endregion

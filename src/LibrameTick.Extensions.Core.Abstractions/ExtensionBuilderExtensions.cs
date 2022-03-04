@@ -55,31 +55,6 @@ public static class ExtensionBuilderExtensions
     }
 
 
-    /// <summary>
-    /// 将服务注册的所有扩展选项保存为 JSON 文件。
-    /// </summary>
-    /// <param name="lastBuilder">给定的 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    /// <returns>返回包含 JSON 文件路径和选项实例的字典集合。</returns>
-    public static Dictionary<string, IExtensionOptions> SaveAllOptionsAsJson(this IExtensionBuilder lastBuilder,
-        IServiceProvider services)
-    {
-        var allOptions = new Dictionary<string, IExtensionOptions>();
-
-        SaveJson(allOptions, lastBuilder);
-
-        return allOptions;
-
-        void SaveJson(Dictionary<string, IExtensionOptions> dict, IExtensionBuilder currentBuilder)
-        {
-            dict.Add(currentBuilder.SaveOptionsAsJson(services, out var options), options);
-
-            if (currentBuilder.ParentBuilder is not null)
-                SaveJson(dict, currentBuilder.ParentBuilder); // 链式保存
-        }
-    }
-
-
     #region TryAddOrReplaceService
 
     /// <summary>

@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Autokeys;
 
 namespace Librame.Extensions.Bootstraps;
 
@@ -20,14 +20,14 @@ namespace Librame.Extensions.Bootstraps;
 public interface IAutokeyBootstrap : IBootstrap
 {
     /// <summary>
-    /// 自动密钥文件路径。
+    /// 自动密钥提供程序。
     /// </summary>
-    string? AutokeyFilePath { get; }
+    IAutokeyProvider Provider { get; }
 
 
     /// <summary>
     /// 获取自动密钥。
     /// </summary>
     /// <returns>返回 <see cref="Autokey"/>。</returns>
-    Autokey GetAutokey();
+    Autokey Get();
 }

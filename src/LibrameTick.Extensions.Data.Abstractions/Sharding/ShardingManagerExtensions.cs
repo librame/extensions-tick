@@ -153,7 +153,7 @@ public static class ShardingManagerExtensions
 
 
     /// <summary>
-    /// 对访问器进行分库。
+    /// 对存取器进行分库。
     /// </summary>
     /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>

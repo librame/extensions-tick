@@ -1,4 +1,3 @@
-using Librame.Extensions.Core;
 using Librame.Extensions.Data.Specifications;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
@@ -48,9 +47,6 @@ namespace Librame.Extensions.Data.Accessing
                 {
                     // 测试时每次运行需新建数据库
                     opts.Access.EnsureDatabaseDeleted = true;
-
-                    // 每次修改选项时自动保存为 JSON 文件
-                    opts.PropertyChangedAction = (o, e) => o?.SaveOptionsAsJson();
                 })
                 .AddSeeder<InternalTestAccessorSeeder>()
                 .AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
@@ -58,9 +54,6 @@ namespace Librame.Extensions.Data.Accessing
                 .AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>();
 
             var provider = services.BuildServiceProvider();
-
-            // 首次保存所有扩展选项为 JSON 文件
-            var dict = builder.SaveAllOptionsAsJson(provider);
 
             provider.UseAccessorInitializer();
 

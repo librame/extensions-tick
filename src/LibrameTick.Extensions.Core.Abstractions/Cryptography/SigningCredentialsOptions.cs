@@ -13,59 +13,42 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义实现 <see cref="IOptionsNotifier"/> 的签名证书选项。
+/// 定义实现 <see cref="IOptions"/> 的签名证书选项。
 /// </summary>
-public class SigningCredentialsOptions : AbstractOptionsNotifier
+public class SigningCredentialsOptions : IOptions
 {
-    /// <summary>
-    /// 构造一个独立属性通知器的 <see cref="SigningCredentialsOptions"/>（此构造函数适用于独立使用 <see cref="SigningCredentialsOptions"/> 的情况）。
-    /// </summary>
-    /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
-    public SigningCredentialsOptions(string sourceAliase)
-        : base(sourceAliase)
-    {
-    }
+    private SigningCredentials? _credentials;
+
 
     /// <summary>
     /// 构造一个 <see cref="SigningCredentialsOptions"/>。
     /// </summary>
-    /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
-    public SigningCredentialsOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
-        : base(parentNotifier, sourceAliase)
+    /// <param name="provider">给定的 <see cref="ISigningCredentialsProvider"/>（可选；默认使用支持 JSON 文件格式的 <see cref="RsaSigningCredentialsProvider"/>）。</param>
+    public SigningCredentialsOptions(ISigningCredentialsProvider? provider = null)
     {
+        Provider = provider ?? new RsaSigningCredentialsProvider(new JsonFileRsaKeyProvider());
     }
 
 
     /// <summary>
-    /// 证书文件（不包含路径，通常位于应用程序根目录；默认兼容 IdentityServer4 生成的临时密钥文件）。
+    /// 签名证书提供程序。
     /// </summary>
-    public string CredentialsFile
-    {
-        get => Notifier.GetOrAdd(nameof(CredentialsFile), "tempkey.rsa");
-        set => Notifier.AddOrUpdate(nameof(CredentialsFile), value);
-    }
+    public ISigningCredentialsProvider? Provider { get; set; }
 
     /// <summary>
     /// 签名证书。
     /// </summary>
     [JsonIgnore]
-    public SigningCredentials Credentials
+    public SigningCredentials? Credentials
     {
-        get => Notifier.GetOrAdd(nameof(Credentials), CredentialsFile.LoadOrCreateCredentialsFromFile());
-        set => Notifier.AddOrUpdate(nameof(Credentials), value);
-    }
+        get
+        {
+            if (_credentials is null && Provider is not null)
+                _credentials = Provider.Load();
 
-
-    /// <summary>
-    /// 设置签名证书方法。
-    /// </summary>
-    /// <param name="credentialsFunc">给定的签名证书方法。</param>
-    /// <returns>返回签名证书方法。</returns>
-    public Func<SigningCredentials> SetCredentialsFunc(Func<SigningCredentials> credentialsFunc)
-    {
-        Notifier.AddOrUpdate(nameof(Credentials), credentialsFunc);
-        return credentialsFunc;
+            return _credentials;
+        }
+        set => _credentials = value;
     }
 
 
@@ -81,6 +64,6 @@ public class SigningCredentialsOptions : AbstractOptionsNotifier
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{nameof(CredentialsFile)}={CredentialsFile},{nameof(Credentials.Key.KeySize)}={Credentials.Key.KeySize},{nameof(Credentials.Key.KeyId)}={Credentials.Key.KeyId}";
+        => $"{nameof(SigningCredentials.Key.KeyId)}:{Credentials?.Key.KeyId},{nameof(SigningCredentials.Key.KeySize)}:{Credentials?.Key.KeySize}";
 
 }

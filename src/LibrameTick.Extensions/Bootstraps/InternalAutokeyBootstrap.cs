@@ -10,37 +10,25 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Autokeys;
 
 namespace Librame.Extensions.Bootstraps;
 
 class InternalAutokeyBootstrap : AbstsractBootstrap, IAutokeyBootstrap
 {
-    public string? AutokeyFilePath
-        => Autokey.GetDefaultFilePath();
+    public IAutokeyProvider Provider
+        => new JsonFileAutokeyProvider();
 
 
-    public Autokey GetAutokey()
+    public Autokey Get()
     {
-        if (string.IsNullOrEmpty(AutokeyFilePath) || !File.Exists(AutokeyFilePath))
-            return GetDefaultAutokey();
+        // 如果不存在 JSON 文件格式的自动密钥
+        if (!Provider.Exist())
+            return Autokey.Fixed(); // 则直接使用固定的自动密钥
 
-        return Autokey.ReadJsonFile(AutokeyFilePath);
-    }
-
-
-    private Autokey GetDefaultAutokey()
-    {
-        return new Autokey
-        {
-            Id = Convert.FromBase64String("5JZ1OolMn7VkmvnDYExRwg=="),
-            HmacMd5Key = Convert.FromBase64String("hl9V6MZP0Bw="),
-            HmacSha256Key = Convert.FromBase64String("bXO8uwG8ysg="),
-            HmacSha384Key = Convert.FromBase64String("s1Q5eN6jd+XK93rGCYce/Q=="),
-            HmacSha512Key = Convert.FromBase64String("oRrbMJzkE1/3Rt7AGPeBQw=="),
-            AesKey = Convert.FromBase64String("ojtZ/C8xb09aZaWZp03PaEq9XHBqosAxXEumFYuptHg="),
-            AesIV = Convert.FromBase64String("5OS2V4WXI56HgYZAptOs7w==")
-        };
+        // 支持加载独立配置的自动密钥
+        return Provider.Load();
+        //return Provider.LoadOrSaveAutokey();
     }
 
 }

@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Drawing.Drawers;
 
-class InternalWatermarkDrawer : AbstractDrawer, IWatermarkDrawer
+class InternalWatermarkDrawer : AbstractInternalDrawer, IWatermarkDrawer
 {
     private SKPaint _forePaint;
     private SKPaint _alternPaint;
@@ -20,7 +20,7 @@ class InternalWatermarkDrawer : AbstractDrawer, IWatermarkDrawer
 
 
     public InternalWatermarkDrawer(IOptionsMonitor<DrawingExtensionOptions> options)
-        : base(options.CurrentValue)
+        : base(options)
     {
         _forePaint = Options.Watermark.Font.CreatePaint(Options.Colors.Fore);
         _alternPaint = Options.Watermark.Font.CreatePaint(Options.Colors.Alternate);

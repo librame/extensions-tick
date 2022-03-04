@@ -29,10 +29,10 @@ public static class ModelBuilderAccessorExtensions
     /// </summary>
     /// <param name="mutableEntityType">给定的 <see cref="IMutableEntityType"/>。</param>
     /// <param name="converterFactory">给定的 <see cref="IEncryptionConverterFactory"/>。</param>
-    /// <param name="accessor">给定的 <see cref="IDataAccessor"/>。</param>
+    /// <param name="accessor">给定的 <see cref="AbstractDbContextAccessor"/>。</param>
     /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
     public static IMutableEntityType UseEncryption(this IMutableEntityType mutableEntityType,
-        IEncryptionConverterFactory converterFactory, IDataAccessor accessor)
+        IEncryptionConverterFactory converterFactory, AbstractDbContextAccessor accessor)
     {
         var encryptedProperties = mutableEntityType.ClrType.GetProperties()
             .Where(p => Attribute.IsDefined(p, _encryptedAttributeType));

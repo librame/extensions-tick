@@ -19,7 +19,7 @@ class InternalAccessorResolver : IAccessorResolver
     private static readonly Type _dbContextType
         = typeof(DbContext);
 
-    // 限定访问器必需实现 DbContext 和 IAccessor
+    // 限定存取器必需实现 DbContext 和 IAccessor
     private static readonly Func<ServiceDescriptor, bool> _accessorServicePredicate
         = sd => sd.ServiceType.IsAssignableTo(_dbContextType) && sd.ServiceType.IsAssignableTo(_accessorType);
 

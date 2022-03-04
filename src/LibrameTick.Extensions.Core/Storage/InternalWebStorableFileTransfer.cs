@@ -18,24 +18,27 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
 {
     private readonly IWebFilePermission _permission;
     private readonly IHttpClientInvokerFactory _factory;
-    private readonly CoreExtensionOptions _options;
+    private readonly IOptionsMonitor<CoreExtensionOptions> _optionsMonitor;
 
 
     public InternalWebStorableFileTransfer(IWebFilePermission permission,
-        IHttpClientInvokerFactory factory, IOptionsMonitor<CoreExtensionOptions> options)
+        IHttpClientInvokerFactory factory,
+        IOptionsMonitor<CoreExtensionOptions> optionsMonitor)
     {
         _permission = permission;
         _factory = factory;
-        _options = options.CurrentValue;
-        
-        Encoding = _options.Algorithm.Encoding;
-        BufferSize = _options.WebFile.BufferSize;
+        _optionsMonitor = optionsMonitor;
     }
 
 
-    public Encoding Encoding { get; }
+    public CoreExtensionOptions Options
+        => _optionsMonitor.CurrentValue;
 
-    public int BufferSize { get; set; }
+    public Encoding Encoding
+        => Options.Algorithm.Encoding;
+
+    public int BufferSize
+        => Options.WebFile.BufferSize;
 
 
     public bool UseAccessToken { get; set; }
@@ -216,7 +219,7 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
 
     private async Task<HttpClient> CreateClientAsync(CancellationToken cancellationToken = default)
     {
-        var client = _factory.CreateClient(_options.WebFile.HttpClientInvoking);
+        var client = _factory.CreateClient(Options.WebFile.HttpClient);
         
         // Authentication: Basic
         if (UseBasicAuthentication)

@@ -14,6 +14,7 @@ using Librame.Extensions.Collections;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Equilizers;
 
 namespace Librame.Extensions.Data.Accessing;
 

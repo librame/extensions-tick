@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义支持对访问器集合进行聚合或切片的冗余模式。
+/// 定义支持对存取器集合进行聚合或切片的冗余模式。
 /// </summary>
 public enum RedundancyMode
 {

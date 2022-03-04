@@ -91,13 +91,13 @@ public sealed class PropertyNotifier : IPropertyNotifier
     {
         // 调用属性改变时事件处理程序
         PropertyChanging?.Invoke(this,
-            new NotifyPropertyChangingEventArgs(propertyName, changingValue, oldValue, isUpdate));
+            new PropertyNoticeChangingEventArgs(propertyName, changingValue, oldValue, isUpdate));
 
         action();
 
         // 调用属性改变后事件处理程序
         PropertyChanged?.Invoke(this,
-            new NotifyPropertyChangedEventArgs(propertyName, changingValue, oldValue, isUpdate));
+            new PropertyNoticeChangedEventArgs(propertyName, changingValue, oldValue, isUpdate));
     }
 
 

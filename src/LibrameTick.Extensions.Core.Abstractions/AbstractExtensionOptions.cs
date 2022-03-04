@@ -68,56 +68,11 @@ public abstract class AbstractExtensionOptions : AbstractExtensionInfo, IExtensi
     protected AbstractExtensionOptions(IDirectoryStructureBootstrap directories)
     {
         Directories = directories;
-
-        Notifier.PropertyChanged += Notifier_PropertyChanged;
-        Notifier.PropertyChanging += Notifier_PropertyChanging;
     }
 
 
     /// <summary>
     /// 目录集合。
     /// </summary>
-    public IDirectoryStructureBootstrap Directories { get; init; }
-
-    /// <summary>
-    /// 属性通知器。
-    /// </summary>
-    [JsonIgnore]
-    public IPropertyNotifier Notifier
-        => new PropertyNotifier(this, ExtensionName);
-
-
-    /// <summary>
-    /// 属性改变后动作。
-    /// </summary>
-    [JsonIgnore]
-    public Action<IExtensionOptions?, NotifyPropertyChangedEventArgs>? PropertyChangedAction { get; set; }
-
-    /// <summary>
-    /// 属性改变时动作。
-    /// </summary>
-    [JsonIgnore]
-    public Action<IExtensionOptions?, NotifyPropertyChangingEventArgs>? PropertyChangingAction { get; set; }
-
-
-    /// <summary>
-    /// 属性改变后的事件方法。
-    /// </summary>
-    /// <param name="sender">给定的事件发起者。</param>
-    /// <param name="e">给定的 <see cref="PropertyChangedEventArgs"/>。</param>
-    protected virtual void Notifier_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        PropertyChangedAction?.Invoke((IExtensionOptions?)sender, (NotifyPropertyChangedEventArgs)e);
-    }
-
-    /// <summary>
-    /// 属性改变时的事件方法。
-    /// </summary>
-    /// <param name="sender">给定的事件发起者。</param>
-    /// <param name="e">给定的 <see cref="PropertyChangingEventArgs"/>。</param>
-    protected virtual void Notifier_PropertyChanging(object? sender, PropertyChangingEventArgs e)
-    {
-        PropertyChangingAction?.Invoke((IExtensionOptions?)sender, (NotifyPropertyChangingEventArgs)e);
-    }
-
+    public IDirectoryStructureBootstrap Directories { get; set; }
 }

@@ -16,7 +16,7 @@ using Librame.Extensions.Specifications;
 namespace Librame.Extensions.Data.Specifications;
 
 /// <summary>
-/// 定义实现 <see cref="IAccessorSpecification"/> 的基础访问器规约（默认按优先级进行升序排列）。
+/// 定义实现 <see cref="IAccessorSpecification"/> 的基础存取器规约（默认按优先级进行升序排列）。
 /// </summary>
 public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessorSpecification
 {
@@ -60,7 +60,7 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
 
 
     /// <summary>
-    /// 评估可枚举访问器。
+    /// 评估可枚举存取器。
     /// </summary>
     /// <param name="enumerable">给定的 <see cref="IEnumerable{IAccessor}"/>。</param>
     /// <returns>返回 <see cref="IEnumerable{IAccessor}"/>。</returns>
@@ -82,7 +82,7 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     }
 
     /// <summary>
-    /// 出具可枚举访问器。
+    /// 出具可枚举存取器。
     /// </summary>
     /// <param name="enumerable">给定的 <see cref="IEnumerable{IAccessor}"/>。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>

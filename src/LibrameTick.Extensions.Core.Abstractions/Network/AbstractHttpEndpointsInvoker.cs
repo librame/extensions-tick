@@ -21,8 +21,9 @@ public abstract class AbstractHttpEndpointsInvoker : IHttpEndpointsInvoker
 {
     private readonly ILogger _logger;
     private readonly IHttpClientInvokerFactory _factory;
-    private readonly HttpClientRequestOptions _requestOptions;
-    private readonly AlgorithmOptions _algorithmOptions;
+
+    private HttpClientRequestOptions _requestOptions;
+    private AlgorithmOptions _algorithmOptions;
 
 
     /// <summary>
@@ -62,7 +63,7 @@ public abstract class AbstractHttpEndpointsInvoker : IHttpEndpointsInvoker
         var results = new List<string>();
 
         Uri? lastUri = null;
-        var client = _factory.CreateClient(_requestOptions.HttpClientInvoking);
+        var client = _factory.CreateClient(_requestOptions.HttpClient);
 
         _logger.LogInformation($"Use text encoding: {Encoding.AsEncodingName()}");
 
@@ -245,7 +246,7 @@ public abstract class AbstractHttpEndpointsInvoker : IHttpEndpointsInvoker
             case HttpClientContentTypes.Stream:
                 {
                     _logger.LogInformation($"Use 'binary' content type: {endpointOptions.Parameters}");
-                    return new ByteArrayContent(endpointOptions.Parameters.FromBase64String());
+                    return new ByteArrayContent(endpointOptions.Parameters!.FromBase64String());
                 }
 
             default:

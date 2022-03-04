@@ -23,11 +23,6 @@ public interface IExtensionBuilder : IExtensionInfo
     IExtensionBuilder? ParentBuilder { get; }
 
     /// <summary>
-    /// 扩展选项类型。
-    /// </summary>
-    Type ExtensionOptionsType { get; }
-
-    /// <summary>
     /// 替换服务字典集合。
     /// </summary>
     IDictionary<Type, Type> ReplacedServices { get; }
@@ -41,20 +36,4 @@ public interface IExtensionBuilder : IExtensionInfo
     /// 服务特征集合。
     /// </summary>
     ServiceCharacteristicCollection ServiceCharacteristics { get; }
-
-
-    /// <summary>
-    /// 将扩展选项保存为 JSON 文件。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    /// <returns>返回保存路径。</returns>
-    string SaveOptionsAsJson(IServiceProvider services);
-
-    /// <summary>
-    /// 将扩展选项保存为 JSON 文件。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    /// <param name="options">输出 <see cref="IExtensionOptions"/>。</param>
-    /// <returns>返回保存路径。</returns>
-    string SaveOptionsAsJson(IServiceProvider services, out IExtensionOptions options);
 }

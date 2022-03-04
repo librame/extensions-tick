@@ -41,7 +41,8 @@ public abstract class AbstractPluginResolver : IPluginResolver
     {
         if (_infos is null)
         {
-            var infoTypes = AssemblyLoader.LoadConcreteTypes(typeof(IPluginInfo), _options.AssemblyLoading);
+            var instantiator = new AssembliesInstantiator(_options.AssemblyLoading);
+            var infoTypes = instantiator.Create().ExportedConcreteTypes<IPluginInfo>().ToArray();
 
             if (infoTypes is null || infoTypes.Length < 1)
                 throw new DllNotFoundException($"The plugin assembly implementing {nameof(IPluginInfo)} was not found, please confirm that any plugin package is installed.");

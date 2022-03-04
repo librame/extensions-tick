@@ -24,13 +24,13 @@ public interface IAccessorInitializer
 
 
     /// <summary>
-    /// 初始化访问器。
+    /// 初始化存取器。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     void Initialize(IServiceProvider services);
 
     /// <summary>
-    /// 异步初始化访问器。
+    /// 异步初始化存取器。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>

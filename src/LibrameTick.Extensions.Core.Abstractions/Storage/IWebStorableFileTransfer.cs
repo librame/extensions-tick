@@ -25,7 +25,7 @@ public interface IWebStorableFileTransfer
     /// <summary>
     /// 缓冲区大小。
     /// </summary>
-    int BufferSize { get; set; }
+    int BufferSize { get; }
 
 
     /// <summary>

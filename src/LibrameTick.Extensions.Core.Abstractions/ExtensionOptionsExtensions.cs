@@ -47,16 +47,19 @@ public static class ExtensionOptionsExtensions
 
 
     /// <summary>
-    /// 将扩展选项保存为 JSON 文件。
+    /// 将扩展选项导出为 JSON 文件。
     /// </summary>
     /// <param name="options">给定的 <see cref="IExtensionOptions"/>。</param>
+    /// <param name="filePath">给定要保存的文件名。</param>
     /// <returns>返回保存的路径字符串。</returns>
-    public static string SaveOptionsAsJson(this IExtensionOptions options)
+    public static string ExportAsJson(this IExtensionOptions options, string? filePath = null)
     {
-        var jsonPath = options.BuildJsonFilePath();
-        jsonPath.SerializeJsonFile(options);
+        if (string.IsNullOrEmpty(filePath))
+            filePath = options.BuildJsonFilePath();
 
-        return jsonPath;
+        filePath.SerializeJsonFile(options);
+
+        return filePath;
     }
 
 }

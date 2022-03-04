@@ -30,22 +30,24 @@ public static class DataExtensionBuilderExtensions
     /// 注册 Librame 数据扩展构建器。
     /// </summary>
     /// <param name="parentBuilder">给定的 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
-    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
-    /// <param name="setupBuilder">给定用于设置构建器的动作（可选；为空则不设置）。</param>
+    /// <param name="setupOptions">给定可用于设置 <see cref="DataExtensionOptions"/> 选项的动作（可选；为空则不设置）。</param>
+    /// <param name="configuration">给定可用于 <see cref="DataExtensionOptions"/> 选项的配置对象（可选；为空则不配置）。</param>
     /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
     public static DataExtensionBuilder AddData(this IExtensionBuilder parentBuilder,
-        Action<DataExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null,
-        Action<DataExtensionBuilder>? setupBuilder = null)
+        Action<DataExtensionOptions>? setupOptions = null, IConfiguration? configuration = null)
     {
-        if (configOptions is null)
-            configOptions = typeof(DataExtensionOptions).GetConfigOptionsFromJson();
+        // 配置扩展选项
+        parentBuilder.ConfigureExtensionOptions(setupOptions, configuration);
 
-        var builder = new DataExtensionBuilder(parentBuilder, setupOptions, configOptions);
-        setupBuilder?.Invoke(builder);
+        var builder = new DataExtensionBuilder(parentBuilder);
 
-        builder.AddAccessing().AddAuditing().AddIdentification()
-            .AddSharding().AddStoring().AddValueConversion();
+        builder
+            .AddAccessing()
+            .AddAuditing()
+            .AddIdentification()
+            .AddSharding()
+            .AddStoring()
+            .AddValueConversion();
 
         return builder;
     }
@@ -69,7 +71,7 @@ public static class DataExtensionBuilderExtensions
 
     private static DataExtensionBuilder AddIdentification(this DataExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService<IIdentificationGeneratorFactory, InternalIdentificationGeneratorFactory>();
+        builder.TryAddOrReplaceService<IIdGeneratorFactory, InternalIdGeneratorFactory>();
 
         return builder;
     }

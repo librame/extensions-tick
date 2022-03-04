@@ -2,7 +2,7 @@
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestSqliteAccessor : AbstractTestAccessor<TestSqliteAccessor>
+    public class TestSqliteAccessor : BaseTestAccessor<TestSqliteAccessor>
     {
 
         public TestSqliteAccessor(DbContextOptions<TestSqliteAccessor> options)

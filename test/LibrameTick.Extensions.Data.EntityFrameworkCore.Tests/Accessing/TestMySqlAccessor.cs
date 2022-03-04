@@ -2,7 +2,7 @@
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestMySqlAccessor : AbstractTestAccessor<TestMySqlAccessor>
+    public class TestMySqlAccessor : BaseTestAccessor<TestMySqlAccessor>
     {
         public TestMySqlAccessor(DbContextOptions<TestMySqlAccessor> options)
             : base(options)

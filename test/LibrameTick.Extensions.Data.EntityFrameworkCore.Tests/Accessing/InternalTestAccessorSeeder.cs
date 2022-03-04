@@ -12,7 +12,7 @@ namespace Librame.Extensions.Data.Accessing
 
 
         public InternalTestAccessorSeeder(IOptionsMonitor<CoreExtensionOptions> options,
-            IIdentificationGeneratorFactory idGeneratorFactory)
+            IIdGeneratorFactory idGeneratorFactory)
             : base(options.CurrentValue.Clock, idGeneratorFactory)
         {
         }

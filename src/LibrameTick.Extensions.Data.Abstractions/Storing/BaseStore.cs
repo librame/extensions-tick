@@ -13,6 +13,7 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.IdGenerators;
 
 namespace Librame.Extensions.Data.Storing;
 
@@ -27,9 +28,9 @@ public class BaseStore<T> : IStore<T>
     /// 构造一个 <see cref="BaseStore{T}"/>。
     /// </summary>
     /// <param name="accessors">给定的 <see cref="IAccessorManager"/>。</param>
-    /// <param name="idGeneratorFactory">给定的 <see cref="IIdentificationGeneratorFactory"/>。</param>
+    /// <param name="idGeneratorFactory">给定的 <see cref="IIdGeneratorFactory"/>。</param>
     public BaseStore(IAccessorManager accessors,
-        IIdentificationGeneratorFactory idGeneratorFactory)
+        IIdGeneratorFactory idGeneratorFactory)
     {
         Accessors = accessors;
         IdGeneratorFactory = idGeneratorFactory;
@@ -42,18 +43,18 @@ public class BaseStore<T> : IStore<T>
     public IAccessorManager Accessors { get; init; }
 
     /// <summary>
-    /// <see cref="IIdentificationGenerator{TId}"/> 工厂。
+    /// <see cref="IIdGenerator{TId}"/> 工厂。
     /// </summary>
-    public IIdentificationGeneratorFactory IdGeneratorFactory { get; init; }
+    public IIdGeneratorFactory IdGeneratorFactory { get; init; }
 
     /// <summary>
-    /// 当前访问器。
+    /// 当前存取器。
     /// </summary>
     public IAccessor? CurrentAccessor { get; private set; }
 
 
     /// <summary>
-    /// 获取访问器。
+    /// 获取存取器。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
@@ -189,7 +190,7 @@ public class BaseStore<T> : IStore<T>
     #region Add
 
     /// <summary>
-    /// 如果不存在则添加类型实例（仅支持写入访问器）。
+    /// 如果不存在则添加类型实例（仅支持写入存取器）。
     /// </summary>
     /// <param name="item">给定要添加的类型实例。</param>
     /// <param name="predicate">给定用于判定是否存在的工厂方法。</param>
@@ -199,7 +200,7 @@ public class BaseStore<T> : IStore<T>
         => (CurrentAccessor = Accessors.GetWriteAccessor(specification)).AddIfNotExists(item, predicate); // 使用元素对象作为分库依据
 
     /// <summary>
-    /// 添加类型实例集合（仅支持写入访问器）。
+    /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="entities">给定的类型实例数组集合。</param>
@@ -207,7 +208,7 @@ public class BaseStore<T> : IStore<T>
         => (CurrentAccessor = Accessors.GetWriteAccessor(specification)).AddRange(entities);
 
     /// <summary>
-    /// 添加类型实例集合（仅支持写入访问器）。
+    /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
@@ -220,7 +221,7 @@ public class BaseStore<T> : IStore<T>
     #region Remove
 
     /// <summary>
-    /// 移除类型实例集合（仅支持写入访问器）。
+    /// 移除类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="entities">给定的类型实例数组集合。</param>
@@ -228,7 +229,7 @@ public class BaseStore<T> : IStore<T>
         => (CurrentAccessor = Accessors.GetWriteAccessor(specification)).RemoveRange(entities);
 
     /// <summary>
-    /// 移除类型实例集合（仅支持写入访问器）。
+    /// 移除类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
@@ -241,7 +242,7 @@ public class BaseStore<T> : IStore<T>
     #region Update
 
     /// <summary>
-    /// 更新类型实例集合（仅支持写入访问器）。
+    /// 更新类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="entities">给定的类型实例数组集合。</param>
@@ -249,7 +250,7 @@ public class BaseStore<T> : IStore<T>
         => (CurrentAccessor = Accessors.GetWriteAccessor(specification)).UpdateRange(entities);
 
     /// <summary>
-    /// 更新类型实例集合（仅支持写入访问器）。
+    /// 更新类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
@@ -262,7 +263,7 @@ public class BaseStore<T> : IStore<T>
     #region SaveChanges
 
     /// <summary>
-    /// 保存更改（仅支持写入访问器）。
+    /// 保存更改（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <returns>返回受影响的行数。</returns>
@@ -270,7 +271,7 @@ public class BaseStore<T> : IStore<T>
         => (CurrentAccessor = Accessors.GetWriteAccessor(specification)).SaveChanges();
 
     /// <summary>
-    /// 异步保存更改（仅支持写入访问器）。
+    /// 异步保存更改（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>

@@ -12,16 +12,16 @@ namespace Librame.Extensions.Core.Storage
             var permission = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<IWebFilePermission>();
 
             var accessToken = await permission.GetAccessTokenAsync().ConfigureAwait();
-            Assert.NotEmpty(accessToken);
+            Assert.NotNull(accessToken);
 
             var basicCode = await permission.GetBasicCodeAsync().ConfigureAwait();
-            Assert.NotEmpty(basicCode);
+            Assert.NotNull(basicCode);
 
             var bearerToken = await permission.GetBearerTokenAsync().ConfigureAwait();
-            Assert.NotEmpty(bearerToken);
+            Assert.NotNull(bearerToken);
 
             var cookieValue = await permission.GetCookieValueAsync().ConfigureAwait();
-            Assert.NotEmpty(cookieValue);
+            Assert.NotNull(cookieValue);
         }
 
     }

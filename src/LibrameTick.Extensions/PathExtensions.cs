@@ -218,11 +218,11 @@ public static class PathExtensions
 
     #region IniFile
 
-    [DllImport(DllImportExtensions.Kernel32DllName)]
+    [DllImport(Core.DllNames.Kernel32)]
     private static extern int GetPrivateProfileString(string section, string key,
         string defValue, StringBuilder retValue, int size, string filePath);
 
-    [DllImport(DllImportExtensions.Kernel32DllName)]
+    [DllImport(Core.DllNames.Kernel32)]
     private static extern long WritePrivateProfileString(string section, string key,
         string value, string filePath);
 

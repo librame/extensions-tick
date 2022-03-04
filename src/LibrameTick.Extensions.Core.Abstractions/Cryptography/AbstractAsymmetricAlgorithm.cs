@@ -49,7 +49,10 @@ public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetr
         if (options is null)
             options = Options.Rsa;
 
-        var rsa = options.Credentials.AsRsa();
+        if (!(options.Provider is IRsaSigningCredentialsProvider rsaProvider))
+            throw new NotSupportedException($"{nameof(options)}.{nameof(options.Provider)} unimplemented {nameof(IRsaSigningCredentialsProvider)}.");
+
+        var rsa = rsaProvider.LoadRsa();
         return rsa.Encrypt(buffer, RsaPadding);
     }
 
@@ -64,7 +67,10 @@ public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetr
         if (options is null)
             options = Options.Rsa;
 
-        var rsa = options.Credentials.AsRsa();
+        if (!(options.Provider is IRsaSigningCredentialsProvider rsaProvider))
+            throw new NotSupportedException($"{nameof(options)}.{nameof(options.Provider)} unimplemented {nameof(IRsaSigningCredentialsProvider)}.");
+
+        var rsa = rsaProvider.LoadRsa();
         return rsa.Decrypt(buffer, RsaPadding);
     }
 

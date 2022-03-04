@@ -17,7 +17,16 @@ namespace Librame.Extensions.Core
                 var fileProvider = new PhysicalStorableFileProvider(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath);
 
                 var services = new ServiceCollection();
-                _builder = services.AddLibrameCore(opts => opts.WebFile.FileProviders.Add(fileProvider));
+                _builder = services.AddLibrameCore(opts =>
+                {
+                    opts.WebFile.AccessToken = "Test access token.";
+                    opts.WebFile.UserName = "Test user name.";
+                    opts.WebFile.Password = "Test password.";
+                    opts.WebFile.JwtToken = "Test jwt token.";
+                    opts.WebFile.CookieName = "Test cookie name.";
+
+                    opts.WebFile.FileProviders.Add(fileProvider);
+                });
             }
 
             if (_services is null)

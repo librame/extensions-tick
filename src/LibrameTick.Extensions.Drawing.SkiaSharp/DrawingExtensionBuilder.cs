@@ -19,7 +19,7 @@ namespace Librame.Extensions.Drawing;
 /// <summary>
 /// 定义实现 <see cref="IExtensionBuilder"/> 的图画扩展构建器。
 /// </summary>
-public class DrawingExtensionBuilder : BaseExtensionBuilder<DrawingExtensionBuilder, DrawingExtensionOptions>
+public class DrawingExtensionBuilder : AbstractExtensionBuilder<DrawingExtensionBuilder>
 {
     /// <summary>
     /// 构造一个 <see cref="DrawingExtensionBuilder"/>。
@@ -28,11 +28,8 @@ public class DrawingExtensionBuilder : BaseExtensionBuilder<DrawingExtensionBuil
     /// <paramref name="parentBuilder"/> 为空。
     /// </exception>
     /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
-    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
-    public DrawingExtensionBuilder(IExtensionBuilder parentBuilder,
-        Action<DrawingExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null)
-        : base(parentBuilder, setupOptions, configOptions)
+    public DrawingExtensionBuilder(IExtensionBuilder parentBuilder)
+        : base(parentBuilder)
     {
         // Drawers
         ServiceCharacteristics.AddSingleton<ISavingDrawer>();

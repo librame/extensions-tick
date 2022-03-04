@@ -19,7 +19,7 @@ namespace Librame.Extensions.Core;
 /// <summary>
 /// 定义实现 <see cref="IExtensionBuilder"/> 的核心扩展构建器。
 /// </summary>
-public class CoreExtensionBuilder : BaseExtensionBuilder<CoreExtensionBuilder, CoreExtensionOptions>
+public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionBuilder>
 {
     /// <summary>
     /// 构造一个 <see cref="CoreExtensionBuilder"/>。
@@ -28,18 +28,9 @@ public class CoreExtensionBuilder : BaseExtensionBuilder<CoreExtensionBuilder, C
     /// <paramref name="services"/> 为空。
     /// </exception>
     /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
-    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
-    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
-    public CoreExtensionBuilder(IServiceCollection services,
-        Action<CoreExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null)
-        : base(services, setupOptions, configOptions)
+    public CoreExtensionBuilder(IServiceCollection services)
+        : base(services)
     {
-        if (!Services.ContainsService<IMemoryCache>())
-            Services.AddMemoryCache();
-
-        if (!Services.ContainsService<IHttpClientFactory>())
-            Services.AddHttpClient();
-
         // Cryptography
         ServiceCharacteristics.AddSingleton<IAlgorithmParameterGenerator>();
         ServiceCharacteristics.AddSingleton<IAsymmetricAlgorithm>();
@@ -53,4 +44,5 @@ public class CoreExtensionBuilder : BaseExtensionBuilder<CoreExtensionBuilder, C
         ServiceCharacteristics.AddSingleton<IWebFilePermission>();
         ServiceCharacteristics.AddSingleton<IWebStorableFileTransfer>();
     }
+
 }

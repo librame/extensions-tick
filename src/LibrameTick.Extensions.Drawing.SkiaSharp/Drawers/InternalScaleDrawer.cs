@@ -12,14 +12,14 @@
 
 namespace Librame.Extensions.Drawing.Drawers;
 
-class InternalScaleDrawer : AbstractDrawer, IScalingDrawer
+class InternalScaleDrawer : AbstractInternalDrawer, IScalingDrawer
 {
     private IWatermarkDrawer _watermarkDrawer;
 
 
     public InternalScaleDrawer(IOptionsMonitor<DrawingExtensionOptions> options,
         IWatermarkDrawer watermarkDrawer)
-        : base(options.CurrentValue)
+        : base(options)
     {
         _watermarkDrawer = watermarkDrawer;
     }

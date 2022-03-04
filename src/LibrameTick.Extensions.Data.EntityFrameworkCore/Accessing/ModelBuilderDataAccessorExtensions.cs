@@ -15,7 +15,7 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// <see cref="ModelBuilder"/> 与 <see cref="AbstractDataAccessor"/> 静态扩展。
+/// <see cref="ModelBuilder"/> 与 <see cref="AbstractDbContextAccessorWithAudit"/> 静态扩展。
 /// </summary>
 public static class ModelBuilderDataAccessorExtensions
 {
@@ -24,16 +24,17 @@ public static class ModelBuilderDataAccessorExtensions
     /// 创建数据模型。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    /// <param name="dataAccessor">给定的 <see cref="IDataAccessor"/>。</param>
+    /// <param name="accessor">给定的 <see cref="AbstractDbContextAccessor"/>。</param>
     /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
-    public static ModelBuilder CreateDataModel(this ModelBuilder modelBuilder, IDataAccessor dataAccessor)
+    public static ModelBuilder CreateDataModel(this ModelBuilder modelBuilder,
+        AbstractDbContextAccessor accessor)
     {
-        var limitableMaxLength = dataAccessor.DataOptions.Store.LimitableMaxLengthOfProperty;
-        var mapRelationship = dataAccessor.DataOptions.Store.MapRelationship;
+        var limitableMaxLength = accessor.DataOptions.Store.LimitableMaxLengthOfProperty;
+        var mapRelationship = accessor.DataOptions.Store.MapRelationship;
 
         modelBuilder.Entity<Audit>(b =>
         {
-            b.ToTableWithSharding(dataAccessor.ShardingManager);
+            b.ToTableWithSharding(accessor.ShardingManager);
 
             b.HasIndex(i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
@@ -52,7 +53,7 @@ public static class ModelBuilderDataAccessorExtensions
 
         modelBuilder.Entity<AuditProperty>(b =>
         {
-            b.ToTableWithSharding(dataAccessor.ShardingManager);
+            b.ToTableWithSharding(accessor.ShardingManager);
 
             b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
 

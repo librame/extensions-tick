@@ -10,10 +10,10 @@
 
 #endregion
 
+using Librame.Extensions.Bootstraps;
 using Librame.Extensions.Core.Cryptography;
 using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
-using Librame.Extensions.Bootstraps;
 
 namespace Librame.Extensions.Core;
 
@@ -23,50 +23,30 @@ namespace Librame.Extensions.Core;
 public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOptions>
 {
     /// <summary>
-    /// 构造一个 <see cref="CoreExtensionOptions"/>。
-    /// </summary>
-    public CoreExtensionOptions()
-    {
-        Algorithm = new(Notifier);
-        Request = new(Notifier);
-        WebFile = new(Notifier);
-    }
-
-
-    /// <summary>
     /// 算法选项。
     /// </summary>
-    public AlgorithmOptions Algorithm { get; init; }
+    public AlgorithmOptions Algorithm { get; set; } = new();
 
     /// <summary>
     /// HTTP 客户端请求选项。
     /// </summary>
-    public HttpClientRequestOptions Request { get; init; }
+    public HttpClientRequestOptions Request { get; set; } = new();
 
     /// <summary>
     /// Web 文件选项。
     /// </summary>
-    public WebFileOptions WebFile { get; init; }
+    public WebFileOptions WebFile { get; set; } = new();
 
 
     /// <summary>
-    /// 时钟（默认使用本地时钟）。
+    /// 时钟（默认使用 <see cref="Bootstrapper.GetClock()"/>）。
     /// </summary>
     [JsonIgnore]
-    public IClockBootstrap Clock
-    {
-        get => Notifier.GetOrAdd(nameof(Clock), Bootstrapper.GetClock());
-        set => Notifier.AddOrUpdate(nameof(Clock), value);
-    }
+    public IClockBootstrap Clock { get; set; } = Bootstrapper.GetClock();
 
     /// <summary>
-    /// 时钟（默认使用本地锁定器）。
+    /// 时钟（默认使用 <see cref="Bootstrapper.GetLocker()"/>）。
     /// </summary>
     [JsonIgnore]
-    public ILockerBootstrap Locker
-    {
-        get => Notifier.GetOrAdd(nameof(Locker), Bootstrapper.GetLocker());
-        set => Notifier.AddOrUpdate(nameof(Locker), value);
-    }
-
+    public ILockerBootstrap Locker { get; set; } = Bootstrapper.GetLocker();
 }

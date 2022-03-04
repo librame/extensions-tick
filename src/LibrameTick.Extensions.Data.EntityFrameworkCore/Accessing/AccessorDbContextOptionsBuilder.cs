@@ -17,7 +17,7 @@ using Librame.Extensions.Data.Sharding;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义访问器的 <see cref="DbContextOptionsBuilder"/>。
+/// 定义存取器的 <see cref="DbContextOptionsBuilder"/>。
 /// </summary>
 public class AccessorDbContextOptionsBuilder
 {
@@ -38,7 +38,7 @@ public class AccessorDbContextOptionsBuilder
 
 
     /// <summary>
-    /// 配置访问器所属群组（默认为 0，表示多个访问器划分为一组，同组意味着具有相同的增、删、改等操作；如果不需要改变，可不调用此方法）。
+    /// 配置存取器所属群组（默认为 0，表示多个存取器划分为一组，同组意味着具有相同的增、删、改等操作；如果不需要改变，可不调用此方法）。
     /// </summary>
     /// <param name="group">给定的所属群组。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
@@ -46,7 +46,7 @@ public class AccessorDbContextOptionsBuilder
         => WithOption(e => e.WithGroup(group));
 
     /// <summary>
-    /// 配置访问器交互方式（默认为读/写；如果不需要改变，可不调用此方法）。
+    /// 配置存取器交互方式（默认为读/写；如果不需要改变，可不调用此方法）。
     /// </summary>
     /// <param name="access">给定的 <see cref="AccessMode"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
@@ -54,17 +54,17 @@ public class AccessorDbContextOptionsBuilder
         => WithOption(e => e.WithAccess(access));
 
     /// <summary>
-    /// 配置访问器是否池化（默认为否，如果不需要改变，可不调用此方法）。
+    /// 配置存取器是否池化（默认为否，如果不需要改变，可不调用此方法）。
     /// </summary>
-    /// <param name="pooling">给定的访问器是否池化（可选；默认池化）。</param>
+    /// <param name="pooling">给定的存取器是否池化（可选；默认池化）。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithPooling(bool pooling = true)
         => WithOption(e => e.WithPooling(pooling));
 
     /// <summary>
-    /// 配置访问器优先级（默认使用 <see cref="IAccessor"/> 定义的优先级属性值；如果不需要改变，可不调用此方法）。
+    /// 配置存取器优先级（默认使用 <see cref="IAccessor"/> 定义的优先级属性值；如果不需要改变，可不调用此方法）。
     /// </summary>
-    /// <param name="priority">给定的访问器优先级（数值越小越优先）。</param>
+    /// <param name="priority">给定的存取器优先级（数值越小越优先）。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithPriority(float priority)
         => WithOption(e => e.WithPriority(priority));
@@ -116,9 +116,9 @@ public class AccessorDbContextOptionsBuilder
 
 
     /// <summary>
-    /// 配置访问器服务类型（通常不需要修改）。
+    /// 配置存取器服务类型（通常不需要修改）。
     /// </summary>
-    /// <param name="serviceType">给定的访问器服务类型。</param>
+    /// <param name="serviceType">给定的存取器服务类型。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithServiceType(Type serviceType)
         => WithOption(e => e.WithServiceType(serviceType));

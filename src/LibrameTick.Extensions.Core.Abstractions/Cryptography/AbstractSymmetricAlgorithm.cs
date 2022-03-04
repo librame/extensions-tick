@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Autokeys;
+
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
@@ -43,8 +45,8 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
             options = Options.Aes;
             
         var aes = Aes.Create();
-        aes.Key = options.Key;
-        aes.IV = options.Nonce;
+        aes.Key = options.Key!;
+        aes.IV = options.Nonce!;
 
         var transform = aes.CreateEncryptor();
         return transform.TransformFinalBlock(buffer, 0, buffer.Length);
@@ -62,8 +64,8 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
             options = Options.Aes;
 
         var aes = Aes.Create();
-        aes.Key = options.Key;
-        aes.IV = options.Nonce;
+        aes.Key = options.Key!;
+        aes.IV = options.Nonce!;
 
         var transform = aes.CreateDecryptor();
         return transform.TransformFinalBlock(buffer, 0, buffer.Length);
@@ -87,8 +89,8 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
             
         var ciphertext = new byte[buffer.Length];
 
-        var aes = new AesCcm(options.Key);
-        aes.Encrypt(options.Nonce, buffer, ciphertext, options.Tag);
+        var aes = new AesCcm(options.Key!);
+        aes.Encrypt(options.Nonce!, buffer, ciphertext, options.Tag!);
 
         return ciphertext;
     }
@@ -106,8 +108,8 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
 
         var plaintext = new byte[buffer.Length];
 
-        var aes = new AesCcm(options.Key);
-        aes.Decrypt(options.Nonce, buffer, options.Tag, plaintext);
+        var aes = new AesCcm(options.Key!);
+        aes.Decrypt(options.Nonce!, buffer, options.Tag!, plaintext);
 
         return plaintext;
     }
@@ -130,8 +132,8 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
 
         var ciphertext = new byte[buffer.Length];
 
-        var aes = new AesGcm(options.Key);
-        aes.Encrypt(options.Nonce, buffer, ciphertext, options.Tag);
+        var aes = new AesGcm(options.Key!);
+        aes.Encrypt(options.Nonce!, buffer, ciphertext, options.Tag!);
 
         return ciphertext;
     }
@@ -149,8 +151,8 @@ public abstract class AbstractSymmetricAlgorithm : AbstractAlgorithm, ISymmetric
 
         var plaintext = new byte[buffer.Length];
 
-        var aes = new AesGcm(options.Key);
-        aes.Decrypt(options.Nonce, buffer, options.Tag, plaintext);
+        var aes = new AesGcm(options.Key!);
+        aes.Decrypt(options.Nonce!, buffer, options.Tag!, plaintext);
 
         return plaintext;
     }

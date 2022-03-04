@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data.Accessing;
 public interface IAccessorResolver
 {
     /// <summary>
-    /// 解析访问器列表。
+    /// 解析存取器列表。
     /// </summary>
     /// <returns>返回 <see cref="IReadOnlyList{IAccessor}"/>。</returns>
     IReadOnlyList<IAccessor> ResolveAccessors();

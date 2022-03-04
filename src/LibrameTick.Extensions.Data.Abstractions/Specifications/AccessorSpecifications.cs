@@ -13,24 +13,24 @@
 namespace Librame.Extensions.Data.Specifications;
 
 /// <summary>
-/// 定义常用访问器规约。
+/// 定义常用存取器规约。
 /// </summary>
 public static class AccessorSpecifications
 {
     /// <summary>
-    /// 基础访问器规约。
+    /// 基础存取器规约。
     /// </summary>
     public static readonly IAccessorSpecification Base
         = new BaseAccessorSpecification();
 
     /// <summary>
-    /// 读取访问器规约。
+    /// 读取存取器规约。
     /// </summary>
     public static readonly IAccessorSpecification Read
         = new ReadAccessorSpecification();
 
     /// <summary>
-    /// 写入访问器规约。
+    /// 写入存取器规约。
     /// </summary>
     public static readonly IAccessorSpecification Write
         = new WriteAccessorSpecification();

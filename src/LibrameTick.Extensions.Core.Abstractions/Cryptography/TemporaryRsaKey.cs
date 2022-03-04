@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>
-/// 定义一个用于文件型的临时 RSA 密钥。
+/// 定义一个用于序列化的临时 RSA 密钥（兼容 IdentityServer4 生成的临时密钥文件）。
 /// </summary>
 public class TemporaryRsaKey
 {
@@ -23,37 +23,47 @@ public class TemporaryRsaKey
     public string? KeyId { get; set; }
 
     /// <summary>
-    /// RSA 参数。
+    /// RSA 参数信息。
     /// </summary>
     public RSAParametersInfo? Parameters { get; set; }
 
 
     /// <summary>
-    /// 生成密钥标识。
+    /// 转为 RSA 安全密钥。
     /// </summary>
-    /// <returns>返回字符串。</returns>
-    public static string GenerateKeyId()
-        => RandomExtensions.GenerateByteArray(16).AsBase64String();
+    /// <param name="requiredPrivateKey">验证必须存在私钥（可选；默认启用验证）。</param>
+    /// <returns>返回 <see cref="RsaSecurityKey"/>。</returns>
+    public virtual RsaSecurityKey ToRsaSecurityKey(bool requiredPrivateKey = true)
+    {
+        if (Parameters is null)
+            throw new ArgumentNullException(nameof(Parameters));
+
+        var rsaKey = new RsaSecurityKey(Parameters.ToParameters())
+        {
+            KeyId = KeyId
+        };
+
+        if (requiredPrivateKey && rsaKey.PrivateKeyStatus is PrivateKeyStatus.DoesNotExist)
+            throw new NotSupportedException("The temporary rsa key does not have a private key.");
+
+        return rsaKey;
+    }
+
 
     /// <summary>
-    /// 从文件中加载或创建 <see cref="TemporaryRsaKey"/>。
+    /// 生成 RSA 密钥。
     /// </summary>
-    /// <param name="keyFile">给定的密钥文件。</param>
     /// <returns>返回 <see cref="TemporaryRsaKey"/>。</returns>
-    public static TemporaryRsaKey LoadOrCreateFile(string keyFile)
+    public static TemporaryRsaKey Generate()
     {
-        var key = keyFile.DeserializeJsonFile<TemporaryRsaKey>();
-        if (key is null)
-        {
-            key = new TemporaryRsaKey
-            {
-                KeyId = GenerateKeyId(),
-                Parameters = RSA.Create().ExportParameters(true).FromParameters()
-            };
-            keyFile.SerializeJsonFile(key);
-        }
+        var rsaKey = new TemporaryRsaKey();
 
-        return key;
+        rsaKey.KeyId = RandomExtensions.GenerateByteArray(16).AsBase64String();
+
+        rsaKey.Parameters = new();
+        rsaKey.Parameters.Populate(RSA.Create().ExportParameters(true));
+
+        return rsaKey;
     }
 
 }

@@ -20,7 +20,7 @@ public interface IHttpClientInvokerFactory
     /// <summary>
     /// 创建客户端调用。
     /// </summary>
-    /// <param name="options">给定的 <see cref="HttpClientInvokingOptions"/>。</param>
+    /// <param name="options">给定的 <see cref="HttpClientOptions"/>。</param>
     /// <returns>返回 <see cref="HttpClient"/>。</returns>
-    HttpClient CreateClient(HttpClientInvokingOptions options);
+    HttpClient CreateClient(HttpClientOptions options);
 }

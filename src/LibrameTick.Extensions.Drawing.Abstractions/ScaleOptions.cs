@@ -15,47 +15,22 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Drawing;
 
 /// <summary>
-/// 定义实现 <see cref="IOptionsNotifier"/> 的缩放选项。
+/// 定义实现 <see cref="IOptions"/> 的缩放选项。
 /// </summary>
-public class ScaleOptions : AbstractOptionsNotifier
+public class ScaleOptions : IOptions
 {
     /// <summary>
-    /// 构造一个独立属性通知器的 <see cref="ScaleOptions"/>（此构造函数适用于独立使用 <see cref="ScaleOptions"/> 的情况）。
+    /// 添加缩放尺寸后缀（默认添加）。
     /// </summary>
-    /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
-    public ScaleOptions(string sourceAliase)
-        : base(sourceAliase)
-    {
-    }
+    public bool AddScaleSizeSuffix { get; set; } = true;
 
     /// <summary>
-    /// 构造一个 <see cref="ScaleOptions"/>。
+    /// 缩放描述符列表（默认支持小-无水印、中-有水印、大-无水印等三种缩放尺寸）。
     /// </summary>
-    /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
-    public ScaleOptions(IPropertyNotifier parentNotifier, string? sourceAliase = null)
-        : base(parentNotifier, sourceAliase)
-    {
-    }
-
-
-    /// <summary>
-    /// 添加缩放尺寸后缀。
-    /// </summary>
-    public bool AddScaleSizeSuffix
-    {
-        get => Notifier.GetOrAdd(nameof(AddScaleSizeSuffix), true);
-        set => Notifier.AddOrUpdate(nameof(AddScaleSizeSuffix), value);
-    }
-
-    /// <summary>
-    /// 缩放描述符列表。
-    /// </summary>
-    public List<ScaleDescriptor> Descriptors { get; init; } = new()
+    public List<ScaleDescriptor> Descriptors { get; set; } = new()
     {
         new("-small", new Size(100, 60), AddWatermark: false),
         new("-medium", new Size(1000, 600), AddWatermark: true),
         new("-large", new Size(2000, 1200), AddWatermark: false)
     };
-
 }

@@ -27,21 +27,20 @@ public static class DrawingExtensionBuilderExtensions
     /// 注册 Librame 图画扩展构建器。
     /// </summary>
     /// <param name="parentBuilder">给定的 <see cref="IExtensionBuilder"/>。</param>
-    /// <param name="setupOptions">给定用于设置选项的动作（可选；为空则不设置）。</param>
-    /// <param name="configOptions">给定使用 <see cref="IConfiguration"/> 的选项配置（可选；为空则不配置）。</param>
-    /// <param name="setupBuilder">给定用于设置构建器的动作（可选；为空则不设置）。</param>
+    /// <param name="setupOptions">给定可用于设置 <see cref="DrawingExtensionOptions"/> 选项的动作（可选；为空则不设置）。</param>
+    /// <param name="configuration">给定可用于 <see cref="DrawingExtensionOptions"/> 选项的配置对象（可选；为空则不配置）。</param>
     /// <returns>返回 <see cref="DrawingExtensionOptions"/>。</returns>
     public static DrawingExtensionBuilder AddDrawing(this IExtensionBuilder parentBuilder,
-        Action<DrawingExtensionOptions>? setupOptions = null, IConfiguration? configOptions = null,
-        Action<DrawingExtensionBuilder>? setupBuilder = null)
+        Action<DrawingExtensionOptions>? setupOptions = null, IConfiguration? configuration = null)
     {
-        if (configOptions is null)
-            configOptions = typeof(DrawingExtensionOptions).GetConfigOptionsFromJson();
+        // 配置扩展选项
+        parentBuilder.ConfigureExtensionOptions(setupOptions, configuration);
 
-        var builder = new DrawingExtensionBuilder(parentBuilder, setupOptions, configOptions);
-        setupBuilder?.Invoke(builder);
+        var builder = new DrawingExtensionBuilder(parentBuilder);
 
-        builder.AddDrawers().AddVerification();
+        builder
+            .AddDrawers()
+            .AddVerification();
 
         return builder;
     }

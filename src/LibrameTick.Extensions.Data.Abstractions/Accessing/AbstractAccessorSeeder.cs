@@ -23,8 +23,8 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// 构造一个 <see cref="AbstractAccessorSeeder"/>。
     /// </summary>
     /// <param name="clock">给定的 <see cref="IClockBootstrap"/>。</param>
-    /// <param name="idGeneratorFactory">给定的 <see cref="IIdentificationGeneratorFactory"/>。</param>
-    protected AbstractAccessorSeeder(IClockBootstrap clock, IIdentificationGeneratorFactory idGeneratorFactory)
+    /// <param name="idGeneratorFactory">给定的 <see cref="IIdGeneratorFactory"/>。</param>
+    protected AbstractAccessorSeeder(IClockBootstrap clock, IIdGeneratorFactory idGeneratorFactory)
     {
         SeedBank = new ConcurrentDictionary<string, object>();
 
@@ -46,7 +46,7 @@ public abstract class AbstractAccessorSeeder : IAccessorSeeder
     /// <summary>
     /// 标识生成器工厂。
     /// </summary>
-    public IIdentificationGeneratorFactory IdGeneratorFactory { get; init; }
+    public IIdGeneratorFactory IdGeneratorFactory { get; init; }
 
 
     /// <summary>

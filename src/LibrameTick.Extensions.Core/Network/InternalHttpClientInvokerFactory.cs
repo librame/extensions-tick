@@ -23,10 +23,10 @@ class InternalHttpClientInvokerFactory : IHttpClientInvokerFactory
     }
 
 
-    public HttpClient CreateClient(HttpClientInvokingOptions options)
+    public HttpClient CreateClient(HttpClientOptions options)
     {
         return string.IsNullOrEmpty(options.ClientName)
-            ? HttpClientInvoker.InvokeClient(options)
+            ? new HttpClientInstantiator(options).Create()
             : _clientFactory.CreateClient(options.ClientName);
     }
 

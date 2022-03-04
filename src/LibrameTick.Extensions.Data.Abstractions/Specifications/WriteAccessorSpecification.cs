@@ -15,7 +15,7 @@ using Librame.Extensions.Data.Accessing;
 namespace Librame.Extensions.Data.Specifications;
 
 /// <summary>
-/// 定义写入访问器规约（默认按优先级进行升序排列）。
+/// 定义写入存取器规约（默认按优先级进行升序排列）。
 /// </summary>
 public class WriteAccessorSpecification : BaseAccessorSpecification
 {

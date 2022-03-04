@@ -13,6 +13,7 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.IdGenerators;
 
 namespace Librame.Extensions.Data.Storing;
 
@@ -28,25 +29,25 @@ public interface IStore<T>
     IAccessorManager Accessors { get; }
 
     /// <summary>
-    /// <see cref="IIdentificationGenerator{TId}"/> 工厂。
+    /// <see cref="IIdGenerator{TId}"/> 工厂。
     /// </summary>
-    IIdentificationGeneratorFactory IdGeneratorFactory { get; }
+    IIdGeneratorFactory IdGeneratorFactory { get; }
 
     /// <summary>
-    /// 当前访问器。
+    /// 当前存取器。
     /// </summary>
     IAccessor? CurrentAccessor { get; }
 
 
     /// <summary>
-    /// 获取访问器。
+    /// 获取存取器。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
     IAccessor GetAccessor(IAccessorSpecification specification);
 
     /// <summary>
-    /// 获取可查询接口（支持强制从写入访问器查询）。
+    /// 获取可查询接口（支持强制从写入存取器查询）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
@@ -56,7 +57,7 @@ public interface IStore<T>
     #region Find
 
     /// <summary>
-    /// 通过标识查找类型实例（支持强制从写入访问器查询）。
+    /// 通过标识查找类型实例（支持强制从写入存取器查询）。
     /// </summary>
     /// <param name="id">给定的标识。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
@@ -152,7 +153,7 @@ public interface IStore<T>
     #region Add
 
     /// <summary>
-    /// 如果不存在则添加类型实例（仅支持写入访问器）。
+    /// 如果不存在则添加类型实例（仅支持写入存取器）。
     /// </summary>
     /// <param name="item">给定要添加的类型实例。</param>
     /// <param name="predicate">给定用于判定是否存在的工厂方法。</param>
@@ -160,14 +161,14 @@ public interface IStore<T>
     void AddIfNotExists(T item, Expression<Func<T, bool>> predicate, IAccessorSpecification? specification = null);
 
     /// <summary>
-    /// 添加类型实例集合（仅支持写入访问器）。
+    /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="items">给定的类型实例数组集合。</param>
     void Add(IAccessorSpecification? specification = null, params T[] items);
 
     /// <summary>
-    /// 添加类型实例集合（仅支持写入访问器）。
+    /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="items">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
@@ -179,14 +180,14 @@ public interface IStore<T>
     #region Remove
 
     /// <summary>
-    /// 移除类型实例集合（仅支持写入访问器）。
+    /// 移除类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="items">给定的类型实例数组集合。</param>
     void Remove(IAccessorSpecification? specification = null, params T[] items);
 
     /// <summary>
-    /// 移除类型实例集合（仅支持写入访问器）。
+    /// 移除类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="items">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
@@ -198,14 +199,14 @@ public interface IStore<T>
     #region Update
 
     /// <summary>
-    /// 更新类型实例集合（仅支持写入访问器）。
+    /// 更新类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="items">给定的类型实例数组集合。</param>
     void Update(IAccessorSpecification? specification = null, params T[] items);
 
     /// <summary>
-    /// 更新类型实例集合（仅支持写入访问器）。
+    /// 更新类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="items">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
@@ -217,14 +218,14 @@ public interface IStore<T>
     #region SaveChanges
 
     /// <summary>
-    /// 保存更改（仅支持写入访问器）。
+    /// 保存更改（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <returns>返回受影响的行数。</returns>
     int SaveChanges(IAccessorSpecification? specification = null);
 
     /// <summary>
-    /// 异步保存更改（仅支持写入访问器）。
+    /// 异步保存更改（仅支持写入存取器）。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>

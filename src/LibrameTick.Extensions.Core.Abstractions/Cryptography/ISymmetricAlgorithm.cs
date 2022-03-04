@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Autokeys;
+
 namespace Librame.Extensions.Core.Cryptography;
 
 /// <summary>

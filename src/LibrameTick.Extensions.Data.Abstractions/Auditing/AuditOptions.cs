@@ -16,82 +16,39 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Auditing;
 
 /// <summary>
-/// 定义实现 <see cref="IOptionsNotifier"/> 的审计选项。
+/// 定义实现 <see cref="IOptions"/> 的审计选项。
 /// </summary>
-public class AuditOptions : AbstractOptionsNotifier
+public class AuditOptions : IOptions
 {
-    /// <summary>
-    /// 构造一个独立属性通知器的 <see cref="AuditOptions"/>（此构造函数适用于独立使用 <see cref="AuditOptions"/> 的情况）。
-    /// </summary>
-    /// <param name="sourceAliase">给定的源别名（独立属性通知器必须命名实例）。</param>
-    public AuditOptions(string sourceAliase)
-        : base(sourceAliase)
-    {
-    }
-
-    /// <summary>
-    /// 构造一个 <see cref="AuditOptions"/>。
-    /// </summary>
-    /// <param name="parentNotifier">给定的父级 <see cref="IPropertyNotifier"/>。</param>
-    public AuditOptions(IPropertyNotifier parentNotifier)
-        : base(parentNotifier, sourceAliase: null)
-    {
-    }
-
-
     /// <summary>
     /// 启用审计（默认启用）。
     /// </summary>
-    public bool Enabling
-    {
-        get => Notifier.GetOrAdd(nameof(Enabling), true);
-        set => Notifier.AddOrUpdate(nameof(Enabling), value);
-    }
+    public bool Enabling { get; set; } = true;
 
     /// <summary>
     /// 启用对实体添加状态的审计（默认启用）。
     /// </summary>
-    public bool AddedState
-    {
-        get => Notifier.GetOrAdd(nameof(AddedState), true);
-        set => Notifier.AddOrUpdate(nameof(AddedState), value);
-    }
+    public bool AddedState { get; set; } = true;
 
     /// <summary>
     /// 启用对实体修改状态的审计（默认启用）。
     /// </summary>
-    public bool ModifiedState
-    {
-        get => Notifier.GetOrAdd(nameof(ModifiedState), true);
-        set => Notifier.AddOrUpdate(nameof(ModifiedState), value);
-    }
+    public bool ModifiedState { get; set; } = true;
 
     /// <summary>
     /// 启用对实体删除状态的审计（默认启用）。
     /// </summary>
-    public bool DeletedState
-    {
-        get => Notifier.GetOrAdd(nameof(DeletedState), true);
-        set => Notifier.AddOrUpdate(nameof(DeletedState), value);
-    }
+    public bool DeletedState { get; set; } = true;
 
     /// <summary>
     /// 启用对实体无变化状态的审计（默认不启用）。
     /// </summary>
-    public bool UnchangedState
-    {
-        get => Notifier.GetOrAdd(nameof(UnchangedState), false);
-        set => Notifier.AddOrUpdate(nameof(UnchangedState), value);
-    }
+    public bool UnchangedState { get; set; } = true;
 
     /// <summary>
     /// 保存审计集合（默认启用）。
     /// </summary>
-    public bool SaveAudits
-    {
-        get => Notifier.GetOrAdd(nameof(SaveAudits), true);
-        set => Notifier.AddOrUpdate(nameof(SaveAudits), value);
-    }
+    public bool SaveAudits { get; set; } = true;
 
 
     /// <summary>
@@ -99,5 +56,4 @@ public class AuditOptions : AbstractOptionsNotifier
     /// </summary>
     [JsonIgnore]
     public Action<IReadOnlyList<Audit>>? NotificationAction { get; set; }
-
 }

@@ -15,20 +15,27 @@ namespace Librame.Extensions.Core.Storage;
 class InternalStorableFileManager : IStorableFileManager
 {
     private readonly IMemoryCache _memoryCache;
-    private readonly CoreExtensionOptions _options;
+    private readonly IOptionsMonitor<CoreExtensionOptions> _optionsMonitor;
     private readonly IStorableFileProvider _fileProvider;
 
 
-    public InternalStorableFileManager(IMemoryCache memoryCache, IOptionsMonitor<CoreExtensionOptions> options)
+    public InternalStorableFileManager(IMemoryCache memoryCache,
+        IOptionsMonitor<CoreExtensionOptions> optionsMonitor)
     {
         _memoryCache = memoryCache;
-        _options = options.CurrentValue;
+        _optionsMonitor = optionsMonitor;
 
-        if (_options.WebFile.FileProviders.Count < 0)
-            throw new ArgumentException($"The {nameof(_options.WebFile.FileProviders)} is empty. ex: services.AddLibrame(opts => opts.{nameof(_options.WebFile)}.{nameof(_options.WebFile.FileProviders)}.Add(new {nameof(PhysicalStorableFileProvider)}()))");
+        var fileProviders = optionsMonitor.CurrentValue.WebFile.FileProviders;
+
+        if (fileProviders.Count < 0)
+            throw new ArgumentException($"The {nameof(fileProviders)} is empty. ex: services.AddLibrame(opts => opts.{nameof(Options.WebFile)}.{nameof(Options.WebFile.FileProviders)}.Add(new {nameof(PhysicalStorableFileProvider)}()))");
             
-        _fileProvider = new InternalCompositeStorableFileProvider(_options.WebFile.FileProviders);
+        _fileProvider = new InternalCompositeStorableFileProvider(fileProviders);
     }
+
+
+    public CoreExtensionOptions Options
+        => _optionsMonitor.CurrentValue;
 
 
     public Action<StorageProgressDescriptor>? ProgressAction { get; set; }
@@ -78,7 +85,7 @@ class InternalStorableFileManager : IStorableFileManager
             var beginSecond = DateTime.Now.Second;
 
             var readLength = 0;
-            var buffer = new byte[_options.WebFile.BufferSize];
+            var buffer = new byte[Options.WebFile.BufferSize];
 
             while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait()) > 0)
             {
@@ -153,7 +160,7 @@ class InternalStorableFileManager : IStorableFileManager
             var beginSecond = DateTime.Now.Second;
 
             var readLength = 0;
-            var buffer = new byte[_options.WebFile.BufferSize];
+            var buffer = new byte[Options.WebFile.BufferSize];
 
             while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait()) > 0)
             {

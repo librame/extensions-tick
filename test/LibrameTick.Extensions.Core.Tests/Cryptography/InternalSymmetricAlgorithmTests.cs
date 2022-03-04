@@ -17,7 +17,7 @@ namespace Librame.Extensions.Core.Cryptography
 
         public InternalSymmetricAlgorithmTests()
         {
-            _algorithm = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<ISymmetricAlgorithm>()!;
+            _algorithm = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<ISymmetricAlgorithm>();
         }
 
 

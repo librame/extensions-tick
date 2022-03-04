@@ -13,87 +13,61 @@
 namespace Librame.Extensions.Core.Network;
 
 /// <summary>
-/// 定义实现 <see cref="IOptionsNotifier"/> 的 HTTP 端点选项。
+/// 定义实现 <see cref="IOptions"/> 的 HTTP 端点选项。
 /// </summary>
-public class HttpEndpointOptions : AbstractOptionsNotifier
+public class HttpEndpointOptions : IOptions
 {
-    private readonly IRequestOptionsNotifier _request;
+    private readonly IRequestOptions _requestOptions;
 
 
     /// <summary>
     /// 使用给定的 <see cref="IPropertyNotifier"/> 构造一个 <see cref="HttpEndpointOptions"/>。
     /// </summary>
-    /// <param name="request">给定的父级 <see cref="IRequestOptionsNotifier"/>。</param>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
-    public HttpEndpointOptions(IRequestOptionsNotifier request, string? sourceAliase = null)
-        : base(request.Notifier, sourceAliase)
+    /// <param name="requestOptions">给定的父级 <see cref="IRequestOptions"/>。</param>
+    /// <param name="path">给定的路径。</param>
+    public HttpEndpointOptions(IRequestOptions requestOptions, string path)
     {
-        _request = request;
+        _requestOptions = requestOptions;
+        Path = path;
     }
 
 
     /// <summary>
     /// 路径。
     /// </summary>
-    public string Path
-    {
-        get => Notifier.GetOrAdd(nameof(Path), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Path), value);
-    }
+    public string Path { get; set; }
 
     /// <summary>
     /// 等待超时（使用 <see cref="TimeSpan"/> 支持的字符串形式；默认不等待）。
     /// </summary>
-    public string WaitTimeout
-    {
-        get => Notifier.GetOrAdd(nameof(WaitTimeout), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(WaitTimeout), value);
-    }
+    public string? WaitTimeout { get; set; }
 
     /// <summary>
     /// 方法（详情参考 <see cref="HttpClientMethods"/>）。
     /// </summary>
-    public HttpClientMethods Method
-    {
-        get => Notifier.GetOrAdd(nameof(Method), HttpClientMethods.Get);
-        set => Notifier.AddOrUpdate(nameof(Method), value);
-    }
+    public HttpClientMethods Method { get; set; }
+        = HttpClientMethods.Get;
 
     /// <summary>
     /// 内容类型（详情参考 <see cref="HttpClientContentTypes"/>）。
     /// </summary>
-    public HttpClientContentTypes ContentType
-    {
-        get => Notifier.GetOrAdd(nameof(ContentType), HttpClientContentTypes.FormUrlEncoded);
-        set => Notifier.AddOrUpdate(nameof(ContentType), value);
-    }
+    public HttpClientContentTypes ContentType { get; set; }
+        = HttpClientContentTypes.FormUrlEncoded;
 
     /// <summary>
     /// 参数集合（即键值对集合。键值以英文等号分隔，多对以英文分号界定）。
     /// </summary>
-    public string Parameters
-    {
-        get => Notifier.GetOrAdd(nameof(Parameters), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(Parameters), value);
-    }
+    public string? Parameters { get; set; }
 
     /// <summary>
     /// 响应 Cookie 名称（如果不为空，则表示获取此值用于验证标识）。
     /// </summary>
-    public string ResponseCookieName
-    {
-        get => Notifier.GetOrAdd(nameof(ResponseCookieName), string.Empty);
-        set => Notifier.AddOrUpdate(nameof(ResponseCookieName), value);
-    }
+    public string? ResponseCookieName { get; set; }
 
     /// <summary>
     /// 响应 Cookie 索引（当存在多个同名响应 Cookie 时，指定索引处的值用于验证标识）。
     /// </summary>
-    public int ResponseCookieIndex
-    {
-        get => Notifier.GetOrAdd(nameof(ResponseCookieIndex), 0);
-        set => Notifier.AddOrUpdate(nameof(ResponseCookieIndex), value);
-    }
+    public int ResponseCookieIndex { get; set; } = 0;
 
     /// <summary>
     /// 响应结束动作（参数为响应内容字符串）。
@@ -138,10 +112,10 @@ public class HttpEndpointOptions : AbstractOptionsNotifier
     public virtual string ToUriString()
     {
         var sb = new StringBuilder();
-        sb.Append(_request.BaseUrl);
+        sb.Append(_requestOptions.BaseUrl);
         sb.Append(Path);
 
-        if (string.IsNullOrEmpty(_request.VerifyId))
+        if (string.IsNullOrEmpty(_requestOptions.VerifyId))
             return sb.ToString();
 
         if (Path.Contains('?'))
@@ -149,7 +123,7 @@ public class HttpEndpointOptions : AbstractOptionsNotifier
         else
             sb.Append('?');
 
-        sb.Append(_request.VerifyId);
+        sb.Append(_requestOptions.VerifyId);
         return sb.ToString();
     }
 

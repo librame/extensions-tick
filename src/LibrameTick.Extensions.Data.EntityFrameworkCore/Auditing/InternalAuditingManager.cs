@@ -18,16 +18,20 @@ class InternalAuditingManager : IAuditingManager
 {
     private readonly Type _notAuditedType = typeof(NotAuditedAttribute);
 
-    private readonly IIdentificationGeneratorFactory _idGeneratorFactory;
-    private readonly DataExtensionOptions _options;
+    private readonly IIdGeneratorFactory _idGeneratorFactory;
+    private readonly IOptionsMonitor<DataExtensionOptions> _optionsMonitor;
 
 
-    public InternalAuditingManager(IIdentificationGeneratorFactory idGeneratorFactory,
-        IOptionsMonitor<DataExtensionOptions> options)
+    public InternalAuditingManager(IIdGeneratorFactory idGeneratorFactory,
+        IOptionsMonitor<DataExtensionOptions> optionsMonitor)
     {
         _idGeneratorFactory = idGeneratorFactory;
-        _options = options.CurrentValue;
+        _optionsMonitor = optionsMonitor;
     }
+
+
+    public DataExtensionOptions Options
+        => _optionsMonitor.CurrentValue;
 
 
     public IReadOnlyList<Audit> GetAudits(IEnumerable<EntityEntry> entityEntries)
@@ -77,7 +81,7 @@ class InternalAuditingManager : IAuditingManager
             auditProperty.NewValue = newValue;
             auditProperty.OldValue = oldValue;
 
-            if (!_options.Store.MapRelationship)
+            if (!Options.Store.MapRelationship)
                 auditProperty.AuditId = audit.Id;
             else
                 auditProperty.Audit = audit;

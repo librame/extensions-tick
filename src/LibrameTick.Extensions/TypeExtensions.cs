@@ -367,4 +367,60 @@ public static class TypeExtensions
 
     #endregion
 
+
+    #region ExportedConcreteTypes
+
+    /// <summary>
+    /// 通过程序集集合加载实现指定特性类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合。
+    /// </summary>
+    /// <typeparam name="TAttribute">指定的特性类型。</typeparam>
+    /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
+    /// <returns>返回 <see cref="IEnumerable{Type}"/>。</returns>
+    public static IEnumerable<Type> ExportedConcreteTypesByAttribute<TAttribute>(this IEnumerable<Assembly> assemblies)
+        => assemblies.ExportedConcreteTypesByAttribute(typeof(TAttribute));
+
+    /// <summary>
+    /// 通过程序集集合加载实现指定特性类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合。
+    /// </summary>
+    /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
+    /// <param name="attributeType">给定的特性类型。</param>
+    /// <returns>返回 <see cref="IEnumerable{Type}"/>。</returns>
+    public static IEnumerable<Type> ExportedConcreteTypesByAttribute(this IEnumerable<Assembly> assemblies, Type attributeType)
+    {
+        if (assemblies is null || !assemblies.Any())
+            return Array.Empty<Type>();
+
+        return assemblies.Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(s => s.ExportedTypes)
+            .Where(p => p.IsDefined(attributeType) && p.IsConcreteType());
+    }
+
+
+    /// <summary>
+    /// 通过程序集集合加载指定基础类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合。
+    /// </summary>
+    /// <typeparam name="TBase">指定的基础类型。</typeparam>
+    /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
+    /// <returns>返回 <see cref="IEnumerable{Type}"/>。</returns>
+    public static IEnumerable<Type> ExportedConcreteTypes<TBase>(this IEnumerable<Assembly> assemblies)
+        => assemblies.ExportedConcreteTypes(typeof(TBase));
+
+    /// <summary>
+    /// 通过程序集集合加载指定基础类型的派生具实类型（即非抽象、非接口、可实例化的类型）集合。
+    /// </summary>
+    /// <param name="assemblies">给定的 <see cref="IEnumerable{Assembly}"/>。</param>
+    /// <param name="baseType">给定的基础类型。</param>
+    /// <returns>返回 <see cref="IEnumerable{Type}"/>。</returns>
+    public static IEnumerable<Type> ExportedConcreteTypes(this IEnumerable<Assembly> assemblies, Type baseType)
+    {
+        if (assemblies is null || !assemblies.Any())
+            return Array.Empty<Type>();
+
+        return assemblies.Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(s => s.ExportedTypes)
+            .Where(p => p.IsAssignableToBaseType(baseType) && p.IsConcreteType());
+    }
+
+    #endregion
+
 }

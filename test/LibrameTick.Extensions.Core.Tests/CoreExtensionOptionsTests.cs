@@ -4,39 +4,23 @@ namespace Librame.Extensions.Core
 {
     public class CoreExtensionOptionsTests
     {
-        private CoreExtensionOptions _options;
-
-
-        public CoreExtensionOptionsTests()
-        {
-            _options = new CoreExtensionOptions();
-
-            _options.PropertyChangedAction = (opts, e) =>
-            {
-                TestSaveOptions(opts!);
-            };
-        }
-
-        private static void TestSaveOptions(IExtensionOptions options)
-        {
-            var filePath = options.SaveOptionsAsJson();
-            Assert.True(filePath.FileExists());
-            //filePath.FileDelete();
-        }
-
 
         [Fact]
-        public void AbstractTest()
+        public void AllTest()
         {
-            Assert.NotNull(_options.ExtensionName);
-            Assert.NotNull(_options.ExtensionType);
+            var options = new CoreExtensionOptions();
 
-            Assert.NotEmpty(_options.Directories.BaseDirectory);
-            Assert.NotEmpty(_options.Directories.ConfigDirectory);
-            Assert.NotEmpty(_options.Directories.ReportDirectory);
-            Assert.NotEmpty(_options.Directories.ResourceDirectory);
+            Assert.NotNull(options.ExtensionName);
+            Assert.NotNull(options.ExtensionType);
 
-            TestSaveOptions(_options);
+            Assert.NotEmpty(options.Directories.BaseDirectory);
+            Assert.NotEmpty(options.Directories.ConfigDirectory);
+            Assert.NotEmpty(options.Directories.ReportDirectory);
+            Assert.NotEmpty(options.Directories.ResourceDirectory);
+
+            var filePath = options.ExportAsJson();
+            Assert.True(filePath.FileExists());
+            filePath.FileDelete();
         }
 
     }

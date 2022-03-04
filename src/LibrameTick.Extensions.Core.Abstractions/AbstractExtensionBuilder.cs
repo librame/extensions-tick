@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义抽象实现 <see cref="IExtensionBuilder"/> 并自动注册当前扩展构建器实例。
+/// 定义抽象继承 <see cref="AbstractExtensionBuilder"/> 并自动注册当前扩展构建器实例。
 /// </summary>
 /// <typeparam name="TBuilder">指定的扩展构建器类型。</typeparam>
 public abstract class AbstractExtensionBuilder<TBuilder> : AbstractExtensionBuilder
@@ -89,11 +89,6 @@ public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensi
     public IExtensionBuilder? ParentBuilder { get; init; }
 
     /// <summary>
-    /// 扩展选项类型。
-    /// </summary>
-    public abstract Type ExtensionOptionsType { get; }
-
-    /// <summary>
     /// 替换服务字典集合。
     /// </summary>
     public IDictionary<Type, Type> ReplacedServices { get; init; }
@@ -107,20 +102,4 @@ public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensi
     /// 服务特征集合。
     /// </summary>
     public ServiceCharacteristicCollection ServiceCharacteristics { get; init; }
-
-
-    /// <summary>
-    /// 将扩展选项保存为 JSON 文件。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    /// <returns>返回保存路径。</returns>
-    public abstract string SaveOptionsAsJson(IServiceProvider services);
-
-    /// <summary>
-    /// 将扩展选项保存为 JSON 文件。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    /// <param name="options">输出 <see cref="IExtensionOptions"/>。</param>
-    /// <returns>返回保存路径。</returns>
-    public abstract string SaveOptionsAsJson(IServiceProvider services, out IExtensionOptions options);
 }
