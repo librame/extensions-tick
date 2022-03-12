@@ -46,7 +46,7 @@ class InternalEncryptionConverterFactory : IEncryptionConverterFactory
             converters.Add(new EncryptionConverter<string>(new StringEncryptionProvider(byteArrayProvider)));
         }
 
-        var converter = converters.FirstOrDefault(p => p.ModelClrType.SameType(propertyType));
+        var converter = converters.FirstOrDefault(p => p.ModelClrType.IsSameType(propertyType));
         if (converter is null)
             throw new ArgumentException($"The encryption property type '{propertyType}' of the current accessor '{accessor.AccessorType}' is not supported.");
 

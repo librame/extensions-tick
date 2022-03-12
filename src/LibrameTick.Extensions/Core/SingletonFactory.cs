@@ -13,14 +13,14 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义单例工厂。
+/// 定义一个单例工厂（仅支持包含私有无参构造函数的单例类型）。
 /// </summary>
-/// <typeparam name="TSingleton">指定的单例类型。</typeparam>
+/// <typeparam name="TSingleton">指定的单例类型（请确保此类型存在私有无参构造函数）。</typeparam>
 public sealed class SingletonFactory<TSingleton>
     where TSingleton : class
 {
     /// <summary>
-    /// 创建弱引用对象（表示在引用对象的同时仍然允许通过垃圾回收来回收该对象）。
+    /// 创建（每个线程唯一）弱引用对象（表示在引用对象的同时仍然允许通过垃圾回收来回收该对象）。
     /// </summary>
     [ThreadStatic]
     private static WeakReference? _reference;
@@ -64,27 +64,10 @@ public sealed class SingletonFactory<TSingleton>
     {
         var type = typeof(TSingleton);
 
-        try
-        {
-            var value = type.InvokeMember(type.Name,
-                BindingFlags.CreateInstance | BindingFlags.Instance | BindingFlags.NonPublic,
-                binder: null,
-                target: null,
-                args: null,
-                CultureInfo.InvariantCulture);
+        if (!type.TryGetPrivateConstructor(isUnique: false, out var info))
+            throw new MissingMethodException($"The type '{type.FullName}' must have a private constructor to be used in the singleton pattern.");
 
-            if (value is not null)
-                return (TSingleton)value;
-
-            return ExpressionExtensions.New<TSingleton>();
-        }
-        catch (MissingMethodException ex)
-        {
-            throw new TypeLoadException(
-                string.Format(CultureInfo.InvariantCulture,
-                    "The type '{0}' must have a private constructor to be used in the singleton pattern.",
-                    type.FullName), ex);
-        }
+        return (TSingleton)info.Invoke(parameters: null);
     }
 
 }

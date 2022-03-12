@@ -13,24 +13,14 @@
 namespace Librame.Extensions.Core.Template;
 
 /// <summary>
-/// 定义实现 <see cref="IOptions"/> 的模板选项。
+/// 定义一个模板提供程序接口。
 /// </summary>
-public class TemplateOptions : IOptions
+public interface ITemplateProvider
 {
     /// <summary>
-    /// 引用键选项。
+    /// 获取或新增模板选项。
     /// </summary>
-    public RefKeyOptions RefKeys { get; set; } = new();
-
-
-    /// <summary>
-    /// 给定的配置源。
-    /// </summary>
-    [JsonIgnore]
-    public IConfiguration? Source { get; set; }
-
-    /// <summary>
-    /// 当配置变化时刷新模板（默认启用）。
-    /// </summary>
-    public bool RefreshOnChange { get; set; } = true;
+    /// <param name="name">给定的实例名称。</param>
+    /// <returns>返回 <see cref="TemplateOptions"/>。</returns>
+    TemplateOptions GetOrAddOptions(string? name = null);
 }

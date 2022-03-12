@@ -37,7 +37,7 @@ public class AssembliesOptions : IOptions
     /// <summary>
     /// 初始化系统程序集的正则表达式列表集合。
     /// </summary>
-    /// <returns>返回</returns>
+    /// <returns>返回 <see cref="List{Regex}"/>。</returns>
     public static List<Regex> InitialSystemAssemblyRegexes()
     {
         return new List<Regex>()

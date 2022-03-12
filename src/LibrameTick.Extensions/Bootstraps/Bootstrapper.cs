@@ -15,7 +15,7 @@ using Librame.Extensions.Core;
 namespace Librame.Extensions.Bootstraps;
 
 /// <summary>
-/// 定义静态引导程序工具。
+/// 定义静态引导程序。
 /// </summary>
 public static class Bootstrapper
 {

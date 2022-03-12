@@ -38,6 +38,6 @@ class InternalShardingManager : IShardingManager
 
 
     public IShardingStrategy? GetStrategy(Type strategyType)
-        => _strategies.FirstOrDefault(s => s.StrategyType.SameType(strategyType));
+        => _strategies.FirstOrDefault(s => s.StrategyType.IsSameType(strategyType));
 
 }

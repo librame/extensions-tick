@@ -72,8 +72,8 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// </summary>
     /// <param name="other">给定的 <see cref="TypeNamedKey"/>。</param>
     /// <returns>返回布尔值。</returns>
-    public bool Equals(TypeNamedKey? other)
-        => other is not null && SourceType.SameType(other.SourceType)
+    public virtual bool Equals(TypeNamedKey? other)
+        => other is not null && SourceType.IsSameType(other.SourceType)
             && SourceAliase == other.SourceAliase;
 
 
@@ -91,7 +91,7 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => ToString().GetHashCode();
+        => SourceType.GetHashCode() ^ SourceAliase?.GetHashCode() ?? 0;
 
     /// <summary>
     /// 转换为字符串。
