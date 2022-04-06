@@ -300,15 +300,15 @@ public static class FileSerializationExtensions
     /// 反序列化 JSON 文件（支持枚举类型）。
     /// </summary>
     /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="type">给定的反序列化对象类型。</param>
+    /// <param name="returnType">给定的反序列化对象类型。</param>
     /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
     /// <returns>返回反序列化对象。</returns>
-    public static object? DeserializeJsonFile(this string filePath, Type type, Encoding? encoding = null,
+    public static object? DeserializeJsonFile(this string filePath, Type returnType, Encoding? encoding = null,
         JsonSerializerOptions? options = null)
     {
         var json = File.ReadAllText(filePath, encoding ?? EncodingExtensions.UTF8Encoding);
-        return JsonSerializer.Deserialize(json, type, options);
+        return json.FromJson(returnType, options);
     }
 
 
@@ -324,17 +324,7 @@ public static class FileSerializationExtensions
     public static string SerializeJsonFile(this string filePath, object value, Encoding? encoding = null,
         JsonSerializerOptions? options = null, bool autoCreateDirectory = true)
     {
-        if (options is null)
-        {
-            options = new JsonSerializerOptions
-            {
-                WriteIndented = true
-            };
-
-            options.Converters.Add(new JsonStringEnumConverter());
-        }
-
-        var json = JsonSerializer.Serialize(value, options);
+        var json = value.AsJson(options);
 
         if (autoCreateDirectory)
         {

@@ -22,8 +22,8 @@ public class CultureInfoShardingStrategy : AbstractShardingStrategy
 {
     private readonly Dictionary<string, string> _parameters = new()
     {
-        { BuildParameterKey("c"), CultureInfo.CurrentCulture.Name },
-        { BuildParameterKey("uic"), CultureInfo.CurrentUICulture.Name }
+        { BuildParameterKey("c"), CultureInfo.CurrentCulture.Name.Replace('-', '_') },
+        { BuildParameterKey("uic"), CultureInfo.CurrentUICulture.Name.Replace('-', '_') }
     };
 
 

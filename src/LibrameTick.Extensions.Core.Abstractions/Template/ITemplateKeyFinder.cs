@@ -13,9 +13,9 @@
 namespace Librame.Extensions.Core.Template;
 
 /// <summary>
-/// 定义用于 <see cref="RefKey"/> 的查找器接口。
+/// 定义模板键查找器接口。
 /// </summary>
-public interface IRefKeyFinder
+public interface ITemplateKeyFinder
 {
     /// <summary>
     /// 所有名称集合。
@@ -32,9 +32,9 @@ public interface IRefKeyFinder
     /// <summary>
     /// 包含指定引用键。
     /// </summary>
-    /// <param name="value">给定的 <see cref="RefKey"/>。</param>
+    /// <param name="value">给定的 <see cref="TemplateKeyDescriptor"/>。</param>
     /// <returns>返回是否存在的布尔值。</returns>
-    bool Contains(RefKey value);
+    bool Contains(TemplateKeyDescriptor value);
 
     /// <summary>
     /// 包含指定引用键。
@@ -47,17 +47,17 @@ public interface IRefKeyFinder
     /// <summary>
     /// 添加或更新指定引用键。
     /// </summary>
-    /// <param name="value">给定要添加或更新的 <see cref="RefKey"/>。</param>
+    /// <param name="value">给定要添加或更新的 <see cref="TemplateKeyDescriptor"/>。</param>
     /// <returns>返回字符串。</returns>
-    RefKey AddOrUpdate(RefKey value);
+    TemplateKeyDescriptor AddOrUpdate(TemplateKeyDescriptor value);
 
     /// <summary>
     /// 添加或更新指定引用键。
     /// </summary>
     /// <param name="name">给定的引用键名称。</param>
-    /// <param name="value">给定要添加或更新的 <see cref="RefKey"/>。</param>
+    /// <param name="value">给定要添加或更新的 <see cref="TemplateKeyDescriptor"/>。</param>
     /// <returns>返回字符串。</returns>
-    RefKey AddOrUpdate(string name, RefKey value);
+    TemplateKeyDescriptor AddOrUpdate(string name, TemplateKeyDescriptor value);
 
 
     /// <summary>
@@ -80,7 +80,7 @@ public interface IRefKeyFinder
     /// 尝试获取指定引用键。
     /// </summary>
     /// <param name="name">给定的引用键名称。</param>
-    /// <param name="value">输出 <see cref="RefKey"/>。</param>
+    /// <param name="value">输出 <see cref="TemplateKeyDescriptor"/>。</param>
     /// <returns>返回是否存在的布尔值。</returns>
-    bool TryGetValue(string name, [MaybeNullWhen(false)] out RefKey value);
+    bool TryGetValue(string name, [MaybeNullWhen(false)] out TemplateKeyDescriptor value);
 }

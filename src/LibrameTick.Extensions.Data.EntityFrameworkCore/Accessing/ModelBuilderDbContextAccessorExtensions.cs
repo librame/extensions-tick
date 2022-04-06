@@ -15,18 +15,61 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// <see cref="ModelBuilder"/> 与 <see cref="AbstractDbContextAccessorWithAudit"/> 静态扩展。
+/// 定义 <see cref="ModelBuilder"/> 与 <see cref="AbstractDbContextAccessor"/> 的静态扩展。
 /// </summary>
-public static class ModelBuilderDataAccessorExtensions
+public static class ModelBuilderDbContextAccessorExtensions
 {
 
     /// <summary>
-    /// 创建数据模型。
+    /// 创建指定程序集模型集合的默认配置（支持过滤 <see cref="NotMappedAttribute"/> 定义的模型）。
+    /// </summary>
+    /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
+    /// <param name="modelAssemblies">给定包含模型的 <see cref="IEnumerable{String}"/> 程序集集合。</param>
+    /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
+    public static ModelBuilder CreateAssembliesModels(this ModelBuilder modelBuilder,
+        params string[] modelAssemblies)
+        => modelBuilder.CreateAssembliesModels(modelAssemblies.AsEnumerable());
+
+    /// <summary>
+    /// 创建指定程序集模型集合的默认配置（支持过滤 <see cref="NotMappedAttribute"/> 定义的模型）。
+    /// </summary>
+    /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
+    /// <param name="modelAssemblies">给定包含模型的 <see cref="IEnumerable{String}"/> 程序集集合。</param>
+    /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
+    public static ModelBuilder CreateAssembliesModels(this ModelBuilder modelBuilder,
+        IEnumerable<string> modelAssemblies)
+    {
+        var notMappedType = typeof(NotMappedAttribute);
+
+        var createMethod = typeof(ModelBuilder).GetType()
+            .GetMethod(nameof(modelBuilder.Entity), Type.EmptyTypes);
+        if (createMethod is null)
+            return modelBuilder;
+
+        var modelTypes = modelAssemblies
+            .Select(Assembly.Load)
+            .Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(s => s.ExportedTypes)
+            .Where(p => p.IsConcreteType() && !p.IsNested && !p.IsDefined(notMappedType, inherit: false))
+            .ToList();
+
+        foreach (var modelType in modelTypes)
+        {
+            createMethod.MakeGenericMethod(modelType)
+                .Invoke(modelBuilder, new object[] { });
+        }
+
+        return modelBuilder;
+    }
+
+
+    /// <summary>
+    /// 创建审计模型集合。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
     /// <param name="accessor">给定的 <see cref="AbstractDbContextAccessor"/>。</param>
     /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
-    public static ModelBuilder CreateDataModel(this ModelBuilder modelBuilder,
+    public static ModelBuilder CreateAuditingModels(this ModelBuilder modelBuilder,
         AbstractDbContextAccessor accessor)
     {
         var limitableMaxLength = accessor.DataOptions.Store.LimitableMaxLengthOfProperty;

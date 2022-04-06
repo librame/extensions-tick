@@ -134,7 +134,14 @@ public abstract class AbstractDbContextAccessor : DbContext, IAccessor
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
     protected virtual void OnModelCreatingCore(ModelBuilder modelBuilder)
-        => modelBuilder.CreateDataModel(this);
+    {
+        if (!DataOptions.Access.AutomaticMapping)
+            return;
+
+        // 默认尝试创建迁移程序集的模型
+        if (!string.IsNullOrEmpty(_relationalExtension?.MigrationsAssembly))
+            modelBuilder.CreateAssembliesModels(_relationalExtension.MigrationsAssembly);
+    }
 
     #endregion
 
@@ -249,6 +256,207 @@ public abstract class AbstractDbContextAccessor : DbContext, IAccessor
     /// <returns>返回整数。</returns>
     public virtual int CompareTo(ISortable? other)
         => Priority.CompareTo(other?.Priority ?? 0);
+
+    #endregion
+
+
+    #region ExecuteCommand
+
+    /// <summary>
+    /// 执行 SQL 语句成功。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <returns>返回是否成功的布尔值。</returns>
+    public virtual bool ExecuteSuccess(string sql,
+        DbParameter[]? parameters = null)
+        => ExecuteCommand(sql, cmd => cmd.ExecuteNonQuery() > 0, parameters);
+
+    /// <summary>
+    /// 通过执行 SQL 语句查询单行单例的单个标量对象。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <returns>返回对象。</returns>
+    public virtual object? ExecuteScalar(string sql,
+        DbParameter[]? parameters = null)
+        => ExecuteCommand(sql, cmd => cmd.ExecuteScalar(), parameters);
+
+    /// <summary>
+    /// 通过执行 SQL 语句查询实体列表。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
+    public virtual IList<TEntity>? ExecuteList<TEntity>(string sql,
+        DbParameter[]? parameters = null)
+        where TEntity : class
+    {
+        var entityType = Model.FindEntityType(typeof(TEntity));
+        if (entityType is not null)
+        {
+            sql = DataOptions.Access.FormatSchema(sql, entityType.GetSchema());
+            sql = DataOptions.Access.FormatTableName(sql, entityType.GetTableName());
+        }
+
+        return ExecuteCommand(sql, cmd =>
+        {
+            var list = new List<IDictionary<string, object>>();
+
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var row = new Dictionary<string, object>();
+
+                    for (var i = 0; i < reader.FieldCount; i++)
+                        row.Add(reader.GetName(i), reader.GetValue(i));
+
+                    list.Add(row);
+                }
+            }
+
+            return list.AsByJson<List<TEntity>>();
+        },
+        parameters);
+    }
+
+    /// <summary>
+    /// 执行命令。
+    /// </summary>
+    /// <typeparam name="TResult">指定的返回类型。</typeparam>
+    /// <param name="sql">给定要执行的 SQL 语句。</param>
+    /// <param name="func">给定要执行的命令结果方法。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <see cref="DbCommand.Connection"/> is null.
+    /// </exception>
+    protected virtual TResult ExecuteCommand<TResult>(string sql,
+        Func<DbCommand, TResult> func, DbParameter[]? parameters = null)
+    {
+        using (var cmd = Database.GetDbConnection().CreateCommand())
+        {
+            if (cmd.Connection is null)
+                throw new ArgumentNullException(nameof(cmd.Connection));
+
+            if (cmd.Connection.State == ConnectionState.Broken)
+                cmd.Connection.Close();
+
+            if (cmd.Connection.State != ConnectionState.Open)
+                cmd.Connection.Open();
+
+            cmd.CommandText = sql;
+
+            if (parameters is not null && parameters.Length > 0)
+                cmd.Parameters.AddRange(parameters);
+
+            return func(cmd);
+        }
+    }
+
+
+    /// <summary>
+    /// 异步执行 SQL 语句成功。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含是否成功的布尔值的异步操作。</returns>
+    public virtual Task<bool> ExecuteSuccessAsync(string sql,
+        DbParameter[]? parameters = null, CancellationToken cancellationToken = default)
+        => ExecuteCommandAsync(sql, async cmd => await cmd.ExecuteNonQueryAsync(cancellationToken) > 0,
+            parameters, cancellationToken);
+
+    /// <summary>
+    /// 通过异步执行 SQL 语句查询单行单例的单个标量对象。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含对象的异步操作。</returns>
+    public virtual Task<object?> ExecuteScalarAsync(string sql,
+        DbParameter[]? parameters = null, CancellationToken cancellationToken = default)
+        => ExecuteCommandAsync(sql, cmd => cmd.ExecuteScalarAsync(cancellationToken),
+            parameters, cancellationToken);
+
+    /// <summary>
+    /// 通过异步执行 SQL 语句查询实体列表。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
+    public virtual Task<List<TEntity>?> ExecuteListAsync<TEntity>(string sql,
+        DbParameter[]? parameters = null, CancellationToken cancellationToken = default)
+        where TEntity : class
+    {
+        var entityType = Model.FindEntityType(typeof(TEntity));
+        if (entityType is not null)
+        {
+            sql = DataOptions.Access.FormatSchema(sql, entityType.GetSchema());
+            sql = DataOptions.Access.FormatTableName(sql, entityType.GetTableName());
+        }
+
+        return ExecuteCommandAsync(sql, async cmd =>
+        {
+            var list = new List<IDictionary<string, object>>();
+
+            using (var reader = await cmd.ExecuteReaderAsync(cancellationToken))
+            {
+                while (await reader.ReadAsync(cancellationToken))
+                {
+                    var row = new Dictionary<string, object>();
+
+                    for (var i = 0; i < reader.FieldCount; i++)
+                        row.Add(reader.GetName(i), reader.GetValue(i));
+
+                    list.Add(row);
+                }
+            }
+
+            return list.AsByJson<List<TEntity>>();
+        },
+        parameters, cancellationToken);
+    }
+
+    /// <summary>
+    /// 异步执行命令。
+    /// </summary>
+    /// <typeparam name="TResult">指定的返回类型。</typeparam>
+    /// <param name="sql">给定要执行的 SQL 语句。</param>
+    /// <param name="func">给定要执行的命令结果异步方法。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <typeparamref name="TResult"/> 的异步操作。</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <see cref="DbCommand.Connection"/> is null.
+    /// </exception>
+    protected virtual async Task<TResult> ExecuteCommandAsync<TResult>(string sql,
+        Func<DbCommand, Task<TResult>> func, DbParameter[]? parameters = null,
+        CancellationToken cancellationToken = default)
+    {
+        using (var cmd = Database.GetDbConnection().CreateCommand())
+        {
+            if (cmd.Connection is null)
+                throw new ArgumentNullException(nameof(cmd.Connection));
+
+            if (cmd.Connection.State == ConnectionState.Broken)
+                await cmd.Connection.CloseAsync();
+
+            if (cmd.Connection.State != ConnectionState.Open)
+                await cmd.Connection.OpenAsync(cancellationToken);
+
+            cmd.CommandText = sql;
+
+            if (parameters is not null && parameters.Length > 0)
+                cmd.Parameters.AddRange(parameters);
+
+            return await func(cmd);
+        }
+    }
 
     #endregion
 

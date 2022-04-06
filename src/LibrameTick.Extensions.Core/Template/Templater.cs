@@ -28,22 +28,22 @@ public static class Templater
         => _provider;
 
     /// <summary>
-    /// 默认模板选项。
+    /// 默认配置模板选项。
     /// </summary>
-    public static TemplateOptions DefaultOptions
-        => _provider.GetOrAddOptions();
+    public static ConfigurationTemplateOptions DefaultConfigurationOptions
+        => _provider.GetOrAddOptions<ConfigurationTemplateOptions>(Options.DefaultName);
 
 
     /// <summary>
-    /// 获取针对配置对象的 <see cref="RefKey"/> 查找器。
+    /// 获取用于配置对象的 <see cref="TemplateKeyDescriptor"/> 查找器。
     /// </summary>
-    /// <param name="options">给定的 <see cref="TemplateOptions"/>（可选；默认使用 <see cref="DefaultOptions"/>）。</param>
-    /// <returns>返回 <see cref="IRefKeyFinder"/>。</returns>
-    public static IRefKeyFinder GetConfigurationRefKeyFinder(TemplateOptions? options = null)
+    /// <param name="options">给定的 <see cref="ConfigurationTemplateOptions"/>（可选；默认使用 <see cref="DefaultConfigurationOptions"/>）。</param>
+    /// <returns>返回 <see cref="ITemplateKeyFinder"/>。</returns>
+    public static ITemplateKeyFinder GetConfigurationTemplateKeyFinder(ConfigurationTemplateOptions? options = null)
     {
-        var finder = new ConfigurationRefKeyFinder(options ?? DefaultOptions);
+        var finder = new ConfigurationTemplateKeyFinder(options ?? DefaultConfigurationOptions);
 
-        // 初始填充引用键集合
+        // 初始填充模板键集合
         finder.Populate();
 
         return finder;

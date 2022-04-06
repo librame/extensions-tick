@@ -70,6 +70,87 @@ public class BaseStore<T> : IStore<T>
         => (CurrentAccessor = Accessors.GetReadAccessor(specification)).GetQueryable<T>();
 
 
+    #region Execute
+
+    /// <summary>
+    /// 执行 SQL 语句成功。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回是否成功的布尔值。</returns>
+    public virtual bool ExecuteSuccess(string sql, DbParameter[]? parameters = null,
+        IAccessorSpecification? specification = null)
+        => (CurrentAccessor = Accessors.GetReadAccessor(specification))
+            .ExecuteSuccess(sql, parameters);
+
+    /// <summary>
+    /// 通过执行 SQL 语句查询单行单例的单个标量对象。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回对象。</returns>
+    public virtual object? ExecuteScalar(string sql, DbParameter[]? parameters = null,
+        IAccessorSpecification? specification = null)
+        => (CurrentAccessor = Accessors.GetReadAccessor(specification))
+            .ExecuteScalar(sql, parameters);
+
+    /// <summary>
+    /// 通过执行 SQL 语句查询实体列表。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
+    public virtual IList<T>? ExecuteList(string sql, DbParameter[]? parameters = null,
+        IAccessorSpecification? specification = null)
+        => (CurrentAccessor = Accessors.GetReadAccessor(specification))
+            .ExecuteList<T>(sql, parameters);
+
+
+    /// <summary>
+    /// 异步执行 SQL 语句成功。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回一个包含是否成功的布尔值的异步操作。</returns>
+    public virtual Task<bool> ExecuteSuccessAsync(string sql, DbParameter[]? parameters = null,
+        CancellationToken cancellationToken = default, IAccessorSpecification? specification = null)
+        => (CurrentAccessor = Accessors.GetReadAccessor(specification))
+            .ExecuteSuccessAsync(sql, parameters, cancellationToken);
+
+    /// <summary>
+    /// 通过异步执行 SQL 语句查询单行单例的单个标量对象。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回一个包含对象的异步操作。</returns>
+    public virtual Task<object?> ExecuteScalarAsync(string sql, DbParameter[]? parameters = null,
+        CancellationToken cancellationToken = default, IAccessorSpecification? specification = null)
+        => (CurrentAccessor = Accessors.GetReadAccessor(specification))
+            .ExecuteScalarAsync(sql, parameters, cancellationToken);
+
+    /// <summary>
+    /// 通过异步执行 SQL 语句查询实体列表。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
+    public virtual Task<List<T>?> ExecuteListAsync(string sql, DbParameter[]? parameters = null,
+        CancellationToken cancellationToken = default, IAccessorSpecification? specification = null)
+        => (CurrentAccessor = Accessors.GetReadAccessor(specification))
+            .ExecuteListAsync<T>(sql, parameters, cancellationToken);
+
+    #endregion
+
+
     #region Find
 
     /// <summary>

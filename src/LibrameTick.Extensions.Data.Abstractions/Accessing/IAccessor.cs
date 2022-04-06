@@ -38,6 +38,73 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     AccessorDescriptor? AccessorDescriptor { get; }
 
 
+    #region ExecuteCommand
+
+    /// <summary>
+    /// 执行 SQL 语句成功。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <returns>返回是否成功的布尔值。</returns>
+    bool ExecuteSuccess(string sql,
+        DbParameter[]? parameters = null);
+
+    /// <summary>
+    /// 通过执行 SQL 语句查询单行单例的单个标量对象。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <returns>返回对象。</returns>
+    object? ExecuteScalar(string sql,
+        DbParameter[]? parameters = null);
+
+    /// <summary>
+    /// 通过执行 SQL 语句查询实体列表。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
+    IList<TEntity>? ExecuteList<TEntity>(string sql,
+        DbParameter[]? parameters = null)
+        where TEntity : class;
+
+
+    /// <summary>
+    /// 异步执行 SQL 语句成功。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含是否成功的布尔值的异步操作。</returns>
+    Task<bool> ExecuteSuccessAsync(string sql,
+        DbParameter[]? parameters = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 通过异步执行 SQL 语句查询单行单例的单个标量对象。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含对象的异步操作。</returns>
+    Task<object?> ExecuteScalarAsync(string sql,
+        DbParameter[]? parameters = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// 通过异步执行 SQL 语句查询实体列表。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
+    Task<List<TEntity>?> ExecuteListAsync<TEntity>(string sql,
+        DbParameter[]? parameters = null, CancellationToken cancellationToken = default)
+        where TEntity : class;
+
+    #endregion
+
+
     #region Exists
 
     /// <summary>

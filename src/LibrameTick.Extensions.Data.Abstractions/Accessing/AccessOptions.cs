@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core;
+using Librame.Extensions.Core.Template;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -19,6 +20,12 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public class AccessOptions : IOptions
 {
+    /// <summary>
+    /// 模板选项。
+    /// </summary>
+    public TemplateOptions Template { get; set; } = InitialTemplates();
+
+
     /// <summary>
     /// 当连接数据库时，如果数据库已存在，则可以确保将可能已存在的数据库删除（默认未启用功能。注：务必慎用此功能，推荐用于测试环境，不可用于正式环境）。
     /// </summary>
@@ -35,7 +42,72 @@ public class AccessOptions : IOptions
     public bool AutomaticMigration { get; set; } = true;
 
     /// <summary>
+    /// 自动创建迁移程序集的模型（默认不启用此功能）。
+    /// </summary>
+    public bool AutomaticMapping { get; set; }
+
+    /// <summary>
     /// 默认存取器优先级（默认为 5）。
     /// </summary>
     public float DefaultPriority { get; set; } = 5;
+
+
+    /// <summary>
+    /// 使用指定的架构格式化 SQL 语句。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="schema">给定的架构。</param>
+    /// <returns>返回字符串。</returns>
+    public virtual string FormatSchema(string sql, string? schema)
+    {
+        if (schema is null)
+            return sql;
+
+        if (Template.KeyDescriptors.TryGetValue("Schema", out var descriptor))
+            return sql.Replace(descriptor.NamePattern, schema);
+
+        return sql;
+    }
+
+    /// <summary>
+    /// 使用指定的表名格式化 SQL 语句。
+    /// </summary>
+    /// <param name="sql">给定的 SQL 语句。</param>
+    /// <param name="tableName">给定的表名。</param>
+    /// <returns>返回字符串。</returns>
+    public virtual string FormatTableName(string sql, string? tableName)
+    {
+        if (tableName is null)
+            return sql;
+
+        if (Template.KeyDescriptors.TryGetValue("Table", out var descriptor))
+            return sql.Replace(descriptor.NamePattern, tableName);
+
+        if (Template.KeyDescriptors.TryGetValue("TableName", out descriptor))
+            return sql.Replace(descriptor.NamePattern, tableName);
+
+        return sql;
+    }
+
+
+    /// <summary>
+    /// 初始化访问模板选项（默认支持“${Table}、${Schema}”格式键）。
+    /// </summary>
+    /// <returns>返回 <see cref="TemplateOptions"/>。</returns>
+    public static TemplateOptions InitialTemplates()
+    {
+        var templates = new TemplateOptions();
+
+        var schemaKey = new TemplateKeyDescriptor("${Schema}", "Schema");
+        templates.KeyDescriptors.Add(schemaKey.Name, schemaKey);
+
+        var tableKey = new TemplateKeyDescriptor("${Table}", "Table");
+        templates.KeyDescriptors.Add(tableKey.Name, tableKey);
+
+        var tableNameKey = new TemplateKeyDescriptor("${TableName}", "TableName");
+        templates.KeyDescriptors.Add(tableNameKey.Name, tableNameKey);
+
+        return templates;
+    }
+
 }

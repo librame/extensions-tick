@@ -112,6 +112,35 @@ sealed class InternalCompositeAccessor : AbstractSortable, IAccessor
     #endregion
 
 
+    #region ExecuteCommand
+
+    public bool ExecuteSuccess(string sql, DbParameter[]? parameters = null)
+        => _equilizer.Invoke(a => a.ExecuteSuccess(sql, parameters)).First();
+
+    public object? ExecuteScalar(string sql, DbParameter[]? parameters = null)
+        => _equilizer.Invoke(a => a.ExecuteScalar(sql, parameters)).First();
+
+    public IList<TEntity>? ExecuteList<TEntity>(string sql, DbParameter[]? parameters = null)
+        where TEntity : class
+        => _equilizer.Invoke(a => a.ExecuteList<TEntity>(sql, parameters)).First();
+
+
+    public Task<bool> ExecuteSuccessAsync(string sql, DbParameter[]? parameters = null,
+        CancellationToken cancellationToken = default)
+        => _equilizer.Invoke(a => a.ExecuteSuccessAsync(sql, parameters, cancellationToken)).First();
+
+    public Task<object?> ExecuteScalarAsync(string sql, DbParameter[]? parameters = null,
+        CancellationToken cancellationToken = default)
+        => _equilizer.Invoke(a => a.ExecuteScalarAsync(sql, parameters, cancellationToken)).First();
+
+    public Task<List<TEntity>?> ExecuteListAsync<TEntity>(string sql, DbParameter[]? parameters = null,
+        CancellationToken cancellationToken = default)
+        where TEntity : class
+        => _equilizer.Invoke(a => a.ExecuteListAsync<TEntity>(sql, parameters, cancellationToken)).First();
+
+    #endregion
+
+
     #region Exists
 
     public bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,

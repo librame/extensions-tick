@@ -13,27 +13,27 @@
 namespace Librame.Extensions.Core.Template;
 
 /// <summary>
-/// 定义用于模板且实现 <see cref="IEquatable{RefKey}"/> 的引用键。
+/// 定义一个包含查找键名模式、键名与值信息且实现 <see cref="IEquatable{TemplateKeyDescriptor}"/> 的模板键描述符。
 /// </summary>
-public class RefKey : IEquatable<RefKey>
+public class TemplateKeyDescriptor : IEquatable<TemplateKeyDescriptor>
 {
     /// <summary>
-    /// 构造一个 <see cref="RefKey"/>。
+    /// 构造一个 <see cref="TemplateKeyDescriptor"/>。
     /// </summary>
     /// <param name="namePattern">给定的名称模式。</param>
     /// <param name="name">给定的名称。</param>
-    public RefKey(string namePattern, string name)
+    public TemplateKeyDescriptor(string namePattern, string name)
         : this(namePattern, name, value: null)
     {
     }
 
     /// <summary>
-    /// 构造一个 <see cref="RefKey"/>。
+    /// 构造一个 <see cref="TemplateKeyDescriptor"/>。
     /// </summary>
     /// <param name="namePattern">给定的名称模式。</param>
     /// <param name="name">给定的名称。</param>
     /// <param name="value">给定的值。</param>
-    public RefKey(string namePattern, string name, string? value)
+    public TemplateKeyDescriptor(string namePattern, string name, string? value)
     {
         NamePattern = namePattern;
         Name = name;
@@ -65,9 +65,9 @@ public class RefKey : IEquatable<RefKey>
     /// <summary>
     /// 比较相等。
     /// </summary>
-    /// <param name="other">给定要比较的 <see cref="RefKey"/>。</param>
+    /// <param name="other">给定要比较的 <see cref="TemplateKeyDescriptor"/>。</param>
     /// <returns>返回是否相等的布尔值。</returns>
-    public virtual bool Equals(RefKey? other)
+    public virtual bool Equals(TemplateKeyDescriptor? other)
         => other is not null && other.Name == Name && other.Value == Value;
 
 

@@ -63,6 +63,11 @@ namespace Librame.Extensions.Data.Accessing
             var pagingUsers = store.FindPagingList(p => p.PageByIndex(index: 1, size: 5));
             Assert.NotEmpty(pagingUsers);
 
+            // sql=$"SELECT * FROM {store.GetTableName()}"
+            var sqlUsers = store.ExecuteList("SELECT * FROM ${Table}");
+            Assert.NotNull(sqlUsers);
+            Assert.NotEmpty(sqlUsers);
+
             // Update
             foreach (var user in pagingUsers)
             {

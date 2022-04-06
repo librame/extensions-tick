@@ -25,13 +25,13 @@ namespace Microsoft.Extensions.Configuration
         /// </summary>
         /// <typeparam name="TConfiguration">指定实现 <see cref="IConfiguration"/> 的配置类型。</typeparam>
         /// <param name="source">给定的 <typeparamref name="TConfiguration"/> 配置源。</param>
-        /// <param name="setupOptions">>给定可用于设置 <see cref="TemplateOptions"/> 选项的动作（可空；为空则不设置）</param>
+        /// <param name="setupOptions">>给定可用于设置 <see cref="ConfigurationTemplateOptions"/> 选项的动作（可空；为空则不设置）</param>
         /// <returns>返回 <typeparamref name="TConfiguration"/>。</returns>
         public static TConfiguration EnableTemplate<TConfiguration>(this TConfiguration source,
-            Action<TemplateOptions>? setupOptions = null)
+            Action<ConfigurationTemplateOptions>? setupOptions = null)
             where TConfiguration : IConfiguration
         {
-            var options = Templater.DefaultOptions;
+            var options = Templater.DefaultConfigurationOptions;
 
             options.Source = source;
 
@@ -42,14 +42,14 @@ namespace Microsoft.Extensions.Configuration
             return source;
         }
 
-        private static void EnableTemplate(TemplateOptions options)
+        private static void EnableTemplate(ConfigurationTemplateOptions options)
         {
             ArgumentNullException.ThrowIfNull(options.Source, nameof(options.Source));
 
             var source = options.Source;
 
-            // 调用配置对象更新后实时刷新引用键功能
-            options.RefKeys.RefreshAction?.Invoke();
+            // 调用配置对象更新后实时刷新（填充）模板键功能
+            options.PopulateKeysAction?.Invoke();
 
             if (options.RefreshOnChange)
             {

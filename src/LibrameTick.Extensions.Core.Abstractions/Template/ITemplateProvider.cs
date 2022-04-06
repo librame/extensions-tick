@@ -21,6 +21,16 @@ public interface ITemplateProvider
     /// 获取或新增模板选项。
     /// </summary>
     /// <param name="name">给定的实例名称。</param>
+    /// <param name="addFunc">给定的新增模板选项方法（可选）。</param>
     /// <returns>返回 <see cref="TemplateOptions"/>。</returns>
-    TemplateOptions GetOrAddOptions(string? name = null);
+    TOptions GetOrAddOptions<TOptions>(string name, Func<string, TOptions>? addFunc = null)
+        where TOptions : TemplateOptions, new();
+
+    /// <summary>
+    /// 获取或新增模板选项。
+    /// </summary>
+    /// <param name="name">给定的实例名称。</param>
+    /// <param name="addFunc">给定的新增模板选项方法。</param>
+    /// <returns>返回 <see cref="TemplateOptions"/>。</returns>
+    TemplateOptions GetOrAddOptions(string name, Func<string, TemplateOptions> addFunc);
 }

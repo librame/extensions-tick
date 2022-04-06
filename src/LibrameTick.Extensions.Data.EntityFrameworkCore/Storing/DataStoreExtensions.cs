@@ -21,7 +21,7 @@ public static class DataStoreExtensions
 {
 
     /// <summary>
-    /// 获取指定实体类型的泛型商店。
+    /// 获取指定实体类型泛型商店的数据集。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
@@ -30,13 +30,43 @@ public static class DataStoreExtensions
     public static DbSet<TEntity> GetSet<TEntity>(this IStore<TEntity> store, IAccessorSpecification? specification = null)
         where TEntity : class
     {
-        if (specification is null)
-        {
-            var context = (DbContext)store.Accessors.GetReadAccessor();
-            return context.Set<TEntity>();
-        }
+        var accessor = specification is null
+            ? store.Accessors.GetReadAccessor()
+            : store.Accessors.GetAccessor(specification);
 
-        return ((DbContext)store.Accessors.GetAccessor(specification)).Set<TEntity>();
+        return ((DbContext)accessor).Set<TEntity>();
+    }
+
+    /// <summary>
+    /// 获取指定实体类型泛型商店的架构。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回表名字符串。</returns>
+    public static string? GetSchema<TEntity>(this IStore<TEntity> store, IAccessorSpecification? specification = null)
+    {
+        var accessor = specification is null
+            ? store.Accessors.GetReadAccessor()
+            : store.Accessors.GetAccessor(specification);
+
+        return ((DbContext)accessor).Model.FindEntityType(typeof(TEntity))?.GetSchema();
+    }
+
+    /// <summary>
+    /// 获取指定实体类型泛型商店的表名。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回表名字符串。</returns>
+    public static string? GetTableName<TEntity>(this IStore<TEntity> store, IAccessorSpecification? specification = null)
+    {
+        var accessor = specification is null
+            ? store.Accessors.GetReadAccessor()
+            : store.Accessors.GetAccessor(specification);
+
+        return ((DbContext)accessor).Model.FindEntityType(typeof(TEntity))?.GetTableName();
     }
 
 }

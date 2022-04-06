@@ -70,9 +70,9 @@ public static class EntityTypeBuilderExtensions
         IShardingManager shardingManager, string? schema)
         where TEntity : class
     {
-        var shardingNaming = shardingManager.GetDescriptorFromEntity(typeof(TEntity));
+        var descriptor = shardingManager.GetDescriptorFromEntity(typeof(TEntity));
 
-        builder.Metadata.SetTableName(shardingNaming);
+        builder.Metadata.SetTableName(descriptor);
         builder.Metadata.SetSchema(schema);
 
         return builder;

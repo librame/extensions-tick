@@ -14,7 +14,7 @@ namespace Librame.Extensions.Core.Template
                 .Build()
                 .EnableTemplate();
 
-            var finder = Templater.GetConfigurationRefKeyFinder();
+            var finder = Templater.GetConfigurationTemplateKeyFinder();
             Assert.NotEmpty(finder.AllNames);
 
             foreach (var section in configuration.GetChildren())

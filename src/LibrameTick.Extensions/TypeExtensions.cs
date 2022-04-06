@@ -36,12 +36,12 @@ public static class TypeExtensions
         => currentType.AssemblyQualifiedName == compareType.AssemblyQualifiedName;
 
     /// <summary>
-    /// 是具实类型（即非抽象、非接口、可实例化的类型）。
+    /// 是具实类型（即非抽象或接口、可实例化的类型）。
     /// </summary>
     /// <param name="type">给定的类型。</param>
     /// <returns>返回布尔值。</returns>
     public static bool IsConcreteType(this Type type)
-        => !type.IsAbstract && !type.IsInterface;
+        => type.IsClass && !type.IsAbstract;
 
     /// <summary>
     /// 是可空泛类型。

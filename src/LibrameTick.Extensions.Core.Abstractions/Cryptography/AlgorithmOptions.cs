@@ -11,7 +11,6 @@
 #endregion
 
 using Librame.Extensions.Autokeys;
-using Librame.Extensions.JsonConverters;
 
 namespace Librame.Extensions.Core.Cryptography;
 
@@ -39,7 +38,6 @@ public class AlgorithmOptions : CkiOptions
     /// <summary>
     /// 字符编码（默认使用 <see cref="Encoding.UTF8"/>）。
     /// </summary>
-    [JsonConverter(typeof(JsonStringEncodingConverter))]
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
 
