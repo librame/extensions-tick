@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Librame.Extensions.Autokeys
+namespace Librame.Extensions.Cryptography
 {
     public class JsonFileAutokeyProviderTests
     {

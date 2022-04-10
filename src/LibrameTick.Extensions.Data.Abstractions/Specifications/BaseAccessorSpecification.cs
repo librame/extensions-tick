@@ -11,9 +11,8 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Specifications;
 
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义实现 <see cref="IAccessorSpecification"/> 的基础存取器规约（默认按优先级进行升序排列）。
@@ -95,9 +94,9 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
         if (Redundancy is not null && enumerable.NonEnumeratedCount() > 1)
         {
             if (Redundancy == RedundancyMode.Aggregation)
-                return new InternalCompositeAccessor(enumerable);
+                return new CompositeAccessor(enumerable);
             else
-                return enumerable.First(); // Default Slicing
+                return new DistributedAccessor(enumerable);
         }
 
         return enumerable.First();

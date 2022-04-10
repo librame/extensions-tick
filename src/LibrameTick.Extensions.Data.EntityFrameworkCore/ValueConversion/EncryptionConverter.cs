@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Data.Cryptography;
+using Librame.Extensions.Cryptography;
 
 namespace Librame.Extensions.Data.ValueConversion;
 

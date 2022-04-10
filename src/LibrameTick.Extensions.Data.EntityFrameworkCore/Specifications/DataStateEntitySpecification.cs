@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Data;
+
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义数据状态实体规约。

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 抽象实现 <see cref="IAlgorithmParameterGenerator"/>。

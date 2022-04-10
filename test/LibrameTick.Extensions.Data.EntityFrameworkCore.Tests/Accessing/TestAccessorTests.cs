@@ -1,4 +1,3 @@
-using Librame.Extensions.Data.Specifications;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,14 +56,14 @@ namespace Librame.Extensions.Data.Accessing
 
             provider.UseAccessorInitializer();
 
-            var store = provider.GetRequiredService<IStore<User>>();
-            Assert.NotNull(store);
+            var userStore = provider.GetRequiredService<IStore<User>>();
+            Assert.NotNull(userStore);
 
-            var pagingUsers = store.FindPagingList(p => p.PageByIndex(index: 1, size: 5));
+            var pagingUsers = userStore.FindPagingList(p => p.PageByIndex(index: 1, size: 5));
             Assert.NotEmpty(pagingUsers);
 
-            // sql=$"SELECT * FROM {store.GetTableName()}"
-            var sqlUsers = store.ExecuteList("SELECT * FROM ${Table}");
+            // sql=$"SELECT * FROM {userStore.GetTableName()}"
+            var sqlUsers = userStore.QueryBySql("SELECT * FROM ${Table}").ToList();
             Assert.NotNull(sqlUsers);
             Assert.NotEmpty(sqlUsers);
 
@@ -75,7 +74,7 @@ namespace Librame.Extensions.Data.Accessing
             }
 
             // 仅针对写入访问器
-            store.Update(pagingUsers);
+            userStore.Update(pagingUsers);
 
             // Add
             var addUsers = new User[10];
@@ -88,31 +87,31 @@ namespace Librame.Extensions.Data.Accessing
                     Passwd = "123456"
                 };
 
-                user.Id = store.IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
+                user.Id = userStore.IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
                 user.PopulateCreation(pagingUsers.First().Id, DateTimeOffset.UtcNow);
 
                 addUsers[i] = user;
             }
 
             // 仅针对写入访问器
-            store.Add(addUsers);
+            userStore.Add(addUsers);
 
-            store.SaveChanges();
+            userStore.SaveChanges();
 
-            // 修改：读取访问器（Sqlite）数据无变化
-            var users = store.FindList(p => p.Name!.StartsWith("Update"));
+            // 读取访问器（Sqlite）更新数据无变化
+            var users = userStore.FindList(p => p.Name!.StartsWith("Update"));
             Assert.Empty(users);
 
-            // 修改：强制从写入访问器查询（MySQL/SQL Server）
-            users = store.FindList(p => p.Name!.StartsWith("Update"), AccessorSpecifications.Write);
+            // 强制从写入访问器（MySQL/SQL Server）查询更新数据
+            users = userStore.UseWriteAccessor().FindList(p => p.Name!.StartsWith("Update"));
             Assert.NotEmpty(users);
 
-            // 新增：读取访问器（Sqlite）数据无变化
-            users = store.FindList(p => p.Name!.StartsWith("Add"));
+            // 读取访问器（Sqlite）新增数据无变化
+            users = userStore.UseReadAccessor().FindList(p => p.Name!.StartsWith("Add"));
             Assert.Empty(users);
 
-            // 新增：强制从写入访问器查询（MySQL/SQL Server）
-            users = store.FindList(p => p.Name!.StartsWith("Add"), AccessorSpecifications.Write);
+            // 强制从写入访问器（MySQL/SQL Server）查询新增数据
+            users = userStore.UseWriteAccessor().FindList(p => p.Name!.StartsWith("Add"));
             Assert.NotEmpty(users);
         }
 

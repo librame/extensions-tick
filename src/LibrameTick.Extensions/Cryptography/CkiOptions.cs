@@ -13,7 +13,7 @@
 using CryptoAesCcm = System.Security.Cryptography.AesCcm;
 using CryptoAesGcm = System.Security.Cryptography.AesGcm;
 
-namespace Librame.Extensions.Autokeys;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义一个通用密钥基础设施（CKI）选项。

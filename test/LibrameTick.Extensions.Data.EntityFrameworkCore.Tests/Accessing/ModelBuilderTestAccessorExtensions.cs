@@ -6,7 +6,7 @@ namespace Librame.Extensions.Data.Accessing
     {
 
         public static ModelBuilder CreateUserModel(this ModelBuilder modelBuilder,
-            AbstractDbContextAccessor accessor)
+            DbContextAccessor accessor)
         {
             modelBuilder.Entity<User>(b =>
             {

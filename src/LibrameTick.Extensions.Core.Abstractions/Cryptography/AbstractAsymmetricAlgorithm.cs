@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义抽象实现 <see cref="IAsymmetricAlgorithm"/> 的非对称算法。

@@ -11,7 +11,7 @@
 #endregion
 
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -20,9 +20,6 @@ class InternalAccessorManager : IAccessorManager
     private readonly IOptionsMonitor<DataExtensionOptions> _optionsMonitor;
     private readonly IAccessorMigrator _migrator;
     private readonly IShardingManager _shardingManager;
-
-    private IAccessor? _defaultReadAccessor;
-    private IAccessor? _defaultWriteAccessor;
 
 
     public InternalAccessorManager(IOptionsMonitor<DataExtensionOptions> optionsMonitor,
@@ -56,29 +53,9 @@ class InternalAccessorManager : IAccessorManager
     }
 
     public IAccessor GetReadAccessor(IAccessorSpecification? specification = null)
-    {
-        if (specification is null)
-        {
-            if (_defaultReadAccessor is null)
-                _defaultReadAccessor = GetAccessor(AccessorSpecifications.Read);
-
-            return _defaultReadAccessor;
-        }
-
-        return GetAccessor(specification);
-    }
+        => GetAccessor(specification ?? AccessorSpecifications.Read);
 
     public IAccessor GetWriteAccessor(IAccessorSpecification? specification = null)
-    {
-        if (specification is null)
-        {
-            if (_defaultWriteAccessor is null)
-                _defaultWriteAccessor = GetAccessor(AccessorSpecifications.Write);
-
-            return _defaultWriteAccessor;
-        }
-
-        return GetAccessor(specification);
-    }
+        => GetAccessor(specification ?? AccessorSpecifications.Write);
 
 }

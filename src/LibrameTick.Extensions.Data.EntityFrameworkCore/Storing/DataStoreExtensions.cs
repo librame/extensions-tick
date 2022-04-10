@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Storing;
 
@@ -27,7 +27,8 @@ public static class DataStoreExtensions
     /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="DbSet{TEntity}"/>。</returns>
-    public static DbSet<TEntity> GetSet<TEntity>(this IStore<TEntity> store, IAccessorSpecification? specification = null)
+    public static DbSet<TEntity> GetSet<TEntity>(this IStore<TEntity> store,
+        IAccessorSpecification? specification = null)
         where TEntity : class
     {
         var accessor = specification is null
@@ -44,7 +45,8 @@ public static class DataStoreExtensions
     /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回表名字符串。</returns>
-    public static string? GetSchema<TEntity>(this IStore<TEntity> store, IAccessorSpecification? specification = null)
+    public static string? GetSchema<TEntity>(this IStore<TEntity> store,
+        IAccessorSpecification? specification = null)
     {
         var accessor = specification is null
             ? store.Accessors.GetReadAccessor()
@@ -60,7 +62,8 @@ public static class DataStoreExtensions
     /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回表名字符串。</returns>
-    public static string? GetTableName<TEntity>(this IStore<TEntity> store, IAccessorSpecification? specification = null)
+    public static string? GetTableName<TEntity>(this IStore<TEntity> store,
+        IAccessorSpecification? specification = null)
     {
         var accessor = specification is null
             ? store.Accessors.GetReadAccessor()

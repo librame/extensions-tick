@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Cryptography;
 
 class InternalSymmetricAlgorithm : AbstractSymmetricAlgorithm
 {

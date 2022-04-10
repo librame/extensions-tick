@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Collections;
 
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// <see cref="IEntitySpecification{T}"/> 静态扩展。

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// <see cref="IDbSetEntitySpecification{TEntity}"/> 静态扩展。

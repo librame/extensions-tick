@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 

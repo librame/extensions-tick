@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Librame.Extensions.Core;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using Xunit;
 
-namespace Librame.Extensions.Core.Cryptography
+namespace Librame.Extensions.Cryptography
 {
     public class InternalSymmetricAlgorithmTests
     {

@@ -55,6 +55,15 @@ public abstract class AbstractEquilizer<TSource> : IEquilizer<TSource>
     /// <returns>返回 <see cref="IEnumerable{TResult}"/>。</returns>
     public abstract IEnumerable<TResult> Invoke<TResult>(Func<TSource, TResult> func);
 
+    /// <summary>
+    /// 调用指定的方法并返回最后一个结果。
+    /// </summary>
+    /// <typeparam name="TResult">指定的返回结果类型。</typeparam>
+    /// <param name="func">给定的方法。</param>
+    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
+    public virtual TResult InvokeGetLast<TResult>(Func<TSource, TResult> func)
+        => Invoke(func).Last();
+
 
     /// <summary>
     /// 获取泛型枚举器。

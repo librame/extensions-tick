@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义算法参数生成器接口。

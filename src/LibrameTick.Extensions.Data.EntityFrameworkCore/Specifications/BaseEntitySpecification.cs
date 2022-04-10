@@ -10,9 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Specifications;
-
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义实现 <see cref="IEntitySpecification{TEntity}"/> 的基础实体规约。

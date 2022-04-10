@@ -15,7 +15,7 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义 <see cref="ModelBuilder"/> 与 <see cref="AbstractDbContextAccessor"/> 的静态扩展。
+/// 定义 <see cref="ModelBuilder"/> 与 <see cref="DbContextAccessor"/> 的静态扩展。
 /// </summary>
 public static class ModelBuilderDbContextAccessorExtensions
 {
@@ -67,10 +67,10 @@ public static class ModelBuilderDbContextAccessorExtensions
     /// 创建审计模型集合。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    /// <param name="accessor">给定的 <see cref="AbstractDbContextAccessor"/>。</param>
+    /// <param name="accessor">给定的 <see cref="DbContextAccessor"/>。</param>
     /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
     public static ModelBuilder CreateAuditingModels(this ModelBuilder modelBuilder,
-        AbstractDbContextAccessor accessor)
+        DbContextAccessor accessor)
     {
         var limitableMaxLength = accessor.DataOptions.Store.LimitableMaxLengthOfProperty;
         var mapRelationship = accessor.DataOptions.Store.MapRelationship;

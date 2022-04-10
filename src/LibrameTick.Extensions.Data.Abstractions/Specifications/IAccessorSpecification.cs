@@ -11,9 +11,8 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Specifications;
 
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义一个存取器规约接口。

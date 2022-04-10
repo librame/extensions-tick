@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义常用存取器规约。

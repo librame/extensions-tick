@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Autokeys;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义实现 <see cref="KeyNonceOptions"/> 的密钥、初始向量（IV）、验证标记选项。

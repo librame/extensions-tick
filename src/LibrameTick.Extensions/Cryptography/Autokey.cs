@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Autokeys;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义一个用于序列化的自动密钥。

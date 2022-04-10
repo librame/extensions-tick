@@ -10,9 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Specifications;
-
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义继承 <see cref="IExpressionSpecification{T}"/> 的实体规约接口。

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Autokeys;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义实现 <see cref="Core.IOptions"/> 的 HMACHASH 选项。

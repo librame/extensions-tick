@@ -10,9 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Autokeys;
-
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义对称算法接口。

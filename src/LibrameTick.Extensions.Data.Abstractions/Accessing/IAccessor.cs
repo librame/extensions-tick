@@ -13,7 +13,7 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -22,6 +22,11 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable, IShardable, IDisposable, IAsyncDisposable
 {
+    /// <summary>
+    /// 存取器描述符。
+    /// </summary>
+    AccessorDescriptor? AccessorDescriptor { get; }
+
     /// <summary>
     /// 存取器标识。
     /// </summary>
@@ -32,74 +37,48 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     /// </summary>
     Type AccessorType { get; }
 
-    /// <summary>
-    /// 存取器描述符。
-    /// </summary>
-    AccessorDescriptor? AccessorDescriptor { get; }
 
-
-    #region ExecuteCommand
+    #region Query
 
     /// <summary>
-    /// 执行 SQL 语句成功。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <returns>返回是否成功的布尔值。</returns>
-    bool ExecuteSuccess(string sql,
-        DbParameter[]? parameters = null);
-
-    /// <summary>
-    /// 通过执行 SQL 语句查询单行单例的单个标量对象。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <returns>返回对象。</returns>
-    object? ExecuteScalar(string sql,
-        DbParameter[]? parameters = null);
-
-    /// <summary>
-    /// 通过执行 SQL 语句查询实体列表。
+    /// 创建指定实体类型的可查询接口。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-    IList<TEntity>? ExecuteList<TEntity>(string sql,
-        DbParameter[]? parameters = null)
+    /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
+    IQueryable<TEntity> Query<TEntity>()
+        where TEntity : class;
+
+    /// <summary>
+    /// 创建指定实体类型的可查询接口。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="name">要使用的共享类型实体类型的名称。</param>
+    /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
+    IQueryable<TEntity> Query<TEntity>(string name)
         where TEntity : class;
 
 
     /// <summary>
-    /// 异步执行 SQL 语句成功。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含是否成功的布尔值的异步操作。</returns>
-    Task<bool> ExecuteSuccessAsync(string sql,
-        DbParameter[]? parameters = null, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 通过异步执行 SQL 语句查询单行单例的单个标量对象。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含对象的异步操作。</returns>
-    Task<object?> ExecuteScalarAsync(string sql,
-        DbParameter[]? parameters = null, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 通过异步执行 SQL 语句查询实体列表。
+    /// 通过 SQL 语句创建指定实体类型的可查询接口。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
-    Task<List<TEntity>?> ExecuteListAsync<TEntity>(string sql,
-        DbParameter[]? parameters = null, CancellationToken cancellationToken = default)
+    /// <param name="sql">给定的 SQL 语句（可使用“${Schema}、${Table}/${TableName}”模板关键字分别代替架构、表名等参数值）。</param>
+    /// <param name="parameters">给定的参数数组。</param>
+    /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
+    IQueryable<TEntity> QueryBySql<TEntity>(string sql,
+        params object[] parameters)
+        where TEntity : class;
+
+    /// <summary>
+    /// 通过 SQL 语句创建指定实体类型的可查询接口。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="name">要使用的共享类型实体类型的名称。</param>
+    /// <param name="sql">给定的 SQL 语句（可使用“${Schema}、${Table}/${TableName}”模板关键字分别代替架构、表名等参数值）。</param>
+    /// <param name="parameters">给定的参数数组。</param>
+    /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
+    IQueryable<TEntity> QueryBySql<TEntity>(string name,
+        string sql, params object[] parameters)
         where TEntity : class;
 
     #endregion
@@ -136,56 +115,68 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     #region Find
 
     /// <summary>
-    /// 查找与指定键值对集合匹配的实体。
+    /// 从表达式建立指定结果的可查询接口。
     /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="keyValues">给定的键值对集合。</param>
-    /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
-    TEntity? Find<TEntity>(params object?[]? keyValues)
-        where TEntity : class;
+    /// <typeparam name="TResult">指定的结果类型。</typeparam>
+    /// <param name="expression">给定的 <see cref="IQueryable{TResult}"/> 表达式。</param>
+    /// <returns>返回 <see cref="IQueryable{TResult}"/>。</returns>
+    IQueryable<TResult> FromExpression<TResult>(Expression<Func<IQueryable<TResult>>> expression);
+
 
     /// <summary>
-    /// 查找与指定键值对集合匹配的实体对象。
+    /// 查找指定键值数组的实体对象。
     /// </summary>
     /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="keyValues">给定的键值对集合。</param>
+    /// <param name="keyValues">给定的键值数组。</param>
     /// <returns>返回实体对象。</returns>
     object? Find(Type entityType, params object?[]? keyValues);
 
     /// <summary>
-    /// 异步查找与指定键值对集合匹配的实体。
-    /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="keyValues">给定的键值对集合。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
-    /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的 <see cref="ValueTask"/>。</returns>
-    ValueTask<TEntity?> FindAsync<TEntity>(object?[]? keyValues, CancellationToken cancellationToken)
-        where TEntity : class;
-
-    /// <summary>
-    /// 异步查找与指定键值对集合匹配的实体对象。
+    /// 异步查找指定键值数组的实体对象。
     /// </summary>
     /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="keyValues">给定的键值对集合。</param>
-    /// <returns>返回一个包含实体对象的 <see cref="ValueTask"/>。</returns>
+    /// <param name="keyValues">给定的键值数组。</param>
+    /// <returns>返回一个包含实体对象的异步操作。</returns>
     ValueTask<object?> FindAsync(Type entityType, params object?[]? keyValues);
 
     /// <summary>
-    /// 异步查找与指定键值对集合匹配的实体对象。
+    /// 异步查找指定键值数组的实体对象。
     /// </summary>
     /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="keyValues">给定的键值对集合。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
-    /// <returns>返回一个包含实体对象的 <see cref="ValueTask"/>。</returns>
-    ValueTask<object?> FindAsync(Type entityType, object?[]? keyValues, CancellationToken cancellationToken);
+    /// <param name="keyValues">给定的键值数组。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含实体对象的异步操作。</returns>
+    ValueTask<object?> FindAsync(Type entityType, object?[]? keyValues,
+        CancellationToken cancellationToken);
+
 
     /// <summary>
-    /// 异步查找与指定键值对集合匹配的实体。
+    /// 查找指定键值数组的实体。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="keyValues">给定的键值对集合。</param>
-    /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的 <see cref="ValueTask"/>。</returns>
+    /// <param name="keyValues">给定的键值数组。</param>
+    /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+    TEntity? Find<TEntity>(params object?[]? keyValues)
+        where TEntity: class;
+
+    /// <summary>
+    /// 异步查找指定键值数组的实体。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="keyValues">给定的键值数组。</param>
+    /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的异步结果。</returns>
     ValueTask<TEntity?> FindAsync<TEntity>(params object?[]? keyValues)
+        where TEntity : class;
+
+    /// <summary>
+    /// 异步查找指定键值数组的实体。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="keyValues">给定的键值数组。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的异步结果。</returns>
+    ValueTask<TEntity?> FindAsync<TEntity>(object?[]? keyValues,
+        CancellationToken cancellationToken)
         where TEntity : class;
 
 
@@ -257,37 +248,6 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     #endregion
 
 
-    #region GetQueryable
-
-    /// <summary>
-    /// 从表达式建立指定结果的可查询接口。
-    /// </summary>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="expression">给定的 <see cref="IQueryable{TResult}"/> 表达式。</param>
-    /// <returns>返回 <see cref="IQueryable{TResult}"/>。</returns>
-    IQueryable<TResult> FromExpression<TResult>(Expression<Func<IQueryable<TResult>>> expression);
-
-
-    /// <summary>
-    /// 获取指定实体的可查询接口。
-    /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
-    IQueryable<TEntity> GetQueryable<TEntity>()
-        where TEntity : class;
-
-    /// <summary>
-    /// 获取指定实体的可查询接口。
-    /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="name">要使用的共享类型实体类型的名称。</param>
-    /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
-    IQueryable<TEntity> GetQueryable<TEntity>(string name)
-        where TEntity : class;
-
-    #endregion
-
-
     #region Add
 
     /// <summary>
@@ -335,7 +295,7 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     /// 异步添加实体范围集合。
     /// </summary>
     /// <param name="entities">给定要添加的实体对象集合。</param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回 <see cref="Task"/>。</returns>
     Task AddRangeAsync(IEnumerable<object> entities,
         CancellationToken cancellationToken = default);

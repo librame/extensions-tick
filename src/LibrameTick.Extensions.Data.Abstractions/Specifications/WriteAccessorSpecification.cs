@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Data.Accessing;
 
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义写入存取器规约（默认按优先级进行升序排列）。

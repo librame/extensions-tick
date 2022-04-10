@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Autokeys;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义继承 <see cref="IAutokeyProvider"/> 的文件型自动密钥提供程序接口。

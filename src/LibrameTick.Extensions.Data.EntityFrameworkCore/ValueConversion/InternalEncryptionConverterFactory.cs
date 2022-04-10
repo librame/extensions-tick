@@ -10,9 +10,8 @@
 
 #endregion
 
-using Librame.Extensions.Core.Cryptography;
+using Librame.Extensions.Cryptography;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Data.Cryptography;
 
 namespace Librame.Extensions.Data.ValueConversion;
 
@@ -29,7 +28,7 @@ class InternalEncryptionConverterFactory : IEncryptionConverterFactory
     }
 
 
-    public ValueConverter GetConverter(AbstractDbContextAccessor accessor, Type propertyType)
+    public ValueConverter GetConverter(DbContextAccessor accessor, Type propertyType)
     {
         if (!_dictionary.TryGetValue(accessor.AccessorId, out var converters))
         {

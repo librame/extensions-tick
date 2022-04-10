@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义一个用于序列化的临时 RSA 密钥（兼容 IdentityServer4 生成的临时密钥文件）。

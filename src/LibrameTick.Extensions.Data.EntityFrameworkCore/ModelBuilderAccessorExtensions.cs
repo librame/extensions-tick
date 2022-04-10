@@ -10,8 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Cryptography;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Data.Cryptography;
 using Librame.Extensions.Data.ValueConversion;
 
 namespace Librame.Extensions.Data;
@@ -29,10 +29,10 @@ public static class ModelBuilderAccessorExtensions
     /// </summary>
     /// <param name="mutableEntityType">给定的 <see cref="IMutableEntityType"/>。</param>
     /// <param name="converterFactory">给定的 <see cref="IEncryptionConverterFactory"/>。</param>
-    /// <param name="accessor">给定的 <see cref="AbstractDbContextAccessor"/>。</param>
+    /// <param name="accessor">给定的 <see cref="DbContextAccessor"/>。</param>
     /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
     public static IMutableEntityType UseEncryption(this IMutableEntityType mutableEntityType,
-        IEncryptionConverterFactory converterFactory, AbstractDbContextAccessor accessor)
+        IEncryptionConverterFactory converterFactory, DbContextAccessor accessor)
     {
         var encryptedProperties = mutableEntityType.ClrType.GetProperties()
             .Where(p => Attribute.IsDefined(p, _encryptedAttributeType));

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义一个用于序列化 <see cref="RSAParameters"/> 的信息（直接序列化 <see cref="RSAParameters"/> 会为空）。

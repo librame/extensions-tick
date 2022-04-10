@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Data;
+
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义一个实现 <see cref="IEntitySpecification{T}"/> 并按创建时间降序排列的实体规约。

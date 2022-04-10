@@ -12,8 +12,8 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Data.Specifications;
 using Librame.Extensions.IdGenerators;
+using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Storing;
 
@@ -34,91 +34,81 @@ public interface IStore<T>
     IIdGeneratorFactory IdGeneratorFactory { get; }
 
     /// <summary>
-    /// 当前存取器。
+    /// 当前存取器（默认使用读取存取器，当调用增、改、删等方法时会自行切换为写入存取器）。
     /// </summary>
-    IAccessor? CurrentAccessor { get; }
+    IAccessor CurrentAccessor { get; }
 
 
     /// <summary>
-    /// 获取存取器。
-    /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>。</param>
-    /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    IAccessor GetAccessor(IAccessorSpecification specification);
-
-    /// <summary>
-    /// 获取可查询接口（支持强制从写入存取器查询）。
+    /// 使用读取访问器。
     /// </summary>
     /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回 <see cref="IStore{T}"/>。</returns>
+    IStore<T> UseReadAccessor(IAccessorSpecification? specification = null);
+
+    /// <summary>
+    /// 使用写入访问器。
+    /// </summary>
+    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回 <see cref="IStore{T}"/>。</returns>
+    IStore<T> UseWriteAccessor(IAccessorSpecification? specification = null);
+
+
+    #region Query
+
+    /// <summary>
+    /// 获取可查询接口。
+    /// </summary>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
-    IQueryable<T> GetQueryable(IAccessorSpecification? specification = null);
-
-
-    #region Execute
+    IQueryable<T> Query();
 
     /// <summary>
-    /// 执行 SQL 语句成功。
+    /// 获取可查询接口。
     /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回是否成功的布尔值。</returns>
-    bool ExecuteSuccess(string sql, DbParameter[]? parameters = null,
-        IAccessorSpecification? specification = null);
-
-    /// <summary>
-    /// 通过执行 SQL 语句查询单行单例的单个标量对象。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回对象。</returns>
-    object? ExecuteScalar(string sql, DbParameter[]? parameters = null,
-        IAccessorSpecification? specification = null);
-
-    /// <summary>
-    /// 通过执行 SQL 语句查询实体列表。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-    IList<T>? ExecuteList(string sql, DbParameter[]? parameters = null,
-        IAccessorSpecification? specification = null);
+    /// <param name="name">要使用的共享类型实体类型的名称。</param>
+    /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
+    IQueryable<T> Query(string name);
 
 
     /// <summary>
-    /// 异步执行 SQL 语句成功。
+    /// 通过 SQL 语句获取可查询接口。
     /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
+    /// <param name="sql">给定的 SQL 语句（可使用“${Schema}、${Table}/${TableName}”模板关键字分别代替架构、表名等参数值）。</param>
+    /// <param name="parameters">给定的参数数组。</param>
+    /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
+    IQueryable<T> QueryBySql(string sql, params object[] parameters);
+
+    /// <summary>
+    /// 通过 SQL 语句获取可查询接口。
+    /// </summary>
+    /// <param name="name">要使用的共享类型实体类型的名称。</param>
+    /// <param name="sql">给定的 SQL 语句（可使用“${Schema}、${Table}/${TableName}”模板关键字分别代替架构、表名等参数值）。</param>
+    /// <param name="parameters">给定的参数数组。</param>
+    /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
+    IQueryable<T> QueryBySql(string name, string sql, params object[] parameters);
+
+    #endregion
+
+
+    #region Exists
+
+    /// <summary>
+    /// 在本地缓存或数据库中是否存在指定断定方法的实体。
+    /// </summary>
+    /// <param name="predicate">给定的断定方法表达式。</param>
+    /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
+    /// <returns>返回布尔值。</returns>
+    bool Exists(Expression<Func<T, bool>> predicate, bool checkLocal = true);
+
+    /// <summary>
+    /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
+    /// </summary>
+    /// <param name="predicate">给定的断定方法表达式。</param>
+    /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回一个包含是否成功的布尔值的异步操作。</returns>
-    Task<bool> ExecuteSuccessAsync(string sql, DbParameter[]? parameters = null,
-        CancellationToken cancellationToken = default, IAccessorSpecification? specification = null);
-
-    /// <summary>
-    /// 通过异步执行 SQL 语句查询单行单例的单个标量对象。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回一个包含对象的异步操作。</returns>
-    Task<object?> ExecuteScalarAsync(string sql, DbParameter[]? parameters = null,
-        CancellationToken cancellationToken = default, IAccessorSpecification? specification = null);
-
-    /// <summary>
-    /// 通过异步执行 SQL 语句查询实体列表。
-    /// </summary>
-    /// <param name="sql">给定的 SQL 语句。</param>
-    /// <param name="parameters">给定的参数数组（可选）。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回一个包含 <see cref="List{TEntity}"/> 的异步操作。</returns>
-    Task<List<T>?> ExecuteListAsync(string sql, DbParameter[]? parameters = null,
-        CancellationToken cancellationToken = default, IAccessorSpecification? specification = null);
+    /// <returns>返回一个包含布尔值的异步操作。</returns>
+    Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate,
+        bool checkLocal = true, CancellationToken cancellationToken = default);
 
     #endregion
 
@@ -126,72 +116,62 @@ public interface IStore<T>
     #region Find
 
     /// <summary>
-    /// 通过标识查找类型实例（支持强制从写入存取器查询）。
+    /// 通过标识查找类型实例。
     /// </summary>
     /// <param name="id">给定的标识。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <typeparamref name="T"/>。</returns>
-    T? FindById(object id, IAccessorSpecification? specification = null);
+    T? FindById(object id);
 
 
     /// <summary>
     /// 通过指定断定条件查找类型实例集合。
     /// </summary>
     /// <param name="predicate">给定的断定条件（可选；为空表示查询所有）</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
-    IList<T> FindList(Expression<Func<T, bool>>? predicate = null,
-        IAccessorSpecification? specification = null);
+    IList<T> FindList(Expression<Func<T, bool>>? predicate = null);
 
     /// <summary>
     /// 异步通过指定断定条件查找类型实例集合。
     /// </summary>
     /// <param name="predicate">给定的断定条件（可选；为空表示查询所有）</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
     Task<IList<T>> FindListAsync(Expression<Func<T, bool>>? predicate = null,
-        IAccessorSpecification? specification = null, CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default);
 
 
     /// <summary>
     /// 查找带有规约的类型实例集合。
     /// </summary>
     /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
-    /// <param name="accessorSpecification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
-    IList<T> FindListWithSpecification(IEntitySpecification<T>? entitySpecification = null,
-        IAccessorSpecification? accessorSpecification = null);
+    IList<T> FindListWithSpecification(IEntitySpecification<T>? entitySpecification = null);
 
     /// <summary>
     /// 异步查找带有规约的类型实例集合。
     /// </summary>
     /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
-    /// <param name="accessorSpecification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
     Task<IList<T>> FindListWithSpecificationAsync(IEntitySpecification<T>? entitySpecification = null,
-        IAccessorSpecification? accessorSpecification = null, CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default);
 
 
     /// <summary>
     /// 查找类型实例分页集合。
     /// </summary>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
-    IPagingList<T> FindPagingList(Action<IPagingList<T>> pageAction,
-        IAccessorSpecification? specification = null);
+    IPagingList<T> FindPagingList(Action<IPagingList<T>> pageAction);
 
     /// <summary>
     /// 异步查找类型实例分页集合。
     /// </summary>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
     Task<IPagingList<T>> FindPagingListAsync(Action<IPagingList<T>> pageAction,
-        IAccessorSpecification? specification = null, CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default);
 
 
     /// <summary>
@@ -199,22 +179,19 @@ public interface IStore<T>
     /// </summary>
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
-    /// <param name="accessorSpecification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
     IPagingList<T> FindPagingListWithSpecification(Action<IPagingList<T>> pageAction,
-        IEntitySpecification<T>? entitySpecification = null, IAccessorSpecification? accessorSpecification = null);
+        IEntitySpecification<T>? entitySpecification = null);
 
     /// <summary>
     /// 异步查找带有规约的类型实例分页集合。
     /// </summary>
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
-    /// <param name="accessorSpecification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
     Task<IPagingList<T>> FindPagingListWithSpecificationAsync(Action<IPagingList<T>> pageAction,
-        IEntitySpecification<T>? entitySpecification = null, IAccessorSpecification? accessorSpecification = null,
-        CancellationToken cancellationToken = default);
+        IEntitySpecification<T>? entitySpecification = null, CancellationToken cancellationToken = default);
 
     #endregion
 
@@ -226,22 +203,19 @@ public interface IStore<T>
     /// </summary>
     /// <param name="item">给定要添加的类型实例。</param>
     /// <param name="predicate">给定用于判定是否存在的工厂方法。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
-    void AddIfNotExists(T item, Expression<Func<T, bool>> predicate, IAccessorSpecification? specification = null);
+    void AddIfNotExists(T item, Expression<Func<T, bool>> predicate);
 
     /// <summary>
     /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="items">给定的类型实例数组集合。</param>
-    void Add(IAccessorSpecification? specification = null, params T[] items);
+    void Add(params T[] items);
 
     /// <summary>
     /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="items">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
-    void Add(IEnumerable<T> items, IAccessorSpecification? specification = null);
+    void Add(IEnumerable<T> items);
 
     #endregion
 
@@ -251,16 +225,14 @@ public interface IStore<T>
     /// <summary>
     /// 移除类型实例集合（仅支持写入存取器）。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="items">给定的类型实例数组集合。</param>
-    void Remove(IAccessorSpecification? specification = null, params T[] items);
+    void Remove(params T[] items);
 
     /// <summary>
     /// 移除类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="items">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
-    void Remove(IEnumerable<T> items, IAccessorSpecification? specification = null);
+    void Remove(IEnumerable<T> items);
 
     #endregion
 
@@ -270,16 +242,14 @@ public interface IStore<T>
     /// <summary>
     /// 更新类型实例集合（仅支持写入存取器）。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="items">给定的类型实例数组集合。</param>
-    void Update(IAccessorSpecification? specification = null, params T[] items);
+    void Update(params T[] items);
 
     /// <summary>
     /// 更新类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="items">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
-    void Update(IEnumerable<T> items, IAccessorSpecification? specification = null);
+    void Update(IEnumerable<T> items);
 
     #endregion
 
@@ -287,20 +257,17 @@ public interface IStore<T>
     #region SaveChanges
 
     /// <summary>
-    /// 保存更改（仅支持写入存取器）。
+    /// 保存更改（仅支持写入存取器；操作结束后将自行切换为读取存取器）。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <returns>返回受影响的行数。</returns>
-    int SaveChanges(IAccessorSpecification? specification = null);
+    int SaveChanges();
 
     /// <summary>
-    /// 异步保存更改（仅支持写入存取器）。
+    /// 异步保存更改（仅支持写入存取器；操作结束后将自行切换为读取存取器）。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含受影响行数的异步操作。</returns>
-    Task<int> SaveChangesAsync(IAccessorSpecification? specification = null,
-        CancellationToken cancellationToken = default);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     #endregion
 

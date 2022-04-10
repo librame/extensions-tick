@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Data.Specifications;
+namespace Librame.Extensions.Specifications;
 
 /// <summary>
 /// 定义一个用于 <see cref="DbSet{TEntity}"/> 筛选的表达式规约接口。

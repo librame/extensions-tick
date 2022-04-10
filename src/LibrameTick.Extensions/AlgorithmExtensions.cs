@@ -18,16 +18,16 @@ namespace Librame.Extensions;
 public static class AlgorithmExtensions
 {
     // 使用自动密钥作为默认的通用密钥基础设施（CKI）
-    private static readonly Autokeys.CkiOptions DefaultCki
+    private static readonly Cryptography.CkiOptions DefaultCki
         = Bootstraps.Bootstrapper.GetAutokey().Get().Cki;
 
 
     /// <summary>
     /// 使用自动密钥作为默认的通用密钥基础设施（CKI）选项填充当前实例。
     /// </summary>
-    /// <param name="options">给定的 <see cref="Autokeys.CkiOptions"/>。</param>
-    /// <returns>返回 <see cref="Autokeys.CkiOptions"/>。</returns>
-    public static Autokeys.CkiOptions PopulateDefaultCki(this Autokeys.CkiOptions options)
+    /// <param name="options">给定的 <see cref="Cryptography.CkiOptions"/>。</param>
+    /// <returns>返回 <see cref="Cryptography.CkiOptions"/>。</returns>
+    public static Cryptography.CkiOptions PopulateDefaultCki(this Cryptography.CkiOptions options)
     {
         options.PopulateAll(DefaultCki);
         return options;

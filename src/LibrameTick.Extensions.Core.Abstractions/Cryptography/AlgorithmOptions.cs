@@ -10,9 +10,9 @@
 
 #endregion
 
-using Librame.Extensions.Autokeys;
+using Librame.Extensions.Core;
 
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的算法选项。

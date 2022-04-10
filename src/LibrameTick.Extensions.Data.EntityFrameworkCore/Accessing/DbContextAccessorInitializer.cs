@@ -10,28 +10,28 @@
 
 #endregion
 
-using Librame.Extensions.Data.Specifications;
+using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
 /// 定义抽象继承 <see cref="AbstractAccessorInitializer{TAccessor}"/> 数据库上下文存取器初始化器的泛型实现。
 /// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="AbstractDbContextAccessor"/> 的存取器类型。</typeparam>
+/// <typeparam name="TAccessor">指定已实现 <see cref="DbContextAccessor"/> 的存取器类型。</typeparam>
 /// <typeparam name="TSeeder">指定已实现 <see cref="IAccessorSeeder"/> 的存取器类型。</typeparam>
-public abstract class AbstractDbContextAccessorInitializer<TAccessor, TSeeder> : AbstractAccessorInitializer<TAccessor>
-    where TAccessor : AbstractDbContextAccessor
+public class DbContextAccessorInitializer<TAccessor, TSeeder> : DbContextAccessorInitializer<TAccessor>
+    where TAccessor : DbContextAccessor
     where TSeeder : IAccessorSeeder
 {
     /// <summary>
-    /// 使用数据库上下文构造一个 <see cref="AbstractDbContextAccessorInitializer{TAccessor, TSeeder}"/>。
+    /// 使用数据库上下文构造一个 <see cref="DbContextAccessorInitializer{TAccessor, TSeeder}"/>。
     /// </summary>
     /// <param name="accessor">给定的 <typeparamref name="TAccessor"/>。</param>
-    /// <param name="seeder">给定的 <see cref="IAccessorSeeder"/>。</param>
-    protected AbstractDbContextAccessorInitializer(TAccessor accessor, IAccessorSeeder seeder)
+    /// <param name="seeder">给定的 <typeparamref name="TSeeder"/>。</param>
+    public DbContextAccessorInitializer(TAccessor accessor, TSeeder seeder)
         : base(accessor)
     {
-        Seeder = (TSeeder)seeder;
+        Seeder = seeder;
     }
 
 
@@ -45,81 +45,18 @@ public abstract class AbstractDbContextAccessorInitializer<TAccessor, TSeeder> :
 /// <summary>
 /// 定义抽象实现 <see cref="IAccessorInitializer"/> 的数据库上下文存取器初始化器。
 /// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="AbstractDbContextAccessor"/> 的存取器类型。</typeparam>
-public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitializer
-    where TAccessor : AbstractDbContextAccessor
+/// <typeparam name="TAccessor">指定已实现 <see cref="DbContextAccessor"/> 的存取器类型。</typeparam>
+public class DbContextAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor>
+    where TAccessor : DbContextAccessor
 {
     /// <summary>
-    /// 使用数据库上下文构造一个 <see cref="AbstractAccessorInitializer{TAccessor}"/>。
+    /// 使用数据库上下文构造一个 <see cref="DbContextAccessorInitializer{TAccessor}"/>。
     /// </summary>
     /// <param name="accessor">给定的 <typeparamref name="TAccessor"/>。</param>
-    protected AbstractAccessorInitializer(TAccessor accessor)
+    public DbContextAccessorInitializer(TAccessor accessor)
+        : base(accessor)
     {
-        Accessor = accessor;
     }
-
-
-    /// <summary>
-    /// 存取器。
-    /// </summary>
-    protected TAccessor Accessor { get; init; }
-
-    /// <summary>
-    /// 是否已填充。
-    /// </summary>
-    public bool IsPopulated { get; protected set; }
-
-
-    /// <summary>
-    /// 初始化存取器。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    public virtual void Initialize(IServiceProvider services)
-    {
-        Accessor.TryCreateDatabase();
-
-        Populate(services);
-
-        if (IsPopulated)
-        {
-            Accessor.SaveChanges();
-        }
-    }
-
-    /// <summary>
-    /// 异步初始化存取器。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个异步操作。</returns>
-    public virtual async Task InitializeAsync(IServiceProvider services,
-        CancellationToken cancellationToken = default)
-    {
-        await Accessor.TryCreateDatabaseAsync(cancellationToken);
-
-        await PopulateAsync(services, cancellationToken);
-
-        if (IsPopulated)
-        {
-            await Accessor.SaveChangesAsync(cancellationToken);
-        }
-    }
-
-
-    /// <summary>
-    /// 填充存取器。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    protected abstract void Populate(IServiceProvider services);
-
-    /// <summary>
-    /// 异步填充存取器。
-    /// </summary>
-    /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个异步操作。</returns>
-    protected abstract Task PopulateAsync(IServiceProvider services,
-        CancellationToken cancellationToken = default);
 
 
     /// <summary>

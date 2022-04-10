@@ -16,21 +16,21 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义抽象继承 <see cref="AbstractDbContextAccessorWithAudit"/> 含审计功能的数据库上下文存取器的泛型实现。
+/// 定义继承 <see cref="DbContextAccessorWithAudit"/> 的数据库上下文存取器的泛型实现。
 /// </summary>
-/// <typeparam name="TAccessor">指定实现 <see cref="AbstractDbContextAccessorWithAudit"/> 的存取器类型。</typeparam>
-public abstract class AbstractDbContextAccessorWithAuditing<TAccessor> : AbstractDbContextAccessorWithAudit
-    where TAccessor : AbstractDbContextAccessorWithAudit
+/// <typeparam name="TAccessor">指定实现 <see cref="DbContextAccessorWithAudit"/> 的存取器类型。</typeparam>
+public class DbContextAccessorWithAuditing<TAccessor> : DbContextAccessorWithAudit
+    where TAccessor : DbContextAccessorWithAudit
 {
     /// <summary>
-    /// 使用指定的数据库上下文选项构造一个 <see cref="AbstractDbContextAccessorWithAuditing{TAccessor}"/> 实例。
+    /// 使用指定的数据库上下文选项构造一个 <see cref="DbContextAccessorWithAuditing{TAccessor}"/> 实例。
     /// </summary>
     /// <remarks>
     /// 备注：如果需要注册多个 <see cref="DbContext"/> 扩展，参数必须使用泛型 <see cref="DbContextOptions{TAccessor}"/> 形式，
     /// 不能使用非泛型 <see cref="DbContextOptions"/> 形式，因为 <paramref name="options"/> 参数也会注册到容器中以供使用。
     /// </remarks>
     /// <param name="options">给定的 <see cref="DbContextOptions{TAccessor}"/>。</param>
-    protected AbstractDbContextAccessorWithAuditing(DbContextOptions<TAccessor> options)
+    public DbContextAccessorWithAuditing(DbContextOptions<TAccessor> options)
         : base(options)
     {
     }
@@ -45,22 +45,22 @@ public abstract class AbstractDbContextAccessorWithAuditing<TAccessor> : Abstrac
 
 
 /// <summary>
-/// 定义抽象继承 <see cref="AbstractDbContextAccessor"/> 含审计功能的数据库上下文存取器。
+/// 定义继承 <see cref="DbContextAccessor"/> 且集成审计功能的数据库上下文存取器。
 /// </summary>
-public abstract class AbstractDbContextAccessorWithAudit : AbstractDbContextAccessor
+public class DbContextAccessorWithAudit : DbContextAccessor
 {
     private IReadOnlyList<Audit>? _audits;
 
 
     /// <summary>
-    /// 使用指定的数据库上下文选项构造一个 <see cref="AbstractDbContextAccessorWithAudit"/> 实例。
+    /// 使用指定的数据库上下文选项构造一个 <see cref="DbContextAccessorWithAudit"/> 实例。
     /// </summary>
     /// <param name="options">给定的 <see cref="DbContextOptions"/>。</param>
-    protected AbstractDbContextAccessorWithAudit(DbContextOptions options)
+    public DbContextAccessorWithAudit(DbContextOptions options)
         : base(options)
     {
-        SavingChanges += AbstractDataAccessor_SavingChanges;
-        SavedChanges += AbstractDataAccessor_SavedChanges;
+        SavingChanges += DbContextAccessorWithAudit_SavingChanges;
+        SavedChanges += DbContextAccessorWithAudit_SavedChanges;
     }
 
 
@@ -77,16 +77,16 @@ public abstract class AbstractDbContextAccessorWithAudit : AbstractDbContextAcce
     }
 
 
-    private void AbstractDataAccessor_SavedChanges(object? sender, SavedChangesEventArgs e)
+    private void DbContextAccessorWithAudit_SavedChanges(object? sender, SavedChangesEventArgs e)
     {
-        var accessor = (sender as AbstractDbContextAccessorWithAudit)!;
+        var accessor = (sender as DbContextAccessorWithAudit)!;
         if (accessor._audits is not null)
             accessor.DataOptions.Audit.NotificationAction?.Invoke(accessor._audits);
     }
 
-    private void AbstractDataAccessor_SavingChanges(object? sender, SavingChangesEventArgs e)
+    private void DbContextAccessorWithAudit_SavingChanges(object? sender, SavingChangesEventArgs e)
     {
-        var accessor = (sender as AbstractDbContextAccessorWithAudit)!;
+        var accessor = (sender as DbContextAccessorWithAudit)!;
         var auditOptions = accessor.DataOptions.Audit;
 
         if (!auditOptions.Enabling)

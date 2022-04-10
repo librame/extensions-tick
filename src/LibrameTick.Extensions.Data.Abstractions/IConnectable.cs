@@ -24,14 +24,14 @@ public interface IConnectable<TConnection>
     string? CurrentConnectionString { get; }
 
     /// <summary>
-    /// 改变时动作。
+    /// 连接改变时动作。
     /// </summary>
-    Action<TConnection>? ChangingAction { get; set; }
+    Action<TConnection>? ConnectionChangingAction { get; set; }
 
     /// <summary>
-    /// 改变后动作。
+    /// 连接改变后动作。
     /// </summary>
-    Action<TConnection>? ChangedAction { get; set; }
+    Action<TConnection>? ConnectionChangedAction { get; set; }
 
 
     /// <summary>

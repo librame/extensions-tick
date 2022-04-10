@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Cryptography;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义继承 <see cref="IRsaKeyProvider"/> 的文件型 RSA 密钥提供程序接口。
