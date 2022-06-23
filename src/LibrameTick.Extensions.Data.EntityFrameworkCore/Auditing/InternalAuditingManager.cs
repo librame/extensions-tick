@@ -75,7 +75,7 @@ class InternalAuditingManager : IAuditingManager
 
             var auditProperty = new AuditProperty();
 
-            auditProperty.Id = _idGeneratorFactory.GetMongoIdGenerator().GenerateId();
+            auditProperty.Id = _idGeneratorFactory.GetSnowflakeIdGenerator().GenerateId();
             auditProperty.PropertyName = property.Name;
             auditProperty.PropertyTypeName = GetTypeName(property.ClrType);
             auditProperty.NewValue = newValue;

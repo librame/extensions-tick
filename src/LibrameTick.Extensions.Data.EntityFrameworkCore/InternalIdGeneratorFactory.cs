@@ -26,29 +26,30 @@ class InternalIdGeneratorFactory : IIdGeneratorFactory
     {
         if (_idGenerators.Count < 1)
         {
+            var snowflake = dataOptionsMonitor.CurrentValue.SnowflakeParameters;
             var idOptions = dataOptionsMonitor.CurrentValue.IdGeneration;
             var clock = coreOptionsMonitor.CurrentValue.Clock;
-            var locker = coreOptionsMonitor.CurrentValue.Locker;
+
             var combIdType = typeof(CombIdGenerator);
 
             // Base: IdentificationGenerator（Sqlite 使用与 MySQL 数据库相同的排序方式）
             _idGenerators.Add(new TypeNamedKey(combIdType, nameof(CombIdGenerators.ForMySql)),
-                CombIdGenerators.ForMySql(clock, locker));
+                CombIdGenerators.ForMySql(idOptions, clock));
 
             _idGenerators.Add(new TypeNamedKey(combIdType, nameof(CombIdGenerators.ForOracle)),
-                CombIdGenerators.ForOracle(clock, locker));
+                CombIdGenerators.ForOracle(idOptions, clock));
 
             _idGenerators.Add(new TypeNamedKey(combIdType, nameof(CombIdGenerators.ForSqlServer)),
-                CombIdGenerators.ForSqlServer(clock, locker));
+                CombIdGenerators.ForSqlServer(idOptions, clock));
 
             _idGenerators.Add(new TypeNamedKey<CombSnowflakeIdGenerator>(),
-                new CombSnowflakeIdGenerator(clock, locker, idOptions));
+                new CombSnowflakeIdGenerator(idOptions, clock));
 
             _idGenerators.Add(new TypeNamedKey<MongoIdGenerator>(),
                 new MongoIdGenerator(clock));
 
             _idGenerators.Add(new TypeNamedKey<SnowflakeIdGenerator>(),
-                new SnowflakeIdGenerator(clock, locker, idOptions));
+                new SnowflakeIdGenerator(snowflake, idOptions, clock));
 
             if (dataOptionsMonitor.CurrentValue.IdGenerators.Count > 0)
             {

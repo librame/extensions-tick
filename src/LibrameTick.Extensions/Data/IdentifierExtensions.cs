@@ -42,10 +42,10 @@ public static class IdentifierExtensions
     public static async ValueTask<object> SetObjectIdAsync(this IObjectIdentifier identifier,
         Func<object, object> newIdFactory, CancellationToken cancellationToken = default)
     {
-        var currentId = await identifier.GetObjectIdAsync(cancellationToken).ConfigureAwaitWithoutContext();
+        var currentId = await identifier.GetObjectIdAsync(cancellationToken).DisableAwaitContext();
 
         return await identifier.SetObjectIdAsync(newIdFactory(currentId), cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
     }
 
 }

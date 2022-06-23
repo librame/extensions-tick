@@ -5,7 +5,6 @@ namespace Librame.Extensions.Core
 {
     public class LazySingletonTests
     {
-
         [Fact]
         public void AllTest()
         {

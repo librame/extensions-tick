@@ -16,42 +16,6 @@ namespace Librame.Extensions
             Assert.NotEqual(Guid.Empty, g.UnwrapOrDefault(Guid.NewGuid()));
         }
 
-
-        #region IsNull and IsEmpty
-
-        //[Fact]
-        //public void IsNullAndIsNotNullTest()
-        //{
-        //    NullableExtensionsTests? value = null;
-        //    Assert.True(value.IsNull());
-
-        //    value = new NullableExtensionsTests();
-        //    Assert.True(value.IsNotNull());
-        //}
-
-        //[Fact]
-        //public void IsEmptyAndIsNotEmptyTest()
-        //{
-        //    // IEnumerable
-        //    IEnumerable? enumerable = Enumerable.Empty<int>();
-        //    Assert.True(enumerable.IsEmpty());
-
-        //    enumerable = Enumerable.Range(1, 5);
-        //    Assert.True(enumerable.IsNotEmpty());
-
-        //    // String
-        //    var value = string.Empty;
-        //    Assert.True(value.IsEmpty());
-
-        //    value = "123";
-        //    Assert.True(value.IsNotEmpty());
-        //}
-
-        #endregion
-
-
-        #region NotNull and NotEmpty
-
         [Fact]
         public void NotNullAndNotEmptyTest()
         {
@@ -66,9 +30,9 @@ namespace Librame.Extensions
             Assert.NotNull(g.NotNull(nameof(g)));
 
             // ICollection
-            ICollection<int>? enumerable = Enumerable.Range(1, 5).ToArray();
+            IEnumerable<int>? enumerable = Enumerable.Range(1, 5).ToArray();
             Assert.NotNull(enumerable.NotEmpty(nameof(enumerable)));
-
+            
             // String
             string str = string.Empty;
             Assert.Throws<ArgumentException>(() =>
@@ -85,8 +49,6 @@ namespace Librame.Extensions
             str = "123";
             Assert.NotNull(str.NotEmpty(nameof(str)));
         }
-
-        #endregion
 
     }
 }

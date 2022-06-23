@@ -13,22 +13,36 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义实现 <see cref="ICloneable{TClone}"/> 的可克隆基类。
+/// 定义一个继承 <see cref="ICloneable"/> 的泛型可克隆接口。
 /// </summary>
 /// <typeparam name="TSource">指定的来源类型。</typeparam>
-public class BaseCloneable<TSource> : ICloneable<TSource>
+public interface ICloneable<TSource> : ICloneable
+{
+    /// <summary>
+    /// 创建一个泛型克隆对象（默认支持包含静态在内的所有字段和属性成员集合）。
+    /// </summary>
+    /// <returns>返回 <typeparamref name="TSource"/>。</returns>
+    TSource CloneAs();
+}
+
+
+/// <summary>
+/// 定义实现 <see cref="ICloneable{TClone}"/> 的可克隆类。
+/// </summary>
+/// <typeparam name="TSource">指定的来源类型。</typeparam>
+public class Cloneable<TSource> : ICloneable<TSource>
 {
     private readonly TSource _source;
 
 
     /// <summary>
-    /// 构造一个 <see cref="BaseCloneable{TClone}"/>。
+    /// 构造一个 <see cref="Cloneable{TClone}"/>。
     /// </summary>
     /// <param name="source">给定的 <typeparamref name="TSource"/>。</param>
-    public BaseCloneable(TSource source)
+    public Cloneable(TSource source)
     {
         _source = source;
-
+        
         SourceMembers = new ConcurrentDictionary<string, object?>();
     }
 

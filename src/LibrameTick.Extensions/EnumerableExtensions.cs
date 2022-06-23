@@ -33,6 +33,47 @@ public static class EnumerableExtensions
     }
 
 
+    /// <summary>
+    /// 比较两个集合序列相等。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="left">给定的左边集合。</param>
+    /// <param name="right">给定的右边集合。</param>
+    /// <param name="bothNullReturn">如果两个集合为空时返回的布尔值。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public static bool SequenceEqual<T>([NotNullWhen(true)] this IEnumerable<T>? left,
+        [NotNullWhen(true)] IEnumerable<T>? right, bool bothNullReturn)
+    {
+        if (left is null)
+            return right is null ? bothNullReturn : false;
+
+        if (right is null)
+            return false;
+
+        return left.SequenceEqual(right);
+    }
+
+    /// <summary>
+    /// 比较两个集合序列相等。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="left">给定的左边集合。</param>
+    /// <param name="right">给定的右边集合。</param>
+    /// <param name="bothNullReturn">如果两个集合为空或空集合时返回的布尔值。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public static bool SequenceEqual<T>([NotNullWhen(true)] this ICollection<T>? left,
+        [NotNullWhen(true)] ICollection<T>? right, bool bothNullReturn)
+    {
+        if (left is null || left.Count == 0)
+            return (right is null || right.Count == 0) ? bothNullReturn : false;
+
+        if (right is null || right.Count == 0)
+            return false;
+
+        return left.SequenceEqual(right);
+    }
+
+
     #region AsEnumerable
 
     /// <summary>
@@ -47,10 +88,22 @@ public static class EnumerableExtensions
     }
 
     /// <summary>
-    /// 转换为可枚举集合。
+    /// 将可枚举集合转为异步可枚举集合。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="task">给定的异步操作。</param>
+    /// <param name="enumerable">给定的可枚举集合。</param>
+    /// <returns>返回 <see cref="IAsyncEnumerable{T}"/>。</returns>
+    public static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(IEnumerable<T> enumerable)
+    {
+        foreach (var item in await Task.FromResult(enumerable))
+            yield return item;
+    }
+
+    /// <summary>
+    /// 将一个异步任务转为异步可枚举集合。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="task">给定的异步任务。</param>
     /// <returns>返回 <see cref="IAsyncEnumerable{T}"/>。</returns>
     public static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(Task<T> task)
     {
@@ -58,10 +111,10 @@ public static class EnumerableExtensions
     }
 
     /// <summary>
-    /// 转换为异步可枚举集合。
+    /// 将可枚举异步任务集合转为异步可枚举集合。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="enumerable">给定的可枚举异步操作。</param>
+    /// <param name="enumerable">给定的可枚举异步任务。</param>
     /// <returns>返回 <see cref="IAsyncEnumerable{T}"/>。</returns>
     public static async IAsyncEnumerable<T> AsAsyncEnumerable<T>(this IEnumerable<Task<T>> enumerable)
     {

@@ -87,9 +87,9 @@ class InternalStorableFileManager : IStorableFileManager
             var readLength = 0;
             var buffer = new byte[Options.WebFile.BufferSize];
 
-            while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait()) > 0)
+            while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).DisableAwaitContext()) > 0)
             {
-                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).ConfigureAwait();
+                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DisableAwaitContext();
 
                 processingSize += readLength;
                 processingSpeed += readLength;
@@ -162,9 +162,9 @@ class InternalStorableFileManager : IStorableFileManager
             var readLength = 0;
             var buffer = new byte[Options.WebFile.BufferSize];
 
-            while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait()) > 0)
+            while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).DisableAwaitContext()) > 0)
             {
-                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).ConfigureAwait();
+                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DisableAwaitContext();
 
                 processingSize += readLength;
                 processingSpeed += readLength;

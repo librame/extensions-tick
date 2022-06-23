@@ -30,90 +30,7 @@ public static class NullableExtensions
         => value.HasValue ? value.Value : defaultValue;
 
 
-    #region IsNull and IsEmpty
-
-    ///// <summary>
-    ///// 值是否为空。
-    ///// </summary>
-    ///// <typeparam name="T">指定的类型。</typeparam>
-    ///// <param name="value">给定的可空值。</param>
-    ///// <returns>返回是否为空的布尔值。</returns>
-    //public static bool IsNull<T>([NotNullWhen(false)] this T? value)
-    //    => value is null;
-
-    ///// <summary>
-    ///// 值是否非空。
-    ///// </summary>
-    ///// <typeparam name="T">指定的类型。</typeparam>
-    ///// <param name="value">给定的可空值。</param>
-    ///// <returns>返回是否非空的布尔值。</returns>
-    //public static bool IsNotNull<T>([NotNullWhen(true)] this T? value)
-    //    => value is not null;
-
-
-    ///// <summary>
-    ///// 值是否为空可枚举集合。
-    ///// </summary>
-    ///// <param name="value">给定的可枚举集合。</param>
-    ///// <returns>返回是否为空可枚举集合的布尔值。</returns>
-    //public static bool IsEmpty([NotNullWhen(false)] this IEnumerable? value)
-    //{
-    //    if (value is null)
-    //        return true;
-
-    //    var enumerator = value.GetEnumerator();
-    //    if (enumerator is null)
-    //        return true;
-
-    //    return !enumerator.MoveNext();
-    //}
-
-    ///// <summary>
-    ///// 值是否为非空可枚举集合。
-    ///// </summary>
-    ///// <param name="value">给定的可枚举集合。</param>
-    ///// <returns>返回是否为非空可枚举集合的布尔值。</returns>
-    //public static bool IsNotEmpty([NotNullWhen(true)] this IEnumerable? value)
-    //    => !value.IsEmpty();
-
-
-    ///// <summary>
-    ///// 值是否为空集合。
-    ///// </summary>
-    ///// <param name="value">给定的可枚举集合。</param>
-    ///// <returns>返回是否为空集合的布尔值。</returns>
-    //public static bool IsEmpty<T>([NotNullWhen(false)] this ICollection<T>? value)
-    //    => value is null || value.Count < 1;
-
-    ///// <summary>
-    ///// 值是否为非空集合。
-    ///// </summary>
-    ///// <param name="value">给定的可枚举集合。</param>
-    ///// <returns>返回是否为非空集合的布尔值。</returns>
-    //public static bool IsNotEmpty<T>([NotNullWhen(true)] this ICollection<T>? value)
-    //    => value is not null && value.Count > 0;
-
-
-    ///// <summary>
-    ///// 字符串是否为空字符串。
-    ///// </summary>
-    ///// <param name="value">给定的字符串。</param>
-    ///// <returns>返回是否为空字符串的布尔值。</returns>
-    //public static bool IsEmpty([NotNullWhen(false)] this string? value)
-    //    => string.IsNullOrEmpty(value);
-
-    ///// <summary>
-    ///// 字符串是否非空字符串。
-    ///// </summary>
-    ///// <param name="value">给定的字符串。</param>
-    ///// <returns>返回是否为非空字符串的布尔值。</returns>
-    //public static bool IsNotEmpty([NotNullWhen(true)] this string? value)
-    //    => !string.IsNullOrEmpty(value);
-
-    #endregion
-
-
-    #region NotNull and NotEmpty
+    #region NotNull
 
     /// <summary>
     /// 值为非空。
@@ -123,9 +40,10 @@ public static class NullableExtensions
     /// </exception>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="value">给定的值。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="value"/> 调用参数名）。</param>
     /// <returns>返回非空 <typeparamref name="T"/>。</returns>
-    public static T NotNull<T>([NotNull] this T? value, string? paramName)
+    public static T NotNull<T>([NotNull] this T? value,
+        [CallerArgumentExpression("value")] string? paramName = null)
     {
         if (value is null)
             throw new ArgumentNullException(paramName);
@@ -142,12 +60,13 @@ public static class NullableExtensions
     /// </exception>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="value">给定的可枚举集合。</param>
-    /// <param name="paramName">给定的参数名称。</param>
-    /// <returns>返回非空 <see cref="ICollection{T}"/>。</returns>
-    public static ICollection<T> NotEmpty<T>([NotNull] this ICollection<T>? value, string? paramName)
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="value"/> 调用参数名）。</param>
+    /// <returns>返回非空 <see cref="IEnumerable{T}"/>。</returns>
+    public static IEnumerable<T> NotEmpty<T>([NotNull] this IEnumerable<T>? value,
+        [CallerArgumentExpression("value")] string? paramName = null)
     {
         if (value is null || !value.Any())
-            throw new ArgumentException($"'{paramName ?? nameof(value)}' is null or empty.");
+            throw new ArgumentException($"'{paramName}' is null or empty.");
 
         return value;
     }
@@ -159,12 +78,13 @@ public static class NullableExtensions
     /// <paramref name="value"/> 为空或空字符串。
     /// </exception>
     /// <param name="value">给定的字符串。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="value"/> 调用参数名）。</param>
     /// <returns>返回字符串。</returns>
-    public static string NotEmpty([NotNull] this string? value, string? paramName)
+    public static string NotEmpty([NotNull] this string? value,
+        [CallerArgumentExpression("value")] string? paramName = null)
     {
         if (string.IsNullOrEmpty(value))
-            throw new ArgumentException($"'{paramName ?? nameof(value)}' is null or empty.");
+            throw new ArgumentException($"'{paramName}' is null or empty.");
 
         return value;
     }
@@ -177,12 +97,13 @@ public static class NullableExtensions
     /// <paramref name="value"/> 为空、空字符串或空格字符。
     /// </exception>
     /// <param name="value">给定的字符串。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="value"/> 调用参数名）。</param>
     /// <returns>返回字符串。</returns>
-    public static string NotWhiteSpace([NotNull] this string? value, string? paramName)
+    public static string NotWhiteSpace([NotNull] this string? value,
+        [CallerArgumentExpression("value")] string? paramName = null)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"'{paramName ?? nameof(value)}' is null or empty or white-space characters.");
+            throw new ArgumentException($"'{paramName}' is null or empty or white-space characters.");
 
         return value;
     }

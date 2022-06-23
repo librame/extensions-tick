@@ -30,7 +30,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPooling().WithPriority(2));
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(2));
             });
 
             services.AddDbContext<TestSqliteAccessor>(opts =>

@@ -10,17 +10,20 @@
 
 #endregion
 
-namespace Librame.Extensions.Core;
+namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义一个可装饰接口。
+/// 定义一个实现 <see cref="IDbContext"/> 的默认 <see cref="DbContext"/>。
 /// </summary>
-/// <typeparam name="TSource">指定的来源类型。</typeparam>
-public interface IDecoratable<out TSource>
+public class DefaultDbContext : DbContext, IDbContext
 {
     /// <summary>
-    /// 来源实例。
+    /// 构造一个 <see cref="DbContextOptions"/>。
     /// </summary>
-    /// <value>返回 <typeparamref name="TSource"/>。</value>
-    TSource Source { get; }
+    /// <param name="options">给定的 <see cref="DbContextOptions"/>。</param>
+    public DefaultDbContext(DbContextOptions options)
+        : base(options)
+    {
+    }
+
 }

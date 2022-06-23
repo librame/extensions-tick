@@ -28,7 +28,7 @@ public abstract class AbstractUpdation<TUpdatedBy>
     /// </summary>
     protected AbstractUpdation()
     {
-        UpdatedTime = CreatedTime = DateTimeExtensions.GetUtcNow();
+        UpdatedTime = CreatedTime = DateTimeOffset.UtcNow;
         UpdatedTimeTicks = CreatedTimeTicks = UpdatedTime.Ticks;
     }
 

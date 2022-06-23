@@ -16,11 +16,11 @@ using Librame.Extensions.Data.Sharding;
 namespace Librame.Extensions.Data.Storing;
 
 /// <summary>
-/// 定义实现 <see cref="IIdentifier{String}"/> 的数据审计属性。
+/// 定义实现 <see cref="IIdentifier{Int64}"/> 的数据审计属性。
 /// </summary>
 [NotAudited]
-[Sharded(typeof(DateTimeShardingStrategy), "%y")]
-public class AuditProperty : AbstractIdentifier<string>
+[Sharded("%m")]
+public class AuditProperty : AbstractIdentifier<long>
 {
     /// <summary>
     /// 审计标识。

@@ -68,10 +68,10 @@ public static class RankingExtensions
         Func<object, object> newRankFactory, CancellationToken cancellationToken = default)
     {
         var currentRank = await ranking.GetObjectRankAsync(cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
 
         return await ranking.SetObjectRankAsync(newRankFactory(currentRank),
-            cancellationToken).ConfigureAwaitWithoutContext();
+            cancellationToken).DisableAwaitContext();
     }
 
 }

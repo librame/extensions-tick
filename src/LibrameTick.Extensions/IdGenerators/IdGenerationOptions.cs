@@ -34,4 +34,13 @@ public class IdGenerationOptions : IOptions
     /// </summary>
     public uint WorkId { get; set; } = 1;
 
+    /// <summary>
+    /// 基础时间刻度。
+    /// </summary>
+    public long BaseTicks { get; set; } = DateTimeExtensions.BaseTime.Ticks;
+
+    /// <summary>
+    /// 基础 UTC 时间刻度。
+    /// </summary>
+    public long UtcBaseTicks { get; set; } = DateTimeExtensions.UtcBaseTime.Ticks;
 }

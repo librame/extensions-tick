@@ -31,7 +31,7 @@ public abstract class AbstractCreationIdentifier<TId, TCreatedBy>
     /// </summary>
     protected AbstractCreationIdentifier()
     {
-        CreatedTime = DateTimeExtensions.GetUtcNow();
+        CreatedTime = DateTimeOffset.UtcNow;
         CreatedTimeTicks = CreatedTime.Ticks;
     }
 
@@ -149,19 +149,21 @@ public abstract class AbstractCreationIdentifier<TId, TCreatedBy, TCreatedTime>
     /// 转换为创建者。
     /// </summary>
     /// <param name="createdBy">给定的创建者对象。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="createdBy"/> 调用参数名）。</param>
     /// <returns>返回 <typeparamref name="TCreatedBy"/>。</returns>
-    public virtual TCreatedBy ToCreatedBy(object? createdBy, string? paramName)
-        => createdBy.AsNotNull<TCreatedBy>(paramName);
+    public virtual TCreatedBy ToCreatedBy(object? createdBy,
+        [CallerArgumentExpression("createdBy")] string? paramName = null)
+        => createdBy.As<TCreatedBy>(paramName);
 
     /// <summary>
     /// 转换为创建时间。
     /// </summary>
     /// <param name="createdTime">给定的创建时间对象。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="createdTime"/> 调用参数名）。</param>
     /// <returns>返回 <typeparamref name="TCreatedTime"/>。</returns>
-    public virtual TCreatedTime ToCreatedTime(object createdTime, string? paramName)
-        => createdTime.AsNotNull<TCreatedTime>(paramName);
+    public virtual TCreatedTime ToCreatedTime(object createdTime,
+        [CallerArgumentExpression("createdTime")] string? paramName = null)
+        => createdTime.As<TCreatedTime>(paramName);
 
 
     /// <summary>

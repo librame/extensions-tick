@@ -55,7 +55,7 @@ public static class PublicationExtensions
         where TPublishedBy : IEquatable<TPublishedBy>
     {
         await publication.PopulateCreationAsync<TPublishedBy>(newPublishedBy, newPublishedTime, cancellationToken)
-            .ConfigureAwait();
+            .DisableAwaitContext();
 
         publication.PublishedTime = newPublishedTime;
         publication.PublishedTimeTicks = publication.PublishedTime.Ticks;
@@ -158,7 +158,7 @@ public static class PublicationExtensions
         Func<TPublishedBy?, TPublishedBy?> newPublishedByFactory, CancellationToken cancellationToken = default)
         where TPublishedBy : IEquatable<TPublishedBy>
     {
-        await publisher.SetCreatedByAsync(newPublishedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
+        await publisher.SetCreatedByAsync(newPublishedByFactory, cancellationToken).DisableAwaitContext();
 
         return publisher.PublishedBy = newPublishedByFactory(publisher.PublishedBy);
     }
@@ -196,7 +196,7 @@ public static class PublicationExtensions
         Func<TPublishedTime, TPublishedTime> newPublishedTimeFactory, CancellationToken cancellationToken = default)
         where TPublishedTime : struct
     {
-        await publicationTime.SetCreatedTimeAsync(newPublishedTimeFactory, cancellationToken).ConfigureAwaitWithoutContext();
+        await publicationTime.SetCreatedTimeAsync(newPublishedTimeFactory, cancellationToken).DisableAwaitContext();
 
         return publicationTime.PublishedTime = newPublishedTimeFactory(publicationTime.PublishedTime);
     }
@@ -232,13 +232,13 @@ public static class PublicationExtensions
     public static async ValueTask<object?> SetObjectPublishedByAsync(this IObjectPublisher publisher,
         Func<object?, object?> newPublishedByFactory, CancellationToken cancellationToken = default)
     {
-        await publisher.SetObjectCreatedByAsync(newPublishedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
+        await publisher.SetObjectCreatedByAsync(newPublishedByFactory, cancellationToken).DisableAwaitContext();
 
         var currentPublishedBy = await publisher.GetObjectPublishedByAsync(cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
 
         return await publisher.SetObjectPublishedByAsync(newPublishedByFactory(currentPublishedBy), cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
     }
 
     #endregion
@@ -274,10 +274,10 @@ public static class PublicationExtensions
         await publicationTime.SetObjectCreatedTimeAsync(newPublishedTimeFactory, cancellationToken);
 
         var currentPublishedTime = await publicationTime.GetObjectPublishedTimeAsync(cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
 
         return await publicationTime.SetObjectPublishedTimeAsync(newPublishedTimeFactory(currentPublishedTime), cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
     }
 
     #endregion

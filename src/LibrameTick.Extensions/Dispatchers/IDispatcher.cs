@@ -10,16 +10,16 @@
 
 #endregion
 
-namespace Librame.Extensions.Equilizers;
+namespace Librame.Extensions.Dispatchers;
 
 /// <summary>
-/// 定义一个用于处理集合的均衡器接口。
+/// 定义一个用于处理集合的调度器接口。
 /// </summary>
 /// <typeparam name="TSource">指定的来源类型。</typeparam>
-public interface IEquilizer<TSource> : IEnumerable<TSource>
+public interface IDispatcher<TSource>
 {
     /// <summary>
-    /// 调用指定的动作。
+    /// 调用指定的方法。
     /// </summary>
     /// <param name="action">给定的动作。</param>
     void Invoke(Action<TSource> action);
@@ -31,12 +31,4 @@ public interface IEquilizer<TSource> : IEnumerable<TSource>
     /// <param name="func">给定的方法。</param>
     /// <returns>返回 <see cref="IEnumerable{TResult}"/>。</returns>
     IEnumerable<TResult> Invoke<TResult>(Func<TSource, TResult> func);
-
-    /// <summary>
-    /// 调用指定的方法并返回最后一个结果。
-    /// </summary>
-    /// <typeparam name="TResult">指定的返回结果类型。</typeparam>
-    /// <param name="func">给定的方法。</param>
-    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
-    TResult InvokeGetLast<TResult>(Func<TSource, TResult> func);
 }

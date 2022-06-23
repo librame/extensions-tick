@@ -67,9 +67,9 @@ public static class StateExtensions
     public static async ValueTask<object> SetObjectStatusAsync(this IObjectState state,
         Func<object, object> newStatusFactory, CancellationToken cancellationToken = default)
     {
-        var currentStatus = await state.GetObjectStatusAsync(cancellationToken).ConfigureAwaitWithoutContext();
+        var currentStatus = await state.GetObjectStatusAsync(cancellationToken).DisableAwaitContext();
         return await state.SetObjectStatusAsync(newStatusFactory(currentStatus), cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
     }
 
 }

@@ -67,9 +67,9 @@ public static class LockoutExtensions
     public static async ValueTask<object> SetObjectLockoutEndAsync(this IObjectLockout lockout,
         Func<object, object> newLockoutEndFactory, CancellationToken cancellationToken = default)
     {
-        var currentLockoutEnd = await lockout.GetObjectLockoutEndAsync(cancellationToken).ConfigureAwaitWithoutContext();
+        var currentLockoutEnd = await lockout.GetObjectLockoutEndAsync(cancellationToken).DisableAwaitContext();
         return await lockout.SetObjectLockoutEndAsync(newLockoutEndFactory(currentLockoutEnd), cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
     }
 
 }

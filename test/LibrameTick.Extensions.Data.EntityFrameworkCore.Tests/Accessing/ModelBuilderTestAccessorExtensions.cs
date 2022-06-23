@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Librame.Extensions.Data.Sharding;
+using Microsoft.EntityFrameworkCore;
 
 namespace Librame.Extensions.Data.Accessing
 {
@@ -20,7 +21,8 @@ namespace Librame.Extensions.Data.Accessing
 
                 b.Property(p => p.Name).HasMaxLength(50);
                 b.Property(p => p.Passwd).HasMaxLength(50);
-                b.Property(p => p.CreatedTime).HasMaxLength(50);
+                b.Property(p => p.CreatedTime).HasMaxLength(50)
+                    .Sharding<DateTimeOffsetShardingStrategy>(accessor.ShardingManager);
             });
 
             return modelBuilder;

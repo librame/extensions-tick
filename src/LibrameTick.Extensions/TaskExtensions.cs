@@ -104,8 +104,8 @@ public static class TaskExtensions
     /// </summary>
     /// <param name="task">给定的 <see cref="Task"/>。</param>
     /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
-    public static ConfiguredTaskAwaitable ConfigureAwait(this Task task)
-        => task.ConfigureAwait(false);
+    public static ConfiguredTaskAwaitable DisableAwaitContext(this Task task)
+        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
 
     /// <summary>
     /// 禁用捕获上下文配置可等待任务。
@@ -113,26 +113,8 @@ public static class TaskExtensions
     /// <typeparam name="TResult">指定的结果类型。</typeparam>
     /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
     /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredTaskAwaitable<TResult> ConfigureAwait<TResult>(this Task<TResult> task)
-        => task.ConfigureAwait(false);
-
-
-    ///// <summary>
-    ///// 使用捕获上下文配置可等待任务。
-    ///// </summary>
-    ///// <param name="task">给定的 <see cref="Task"/>。</param>
-    ///// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
-    //public static ConfiguredTaskAwaitable ConfigureAwaitWithContext(this Task task)
-    //    => task.ConfigureAwait(true);
-
-    ///// <summary>
-    ///// 使用捕获上下文配置可等待任务。
-    ///// </summary>
-    ///// <typeparam name="TResult">指定的结果类型。</typeparam>
-    ///// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
-    ///// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
-    //public static ConfiguredTaskAwaitable<TResult> ConfigureAwaitWithContext<TResult>(this Task<TResult> task)
-    //    => task.ConfigureAwait(true);
+    public static ConfiguredTaskAwaitable<TResult> DisableAwaitContext<TResult>(this Task<TResult> task)
+        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
 
     #endregion
 
@@ -161,8 +143,8 @@ public static class TaskExtensions
     /// </summary>
     /// <param name="valueTask">给定的 <see cref="ValueTask"/>。</param>
     /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable"/>。</returns>
-    public static ConfiguredValueTaskAwaitable ConfigureAwaitWithoutContext(this ValueTask valueTask)
-        => valueTask.ConfigureAwait(false);
+    public static ConfiguredValueTaskAwaitable DisableAwaitContext(this ValueTask valueTask)
+        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
 
     /// <summary>
     /// 禁用捕获上下文配置可等待任务。
@@ -170,26 +152,8 @@ public static class TaskExtensions
     /// <typeparam name="TResult">指定的结果类型。</typeparam>
     /// <param name="valueTask">给定的 <see cref="ValueTask{TResult}"/>。</param>
     /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredValueTaskAwaitable<TResult> ConfigureAwaitWithoutContext<TResult>(this ValueTask<TResult> valueTask)
-        => valueTask.ConfigureAwait(false);
-
-
-    ///// <summary>
-    ///// 使用捕获上下文配置可等待任务。
-    ///// </summary>
-    ///// <param name="valueTask">给定的 <see cref="ValueTask"/>。</param>
-    ///// <returns>返回 <see cref="ConfiguredValueTaskAwaitable"/>。</returns>
-    //public static ConfiguredValueTaskAwaitable ConfigureAwaitWithContext(this ValueTask valueTask)
-    //    => valueTask.ConfigureAwait(true);
-
-    ///// <summary>
-    ///// 使用捕获上下文配置可等待任务。
-    ///// </summary>
-    ///// <typeparam name="TResult">指定的结果类型。</typeparam>
-    ///// <param name="valueTask">给定的 <see cref="ValueTask{TResult}"/>。</param>
-    ///// <returns>返回 <see cref="ConfiguredValueTaskAwaitable{TResult}"/>。</returns>
-    //public static ConfiguredValueTaskAwaitable<TResult> ConfigureAwaitWithContext<TResult>(this ValueTask<TResult> valueTask)
-    //    => valueTask.ConfigureAwait(true);
+    public static ConfiguredValueTaskAwaitable<TResult> DisableAwaitContext<TResult>(this ValueTask<TResult> valueTask)
+        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
 
     #endregion
 

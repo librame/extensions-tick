@@ -3,16 +3,16 @@ using Xunit;
 
 namespace Librame.Extensions
 {
-    public class ObjectExtensionsTests
+    public class ConversionExtensionsTests
     {
 
         [Fact]
-        public void AsNotNullTest()
+        public void AsTest()
         {
             object? obj = null;
             Assert.Throws<ArgumentNullException>(() =>
             {
-                obj!.AsNotNull<int>(nameof(obj));
+                obj!.As<int>(nameof(obj));
             });
         }
 

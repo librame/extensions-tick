@@ -5,7 +5,6 @@ namespace Librame.Extensions.Core
 {
     public class FileSizeDescriptionTests
     {
-
         [Fact]
         public void AllTest()
         {

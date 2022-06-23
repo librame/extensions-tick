@@ -11,12 +11,12 @@ namespace Librame.Extensions.Data.Sharding
         {
             var now = DateTime.Now;
 
-            var sharding = new ShardDescriptor("Shard", now.Year.ToString());
+            var sharding = new ShardedDescriptor("Shard", now.Year.ToString());
 
             var expected = $"{sharding.BaseName}{sharding.SuffixConnector}{now.Year}";
             Assert.Equal(expected, sharding);
 
-            var copyShard = ShardDescriptor.Parse(expected);
+            var copyShard = ShardedDescriptor.Parse(expected);
             Assert.Equal(expected, copyShard);
 
             var newSharding = sharding.WithSuffix(now.Month.ToString());

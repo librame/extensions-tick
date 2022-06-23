@@ -5,15 +5,6 @@ namespace Librame.Extensions
 {
     public class DateTimeExtensionsTests
     {
-
-        [Fact]
-        public void ToUnixTicksTest()
-        {
-            var unixTicks = DateTimeOffset.UtcNow.ToUnixTicks();
-            Assert.True(unixTicks > 0);
-        }
-
-
         [Fact]
         public void AsWeekOfYearTest()
         {

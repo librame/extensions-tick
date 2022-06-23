@@ -31,7 +31,7 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy>
     /// </summary>
     protected AbstractUpdationIdentifier()
     {
-        UpdatedTime = CreatedTime = DateTimeExtensions.GetUtcNow();
+        UpdatedTime = CreatedTime = DateTimeOffset.UtcNow;
         UpdatedTimeTicks = CreatedTimeTicks = UpdatedTime.Ticks;
     }
 

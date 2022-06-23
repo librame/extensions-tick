@@ -20,39 +20,51 @@ namespace Librame.Extensions.Specifications;
 public interface IAccessorSpecification : ISpecification<IAccessor>
 {
     /// <summary>
-    /// 访问模式。
+    /// 规约访问模式。
     /// </summary>
     AccessMode? Access { get; }
 
     /// <summary>
-    /// 分组。
+    /// 规约分组。
     /// </summary>
     int? Group { get; }
 
     /// <summary>
-    /// 冗余模式。
+    /// 规约冗余模式。
     /// </summary>
-    RedundancyMode? Redundancy { get; }
+    RedundancyMode Redundancy { get; }
+
+    /// <summary>
+    /// 规约冗余存取器方法。
+    /// </summary>
+    Func<IEnumerable<IAccessor>, RedundancyMode, IAccessor> RedundancyAccessorFunc { get; }
 
 
     /// <summary>
-    /// 设置访问模式。
+    /// 设置规约访问模式。
     /// </summary>
     /// <param name="access">给定的 <see cref="AccessMode"/>。</param>
     /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
     IAccessorSpecification SetAccess(AccessMode access);
 
     /// <summary>
-    /// 设置分组。
+    /// 设置规约分组。
     /// </summary>
     /// <param name="group">给定的分组。</param>
     /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
     IAccessorSpecification SetGroup(int group);
 
     /// <summary>
-    /// 设置冗余模式。
+    /// 设置规约冗余模式。
     /// </summary>
     /// <param name="redundancy">给定的冗余模式。</param>
     /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
     IAccessorSpecification SetRedundancy(RedundancyMode redundancy);
+
+    /// <summary>
+    /// 设置规约冗余存取器方法。
+    /// </summary>
+    /// <param name="func">给定的冗余存取器方法。</param>
+    /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
+    IAccessorSpecification SetRedundancyAccessorFunc(Func<IEnumerable<IAccessor>, RedundancyMode, IAccessor> func);
 }

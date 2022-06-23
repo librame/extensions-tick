@@ -30,45 +30,6 @@ public static class DateTimeExtensions
         = DateTimeOffset.UnixEpoch;
 
 
-    /// <summary>
-    /// 获取系统当前时间。
-    /// </summary>
-    /// <returns>返回 <see cref="DateTime"/>。</returns>
-    public static DateTime GetNow()
-        => DateTime.Now;
-
-    /// <summary>
-    /// 获取系统 UTC 当前时间。
-    /// </summary>
-    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public static DateTimeOffset GetUtcNow()
-        => DateTimeOffset.UtcNow;
-
-
-    /// <summary>
-    /// 转换为相对于 Unix 时间等于 0 的时间点的周期数（可用于转换为 JavaScript 时间）。
-    /// </summary>
-    /// <param name="dateTime">给定的 <see cref="DateTime"/>。</param>
-    /// <returns>返回长整数。</returns>
-    public static long ToUnixTicks(this DateTime dateTime)
-        => (long)TimeSpan.FromTicks(dateTime.Ticks - BaseTime.Ticks).TotalMilliseconds;
-
-    /// <summary>
-    /// 转换为相对于 Unix 时间等于 0 的时间点的周期数（可用于转换为 JavaScript 时间）。
-    /// </summary>
-    /// <param name="dateTimeOffset">给定的 <see cref="DateTimeOffset"/>。</param>
-    /// <returns>返回长整数。</returns>
-    public static long ToUnixTicks(this DateTimeOffset dateTimeOffset)
-    {
-        return (long)TimeSpan.FromTicks(dateTimeOffset.Ticks - UtcBaseTime.Ticks)
-            .TotalMilliseconds - GetUtcOffset(dateTimeOffset.Offset.Hours);
-
-        // GetUtcOffset
-        static int GetUtcOffset(int hours)
-            => hours * 60 * 60 * 1000;
-    }
-
-
     #region DateOfYear and QuarterOfYear
 
     /// <summary>

@@ -17,29 +17,33 @@ namespace Librame.Extensions.IdGenerators;
 /// <summary>
 /// 定义 COMB <see cref="Guid"/> 格式的雪花标识生成器（包含 64 位完整的时间标记，32 位工作标识，32 位序列）。
 /// </summary>
-public class CombSnowflakeIdGenerator : AbstractIdGenerator<Guid>
+public class CombSnowflakeIdGenerator : AbstractClockIdGenerator<Guid>
 {
-    private readonly IClockBootstrap _clock;
-    private readonly ILockerBootstrap _locker;
-
     private readonly uint _workId;
+
     private int _a;
     private int _b;
-    private long _lastTick;
+    private long _lastTicks;
     private uint _sequence;
 
 
     /// <summary>
+    /// 使用内置的 <see cref="Bootstrapper.GetClock()"/> 构造一个 <see cref="CombSnowflakeIdGenerator"/>。
+    /// </summary>
+    /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
+    public CombSnowflakeIdGenerator(IdGenerationOptions options)
+        : this(options, Bootstrapper.GetClock())
+    {
+    }
+
+    /// <summary>
     /// 构造一个 <see cref="CombSnowflakeIdGenerator"/>。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
     /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
-    public CombSnowflakeIdGenerator(IClockBootstrap clock, ILockerBootstrap locker,
-        IdGenerationOptions options)
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>。</param>
+    public CombSnowflakeIdGenerator(IdGenerationOptions options, IClockBootstrap clock)
+        : base(options, clock)
     {
-        _clock = clock;
-        _locker = locker;
         _workId = options.WorkId;
     }
 
@@ -50,26 +54,39 @@ public class CombSnowflakeIdGenerator : AbstractIdGenerator<Guid>
     /// <returns>返回 <see cref="Guid"/>。</returns>
     public override Guid GenerateId()
     {
-        var ticks = _clock.GetUtcNow().Ticks;
+        var ticks = GetNowTicks();
+        return CreateGuid(ticks / 10); // 转为微秒
+    }
 
-        var a = 0;
-        var b = 0;
-        var sequence = uint.MinValue;
+    /// <summary>
+    /// 异步生成标识。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
+    public override async Task<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
+    {
+        var ticks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+        return CreateGuid(ticks / 10); // 转为微秒
+    }
 
-        _locker.SpinLock(() =>
-        {
-            if (ticks > _lastTick)
-                UpdateTimestamp(ticks);
-            else if (_sequence == uint.MaxValue)
-                UpdateTimestamp(_lastTick + 1);
 
-            sequence = _sequence++;
+    /// <summary>
+    /// 创建 <see cref="Guid"/>。
+    /// </summary>
+    /// <param name="ticks">给定的时间刻度。</param>
+    /// <returns>返回 <see cref="Guid"/>。</returns>
+    protected virtual Guid CreateGuid(long ticks)
+    {
+        if (ticks > _lastTicks)
+            UpdateTicks(ticks);
 
-            a = _a;
-            b = _b;
-        });
+        else if (_sequence == uint.MaxValue)
+            UpdateTicks(_lastTicks + 1);
 
-        var s = sequence;
+        var a = _a;
+        var b = _b;
+        var s = _sequence++;
+
         var bytes = new byte[16];
 
         bytes[0] = (byte)(a >> 24);
@@ -90,47 +107,62 @@ public class CombSnowflakeIdGenerator : AbstractIdGenerator<Guid>
         bytes[15] = (byte)(s >> 0);
 
         return new Guid(bytes);
+    }
 
-        void UpdateTimestamp(long tick)
-        {
-            _b = (int)(tick & 0xFFFFFFFF);
-            _a = (int)(tick >> 32);
+    private void UpdateTicks(long ticks)
+    {
+        _b = (int)(ticks & 0xFFFFFFFF);
+        _a = (int)(ticks >> 32);
 
-            _sequence = uint.MinValue;
-            _lastTick = tick;
-        }
+        _sequence = uint.MinValue;
+        _lastTicks = ticks;
+    }
+
+
+    /// <summary>
+    /// 转为 <see cref="DateTimeOffset"/>。
+    /// </summary>
+    /// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
+    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
+    public virtual DateTimeOffset ToDateTime(Guid combSnowflakeId)
+    {
+        var now = Clock.GetUtcNow();
+        return ToDateTimeCore(combSnowflakeId, now.Offset);
     }
 
     /// <summary>
-    /// 异步生成标识。
-    /// </summary>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
-    public override Task<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(GenerateId);
-
-
-    /// <summary>
-    /// 获取标识包含的日期与时间。
+    /// 异步转为 <see cref="DateTimeOffset"/>。
     /// </summary>
     /// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
-    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public static DateTimeOffset GetDateTime(Guid combSnowflakeId, IClockBootstrap clock)
+    public virtual async Task<DateTimeOffset> ToDateTimeAsync(Guid combSnowflakeId,
+        CancellationToken cancellationToken = default)
+    {
+        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).DisableAwaitContext();
+        return ToDateTimeCore(combSnowflakeId, now.Offset);
+    }
+
+    /// <summary>
+    /// 转为 <see cref="DateTimeOffset"/>。
+    /// </summary>
+    /// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
+    /// <param name="utcOffset">给定的 <see cref="TimeSpan"/> UTC 偏移量。</param>
+    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
+    protected virtual DateTimeOffset ToDateTimeCore(Guid combSnowflakeId, TimeSpan utcOffset)
     {
         var bytes = combSnowflakeId.ToByteArray();
 
-        var tick = (long)bytes[0] << 56;
-        tick += (long)bytes[1] << 48;
-        tick += (long)bytes[2] << 40;
-        tick += (long)bytes[3] << 32;
-        tick += (long)bytes[3] << 24;
-        tick += (long)bytes[3] << 16;
-        tick += (long)bytes[3] << 8;
-        tick += bytes[3];
+        var ticks = (long)bytes[0] << 56;
+        ticks += (long)bytes[1] << 48;
+        ticks += (long)bytes[2] << 40;
+        ticks += (long)bytes[3] << 32;
+        ticks += (long)bytes[3] << 24;
+        ticks += (long)bytes[3] << 16;
+        ticks += (long)bytes[3] << 8;
+        ticks += bytes[3];
 
-        var utcNow = clock.GetUtcNow();
-        return new DateTimeOffset(tick, utcNow.Offset);
+        return new DateTimeOffset(AddBaseTicks(ticks * 10), utcOffset); // 转回纳秒计算，但精度只能到微秒
     }
 
 }

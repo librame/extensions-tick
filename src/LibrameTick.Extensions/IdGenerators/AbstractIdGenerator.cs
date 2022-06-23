@@ -60,7 +60,7 @@ public abstract class AbstractIdGenerator<TId> : IIdGenerator<TId>
     /// <returns>返回一个包含标识对象的异步操作。</returns>
     public virtual async Task<object> GenerateObjectIdAsync(CancellationToken cancellationToken = default)
     {
-        var id = await GenerateIdAsync(cancellationToken).ConfigureAwait();
+        var id = await GenerateIdAsync(cancellationToken).DisableAwaitContext();
         if (id is null)
             throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.");
 

@@ -212,10 +212,11 @@ public static class ValidationExtensions
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="value">给定的值。</param>
     /// <param name="compare">给定的比较值。</param>
-    /// <param name="paramName">给定的参数名。</param>
     /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="value"/> 调用参数名）。</param>
     /// <returns>返回值或抛出异常。</returns>
-    public static T NotGreater<T>(this T value, T compare, string paramName, bool equals = false)
+    public static T NotGreater<T>(this T value, T compare, bool equals = false,
+        [CallerArgumentExpression("value")] string? paramName = null)
         where T : IComparable<T>
     {
         if (value.IsGreater(compare, equals))
@@ -233,10 +234,11 @@ public static class ValidationExtensions
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="value">给定的值。</param>
     /// <param name="compare">给定的比较值。</param>
-    /// <param name="paramName">给定的参数名。</param>
     /// <param name="equals">是否比较等于（可选；默认不比较）。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="value"/> 调用参数名）。</param>
     /// <returns>返回值或抛出异常。</returns>
-    public static T NotLesser<T>(this T value, T compare, string paramName, bool equals = false)
+    public static T NotLesser<T>(this T value, T compare, bool equals = false,
+        [CallerArgumentExpression("value")] string? paramName = null)
         where T : IComparable<T>
     {
         if (value.IsLesser(compare, equals))
@@ -255,12 +257,13 @@ public static class ValidationExtensions
     /// <param name="value">给定的值。</param>
     /// <param name="compareMinimum">给定的最小比较值。</param>
     /// <param name="compareMaximum">给定的最大比较值。</param>
-    /// <param name="paramName">给定的参数名。</param>
     /// <param name="equalMinimum">是否比较等于最小值（可选；默认不比较）。</param>
     /// <param name="equalMaximum">是否比较等于最大值（可选；默认不比较）。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="value"/> 调用参数名）。</param>
     /// <returns>返回值或抛出异常。</returns>
-    public static T NotOutOfRange<T>(this T value, T compareMinimum, T compareMaximum, string paramName,
-        bool equalMinimum = false, bool equalMaximum = false)
+    public static T NotOutOfRange<T>(this T value, T compareMinimum, T compareMaximum,
+        bool equalMinimum = false, bool equalMaximum = false,
+        [CallerArgumentExpression("value")] string? paramName = null)
         where T : IComparable<T>
     {
         if (value.IsOutOfRange(compareMinimum, compareMaximum, equalMinimum, equalMaximum))

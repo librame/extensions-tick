@@ -13,17 +13,17 @@
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义支持对存取器集合进行聚合或切片的冗余模式。
+/// 定义支持对存取器集合进行镜像或分割的冗余模式。
 /// </summary>
 public enum RedundancyMode
 {
     /// <summary>
-    /// 聚合。
+    /// 镜像模式。在此模式下，同分组的存取器将组合为镜像，互为主备存取，适用于高安全性部署场景。
     /// </summary>
-    Aggregation,
+    Mirroring,
 
     /// <summary>
-    /// 切片。
+    /// 分割模式。在此模式下，同分组的存取器将切分为不同条带分散存取，适用于安全性不高的高并发部署场景。
     /// </summary>
-    Slicing
+    Striping
 }

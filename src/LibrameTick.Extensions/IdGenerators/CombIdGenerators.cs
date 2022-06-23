@@ -23,37 +23,37 @@ public static class CombIdGenerators
     /// <summary>
     /// 支持 MySQL 排序类型的 COMB 标识生成器（char(36)）。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
+    /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>
     /// <returns>返回 <see cref="CombIdGenerator"/>。</returns>
-    public static CombIdGenerator ForMySql(IClockBootstrap clock, ILockerBootstrap locker)
-        => new CombIdGenerator(clock, locker, CombIdGeneration.AsString);
+    public static CombIdGenerator ForMySql(IdGenerationOptions options, IClockBootstrap? clock = null)
+        => new CombIdGenerator(CombIdGeneration.AsString, options, clock ?? Bootstrapper.GetClock());
 
     /// <summary>
     /// 支持 Oracle 排序类型的 COMB 标识生成器（raw(16)）。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
+    /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>
     /// <returns>返回 <see cref="CombIdGenerator"/>。</returns>
-    public static CombIdGenerator ForOracle(IClockBootstrap clock, ILockerBootstrap locker)
-        => new CombIdGenerator(clock, locker, CombIdGeneration.AsBinary);
+    public static CombIdGenerator ForOracle(IdGenerationOptions options, IClockBootstrap? clock = null)
+        => new CombIdGenerator(CombIdGeneration.AsBinary, options, clock ?? Bootstrapper.GetClock());
 
     /// <summary>
     /// 支持 SQLite 排序类型的 COMB 标识生成器（text）。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
+    /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>
     /// <returns>返回 <see cref="CombIdGenerator"/>。</returns>
-    public static CombIdGenerator ForSqlite(IClockBootstrap clock, ILockerBootstrap locker)
-        => ForMySql(clock, locker); // 使用与 MySQL 数据库相同的排序方式
+    public static CombIdGenerator ForSqlite(IdGenerationOptions options, IClockBootstrap? clock = null)
+        => ForMySql(options, clock); // 使用与 MySQL 数据库相同的排序方式
 
     /// <summary>
     /// 支持 SQL Server 排序类型的 COMB 标识生成器（uniqueidentifier）。
     /// </summary>
-    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（如使用本地时钟可参考 <see cref="Bootstrapper.GetClock()"/>）。</param>
-    /// <param name="locker">给定的 <see cref="ILockerBootstrap"/>（如使用本地锁定器可参考 <see cref="Bootstrapper.GetLocker()"/>）。</param>
+    /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
+    /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>
     /// <returns>返回 <see cref="CombIdGenerator"/>。</returns>
-    public static CombIdGenerator ForSqlServer(IClockBootstrap clock, ILockerBootstrap locker)
-        => new CombIdGenerator(clock, locker, CombIdGeneration.AtEnd);
+    public static CombIdGenerator ForSqlServer(IdGenerationOptions options, IClockBootstrap? clock = null)
+        => new CombIdGenerator(CombIdGeneration.AtEnd, options, clock ?? Bootstrapper.GetClock());
 
 }

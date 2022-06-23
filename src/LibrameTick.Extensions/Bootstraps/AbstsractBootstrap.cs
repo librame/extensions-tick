@@ -17,7 +17,7 @@ namespace Librame.Extensions.Bootstraps;
 /// <summary>
 /// 定义抽象实现 <see cref="IBootstrap"/> 的引导程序。
 /// </summary>
-public class AbstsractBootstrap : AbstractDisposable, IBootstrap
+public abstract class AbstsractBootstrap : AbstractDisposable, IBootstrap
 {
     /// <summary>
     /// 释放已托管资源。

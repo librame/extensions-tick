@@ -8,7 +8,7 @@ namespace Librame.Extensions.Core.Tests
             = 1;
     }
 
-    public class Decoratable : BaseDecoratable<DecoratedInfo>
+    public class Decoratable : Decoratable<DecoratedInfo>
     {
         public Decoratable(DecoratedInfo source)
             : base(source)

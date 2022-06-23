@@ -70,7 +70,7 @@ public class DbContextAccessorInitializer<TAccessor> : AbstractAccessorInitializ
         where TEntity : class
     {
         var dbSet = dbSetFunc(Accessor);
-        if (!dbSet.Exists(predicate: null))
+        if (!dbSet.ExistsBySpecification(predicate: null))
         {
             dbSet.AddRange(initialFunc());
 
@@ -91,7 +91,7 @@ public class DbContextAccessorInitializer<TAccessor> : AbstractAccessorInitializ
         where TEntity : class
     {
         var dbSet = dbSetFunc(Accessor);
-        if (!await dbSet.ExistsAsync(predicate: null, cancellationToken: cancellationToken))
+        if (!await dbSet.ExistsBySpecificationAsync(predicate: null, cancellationToken: cancellationToken))
         {
             var initial = await initialFunc(cancellationToken);
             await dbSet.AddRangeAsync(initial, cancellationToken);

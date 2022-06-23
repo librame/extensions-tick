@@ -47,9 +47,9 @@ namespace Librame.Extensions.Core.Tests
             info.SetField2(2);
             info.SetProperty2(4);
             info.Size = new Rectangle(5, 5, 20, 10);
-            info.Version = typeof(BaseCloneable<>).Assembly.GetName().Version;
+            info.Version = typeof(Cloneable<>).Assembly.GetName().Version;
 
-            var cloneable = new BaseCloneable<ClonedInfo>(info);
+            var cloneable = new Cloneable<ClonedInfo>(info);
 
             var info1 = (ClonedInfo)cloneable.Clone();
             Assert.True(info.Field1Equals(info1));

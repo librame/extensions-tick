@@ -62,10 +62,11 @@ public abstract class AbstractRanking<TRank> : IRanking<TRank>
     /// 转换为排名。
     /// </summary>
     /// <param name="rank">给定的排名对象。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="rank"/> 调用参数名）。</param>
     /// <returns>返回 <typeparamref name="TRank"/>。</returns>
-    public virtual TRank ToRank(object rank, string? paramName)
-        => rank.AsNotNull<TRank>(paramName);
+    public virtual TRank ToRank(object rank,
+        [CallerArgumentExpression("rank")] string? paramName = null)
+        => rank.As<TRank>(paramName);
 
 
     /// <summary>

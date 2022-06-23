@@ -21,13 +21,23 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public class AccessorDbContextOptionsBuilder
 {
+    private readonly CoreOptionsExtension? _coreOptionsExtension;
+    private readonly RelationalOptionsExtension? _relationalOptionsExtension;
+
+
     /// <summary>
-    /// 构造一个默认的 <see cref="AccessorDbContextOptionsBuilder"/> 实例。
+    /// 构造一个 <see cref="AccessorDbContextOptionsBuilder"/>。
     /// </summary>
     /// <param name="parentBuilder">给定的 <see cref="DbContextOptionsBuilder"/>。</param>
     public AccessorDbContextOptionsBuilder(DbContextOptionsBuilder parentBuilder)
     {
         ParentBuilder = parentBuilder;
+
+        _coreOptionsExtension = parentBuilder.Options.FindExtension<CoreOptionsExtension>();
+        _relationalOptionsExtension = parentBuilder.Options.FindExtension<RelationalOptionsExtension>();
+
+        if (_coreOptionsExtension?.MaxPoolSize > 0)
+            WithOption(e => e.WithPooling(true));
     }
 
 
@@ -52,14 +62,6 @@ public class AccessorDbContextOptionsBuilder
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithAccess(AccessMode access)
         => WithOption(e => e.WithAccess(access));
-
-    /// <summary>
-    /// 配置存取器是否池化（默认为否，如果不需要改变，可不调用此方法）。
-    /// </summary>
-    /// <param name="pooling">给定的存取器是否池化（可选；默认池化）。</param>
-    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithPooling(bool pooling = true)
-        => WithOption(e => e.WithPooling(pooling));
 
     /// <summary>
     /// 配置存取器优先级（默认使用 <see cref="IAccessor"/> 定义的优先级属性值；如果不需要改变，可不调用此方法）。
@@ -97,10 +99,12 @@ public class AccessorDbContextOptionsBuilder
     /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
     /// <param name="configureAction">给定的分片命名特性配置动作（可选）。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithSharding(Type strategyType, string suffix,
-        Action<ShardedAttribute>? configureAction = null)
+    public virtual AccessorDbContextOptionsBuilder WithSharding(Type strategyType,
+        string suffix, Action<ShardedAttribute>? configureAction = null)
     {
-        var attribute = new ShardedAttribute(strategyType, suffix);
+        var attribute = new ShardedAttribute(suffix, strategyType);
+        attribute.TryUpdateBaseNameFromConnectionString(_relationalOptionsExtension?.ConnectionString);
+
         configureAction?.Invoke(attribute);
 
         return WithSharding(attribute);

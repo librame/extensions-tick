@@ -13,11 +13,11 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义抽象可实例化对象。
+/// 定义抽象实现 <see cref="IInstantiable{TInstance}"/> 的可实例化对象。
 /// </summary>
 /// <typeparam name="TInstance">指定的实例类型。</typeparam>
 /// <typeparam name="TOptions">指定的构建选项类型。</typeparam>
-public abstract class AbstractInstantiable<TInstance, TOptions> : IInstantiator<TInstance>
+public abstract class AbstractInstantiable<TInstance, TOptions> : IInstantiable<TInstance>
     where TInstance : class
     where TOptions : IOptions
 {

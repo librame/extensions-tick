@@ -10,34 +10,24 @@
 
 #endregion
 
-using Librame.Extensions.Core;
-
 namespace Librame.Extensions.Data.Sharding;
 
-class InternalShardingManager : IShardingManager
+class InternalShardingManager : AbstractShardingManager
 {
-    private readonly List<IShardingStrategy> _strategies = new();
-
-
-    public InternalShardingManager(IOptionsMonitor<DataExtensionOptions> dataOptions,
-        IOptionsMonitor<CoreExtensionOptions> coreOptions)
+    public InternalShardingManager(IOptionsMonitor<DataExtensionOptions> dataOptions)
     {
-        if (_strategies.Count < 1)
-        {
-            _strategies.Add(new DateTimeShardingStrategy(coreOptions.CurrentValue.Clock));
-            _strategies.Add(new DateTimeOffsetShardingStrategy(coreOptions.CurrentValue.Clock));
-            _strategies.Add(new CultureInfoShardingStrategy());
+        AddStrategy(new DateTimeShardingStrategy());
+        AddStrategy(new DateTimeOffsetShardingStrategy());
+        AddStrategy(new CultureInfoShardingStrategy());
 
-            if (dataOptions.CurrentValue.ShardingStrategies.Count > 0)
+        // 合并选项自定义策略集合
+        if (dataOptions.CurrentValue.ShardingStrategies.Count > 0)
+        {
+            foreach (var strategy in dataOptions.CurrentValue.ShardingStrategies)
             {
-                _strategies.AddRange(dataOptions.CurrentValue.ShardingStrategies);
-                _strategies = _strategies.DistinctBy(ks => ks.StrategyType.FullName).ToList();
+                AddStrategy(strategy);
             }
         }
     }
-
-
-    public IShardingStrategy? GetStrategy(Type strategyType)
-        => _strategies.FirstOrDefault(s => s.StrategyType.IsSameType(strategyType));
 
 }

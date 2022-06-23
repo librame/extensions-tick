@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 
 namespace Librame.Extensions.Data.Accessing;
@@ -77,13 +78,14 @@ public static class ModelBuilderDbContextAccessorExtensions
 
         modelBuilder.Entity<Audit>(b =>
         {
-            b.ToTableWithSharding(accessor.ShardingManager);
+            b.ToTableWithSharding(accessor.ShardingManager, accessor);
 
             b.HasIndex(i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
             b.HasKey(k => k.Id);
 
-            b.Property(p => p.Id).ValueGeneratedNever();
+            b.Property(p => p.Id).ValueGeneratedNever()
+                .Sharding<ModShardingStrategy>(accessor.ShardingManager);
 
             if (limitableMaxLength > 0)
             {
@@ -96,13 +98,14 @@ public static class ModelBuilderDbContextAccessorExtensions
 
         modelBuilder.Entity<AuditProperty>(b =>
         {
-            b.ToTableWithSharding(accessor.ShardingManager);
+            b.ToTableWithSharding(accessor.ShardingManager, accessor);
 
             b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
 
             b.HasKey(k => k.Id);
 
-            b.Property(x => x.Id).ValueGeneratedNever();
+            b.Property(x => x.Id).ValueGeneratedNever()
+                .Sharding<ModShardingStrategy>(accessor.ShardingManager);
 
             if (limitableMaxLength > 0)
             {

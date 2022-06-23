@@ -55,7 +55,7 @@ public static class UpdationExtensions
         where TUpdatedBy : IEquatable<TUpdatedBy>
     {
         await updation.PopulateCreationAsync<TUpdatedBy>(newUpdatedBy, newUpdatedTime, cancellationToken)
-            .ConfigureAwait();
+            .DisableAwaitContext();
 
         updation.UpdatedTime = newUpdatedTime;
         updation.UpdatedTimeTicks = updation.UpdatedTime.Ticks;
@@ -158,7 +158,7 @@ public static class UpdationExtensions
         Func<TUpdatedBy?, TUpdatedBy?> newUpdatedByFactory, CancellationToken cancellationToken = default)
         where TUpdatedBy : IEquatable<TUpdatedBy>
     {
-        await updator.SetCreatedByAsync(newUpdatedByFactory, cancellationToken).ConfigureAwaitWithoutContext();
+        await updator.SetCreatedByAsync(newUpdatedByFactory, cancellationToken).DisableAwaitContext();
 
         return updator.UpdatedBy = newUpdatedByFactory(updator.UpdatedBy);
     }
@@ -196,7 +196,7 @@ public static class UpdationExtensions
         Func<TUpdatedTime, TUpdatedTime> newUpdatedTimeFactory, CancellationToken cancellationToken = default)
         where TUpdatedTime : struct
     {
-        await updationTime.SetCreatedTimeAsync(newUpdatedTimeFactory, cancellationToken).ConfigureAwaitWithoutContext();
+        await updationTime.SetCreatedTimeAsync(newUpdatedTimeFactory, cancellationToken).DisableAwaitContext();
 
         return updationTime.UpdatedTime = newUpdatedTimeFactory(updationTime.UpdatedTime);
     }

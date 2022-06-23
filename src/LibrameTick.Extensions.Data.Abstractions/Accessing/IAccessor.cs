@@ -18,10 +18,16 @@ using Librame.Extensions.Specifications;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义表示数据访问的存取器接口（主要用于适配数据实现层的访问对象；如 EFCore 实现层的 DbContext 对象）。
+/// 定义一个表示数据访问的存取器接口。
 /// </summary>
-public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable, IShardable, IDisposable, IAsyncDisposable
+public interface IAccessor : ISortable, IShardable
 {
+    /// <summary>
+    /// 当前数据库上下文。
+    /// </summary>
+    IDbContext CurrentContext { get; }
+
+
     /// <summary>
     /// 存取器描述符。
     /// </summary>
@@ -36,6 +42,34 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     /// 存取器类型。
     /// </summary>
     Type AccessorType { get; }
+
+
+    /// <summary>
+    /// 当前连接字符串。
+    /// </summary>
+    string? CurrentConnectionString { get; }
+
+
+    /// <summary>
+    /// 改变数据库连接。
+    /// </summary>
+    /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
+    /// <returns>返回 <see cref="IAccessor"/>。</returns>
+    IAccessor ChangeConnection(string newConnectionString);
+
+
+    /// <summary>
+    /// 尝试创建数据库。
+    /// </summary>
+    /// <returns>返回布尔值。</returns>
+    bool TryCreateDatabase();
+
+    /// <summary>
+    /// 异步尝试创建数据库。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含布尔值的异步操作。</returns>
+    Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default);
 
 
     #region Query
@@ -113,72 +147,6 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
 
 
     #region Find
-
-    /// <summary>
-    /// 从表达式建立指定结果的可查询接口。
-    /// </summary>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="expression">给定的 <see cref="IQueryable{TResult}"/> 表达式。</param>
-    /// <returns>返回 <see cref="IQueryable{TResult}"/>。</returns>
-    IQueryable<TResult> FromExpression<TResult>(Expression<Func<IQueryable<TResult>>> expression);
-
-
-    /// <summary>
-    /// 查找指定键值数组的实体对象。
-    /// </summary>
-    /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="keyValues">给定的键值数组。</param>
-    /// <returns>返回实体对象。</returns>
-    object? Find(Type entityType, params object?[]? keyValues);
-
-    /// <summary>
-    /// 异步查找指定键值数组的实体对象。
-    /// </summary>
-    /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="keyValues">给定的键值数组。</param>
-    /// <returns>返回一个包含实体对象的异步操作。</returns>
-    ValueTask<object?> FindAsync(Type entityType, params object?[]? keyValues);
-
-    /// <summary>
-    /// 异步查找指定键值数组的实体对象。
-    /// </summary>
-    /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="keyValues">给定的键值数组。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含实体对象的异步操作。</returns>
-    ValueTask<object?> FindAsync(Type entityType, object?[]? keyValues,
-        CancellationToken cancellationToken);
-
-
-    /// <summary>
-    /// 查找指定键值数组的实体。
-    /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="keyValues">给定的键值数组。</param>
-    /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
-    TEntity? Find<TEntity>(params object?[]? keyValues)
-        where TEntity: class;
-
-    /// <summary>
-    /// 异步查找指定键值数组的实体。
-    /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="keyValues">给定的键值数组。</param>
-    /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的异步结果。</returns>
-    ValueTask<TEntity?> FindAsync<TEntity>(params object?[]? keyValues)
-        where TEntity : class;
-
-    /// <summary>
-    /// 异步查找指定键值数组的实体。
-    /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="keyValues">给定的键值数组。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <typeparamref name="TEntity"/> 的异步结果。</returns>
-    ValueTask<TEntity?> FindAsync<TEntity>(object?[]? keyValues,
-        CancellationToken cancellationToken)
-        where TEntity : class;
-
 
     /// <summary>
     /// 查找带有规约的实体集合。
@@ -278,35 +246,6 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     TEntity Add<TEntity>(TEntity entity)
         where TEntity : class;
 
-
-    /// <summary>
-    /// 添加实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要添加的实体对象集合。</param>
-    void AddRange(IEnumerable<object> entities);
-
-    /// <summary>
-    /// 添加实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要添加的实体对象集合。</param>
-    void AddRange(params object[] entities);
-
-    /// <summary>
-    /// 异步添加实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要添加的实体对象集合。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回 <see cref="Task"/>。</returns>
-    Task AddRangeAsync(IEnumerable<object> entities,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 异步添加实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要添加的实体对象集合。</param>
-    /// <returns>返回 <see cref="Task"/>。</returns>
-    Task AddRangeAsync(params object[] entities);
-
     #endregion
 
 
@@ -327,19 +266,6 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     TEntity Attach<TEntity>(TEntity entity)
         where TEntity : class;
-
-
-    /// <summary>
-    /// 附加实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要附加的实体对象集合。</param>
-    void AttachRange(params object[] entities);
-
-    /// <summary>
-    /// 附加实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要附加的实体对象集合。</param>
-    void AttachRange(IEnumerable<object> entities);
 
     #endregion
 
@@ -362,19 +288,6 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     TEntity Remove<TEntity>(TEntity entity)
         where TEntity : class;
 
-
-    /// <summary>
-    /// 移除实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要移除的实体对象集合。</param>
-    void RemoveRange(params object[] entities);
-
-    /// <summary>
-    /// 移除实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要移除的实体对象集合。</param>
-    void RemoveRange(IEnumerable<object> entities);
-
     #endregion
 
 
@@ -395,19 +308,6 @@ public interface IAccessor : IConnectable<IAccessor>, ISaveChangeable, ISortable
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     TEntity Update<TEntity>(TEntity entity)
         where TEntity : class;
-
-
-    /// <summary>
-    /// 更新实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要更新的实体对象集合。</param>
-    void UpdateRange(params object[] entities);
-
-    /// <summary>
-    /// 更新实体范围集合。
-    /// </summary>
-    /// <param name="entities">给定要更新的实体对象集合。</param>
-    void UpdateRange(IEnumerable<object> entities);
 
     #endregion
 

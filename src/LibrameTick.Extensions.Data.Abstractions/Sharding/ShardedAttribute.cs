@@ -10,73 +10,179 @@
 
 #endregion
 
+using Microsoft.Extensions.Configuration;
+
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
-/// 定义用于分片的特性（常用于分库、分表操作）。
+/// 定义用于分片的命名特性（构成方式为：BaseName+Suffix，可用于分库、分表操作）。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public sealed class ShardedAttribute : Attribute
 {
     /// <summary>
+    /// 默认已支持的数据库键集合。
+    /// </summary>
+    public static readonly string[] DefaultSupportedDatabaseKeys
+        = new string[] { "Database", "Initial Catalog", "Data Source" };
+
+
+    /// <summary>
     /// 构造一个 <see cref="ShardedAttribute"/>。
     /// </summary>
-    /// <param name="strategyType">给定的分片策略类型。</param>
     /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
-    public ShardedAttribute(Type strategyType, string suffix)
-        : this(strategyType, suffix, suffixConnector: null, baseName: null)
+    public ShardedAttribute(string suffix)
+        : this(suffix, defaultStrategyType: null, baseName: null)
     {
     }
 
     /// <summary>
     /// 构造一个 <see cref="ShardedAttribute"/>。
     /// </summary>
-    /// <param name="strategyType">给定的分片策略类型。</param>
     /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
-    /// <param name="suffixConnector">给定的后缀连接符（可空；默认使用 <see cref="ShardDescriptor.DefaultSuffixConnector"/>）。</param>
-    /// <param name="baseName">给定的基础名称（可空；针对分表默认使用实体名称复数，针对数据库默认使用数据库名）。</param>
-    public ShardedAttribute(Type strategyType, string suffix, string? suffixConnector, string? baseName)
+    /// <param name="defaultStrategyType">给定的默认分片策略（可空）。</param>
+    public ShardedAttribute(string suffix, Type? defaultStrategyType)
+        : this(suffix, defaultStrategyType, baseName: null)
     {
-        StrategyType = strategyType;
+    }
+
+    /// <summary>
+    /// 构造一个 <see cref="ShardedAttribute"/>。
+    /// </summary>
+    /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
+    /// <param name="defaultStrategyType">给定的默认分片策略（可空）。</param>
+    /// <param name="baseName">给定的基础名称（可空；针对分表默认使用实体名称复数，针对数据库默认使用数据库名）。</param>
+    public ShardedAttribute(string suffix, Type? defaultStrategyType, string? baseName)
+    {
         Suffix = suffix;
-        SuffixConnector = suffixConnector;
+        DefaultStrategyType = defaultStrategyType;
         BaseName = baseName;
     }
 
 
     /// <summary>
-    /// 策略类型。
-    /// </summary>
-    public Type StrategyType { get; set; }
-
-    /// <summary>
-    /// 后缀。
+    /// 命名后缀。
     /// </summary>
     public string Suffix { get; set; }
-
-    /// <summary>
-    /// 后缀连接符。
-    /// </summary>
-    public string? SuffixConnector { get; set; }
 
     /// <summary>
     /// 基础名称。
     /// </summary>
     public string? BaseName { get; set; }
 
+    /// <summary>
+    /// 默认策略类型。
+    /// </summary>
+    public Type? DefaultStrategyType { get; set; }
 
     /// <summary>
-    /// 获取哈希码。
+    /// 分片配置。
     /// </summary>
-    /// <returns>返回 32 位整数。</returns>
-    public override int GetHashCode()
-        => ToString().GetHashCode();
+    public IConfiguration? Configuration { get; set; }
+
 
     /// <summary>
-    /// 转换为字符串。
+    /// 尝试从数据库连接字符串包含的数据库键值中更新基础名称。
     /// </summary>
-    /// <returns>返回字符串。</returns>
-    public override string ToString()
-        => $"{nameof(BaseName)}={BaseName};{nameof(StrategyType)}={StrategyType.Name};{nameof(SuffixConnector)}={SuffixConnector};{nameof(Suffix)}={Suffix}";
+    /// <param name="connectionString">给定的连接字符串。</param>
+    /// <returns>返回是否更新的布尔值。</returns>
+    public bool TryUpdateBaseNameFromConnectionString(string? connectionString)
+        => TryUpdateBaseNameFromConnectionString(connectionString, out _);
+
+    /// <summary>
+    /// 尝试从数据库连接字符串包含的数据库键值中更新基础名称。
+    /// </summary>
+    /// <param name="connectionString">给定的连接字符串。</param>
+    /// <param name="segments">输出连接字符串的键值对集合。</param>
+    /// <param name="keyValueSeparator">给定的键值对分隔符（可选；默认为等号）。</param>
+    /// <param name="pairDelimiter">给定的键值对集合界定符（可选；默认为分号）。</param>
+    /// <param name="databaseKey">给定的数据库键（可选；默认使用 <see cref="DefaultSupportedDatabaseKeys"/>）。</param>
+    /// <returns>返回是否更新的布尔值。</returns>
+    /// <exception cref="ArgumentException">
+    /// A matching supported database keys was not found from the current connection string, Please specify the database key.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// The database key for the current connection string is null or empty.
+    /// </exception>
+    public bool TryUpdateBaseNameFromConnectionString(string? connectionString,
+        [MaybeNullWhen(false)] out Dictionary<string, string>? segments,
+        string keyValueSeparator = "=", string pairDelimiter = ";", string? databaseKey = null)
+    {
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            segments = null;
+            return false;
+        }
+
+        // 提取连接字符串的键值对集合
+        segments = connectionString
+            .TrimEnd(pairDelimiter)
+            .Split(pairDelimiter)
+            .Select(part =>
+            {
+                var pairPart = part.Split(keyValueSeparator);
+                return new KeyValuePair<string, string>(pairPart[0], pairPart[pairPart.Length - 1]);
+            })
+            .ToDictionary(ks => ks.Key, ele => ele.Value);
+
+        var database = string.Empty;
+
+        // 解析数据库键值
+        if (string.IsNullOrEmpty(databaseKey))
+        {
+            foreach (var key in DefaultSupportedDatabaseKeys)
+            {
+                if (segments.TryGetValue(key, out var value))
+                {
+                    databaseKey = key;
+                    database = value;
+                }
+            }
+
+            throw new ArgumentException($"A matching supported database keys '{DefaultSupportedDatabaseKeys.JoinString(',')}' was not found from the current connection string '{connectionString}', Please specify the database key.");
+        }
+        else
+        {
+            database = segments[databaseKey];
+        }
+
+        if (string.IsNullOrEmpty(database))
+            throw new ArgumentNullException($"The database key '{databaseKey}' for the current connection string '{connectionString}' is null or empty.");
+
+        // 修剪可能存在的路径和文件扩展名
+        if (database.Contains('.') || database.Contains(Path.DirectorySeparatorChar))
+            BaseName = Path.GetFileNameWithoutExtension(database);
+        else
+            BaseName = database;
+
+        return true;
+    }
+
+
+    /// <summary>
+    /// 从已标记分片特性的实体解析实例。
+    /// </summary>
+    /// <param name="entityType">给定的实体类型。</param>
+    /// <param name="tableName">给定的映射表名。</param>
+    /// <returns>返回 <see cref="ShardedAttribute"/>。</returns>
+    /// <exception cref="NotSupportedException">
+    /// Unsupported entity type. You need to label entity type with attribute.
+    /// </exception>
+    public static ShardedAttribute ParseFromEntity(Type entityType, string? tableName)
+    {
+        if (!entityType.TryGetAttribute<ShardedAttribute>(out var attribute))
+            throw new NotSupportedException($"Unsupported entity type '{entityType}'. You need to label entity type with attribute '[{nameof(ShardedAttribute)}]'.");
+
+        // 忽略已指定基础名称的情况
+        if (string.IsNullOrEmpty(attribute.BaseName))
+        {
+            if (string.IsNullOrEmpty(tableName))
+                tableName = entityType.Name.AsPluralize();
+
+            attribute.BaseName = tableName;
+        }
+
+        return attribute;
+    }
 
 }

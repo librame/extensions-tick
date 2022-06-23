@@ -47,6 +47,11 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     /// </summary>
     public IdGenerationOptions IdGeneration { get; set; } = new();
 
+    /// <summary>
+    /// 雪花标识参数。
+    /// </summary>
+    public SnowflakeIdOptions SnowflakeParameters { get; set; } = new();
+
 
     /// <summary>
     /// 标识生成器字典集合（默认已集成 <see cref="string"/> “MongoDB”、<see cref="long"/> “雪花”、<see cref="Guid"/> “COMB for SQLServer/MySQL/Oracle” 等标识类型的生成器）。

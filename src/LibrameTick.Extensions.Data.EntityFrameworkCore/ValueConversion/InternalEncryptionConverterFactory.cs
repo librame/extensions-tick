@@ -28,7 +28,7 @@ class InternalEncryptionConverterFactory : IEncryptionConverterFactory
     }
 
 
-    public ValueConverter GetConverter(DbContextAccessor accessor, Type propertyType)
+    public ValueConverter GetConverter(AbstractContextAccessor accessor, Type propertyType)
     {
         if (!_dictionary.TryGetValue(accessor.AccessorId, out var converters))
         {

@@ -31,7 +31,7 @@ public abstract class AbstractPublicationIdentifier<TId, TPublishedBy>
     /// </summary>
     protected AbstractPublicationIdentifier()
     {
-        PublishedTime = CreatedTime = DateTimeExtensions.GetUtcNow();
+        PublishedTime = CreatedTime = DateTimeOffset.UtcNow;
         PublishedTimeTicks = CreatedTimeTicks = PublishedTime.Ticks;
     }
 

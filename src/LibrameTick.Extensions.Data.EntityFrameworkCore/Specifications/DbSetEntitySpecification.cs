@@ -64,6 +64,11 @@ public class DbSetEntitySpecification<TEntity> : IDbSetEntitySpecification<TEnti
     /// </summary>
     public Func<IEnumerable<TEntity>, TEntity>? Provider { get; private set; }
 
+    /// <summary>
+    /// 异步出具提供方法。
+    /// </summary>
+    public Func<IAsyncEnumerable<TEntity>, TEntity>? AsyncProvider { get; private set; }
+
 
     /// <summary>
     /// 判断是否存在指定条件的对象（如果本地缓存不为空时，支持查找本地缓存）。
@@ -119,6 +124,33 @@ public class DbSetEntitySpecification<TEntity> : IDbSetEntitySpecification<TEnti
     /// <returns>返回 <see cref="IEnumerable{TEntity}"/>。</returns>
     public virtual IEnumerable<TEntity> Evaluate(DbSet<TEntity> dbSet)
     {
+        (var enumerable, var queryable) = EvaluateCore(dbSet);
+
+        return enumerable ?? queryable!.ToList();
+    }
+
+    /// <summary>
+    /// 异步评估可枚举对象。
+    /// </summary>
+    /// <param name="dbSet">给定的 <see cref="DbSet{TEntity}"/>。</param>
+    /// <returns>返回 <see cref="IAsyncEnumerable{TEntity}"/>。</returns>
+    public virtual IAsyncEnumerable<TEntity> EvaluateAsync(DbSet<TEntity> dbSet)
+    {
+        (var enumerable, var queryable) = EvaluateCore(dbSet);
+
+        if (enumerable is not null)
+            return EnumerableExtensions.AsAsyncEnumerable(enumerable);
+
+        return queryable!.AsAsyncEnumerable();
+    }
+
+    /// <summary>
+    /// 评估实体数据集。
+    /// </summary>
+    /// <param name="dbSet">给定的 <see cref="DbSet{TEntity}"/>。</param>
+    /// <returns>返回包含 <see cref="IEnumerable{TEntity}"/> 与 <see cref="IQueryable{TEntity}"/> 的元组。</returns>
+    protected virtual (IEnumerable<TEntity>? enumerable, IQueryable<TEntity>? queryable) EvaluateCore(DbSet<TEntity> dbSet)
+    {
         IEnumerable<TEntity> enumerable = dbSet.Local;
         IQueryable<TEntity> queryable = dbSet;
 
@@ -149,8 +181,9 @@ public class DbSetEntitySpecification<TEntity> : IDbSetEntitySpecification<TEnti
                 queryable = queryable.OrderByDescending(OrderByDescending);
         }
 
-        return enumerable ?? queryable!.ToList();
+        return (enumerable, queryable);
     }
+
 
     /// <summary>
     /// 出具可查询对象。
@@ -166,12 +199,38 @@ public class DbSetEntitySpecification<TEntity> : IDbSetEntitySpecification<TEnti
     }
 
     /// <summary>
+    /// 异步出具可查询对象。
+    /// </summary>
+    /// <param name="enumerable">给定的 <see cref="IAsyncEnumerable{TEntity}"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+    public virtual TEntity IssueAsync(IAsyncEnumerable<TEntity> enumerable,
+        CancellationToken cancellationToken = default)
+    {
+        if (AsyncProvider is not null)
+            return AsyncProvider(enumerable);
+
+        return enumerable.GetAsyncEnumerator(cancellationToken).Current;
+    }
+
+
+    /// <summary>
     /// 出具经过评估的可查询对象。
     /// </summary>
     /// <param name="dbSet">给定的 <see cref="DbSet{TEntity}"/>。</param>
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity IssueEvaluate(DbSet<TEntity> dbSet)
         => Issue(Evaluate(dbSet));
+
+    /// <summary>
+    /// 异步出具经过评估的可查询对象。
+    /// </summary>
+    /// <param name="dbSet">给定的 <see cref="DbSet{TEntity}"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+    public virtual TEntity IssueEvaluateAsync(DbSet<TEntity> dbSet,
+        CancellationToken cancellationToken = default)
+        => IssueAsync(EvaluateAsync(dbSet), cancellationToken);
 
 
     /// <summary>
@@ -213,6 +272,17 @@ public class DbSetEntitySpecification<TEntity> : IDbSetEntitySpecification<TEnti
     public IDbSetEntitySpecification<TEntity> SetProvider(Func<IEnumerable<TEntity>, TEntity> provider)
     {
         Provider = provider;
+        return this;
+    }
+
+    /// <summary>
+    /// 设置异步出具提供方法。
+    /// </summary>
+    /// <param name="asyncProvider">给定的异步出具提供方法。</param>
+    /// <returns>返回 <see cref="IDbSetEntitySpecification{TEntity}"/>。</returns>
+    public IDbSetEntitySpecification<TEntity> SetProviderAsync(Func<IAsyncEnumerable<TEntity>, TEntity> asyncProvider)
+    {
+        AsyncProvider = asyncProvider;
         return this;
     }
 

@@ -53,10 +53,11 @@ public abstract class AbstractState<TStatus> : IState<TStatus>
     /// 转换为状态。
     /// </summary>
     /// <param name="status">给定的状态对象。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="status"/> 调用参数名）。</param>
     /// <returns>返回 <typeparamref name="TStatus"/>。</returns>
-    public virtual TStatus ToStatus(object? status, string? paramName)
-        => status.AsNotNull<TStatus>(paramName);
+    public virtual TStatus ToStatus(object? status,
+        [CallerArgumentExpression("status")] string? paramName = null)
+        => status.As<TStatus>(paramName);
 
 
     /// <summary>

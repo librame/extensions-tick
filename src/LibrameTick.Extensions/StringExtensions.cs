@@ -53,6 +53,28 @@ public static class StringExtensions
         => value.ToCharArray().Any(c => invalidChars.Contains(c));
 
 
+    /// <summary>
+    /// 使用固定时间比较字符串相等，以防范诸如破解密钥的计时攻击。注：同时为空或空字符串表示相等。
+    /// </summary>
+    /// <param name="left">给定的左侧字符串。</param>
+    /// <param name="right">给定的右侧字符串。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public static bool FixedTimeEquals(this string? left, string? right)
+    {
+        if (left is null && right is null)
+            return true;
+
+        if (left is null || right is null || left.Length != right.Length)
+            return false;
+
+        if (left.Length == string.Empty.Length)
+            return true;
+
+        return CryptographicOperations.FixedTimeEquals(left.FromEncodingString(),
+            right.FromEncodingString());
+    }
+
+
     #region Append and Insert
 
     /// <summary>
@@ -608,7 +630,7 @@ public static class StringExtensions
 
         if (system.HasValue)
         {
-            system.Value.NotOutOfRange(2, mapCharset.Length, nameof(system));
+            system.Value.NotOutOfRange(2, mapCharset.Length, paramName: nameof(system));
 
             if (mapCharset.Length > system.Value)
                 mapCharset = mapCharset.Substring(0, system.Value);

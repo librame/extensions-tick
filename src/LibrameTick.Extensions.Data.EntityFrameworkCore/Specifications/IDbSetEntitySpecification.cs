@@ -45,6 +45,11 @@ public interface IDbSetEntitySpecification<TEntity>
     /// </summary>
     Func<IEnumerable<TEntity>, TEntity>? Provider { get; }
 
+    /// <summary>
+    /// 异步出具提供方法。
+    /// </summary>
+    Func<IAsyncEnumerable<TEntity>, TEntity>? AsyncProvider { get; }
+
 
     /// <summary>
     /// 判断是否存在指定条件的对象（如果本地缓存不为空时，支持查找本地缓存）。
@@ -71,6 +76,14 @@ public interface IDbSetEntitySpecification<TEntity>
     IEnumerable<TEntity> Evaluate(DbSet<TEntity> dbSet);
 
     /// <summary>
+    /// 异步评估可枚举对象。
+    /// </summary>
+    /// <param name="dbSet">给定的 <see cref="DbSet{TEntity}"/>。</param>
+    /// <returns>返回 <see cref="IAsyncEnumerable{TEntity}"/>。</returns>
+    IAsyncEnumerable<TEntity> EvaluateAsync(DbSet<TEntity> dbSet);
+
+
+    /// <summary>
     /// 出具可查询对象。
     /// </summary>
     /// <param name="queryable">给定的 <see cref="IEnumerable{TEntity}"/>。</param>
@@ -78,11 +91,30 @@ public interface IDbSetEntitySpecification<TEntity>
     TEntity Issue(IEnumerable<TEntity> queryable);
 
     /// <summary>
+    /// 异步出具可查询对象。
+    /// </summary>
+    /// <param name="enumerable">给定的 <see cref="IAsyncEnumerable{TEntity}"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+    TEntity IssueAsync(IAsyncEnumerable<TEntity> enumerable,
+        CancellationToken cancellationToken = default);
+
+
+    /// <summary>
     /// 出具经过评估的可查询对象。
     /// </summary>
     /// <param name="dbSet">给定的 <see cref="DbSet{TEntity}"/>。</param>
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     TEntity IssueEvaluate(DbSet<TEntity> dbSet);
+
+    /// <summary>
+    /// 异步出具经过评估的可查询对象。
+    /// </summary>
+    /// <param name="dbSet">给定的 <see cref="DbSet{TEntity}"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
+    TEntity IssueEvaluateAsync(DbSet<TEntity> dbSet,
+        CancellationToken cancellationToken = default);
 
 
     /// <summary>
@@ -113,4 +145,11 @@ public interface IDbSetEntitySpecification<TEntity>
     /// <param name="provider">给定的出具提供方法。</param>
     /// <returns>返回 <see cref="IDbSetEntitySpecification{TEntity}"/>。</returns>
     IDbSetEntitySpecification<TEntity> SetProvider(Func<IEnumerable<TEntity>, TEntity> provider);
+
+    /// <summary>
+    /// 设置异步出具提供方法。
+    /// </summary>
+    /// <param name="asyncProvider">给定的异步出具提供方法。</param>
+    /// <returns>返回 <see cref="IDbSetEntitySpecification{TEntity}"/>。</returns>
+    IDbSetEntitySpecification<TEntity> SetProviderAsync(Func<IAsyncEnumerable<TEntity>, TEntity> asyncProvider);
 }

@@ -43,22 +43,14 @@ public abstract class AbstractIdentifier<TId> : IIdentifier<TId>
 
 
     /// <summary>
-    /// 比较相等。
-    /// </summary>
-    /// <param name="other">给定的 <see cref="IIdentifier{TId}"/>。</param>
-    /// <returns>返回布尔值。</returns>
-    public virtual bool Equals(IIdentifier<TId>? other)
-        => other is not null && Id.Equals(other.Id);
-
-
-    /// <summary>
     /// 转换为标识。
     /// </summary>
     /// <param name="id">给定的标识对象。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="id"/> 调用参数名）。</param>
     /// <returns>返回 <typeparamref name="TId"/>。</returns>
-    public virtual TId ToId(object? id, string? paramName)
-        => id.AsNotNull<TId>(paramName);
+    public virtual TId ToId(object? id,
+        [CallerArgumentExpression("id")] string? paramName = null)
+        => id.As<TId>(paramName);
 
 
     /// <summary>
@@ -107,10 +99,94 @@ public abstract class AbstractIdentifier<TId> : IIdentifier<TId>
 
 
     /// <summary>
+    /// 比较引用与标识是否相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="IIdentifier{TId}"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    protected virtual bool ReferenceAndIdEquals(IIdentifier<TId> other)
+    {
+        if (ReferenceEquals(this, other))
+            return true;
+
+        if (GetType() != other.GetType())
+            return false;
+
+        return Id.Equals(other.Id);
+    }
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="IIdentifier{TId}"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    public virtual bool Equals(IIdentifier<TId>? other)
+        => other is not null && ReferenceAndIdEquals(other);
+
+
+    /// <summary>
+    /// 判断引用对象是否相等。注：默认实例将被认定不相等。
+    /// </summary>
+    /// <param name="obj">给定要比较的对象。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public override bool Equals(object? obj)
+    {
+        if (!(obj is IIdentifier<TId> other))
+            return false;
+
+        if (!ReferenceAndIdEquals(other))
+            return false;
+
+        if (!(other is AbstractIdentifier<TId> otherId))
+            return true; // 如果不是继承于抽象标识符，则直接返回相等
+
+        // 比较是否为默认实例
+        return !(IsTransient() || otherId.IsTransient());
+    }
+
+    private bool IsTransient()
+        => Id is null || Id.Equals(default(TId));
+
+
+    /// <summary>
+    /// 获取哈希码。
+    /// </summary>
+    /// <returns>返回整数。</returns>
+    public override int GetHashCode()
+        => (GetType().ToString() + Id).GetHashCode();
+
+
+    /// <summary>
     /// 转换为字符串。
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
         => $"{nameof(Id)}={Id}";
+
+
+    /// <summary>
+    /// 比较相等。注：同时为空表示相等。
+    /// </summary>
+    /// <param name="a">给定的 <see cref="AbstractIdentifier{TId}"/>。</param>
+    /// <param name="b">给定的 <see cref="AbstractIdentifier{TId}"/>。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public static bool operator ==(AbstractIdentifier<TId>? a, AbstractIdentifier<TId>? b)
+    {
+        if (a is null && b is null)
+            return true;
+
+        if (a is null || b is null)
+            return false;
+
+        return a.Equals(b);
+    }
+
+    /// <summary>
+    /// 比较不等。注：同时为空表示相等。
+    /// </summary>
+    /// <param name="a">给定的 <see cref="AbstractIdentifier{TId}"/>。</param>
+    /// <param name="b">给定的 <see cref="AbstractIdentifier{TId}"/>。</param>
+    /// <returns>返回是否不等的布尔值。</returns>
+    public static bool operator !=(AbstractIdentifier<TId>? a, AbstractIdentifier<TId>? b)
+        => !(a == b);
 
 }

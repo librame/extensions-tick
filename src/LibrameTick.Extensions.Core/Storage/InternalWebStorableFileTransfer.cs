@@ -62,17 +62,17 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
         CancellationToken cancellationToken = default)
     {
         // 获取本地文件最后一次写入的结束位置
-        var startPosition = await GetFileLastEndPositionAsync(savePath, cancellationToken).ConfigureAwait();
+        var startPosition = await GetFileLastEndPositionAsync(savePath, cancellationToken).DisableAwaitContext();
 
-        var client = await CreateClientAsync(cancellationToken).ConfigureAwait();
+        var client = await CreateClientAsync(cancellationToken).DisableAwaitContext();
         var message = await client.GetAsync(downloadUri, HttpCompletionOption.ResponseHeadersRead,
-            cancellationToken).ConfigureAwait();
+            cancellationToken).DisableAwaitContext();
             
         var contentLength = message.Content.Headers.ContentLength;
         if (contentLength is null || contentLength.HasValue && contentLength < 1)
             return string.Empty;
 
-        using (var rs = await message.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait())
+        using (var rs = await message.Content.ReadAsStreamAsync(cancellationToken).DisableAwaitContext())
         {
             if (rs.CanSeek)
                 rs.Position = startPosition;
@@ -86,9 +86,9 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
                 var readLength = 0;
                 var buffer = new byte[BufferSize];
 
-                while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait()) > 0)
+                while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).DisableAwaitContext()) > 0)
                 {
-                    await fs.WriteAsync(buffer, 0, readLength).ConfigureAwait();
+                    await fs.WriteAsync(buffer, 0, readLength).DisableAwaitContext();
 
                     processingSize += readLength;
                     processingSpeed += readLength;
@@ -131,7 +131,7 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
             {
                 var buffer = new byte[BufferSize];
 
-                while (await fs.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait() > 0) ;
+                while (await fs.ReadAsync(buffer, 0, buffer.Length, cancellationToken).DisableAwaitContext() > 0) ;
 
                 return fs.Position;
             }
@@ -149,7 +149,7 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
         string? saveFileNameStar = null, string? saveFileName = null,
         CancellationToken cancellationToken = default)
     {
-        var client = await CreateClientAsync(cancellationToken: cancellationToken).ConfigureAwait();
+        var client = await CreateClientAsync(cancellationToken: cancellationToken).DisableAwaitContext();
 
         using (var content = new MultipartFormDataContent())
         {
@@ -172,9 +172,9 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
 
             content.Add(bytesContent);
 
-            var message = await client.PostAsync(uploadUri, content).ConfigureAwait();
+            var message = await client.PostAsync(uploadUri, content).DisableAwaitContext();
 
-            return await message.Content.ReadAsStringAsync().ConfigureAwait();
+            return await message.Content.ReadAsStringAsync().DisableAwaitContext();
         }
     }
 
@@ -202,7 +202,7 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
                 var buffer = new byte[BufferSize];
 
                 while ((readLength = await fs.ReadAsync(buffer, 0, buffer.Length,
-                    cancellationToken).ConfigureAwait()) > 0)
+                    cancellationToken).DisableAwaitContext()) > 0)
                 {
                     Array.Copy(buffer, allBytes, readLength);
                 }
@@ -224,28 +224,28 @@ class InternalWebStorableFileTransfer : IWebStorableFileTransfer
         // Authentication: Basic
         if (UseBasicAuthentication)
         {
-            var parameter = await _permission.GetBasicCodeAsync(cancellationToken).ConfigureAwait();
+            var parameter = await _permission.GetBasicCodeAsync(cancellationToken).DisableAwaitContext();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", parameter);
         }
 
         // Authentication: Bearer
         if (UseBearerAuthentication)
         {
-            var parameter = await _permission.GetBearerTokenAsync(cancellationToken).ConfigureAwait();
+            var parameter = await _permission.GetBearerTokenAsync(cancellationToken).DisableAwaitContext();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", parameter);
         }
 
         // AccessToken
         if (UseAccessToken)
         {
-            var accessToken = await _permission.GetAccessTokenAsync(cancellationToken).ConfigureAwait();
+            var accessToken = await _permission.GetAccessTokenAsync(cancellationToken).DisableAwaitContext();
             client.DefaultRequestHeaders.Add("access_token", accessToken);
         }
 
         // Cookie
         if (UseCookieValue)
         {
-            var cookieValue = await _permission.GetCookieValueAsync(cancellationToken).ConfigureAwait();
+            var cookieValue = await _permission.GetCookieValueAsync(cancellationToken).DisableAwaitContext();
             client.DefaultRequestHeaders.Add(nameof(HttpRequestHeader.Cookie), cookieValue);
         }
 

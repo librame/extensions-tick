@@ -28,7 +28,7 @@ public abstract class AbstractPublication<TPublishedBy>
     /// </summary>
     protected AbstractPublication()
     {
-        PublishedTime = CreatedTime = DateTimeExtensions.GetUtcNow();
+        PublishedTime = CreatedTime = DateTimeOffset.UtcNow;
         PublishedTimeTicks = CreatedTimeTicks = PublishedTime.Ticks;
     }
 

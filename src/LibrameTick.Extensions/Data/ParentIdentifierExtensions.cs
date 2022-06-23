@@ -42,10 +42,10 @@ public static class ParentIdentifierExtensions
     public static async ValueTask<object?> SetObjectParentIdAsync(this IObjectParentIdentifier parentIdentifier,
         Func<object?, object?> newParentIdFactory, CancellationToken cancellationToken = default)
     {
-        var currentParentId = await parentIdentifier.GetObjectParentIdAsync(cancellationToken).ConfigureAwaitWithoutContext();
+        var currentParentId = await parentIdentifier.GetObjectParentIdAsync(cancellationToken).DisableAwaitContext();
 
         return await parentIdentifier.SetObjectParentIdAsync(newParentIdFactory(currentParentId), cancellationToken)
-            .ConfigureAwaitWithoutContext();
+            .DisableAwaitContext();
     }
 
 }

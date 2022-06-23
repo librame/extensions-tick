@@ -42,20 +42,26 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
 
 
     /// <summary>
-    /// 访问模式。
+    /// 规约访问模式。
     /// </summary>
     public AccessMode? Access { get; private set; }
 
     /// <summary>
-    /// 分组。
+    /// 规约分组。
     /// </summary>
     public int? Group { get; private set; }
 
     /// <summary>
-    /// 冗余模式（默认为聚合模式）。
+    /// 规约冗余模式（默认为聚合模式）。
     /// </summary>
-    public RedundancyMode? Redundancy { get; private set; }
-        = RedundancyMode.Aggregation;
+    public RedundancyMode Redundancy { get; private set; }
+        = RedundancyMode.Mirroring;
+
+    /// <summary>
+    /// 规约冗余存取器方法。
+    /// </summary>
+    public Func<IEnumerable<IAccessor>, RedundancyMode, IAccessor> RedundancyAccessorFunc { get; private set; }
+        = RedundableAccessorsExtensions.GetRedundableAccessors;
 
 
     /// <summary>
@@ -69,7 +75,7 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
         if (Group is not null)
             enumerable = enumerable.Where(p => p.AccessorDescriptor?.Group == Group);
 
-        // 计算访问模式
+        // 计算访问模式（区分读写）
         if (Access is not null)
         {
             // 使用位移运算
@@ -91,20 +97,16 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
         if (Provider is not null)
             return Provider(enumerable);
 
-        if (Redundancy is not null && enumerable.NonEnumeratedCount() > 1)
-        {
-            if (Redundancy == RedundancyMode.Aggregation)
-                return new CompositeAccessor(enumerable);
-            else
-                return new DistributedAccessor(enumerable);
-        }
+        // 使用冗余存取器
+        if (enumerable.NonEnumeratedCount() > 1)
+            return RedundancyAccessorFunc(enumerable, Redundancy);
 
         return enumerable.First();
     }
 
 
     /// <summary>
-    /// 设置访问模式。
+    /// 设置规约访问模式。
     /// </summary>
     /// <param name="access">给定的 <see cref="AccessMode"/>。</param>
     /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
@@ -115,7 +117,7 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     }
 
     /// <summary>
-    /// 设置分组。
+    /// 设置规约分组。
     /// </summary>
     /// <param name="group">给定的分组。</param>
     /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
@@ -126,13 +128,24 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     }
 
     /// <summary>
-    /// 设置冗余模式。
+    /// 设置规约冗余模式。
     /// </summary>
     /// <param name="redundancy">给定的冗余模式。</param>
     /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
     public IAccessorSpecification SetRedundancy(RedundancyMode redundancy)
     {
         Redundancy = redundancy;
+        return this;
+    }
+
+    /// <summary>
+    /// 设置规约冗余存取器方法。
+    /// </summary>
+    /// <param name="func">给定的冗余存取器方法。</param>
+    /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
+    public IAccessorSpecification SetRedundancyAccessorFunc(Func<IEnumerable<IAccessor>, RedundancyMode, IAccessor> func)
+    {
+        RedundancyAccessorFunc = func;
         return this;
     }
 
