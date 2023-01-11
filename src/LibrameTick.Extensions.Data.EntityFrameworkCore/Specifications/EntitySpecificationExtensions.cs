@@ -71,8 +71,7 @@ public static class EntitySpecificationExtensions
     /// <param name="specification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
     public static IPagingList<T> EvaluatePagingList<T>(this IQueryable<T> queryable,
-        Action<IPagingList<T>> pageAction,
-        IEntitySpecification<T>? specification = null)
+        Action<IPagingList<T>> pageAction, IEntitySpecification<T>? specification = null)
         where T : class
     {
         IPagingList<T> list = new PagingList<T>(queryable);

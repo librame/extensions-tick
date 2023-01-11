@@ -41,7 +41,7 @@ public class TemplateOptions : IOptions
     /// </summary>
     /// <param name="template">给定的模板字符串。</param>
     /// <returns>返回 <see cref="List{TemplateKeyDescriptor}"/>。</returns>
-    public virtual List<TemplateKeyDescriptor> FindAll(string template)
+    public virtual List<TemplateKeyDescriptor> FindAll(string? template)
     {
         var keys = new List<TemplateKeyDescriptor>();
 
@@ -62,7 +62,7 @@ public class TemplateOptions : IOptions
     /// <param name="template">给定的模板字符串。</param>
     /// <param name="valueFunc">给定用于格式化模板键的值方法。</param>
     /// <returns>返回经过格式化的模板字符串。</returns>
-    public virtual string Format(string template,
+    public virtual string Format(string? template,
         Func<TemplateKeyDescriptor, string?> valueFunc)
     {
         return Search(template, (temp, key, match) =>
@@ -82,11 +82,11 @@ public class TemplateOptions : IOptions
     /// <param name="template">给定的模板字符串。</param>
     /// <param name="matchFunc">给定的模板匹配方法。</param>
     /// <returns>返回模板字符串。</returns>
-    public virtual string Search(string template,
+    public virtual string Search(string? template,
         Func<string, TemplateKeyDescriptor, Match, string> matchFunc)
     {
         if (string.IsNullOrWhiteSpace(template))
-            return template;
+            return template ?? string.Empty;
 
         foreach (var regex in KeyRegexes)
         {

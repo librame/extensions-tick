@@ -80,7 +80,7 @@ public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitiali
 
         if (IsPopulated)
         {
-            Accessor.SaveChanges();
+            Accessor.CurrentContext.SaveChanges();
         }
     }
 
@@ -99,7 +99,7 @@ public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitiali
 
         if (IsPopulated)
         {
-            await Accessor.SaveChangesAsync(cancellationToken);
+            await Accessor.CurrentContext.SaveChangesAsync(cancellationToken);
         }
     }
 

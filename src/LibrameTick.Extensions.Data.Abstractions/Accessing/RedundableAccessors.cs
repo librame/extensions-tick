@@ -26,9 +26,9 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <summary>
     /// 构造一个 <see cref="RedundableAccessors"/>。
     /// </summary>
-    /// <param name="equilizer">给定的 <see cref="IDispatcher{IAccessor}"/> 读写均衡器存取器。</param>
-    public RedundableAccessors(IDispatcher<IAccessor> equilizer)
-        : this(equilizer, equilizer)
+    /// <param name="dispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 读写存取器调度器。</param>
+    public RedundableAccessors(IDispatcher<IAccessor> dispatcher)
+        : this(dispatcher, dispatcher)
     {
         IsWritingSeparation = false;
     }
@@ -36,26 +36,40 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <summary>
     /// 构造一个 <see cref="RedundableAccessors"/>。
     /// </summary>
-    /// <param name="readingEquilizer">给定的 <see cref="IDispatcher{IAccessor}"/> 读均衡器存取器。</param>
-    /// <param name="writingEquilizer">给定的 <see cref="IDispatcher{IAccessor}"/> 写均衡器存取器。</param>
-    public RedundableAccessors(IDispatcher<IAccessor> readingEquilizer, IDispatcher<IAccessor> writingEquilizer)
+    /// <param name="readingDispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 读存取器调度器。</param>
+    /// <param name="writingDispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 写存取器调度器。</param>
+    public RedundableAccessors(IDispatcher<IAccessor> readingDispatcher,
+        IDispatcher<IAccessor> writingDispatcher)
     {
-        ReadingEquilizer = readingEquilizer;
-        WritingEquilizer = writingEquilizer;
+        ReadingDispatcher = readingDispatcher;
+        WritingDispatcher = writingDispatcher;
 
         IsWritingSeparation = true;
     }
 
 
     /// <summary>
-    /// 读均衡器存取器。
+    /// 默认访问器（初始返回 <see cref="ReadingDispatcher"/> 第一项）。
     /// </summary>
-    public IDispatcher<IAccessor> ReadingEquilizer { get; init; }
+    public virtual IAccessor DefaultAccessor
+        => ReadingDispatcher.First;
 
     /// <summary>
-    /// 写均衡器存取器。
+    /// 默认写访问器（如果启用读写分离，则初始返回 <see cref="WritingDispatcher"/> 第一项，反之则返回 <see cref="DefaultAccessor"/>）。
     /// </summary>
-    public IDispatcher<IAccessor> WritingEquilizer { get; init; }
+    public virtual IAccessor DefaultWritingAccessor
+        => IsWritingSeparation ? WritingDispatcher.First : DefaultAccessor;
+
+
+    /// <summary>
+    /// 读存取器调度器。
+    /// </summary>
+    public IDispatcher<IAccessor> ReadingDispatcher { get; init; }
+
+    /// <summary>
+    /// 写存取器调度器。
+    /// </summary>
+    public IDispatcher<IAccessor> WritingDispatcher { get; init; }
 
     /// <summary>
     /// 是否读写分离。
@@ -64,42 +78,42 @@ public class RedundableAccessors : AbstractSortable, IAccessor
 
 
     /// <summary>
-    /// 当前数据库上下文。
+    /// 当前数据库上下文（默认返回读存取器的第一项 <see cref="IDbContext"/>）。
     /// </summary>
     public virtual IDbContext CurrentContext
-        => ReadingEquilizer.InvokeGetLast(a => a.CurrentContext);
+        => DefaultAccessor.CurrentContext;
 
 
     /// <summary>
-    /// 存取器描述符。
+    /// 存取器描述符（默认返回读存取器的第一项 <see cref="AccessorDescriptor"/>）。
     /// </summary>
     public AccessorDescriptor? AccessorDescriptor
-        => ReadingEquilizer.InvokeGetLast(a => a.AccessorDescriptor);
+        => DefaultAccessor.AccessorDescriptor;
 
     /// <summary>
-    /// 存取器标识。
+    /// 存取器标识（默认返回读存取器的所有项存取器标识集合）。
     /// </summary>
     public string AccessorId
-        => ReadingEquilizer.InvokeGetLast(a => a.AccessorId);
+        => string.Join(",", ReadingDispatcher.InvokeFunc(a => a.CurrentSource.AccessorId));
 
     /// <summary>
     /// 存取器类型。
     /// </summary>
     public Type AccessorType
-        => ReadingEquilizer.InvokeGetLast(a => a.AccessorType);
+        => GetType();
 
 
     #region Connection
 
     /// <summary>
-    /// 当前连接字符串。
+    /// 当前连接字符串（默认返回读存取器的所有项连接字符串集合）。
     /// </summary>
     public virtual string? CurrentConnectionString
-        => ReadingEquilizer.InvokeGetLast(a => a.CurrentConnectionString);
+        => string.Join(",", ReadingDispatcher.InvokeFunc(a => a.CurrentSource.CurrentConnectionString));
 
 
     /// <summary>
-    /// 改变数据库连接（始终抛出异常）。
+    /// 改变默认访问器数据库连接。
     /// </summary>
     /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
@@ -107,7 +121,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// The redundable accessors does not support this operation.
     /// </exception>
     public virtual IAccessor ChangeConnection(string newConnectionString)
-        => throw new NotImplementedException();
+        => DefaultAccessor.ChangeConnection(newConnectionString);
 
 
     /// <summary>
@@ -116,12 +130,14 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <returns>返回布尔值。</returns>
     public virtual bool TryCreateDatabase()
     {
-        var result = ReadingEquilizer.InvokeGetLast(a => a.TryCreateDatabase());
+        var results = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.TryCreateDatabase()).ToList();
 
+        // 启用写入分离时需确保写入库已存在
         if (IsWritingSeparation)
-            return result && WritingEquilizer.InvokeGetLast(a => a.TryCreateDatabase());
+            results.AddRange(WritingDispatcher.InvokeFunc(a => a.CurrentSource.TryCreateDatabase()));
 
-        return result;
+        // 只要有一个 FALSE 就返回 FALSE
+        return !results.Any(result => false);
     }
 
     /// <summary>
@@ -131,12 +147,18 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <returns>返回一个包含布尔值的异步操作。</returns>
     public virtual async Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        var result = await ReadingEquilizer.InvokeGetLast(a => a.TryCreateDatabaseAsync(cancellationToken));
+        var results = (await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.TryCreateDatabaseAsync(cancellationToken),
+            cancellationToken: cancellationToken)).ToList();
 
+        // 启用写入分离时需确保写入库已存在
         if (IsWritingSeparation)
-            return result && await WritingEquilizer.InvokeGetLast(a => a.TryCreateDatabaseAsync(cancellationToken));
+        {
+            results.AddRange(await WritingDispatcher.InvokeFuncAsync(a => a.CurrentSource.TryCreateDatabaseAsync(cancellationToken),
+                cancellationToken: cancellationToken));
+        }
 
-        return result;
+        // 只要有一个 FALSE 就返回 FALSE
+        return !results.Any(result => false);
     }
 
     #endregion
@@ -148,7 +170,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// 分片管理器。
     /// </summary>
     public IShardingManager ShardingManager
-        => ReadingEquilizer.InvokeGetLast(a => a.ShardingManager);
+        => DefaultAccessor.ShardingManager;
 
     #endregion
 
@@ -159,16 +181,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// 排序优先级（数值越小越优先）。
     /// </summary>
     public override float Priority
-        => ReadingEquilizer.InvokeGetLast(a => a.Priority);
-
-
-    /// <summary>
-    /// 与指定的 <see cref="ISortable"/> 比较大小。
-    /// </summary>
-    /// <param name="other">给定的 <see cref="ISortable"/>。</param>
-    /// <returns>返回整数。</returns>
-    public override int CompareTo(ISortable? other)
-        => ReadingEquilizer.InvokeGetLast(a => a.CompareTo(other));
+        => ReadingDispatcher.Sources.Max(s => s.Priority) + 1; // 复合访问器优先级最低
 
     #endregion
 
@@ -176,27 +189,27 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     #region Query
 
     /// <summary>
-    /// 创建指定实体类型的可查询接口。
+    /// 创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
     public virtual IQueryable<TEntity> Query<TEntity>()
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.Query<TEntity>());
+        => DefaultAccessor.Query<TEntity>();
 
     /// <summary>
-    /// 创建指定实体类型的可查询接口。
+    /// 创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="name">要使用的共享类型实体类型的名称。</param>
     /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
     public virtual IQueryable<TEntity> Query<TEntity>(string name)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.Query<TEntity>(name));
+        => DefaultAccessor.Query<TEntity>(name);
 
 
     /// <summary>
-    /// 通过 SQL 语句创建指定实体类型的可查询接口。
+    /// 通过 SQL 语句创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="sql">给定的 SQL 语句（可使用“${Schema}、${Table}/${TableName}”模板关键字分别代替架构、表名等参数值）。</param>
@@ -205,10 +218,10 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     public virtual IQueryable<TEntity> QueryBySql<TEntity>(string sql,
         params object[] parameters)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.QueryBySql<TEntity>(sql, parameters));
+        => DefaultAccessor.QueryBySql<TEntity>(sql, parameters);
 
     /// <summary>
-    /// 通过 SQL 语句创建指定实体类型的可查询接口。
+    /// 通过 SQL 语句创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="name">要使用的共享类型实体类型的名称。</param>
@@ -218,7 +231,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     public virtual IQueryable<TEntity> QueryBySql<TEntity>(string name,
         string sql, params object[] parameters)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.QueryBySql<TEntity>(name, sql, parameters));
+        => DefaultAccessor.QueryBySql<TEntity>(name, sql, parameters);
 
     #endregion
 
@@ -235,7 +248,13 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     public virtual bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.Exists(predicate, checkLocal));
+    {
+        var results = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.Exists(predicate, checkLocal),
+            (a, result) => result);
+
+        // 只要有一个 TRUE 就返回 TRUE
+        return results.Any(result => true);
+    }
 
     /// <summary>
     /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
@@ -245,10 +264,16 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含布尔值的异步操作。</returns>
-    public virtual Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
+    public virtual async Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true, CancellationToken cancellationToken = default)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.ExistsAsync(predicate, checkLocal, cancellationToken));
+    {
+        var results = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.ExistsAsync(predicate, checkLocal, cancellationToken),
+            (a, result) => result, cancellationToken: cancellationToken);
+        
+        // 只要有一个 TRUE 就返回 TRUE
+        return results.Any(result => true);
+    }
 
     #endregion
 
@@ -261,9 +286,10 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-    public virtual IList<TEntity> FindListWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
+    public virtual IList<TEntity> FindsWithSpecification<TEntity>(
+        IEntitySpecification<TEntity>? specification = null)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.FindListWithSpecification(specification));
+        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindsWithSpecification(specification)).SelectMany(s => s).ToList();
 
     /// <summary>
     /// 异步查找带有规约的实体集合。
@@ -272,10 +298,14 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
-    public virtual Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
-        CancellationToken cancellationToken = default)
+    public virtual async Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(
+        IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.FindListWithSpecificationAsync(specification, cancellationToken));
+    {
+        var result = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindsWithSpecificationAsync(specification, cancellationToken));
+
+        return result.SelectMany(s => s).ToList();
+    }
 
 
     /// <summary>
@@ -286,7 +316,11 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
     public virtual IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.FindPagingList(pageAction));
+    {
+        var pagings = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingList(pageAction));
+
+        return pagings.CompositePaging();
+    }
 
     /// <summary>
     /// 异步查找实体分页集合。
@@ -295,10 +329,14 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
-    public virtual Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+    public virtual async Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
         CancellationToken cancellationToken = default)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.FindPagingListAsync(pageAction, cancellationToken));
+    {
+        var pagings = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindPagingListAsync(pageAction, cancellationToken));
+
+        return await pagings.CompositePagingAsync(cancellationToken);
+    }
 
 
     /// <summary>
@@ -311,7 +349,11 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     public virtual IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
         IEntitySpecification<TEntity>? specification = null)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.FindPagingListWithSpecification(pageAction, specification));
+    {
+        var pagings = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingListWithSpecification(pageAction, specification));
+
+        return pagings.CompositePaging();
+    }
 
     /// <summary>
     /// 异步查找带有规约的实体分页集合。
@@ -321,10 +363,15 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
-    public virtual Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+    public virtual async Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
         IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
-        => ReadingEquilizer.InvokeGetLast(a => a.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
+    {
+        var pagings = await ReadingDispatcher.InvokeFuncAsync(a
+            => a.CurrentSource.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
+
+        return await pagings.CompositePagingAsync(cancellationToken);
+    }
 
     #endregion
 
@@ -339,9 +386,10 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="predicate">给定的断定方法表达式。</param>
     /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
-    public virtual TEntity AddIfNotExists<TEntity>(TEntity entity, Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
+    public virtual TEntity AddIfNotExists<TEntity>(TEntity entity,
+        Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
         where TEntity : class
-        => WritingEquilizer.InvokeGetLast(a => a.AddIfNotExists(entity, predicate, checkLocal));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.AddIfNotExists(entity, predicate, checkLocal), isTraversal: false).First();
 
     /// <summary>
     /// 添加实体对象。
@@ -349,7 +397,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="entity">给定要添加的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Add(object entity)
-        => WritingEquilizer.InvokeGetLast(a => a.Add(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Add(entity), isTraversal: false).First();
 
     /// <summary>
     /// 添加实体。
@@ -359,7 +407,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Add<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingEquilizer.InvokeGetLast(a => a.Add(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Add(entity), isTraversal: false).First();
 
     #endregion
 
@@ -372,7 +420,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="entity">给定要附加的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Attach(object entity)
-        => WritingEquilizer.InvokeGetLast(a => a.Attach(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Attach(entity), isTraversal: false).First();
 
     /// <summary>
     /// 附加实体。
@@ -382,7 +430,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Attach<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingEquilizer.InvokeGetLast(a => a.Attach(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Attach(entity), isTraversal: false).First();
 
     #endregion
 
@@ -395,7 +443,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="entity">给定要移除的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Remove(object entity)
-        => WritingEquilizer.InvokeGetLast(a => a.Remove(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
 
     /// <summary>
     /// 移除实体。
@@ -405,7 +453,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Remove<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingEquilizer.InvokeGetLast(a => a.Remove(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
 
     #endregion
 
@@ -418,7 +466,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <param name="entity">给定要更新的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Update(object entity)
-        => WritingEquilizer.InvokeGetLast(a => a.Update(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Update(entity), isTraversal: false).First();
 
     /// <summary>
     /// 更新实体。
@@ -428,7 +476,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Update<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingEquilizer.InvokeGetLast(a => a.Update(entity));
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
 
     #endregion
 

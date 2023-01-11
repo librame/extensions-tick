@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace Librame.Extensions.IdGenerators
@@ -8,18 +7,28 @@ namespace Librame.Extensions.IdGenerators
     public class MongoIdGeneratorTests
     {
         [Fact]
+        public void ParseTest()
+        {
+            var generator = new MongoIdGenerator(new(), new());
+
+            var testId = generator.GenerateId();
+
+            var ticks1 = generator.ParseTicks(testId);
+            var lastTicks = generator.GetLastTicks();
+
+            Assert.Equal(ticks1, lastTicks);
+        }
+
+        [Fact]
         public void AllTest()
         {
             var generator = new MongoIdGenerator(new(), new());
 
-            var capacity = 100; // 1000000 [921ms]
+            var capacity = 1000000; // 835ms
             var ids = new HashSet<string>(capacity);
-
-            //var startTime = DateTimeOffset.UtcNow;
 
             for (var i = 0; i < capacity; i++)
             {
-                // 629B69108628AB55040D4B85
                 var id = generator.GenerateId();
 
                 if (ids.Contains(id))
@@ -29,10 +38,6 @@ namespace Librame.Extensions.IdGenerators
             }
 
             Assert.Equal(capacity, ids.Count);
-
-            // ToDateTime
-            //var dateTime = generator.ToDateTime(ids.First());
-            //Assert.True(dateTime > startTime);
         }
 
     }

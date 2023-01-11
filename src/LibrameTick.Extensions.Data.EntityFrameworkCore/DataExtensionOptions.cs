@@ -48,9 +48,14 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     public IdGenerationOptions IdGeneration { get; set; } = new();
 
     /// <summary>
-    /// 雪花标识参数。
+    /// Mongo 标识选项。
     /// </summary>
-    public SnowflakeIdOptions SnowflakeParameters { get; set; } = new();
+    public MongoIdOptions Mongo { get; set; } = new();
+
+    /// <summary>
+    /// 雪花标识选项。
+    /// </summary>
+    public SnowflakeIdOptions Snowflake { get; set; } = new();
 
 
     /// <summary>

@@ -18,42 +18,24 @@ using Librame.Extensions.Specifications;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义一个抽象实现 <see cref="IAccessor"/> 的 <see cref="DbContext"/> 存取器。
+/// 定义一个抽象实现 <see cref="IAccessor"/> 的存取器。
 /// </summary>
-public abstract class AbstractContextAccessor : IAccessor
+public abstract class AbstractAccessor : IAccessor
 {
-    private readonly IOptionsMonitor<DataExtensionOptions> _dataOptionsMonitor;
-    private readonly IOptionsMonitor<CoreExtensionOptions> _coreOptionsMonitor;
-
-    private readonly AccessorDbContextOptionsExtension? _accessorExtension;
-    private readonly RelationalOptionsExtension? _relationalExtension;
-
-
     /// <summary>
-    /// 构造一个 <see cref="AbstractContextAccessor"/>。
+    /// 构造一个 <see cref="AbstractAccessor"/>。
     /// </summary>
-    /// <param name="context">给定的 <see cref="DbContext"/>。</param>
-    /// <param name="options">给定的 <see cref="DbContextOptions"/>。</param>
-    /// <param name="dataOptionsMonitor">给定的 <see cref="IOptionsMonitor{DataExtensionOptions}"/>。</param>
-    /// <param name="coreOptionsMonitor">给定的 <see cref="IOptionsMonitor{CoreExtensionOptions}"/>。</param>
-    protected AbstractContextAccessor(DbContext context, DbContextOptions options,
-        IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
-        IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor)
+    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
+    protected AbstractAccessor(BaseDbContext dbContext)
     {
-        _accessorExtension = options.FindExtension<AccessorDbContextOptionsExtension>();
-        _relationalExtension = options.Extensions.OfType<RelationalOptionsExtension>().FirstOrDefault();
-
-        _dataOptionsMonitor = dataOptionsMonitor;
-        _coreOptionsMonitor = coreOptionsMonitor;
-
-        OriginalContext = context;
+        OriginalContext = dbContext;
     }
 
 
     /// <summary>
     /// 原始数据库上下文。
     /// </summary>
-    public DbContext OriginalContext { get; init; }
+    public BaseDbContext OriginalContext { get; init; }
 
     /// <summary>
     /// 当前数据库上下文。
@@ -65,7 +47,7 @@ public abstract class AbstractContextAccessor : IAccessor
     /// 存取器描述符。
     /// </summary>
     public AccessorDescriptor? AccessorDescriptor
-        => _accessorExtension?.ToDescriptor(this);
+        => OriginalContext.AccessorExtension?.ToDescriptor(this);
 
     /// <summary>
     /// 存取器标识。
@@ -84,25 +66,25 @@ public abstract class AbstractContextAccessor : IAccessor
     /// 数据扩展选项。
     /// </summary>
     public DataExtensionOptions DataOptions
-        => _dataOptionsMonitor.CurrentValue;
+        => OriginalContext.DataOptions;
 
     /// <summary>
     /// 核心扩展选项。
     /// </summary>
     public CoreExtensionOptions CoreOptions
-        => _coreOptionsMonitor.CurrentValue;
+        => OriginalContext.CoreOptions;
 
     /// <summary>
     /// 存取器选项扩展。
     /// </summary>
-    protected AccessorDbContextOptionsExtension? AccessorExtension
-        => _accessorExtension;
+    public AccessorDbContextOptionsExtension? AccessorExtension
+        => OriginalContext.AccessorExtension;
 
     /// <summary>
     /// 关系型选项扩展。
     /// </summary>
-    protected RelationalOptionsExtension? RelationalExtension
-        => _relationalExtension;
+    public RelationalOptionsExtension? RelationalExtension
+        => OriginalContext.RelationalExtension;
 
 
     #region Connection
@@ -127,7 +109,7 @@ public abstract class AbstractContextAccessor : IAccessor
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
     public virtual IAccessor ChangeConnection(string newConnectionString)
     {
-        var connection = _relationalExtension?.Connection
+        var connection = RelationalExtension?.Connection
             ?? RelationalConnection.DbConnection;
 
         if (connection is not null)
@@ -313,8 +295,8 @@ public abstract class AbstractContextAccessor : IAccessor
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
-    /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-    public virtual IList<TEntity> FindListWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
+    /// <returns>返回 <see cref="IEnumerable{TEntity}"/>。</returns>
+    public virtual IList<TEntity> FindsWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
         where TEntity : class
         => Query<TEntity>().EvaluateList(specification);
 
@@ -324,11 +306,11 @@ public abstract class AbstractContextAccessor : IAccessor
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
-    public virtual Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
+    /// <returns>返回一个包含 <see cref="IEnumerable{TEntity}"/> 的异步操作。</returns>
+    public virtual async Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
         CancellationToken cancellationToken = default)
         where TEntity : class
-        => Query<TEntity>().EvaluateListAsync(specification, cancellationToken);
+        => await Query<TEntity>().EvaluateListAsync(specification, cancellationToken);
 
 
     /// <summary>

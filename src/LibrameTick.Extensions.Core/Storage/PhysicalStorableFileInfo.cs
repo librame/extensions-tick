@@ -54,7 +54,7 @@ public class PhysicalStorableFileInfo : IStorableFileInfo
     /// <summary>
     /// 文件的路径，包括文件名。如果文件不能直接访问，则返回 NULL。
     /// </summary>
-    public string PhysicalPath
+    public string? PhysicalPath
         => _info.PhysicalPath;
 
     /// <summary>
@@ -89,6 +89,8 @@ public class PhysicalStorableFileInfo : IStorableFileInfo
     /// <returns>返回 <see cref="Stream"/>。</returns>
     public virtual Stream CreateWriteStream()
     {
+        ArgumentNullException.ThrowIfNull(PhysicalPath);
+
         // 将缓冲区大小设置为 1，以防止 FileStream 分配它的内部缓冲区 0 导致构造函数抛出异常
         var bufferSize = 1;
 

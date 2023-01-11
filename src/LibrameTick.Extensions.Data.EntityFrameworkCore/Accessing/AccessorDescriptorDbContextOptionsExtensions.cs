@@ -22,10 +22,10 @@ public static class AccessorDescriptorDbContextOptionsExtensions
     /// 转为存取器描述符。
     /// </summary>
     /// <param name="extension">给定的 <see cref="AccessorDbContextOptionsExtension"/>。</param>
-    /// <param name="accessor">给定的 <see cref="AbstractContextAccessor"/>。</param>
+    /// <param name="accessor">给定的 <see cref="AbstractAccessor"/>。</param>
     /// <returns>返回 <see cref="AccessorDescriptor"/>。</returns>
     public static AccessorDescriptor ToDescriptor(this AccessorDbContextOptionsExtension extension,
-        AbstractContextAccessor accessor)
+        AbstractAccessor accessor)
     {
         // 默认使用存取器定义的优先级属性值
         var priority = extension.Priority < 0 ? accessor.Priority : extension.Priority;

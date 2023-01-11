@@ -18,6 +18,12 @@ namespace Librame.Extensions.Data;
 public interface IDbContext : IDisposable, IAsyncDisposable
 {
 
+    /// <summary>
+    /// 上下文类型。
+    /// </summary>
+    Type ContextType { get; }
+
+
     #region Find
 
     /// <summary>

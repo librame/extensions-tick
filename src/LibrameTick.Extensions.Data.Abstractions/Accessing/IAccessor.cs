@@ -154,7 +154,7 @@ public interface IAccessor : ISortable, IShardable
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-    IList<TEntity> FindListWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
+    IList<TEntity> FindsWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
         where TEntity : class;
 
     /// <summary>
@@ -164,7 +164,7 @@ public interface IAccessor : ISortable, IShardable
     /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
-    Task<IList<TEntity>> FindListWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
+    Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
         CancellationToken cancellationToken = default)
         where TEntity : class;
 

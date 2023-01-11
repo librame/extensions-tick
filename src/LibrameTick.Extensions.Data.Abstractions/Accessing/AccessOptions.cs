@@ -12,6 +12,7 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Core.Template;
+using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -20,6 +21,11 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public class AccessOptions : IOptions
 {
+    /// <summary>
+    /// 调度器选项。
+    /// </summary>
+    public DispatcherOptions Dispatcher { get; set; } = new();
+
     /// <summary>
     /// 模板选项。
     /// </summary>
@@ -39,12 +45,17 @@ public class AccessOptions : IOptions
     /// <summary>
     /// 自动迁移数据库（默认启用此功能）。
     /// </summary>
-    public bool AutomaticMigration { get; set; } = true;
+    public bool AutoMigration { get; set; } = true;
 
     /// <summary>
-    /// 自动创建迁移程序集的模型（默认不启用此功能）。
+    /// 自动映射程序集模型（默认不启用此功能）。
     /// </summary>
-    public bool AutomaticMapping { get; set; }
+    public bool AutoMapping { get; set; }
+
+    /// <summary>
+    /// 针对 SQLServer 特殊的 Guid 排序方式，是否将 Guid 转换为字符串处理（默认启用）。
+    /// </summary>
+    public bool GuidToChars { get; set; } = true;
 
     /// <summary>
     /// 默认存取器优先级（默认为 5）。

@@ -22,10 +22,10 @@ public class MirroringAccessors : RedundableAccessors
     /// <summary>
     /// 构造一个 <see cref="MirroringAccessors"/>。
     /// </summary>
-    /// <param name="accessors">给定要复合的 <see cref="IEnumerable{IAccessor}"/>。</param>
-    public MirroringAccessors(IEnumerable<IAccessor> accessors)
-        : base(new ExceptionSwitchingDispatcher<IAccessor>(accessors),
-            new TransactionTraversalDispatcher<IAccessor>(accessors))
+    /// <param name="accessors">给定的 <see cref="IEnumerable{IAccessor}"/>。</param>
+    /// <param name="dispatcherOptions">给定的 <see cref="DispatcherOptions"/>。</param>
+    public MirroringAccessors(IEnumerable<IAccessor> accessors, DispatcherOptions dispatcherOptions)
+        : base(new TransactionTraversalDispatcher<IAccessor>(accessors, dispatcherOptions))
     {
     }
 

@@ -11,12 +11,11 @@ namespace Librame.Extensions.IdGenerators
         {
             var generator = CombIdGenerators.ForSqlServer(new());
 
-            var capacity = 100; // 1000000 [374ms]
+            var capacity = 1000000; // 374ms
             var ids = new HashSet<Guid>(capacity);
 
             for (var i = 0; i < capacity; i++)
             {
-                // 1370a73b-a0c4-6a6b-049f-01812e2d479f
                 var id = generator.GenerateId();
 
                 if (ids.Contains(id))

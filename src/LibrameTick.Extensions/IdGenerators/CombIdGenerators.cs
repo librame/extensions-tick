@@ -21,7 +21,7 @@ public static class CombIdGenerators
 {
 
     /// <summary>
-    /// 支持 MySQL 排序类型的 COMB 标识生成器（char(36)）。
+    /// 支持 MySQL 排序类型的 COMB 标识生成器（char(36)）。当使用 Guid.ToString() 方法进行格式化时连续。
     /// </summary>
     /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
     /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>
@@ -30,7 +30,7 @@ public static class CombIdGenerators
         => new CombIdGenerator(CombIdGeneration.AsString, options, clock ?? Bootstrapper.GetClock());
 
     /// <summary>
-    /// 支持 Oracle 排序类型的 COMB 标识生成器（raw(16)）。
+    /// 支持 Oracle 排序类型的 COMB 标识生成器（raw(16)）。当使用 Guid.ToByteArray() 方法进行格式化时连续。
     /// </summary>
     /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
     /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>
@@ -39,7 +39,7 @@ public static class CombIdGenerators
         => new CombIdGenerator(CombIdGeneration.AsBinary, options, clock ?? Bootstrapper.GetClock());
 
     /// <summary>
-    /// 支持 SQLite 排序类型的 COMB 标识生成器（text）。
+    /// 支持 SQLite 排序类型的 COMB 标识生成器（text）。当使用 Guid.ToString() 方法进行格式化时连续。
     /// </summary>
     /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
     /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>
@@ -48,7 +48,7 @@ public static class CombIdGenerators
         => ForMySql(options, clock); // 使用与 MySQL 数据库相同的排序方式
 
     /// <summary>
-    /// 支持 SQL Server 排序类型的 COMB 标识生成器（uniqueidentifier）。
+    /// 支持 SQL Server 排序类型的 COMB 标识生成器（uniqueidentifier）。连续性体现于 GUID 的第4块（Data4）。
     /// </summary>
     /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
     /// <param name="clock">给定的 <see cref="IClockBootstrap"/>（可选；默认使用 <see cref="Bootstrapper.GetClock()"/>）。</param>

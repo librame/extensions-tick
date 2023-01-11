@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 
 namespace Microsoft.EntityFrameworkCore;
@@ -27,12 +26,12 @@ public static class EntityTypeBuilderExtensions
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
     /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="accessor">给定的 <see cref="DbContextAccessor"/>。</param>
+    /// <param name="context">给定的 <see cref="DbContext"/>。</param>
     /// <returns>返回 <see cref="EntityTypeBuilder{TEntity}"/>。</returns>
     public static EntityTypeBuilder<TEntity> ToTableWithSharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
-        IShardingManager shardingManager, DbContextAccessor accessor)
+        IShardingManager shardingManager, DbContext context)
         where TEntity : class
-        => builder.ToTableWithSharding(shardingManager, accessor, schema: null);
+        => builder.ToTableWithSharding(shardingManager, context, schema: null);
 
     /// <summary>
     /// 通过带分片与复数化实体类型名称映射表名（此方法仅支持关系型数据库，同时要求实体添加 <see cref="ShardedAttribute"/> 特性）。
@@ -40,14 +39,14 @@ public static class EntityTypeBuilderExtensions
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
     /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="accessor">给定的 <see cref="DbContextAccessor"/>。</param>
+    /// <param name="context">给定的 <see cref="DbContext"/>。</param>
     /// <param name="schema">给定的架构。</param>
     /// <returns>返回 <see cref="EntityTypeBuilder{TEntity}"/>。</returns>
     public static EntityTypeBuilder<TEntity> ToTableWithSharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
-        IShardingManager shardingManager, DbContextAccessor accessor, string? schema)
+        IShardingManager shardingManager, DbContext context, string? schema)
         where TEntity : class
     {
-        var entity = accessor.Set<TEntity>().FirstBySpecification();
+        var entity = context.Set<TEntity>().FirstBySpecification();
         if (entity is not null)
         {
             var tableName = builder.Metadata.GetTableName();

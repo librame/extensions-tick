@@ -20,10 +20,6 @@ namespace Librame.Extensions.IdGenerators;
 public abstract class AbstractClockIdGenerator<TId> : AbstractIdGenerator<TId>
     where TId : IEquatable<TId>
 {
-    private long? _lastTicks;
-    private long? _lastTicksAsync;
-
-
     /// <summary>
     /// 构造一个 <see cref="AbstractClockIdGenerator{TId}"/>。
     /// </summary>
@@ -46,84 +42,83 @@ public abstract class AbstractClockIdGenerator<TId> : AbstractIdGenerator<TId>
     /// </summary>
     public IClockBootstrap Clock { get; init; }
 
+
     /// <summary>
-    /// 更新当前时间刻度动作。
+    /// 转换时钟周期数精度（默认不转换，即原 100ns 精度）。
     /// </summary>
-    public Action<long>? UpdateNowTicksAction { get; set; }
+    /// <param name="ticks">给定的时钟周期数。</param>
+    /// <returns>返回长整数。</returns>
+    protected virtual long ConvertTicksAccuracy(long ticks)
+        => ticks;
 
 
     /// <summary>
-    /// 获取当前时间刻度。
+    /// 获取基础时钟周期数。
+    /// </summary>
+    /// <returns>返回长整数。</returns>
+    protected virtual long GetBaseTicks()
+        => ConvertTicksAccuracy(Options.UtcBaseTicks);
+
+
+    /// <summary>
+    /// 获取当前时钟周期数。
     /// </summary>
     /// <returns>返回长整数。</returns>
     protected virtual long GetNowTicks()
     {
-        var ticks = GetNowTicksSpan();
+        var ticks = ConvertTicksAccuracy(Clock.GetUtcNow().Ticks);
 
-        if (_lastTicks is not null)
-        {
-            while (ticks <= _lastTicks)
-            {
-                ticks = GetNowTicksSpan();
-
-                UpdateNowTicksAction?.Invoke(ticks);
-            }
-        }
-
-        _lastTicks = ticks;
+        Options.UpdateNowTicksAction?.Invoke(ticks);
 
         return ticks;
     }
 
     /// <summary>
-    /// 获取排除基础时间刻度的当前时间刻度差值。
+    /// 获取当前时钟周期数（支持时间回拨）。
     /// </summary>
+    /// <param name="lastTicks">给定的上次时钟周期数。</param>
     /// <returns>返回长整数。</returns>
-    protected virtual long GetNowTicksSpan()
-        => Clock.GetUtcNow().Ticks - Options.UtcBaseTicks;
+    protected virtual long GetNowTicks(long lastTicks)
+    {
+        var nowTicks = GetNowTicks();
+
+        while (nowTicks <= lastTicks)
+            nowTicks = GetNowTicks();
+
+        return nowTicks;
+    }
+
 
     /// <summary>
-    /// 增加基础时间刻度的当前时间刻度。
-    /// </summary>
-    /// <param name="ticks">给定的时间刻度。</param>
-    /// <returns>返回长整数。</returns>
-    protected virtual long AddBaseTicks(long ticks)
-        => ticks + Options.UtcBaseTicks;
-
-
-    /// <summary>
-    /// 异步获取当前时间刻度。
+    /// 异步获取当前时钟周期数。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回长整数。</returns>
+    /// <returns>返回一个包含长整数的异步操作。</returns>
     protected virtual async Task<long> GetNowTicksAsync(CancellationToken cancellationToken = default)
     {
-        var ticksAsync = await GetNowTicksSpanAsync(cancellationToken);
+        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).DisableAwaitContext();
+        var ticks = ConvertTicksAccuracy(now.Ticks);
 
-        if (_lastTicksAsync is not null)
-        {
-            while (ticksAsync <= _lastTicksAsync)
-            {
-                ticksAsync = await GetNowTicksSpanAsync(cancellationToken);
+        Options.UpdateNowTicksAction?.Invoke(ticks);
 
-                UpdateNowTicksAction?.Invoke(ticksAsync);
-            }
-        }
-
-        _lastTicksAsync = ticksAsync;
-
-        return ticksAsync;
+        return ticks;
     }
 
     /// <summary>
-    /// 异步获取排除基础时间刻度的当前时间刻度差值。
+    /// 异步获取当前时钟周期数（支持时间回拨）。
     /// </summary>
+    /// <param name="lastTicks">给定的上次时钟周期数。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回长整数。</returns>
-    protected virtual async Task<long> GetNowTicksSpanAsync(CancellationToken cancellationToken = default)
+    /// <returns>返回一个包含长整数的异步操作。</returns>
+    protected virtual async Task<long> GetNowTicksAsync(long lastTicks,
+        CancellationToken cancellationToken = default)
     {
-        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).DisableAwaitContext();
-        return now.Ticks - Options.UtcBaseTicks;
+        var nowTicks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+
+        while (nowTicks <= lastTicks)
+            nowTicks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+
+        return nowTicks;
     }
 
 }

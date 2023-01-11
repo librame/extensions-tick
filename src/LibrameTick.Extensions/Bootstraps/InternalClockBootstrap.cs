@@ -20,7 +20,7 @@ class InternalClockBootstrap : AbstsractBootstrap, IClockBootstrap
 
     public InternalClockBootstrap()
     {
-        // 默认为 100
+        // 默认为 100 毫秒
         _refluxOffsetMilliseconds = TimeSpan.FromMilliseconds(100);
     }
 

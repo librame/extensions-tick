@@ -52,14 +52,19 @@ class InternalStorableFileManager : IStorableFileManager
 
     #region Read
 
-    public Task<string> ReadStringAsync(string subpath)
+    public async Task<string> ReadStringAsync(string subpath)
     {
         var fileInfo = _fileProvider.GetFileInfo(subpath);
-        return _memoryCache.GetOrCreateAsync(fileInfo.PhysicalPath, entry =>
+
+        ArgumentNullException.ThrowIfNull(fileInfo.PhysicalPath);
+
+        return (await _memoryCache.GetOrCreateAsync(fileInfo.PhysicalPath, entry =>
         {
             entry.AddExpirationToken(_fileProvider.Watch(subpath));
+
             return ReadStringAsync(fileInfo);
-        });
+        }))
+        ?? string.Empty;
     }
 
     public Task<string> ReadStringAsync(IStorableFileInfo fileInfo)

@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
+using Librame.Extensions.Core;
 
 namespace Librame.Extensions.IdGenerators;
 
@@ -23,8 +24,11 @@ public class CombSnowflakeIdGenerator : AbstractClockIdGenerator<Guid>
 
     private int _a;
     private int _b;
-    private long _lastTicks;
+
     private uint _sequence;
+
+    private long _lastTicks = -1L;
+    private long _lastTicksAsync = -1L;
 
 
     /// <summary>
@@ -49,13 +53,25 @@ public class CombSnowflakeIdGenerator : AbstractClockIdGenerator<Guid>
 
 
     /// <summary>
+    /// 转换时钟周期数精度。
+    /// </summary>
+    /// <param name="ticks">给定的时钟周期数。</param>
+    /// <returns>返回长整数。</returns>
+    protected override long ConvertTicksAccuracy(long ticks)
+        => ticks / 10; // 转为微秒
+
+
+    /// <summary>
     /// 生成标识。
     /// </summary>
     /// <returns>返回 <see cref="Guid"/>。</returns>
     public override Guid GenerateId()
     {
-        var ticks = GetNowTicks();
-        return CreateGuid(ticks / 10); // 转为微秒
+        var nowTicks = GetNowTicks();
+
+        Options.GeneratingAction?.Invoke(new(nowTicks, 0, TemporalAccuracy.Microsecond));
+
+        return CreateGuid(nowTicks, false);
     }
 
     /// <summary>
@@ -65,23 +81,39 @@ public class CombSnowflakeIdGenerator : AbstractClockIdGenerator<Guid>
     /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
     public override async Task<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var ticks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
-        return CreateGuid(ticks / 10); // 转为微秒
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+
+        Options.GeneratingAction?.Invoke(new(nowTicksAsync, 0, TemporalAccuracy.Microsecond));
+
+        return CreateGuid(nowTicksAsync, true);
     }
 
 
     /// <summary>
     /// 创建 <see cref="Guid"/>。
     /// </summary>
-    /// <param name="ticks">给定的时间刻度。</param>
+    /// <param name="ticks">给定的时钟周期数。</param>
+    /// <param name="isAsync">是否异步。</param>
     /// <returns>返回 <see cref="Guid"/>。</returns>
-    protected virtual Guid CreateGuid(long ticks)
+    protected virtual Guid CreateGuid(long ticks, bool isAsync)
     {
-        if (ticks > _lastTicks)
-            UpdateTicks(ticks);
+        var lastTicks = isAsync ? _lastTicksAsync : _lastTicks;
 
+        if (ticks > lastTicks)
+        {
+            UpdateTicks(ticks, isAsync);
+        }
         else if (_sequence == uint.MaxValue)
-            UpdateTicks(_lastTicks + 1);
+        {
+            UpdateTicks(lastTicks + 1, isAsync);
+        }
+        else
+        {
+            if (isAsync)
+                _lastTicksAsync = ticks;
+            else
+                _lastTicks = ticks;
+        }
 
         var a = _a;
         var b = _b;
@@ -109,60 +141,55 @@ public class CombSnowflakeIdGenerator : AbstractClockIdGenerator<Guid>
         return new Guid(bytes);
     }
 
-    private void UpdateTicks(long ticks)
+    private void UpdateTicks(long ticks, bool isAsync)
     {
         _b = (int)(ticks & 0xFFFFFFFF);
         _a = (int)(ticks >> 32);
 
         _sequence = uint.MinValue;
-        _lastTicks = ticks;
+
+        if (isAsync)
+            _lastTicksAsync = ticks;
+        else
+            _lastTicks = ticks;
     }
 
 
-    /// <summary>
-    /// 转为 <see cref="DateTimeOffset"/>。
-    /// </summary>
-    /// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
-    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public virtual DateTimeOffset ToDateTime(Guid combSnowflakeId)
-    {
-        var now = Clock.GetUtcNow();
-        return ToDateTimeCore(combSnowflakeId, now.Offset);
-    }
+    ///// <summary>
+    ///// 获取最后一次时钟周期数。
+    ///// </summary>
+    ///// <returns>返回长整数。</returns>
+    //public virtual long GetLastTicks()
+    //    => _lastTicks;
 
-    /// <summary>
-    /// 异步转为 <see cref="DateTimeOffset"/>。
-    /// </summary>
-    /// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public virtual async Task<DateTimeOffset> ToDateTimeAsync(Guid combSnowflakeId,
-        CancellationToken cancellationToken = default)
-    {
-        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).DisableAwaitContext();
-        return ToDateTimeCore(combSnowflakeId, now.Offset);
-    }
+    ///// <summary>
+    ///// 异步获取最后一次时钟周期数。
+    ///// </summary>
+    ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    ///// <returns>返回一个包含长整数的异步操作。</returns>
+    //public virtual Task<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
+    //    => cancellationToken.RunTask(() => _lastTicksAsync);
 
-    /// <summary>
-    /// 转为 <see cref="DateTimeOffset"/>。
-    /// </summary>
-    /// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
-    /// <param name="utcOffset">给定的 <see cref="TimeSpan"/> UTC 偏移量。</param>
-    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    protected virtual DateTimeOffset ToDateTimeCore(Guid combSnowflakeId, TimeSpan utcOffset)
-    {
-        var bytes = combSnowflakeId.ToByteArray();
 
-        var ticks = (long)bytes[0] << 56;
-        ticks += (long)bytes[1] << 48;
-        ticks += (long)bytes[2] << 40;
-        ticks += (long)bytes[3] << 32;
-        ticks += (long)bytes[3] << 24;
-        ticks += (long)bytes[3] << 16;
-        ticks += (long)bytes[3] << 8;
-        ticks += bytes[3];
+    ///// <summary>
+    ///// 解析时钟周期数。
+    ///// </summary>
+    ///// <param name="combSnowflakeId">给定的 <see cref="Guid"/>。</param>
+    ///// <returns>返回长整数。</returns>
+    //public virtual long ParseTicks(Guid combSnowflakeId)
+    //{
+    //    var bytes = combSnowflakeId.ToByteArray();
 
-        return new DateTimeOffset(AddBaseTicks(ticks * 10), utcOffset); // 转回纳秒计算，但精度只能到微秒
-    }
+    //    var ticks = (long)bytes[0] << 56;
+    //    ticks += (long)bytes[1] << 48;
+    //    ticks += (long)bytes[2] << 40;
+    //    ticks += (long)bytes[3] << 32;
+    //    ticks += (long)bytes[3] << 24;
+    //    ticks += (long)bytes[3] << 16;
+    //    ticks += (long)bytes[3] << 8;
+    //    ticks += bytes[3];
+
+    //    return ticks;
+    //}
 
 }

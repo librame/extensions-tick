@@ -89,6 +89,15 @@ public class ShardedDescriptor : IEquatable<ShardedDescriptor>
 
 
     /// <summary>
+    /// 带指定新后缀的新 <see cref="ShardedDescriptor"/>。
+    /// </summary>
+    /// <param name="newSuffix">给定的新后缀。</param>
+    /// <returns>返回 <see cref="ShardedDescriptor"/>。</returns>
+    public ShardedDescriptor WithSuffix(string newSuffix)
+        => new ShardedDescriptor(BaseName, newSuffix, SuffixConnector);
+
+
+    /// <summary>
     /// 比较相等。
     /// </summary>
     /// <param name="other">给定的 <see cref="ShardedDescriptor"/>。</param>
@@ -116,6 +125,14 @@ public class ShardedDescriptor : IEquatable<ShardedDescriptor>
 
         return BaseName ?? string.Empty;
     }
+
+
+    /// <summary>
+    /// 隐式转为字符串。
+    /// </summary>
+    /// <param name="descriptor">给定的 <see cref="ShardedDescriptor"/>。</param>
+    public static implicit operator string(ShardedDescriptor descriptor)
+        => descriptor.ToString();
 
 
     /// <summary>

@@ -29,6 +29,22 @@ public static class DateTimeExtensions
     public static readonly DateTimeOffset UtcBaseTime
         = DateTimeOffset.UnixEpoch;
 
+    /// <summary>
+    /// 系统 UTC 与本地时区偏移量。
+    /// </summary>
+    public static readonly TimeSpan UtcLocalOffset
+        = UtcBaseTime.LocalDateTime - UtcBaseTime.DateTime;
+
+
+    /// <summary>
+    /// 转为 <see cref="DateTimeOffset"/>。
+    /// </summary>
+    /// <param name="dateTime">给定的 <see cref="DateTime"/>。</param>
+    /// <param name="useLocalOffset">使用本地时区偏移量（可选；默认不使用，即与 <see cref="DateTime"/> 相同时钟周期数）。</param>
+    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
+    public static DateTimeOffset ToOffset(this DateTime dateTime, bool useLocalOffset = false)
+        => new(dateTime, useLocalOffset ? UtcLocalOffset : UtcBaseTime.Offset);
+
 
     #region DateOfYear and QuarterOfYear
 

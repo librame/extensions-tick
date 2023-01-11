@@ -42,7 +42,7 @@ public class PagingList<T> : IPagingList<T>
     {
         // 默认使用副本集合
         var copy = new List<T>(collection);
-        _info = new PagingInfo(copy.Count);
+        _info = new(copy.Count);
         _collection = copy;
     }
 
@@ -62,7 +62,7 @@ public class PagingList<T> : IPagingList<T>
         else
             _collection = collection;
 
-        _info = new PagingInfo(total);
+        _info = new(total);
     }
 
 
@@ -76,7 +76,7 @@ public class PagingList<T> : IPagingList<T>
     public PagingList(IQueryable<T> queryable)
     {
         _queryable = queryable;
-        _info = new PagingInfo(queryable.NonEnumeratedCount());
+        _info = new(queryable.NonEnumeratedCount());
     }
 
     /// <summary>
@@ -87,14 +87,14 @@ public class PagingList<T> : IPagingList<T>
     public PagingList(IQueryable<T> queryable, long total)
     {
         _queryable = queryable;
-        _info = new PagingInfo(total);
+        _info = new(total);
     }
 
 
     /// <summary>
     /// 分页信息（需要先分页后才有效）。
     /// </summary>
-    public PagingInfo Info
+    public virtual PagingInfo Info
         => _info;
 
 
@@ -102,7 +102,7 @@ public class PagingList<T> : IPagingList<T>
     /// 筛选列表（通常用于内存分页）。
     /// </summary>
     /// <param name="func">给定的筛选方法。</param>
-    public void Filtrate(Func<IEnumerable<T>, IEnumerable<T>> func)
+    public virtual void Filtrate(Func<IEnumerable<T>, IEnumerable<T>> func)
     {
         if (_filter is not null)
         {
@@ -117,7 +117,7 @@ public class PagingList<T> : IPagingList<T>
     /// 筛选列表（通常用于动态分页）。
     /// </summary>
     /// <param name="func">给定的筛选方法。</param>
-    public void Filtrate(Func<IQueryable<T>, IQueryable<T>> func)
+    public virtual void Filtrate(Func<IQueryable<T>, IQueryable<T>> func)
     {
         _queryable = func(_queryable!);
     }
@@ -129,7 +129,7 @@ public class PagingList<T> : IPagingList<T>
     /// <param name="index">给定的页索引。</param>
     /// <param name="size">给定的页大小。</param>
     /// <returns>返回 <see cref="PagingInfo"/>。</returns>
-    public PagingInfo PageByIndex(int index, int size)
+    public virtual PagingInfo PageByIndex(int index, int size)
     {
         _info.ComputeByIndex(index, size);
 
@@ -144,7 +144,7 @@ public class PagingList<T> : IPagingList<T>
     /// <param name="skip">给定的跳过条数。</param>
     /// <param name="take">给定的取得条数。</param>
     /// <returns>返回 <see cref="PagingInfo"/>。</returns>
-    public PagingInfo PageBySkip(int skip, int take)
+    public virtual PagingInfo PageBySkip(int skip, int take)
     {
         _info.ComputeBySkip(skip, take);
 
@@ -196,7 +196,7 @@ public class PagingList<T> : IPagingList<T>
     /// 返回一个循环访问集合的枚举器。
     /// </summary>
     /// <returns>返回枚举器。</returns>
-    public IEnumerator<T> GetEnumerator()
+    public virtual IEnumerator<T> GetEnumerator()
     {
         if (_filter is null)
             throw new InvalidOperationException($"You need to run the '${nameof(PageByIndex)}()' or '${nameof(PageBySkip)}()' method first.");

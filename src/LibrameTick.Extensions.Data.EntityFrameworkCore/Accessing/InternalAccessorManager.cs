@@ -44,10 +44,12 @@ class InternalAccessorManager : IAccessorManager
 
     public IAccessor GetAccessor(IAccessorSpecification specification)
     {
-        if (Options.Access.AutomaticMigration)
+        if (Options.Access.AutoMigration)
             _migrator.Migrate(Accessors);
 
-        var accessor = specification.IssueEvaluate(Accessors);
+        var accessor = specification
+            .SetDispatcherOptionsIfNull(Options.Access.Dispatcher)
+            .IssueEvaluate(Accessors);
 
         return _shardingManager.ShardDatabase(accessor);
     }

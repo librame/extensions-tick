@@ -12,7 +12,6 @@
 
 using Librame.Extensions.Cryptography;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Data.ValueConversion;
 
 namespace Librame.Extensions.Data;
 
@@ -27,52 +26,82 @@ public static class ModelBuilderAccessorExtensions
     /// <summary>
     /// 对使用 <see cref="EncryptedAttribute"/> 的属性应用加密功能。
     /// </summary>
-    /// <param name="mutableEntityType">给定的 <see cref="IMutableEntityType"/>。</param>
-    /// <param name="converterFactory">给定的 <see cref="IEncryptionConverterFactory"/>。</param>
-    /// <param name="accessor">给定的 <see cref="AbstractContextAccessor"/>。</param>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
     /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
-    public static IMutableEntityType UseEncryption(this IMutableEntityType mutableEntityType,
-        IEncryptionConverterFactory converterFactory, AbstractContextAccessor accessor)
+    public static IMutableEntityType UseEncryption(this IMutableEntityType entityType,
+        PropertyInfo property, BaseDbContext dbContext)
     {
-        var encryptedProperties = mutableEntityType.ClrType.GetProperties()
-            .Where(p => Attribute.IsDefined(p, _encryptedAttributeType));
-
-        foreach (var property in encryptedProperties)
+        if (Attribute.IsDefined(property, _encryptedAttributeType))
         {
-            var converter = converterFactory.GetConverter(accessor, property.PropertyType);
-            mutableEntityType.GetProperty(property.Name).SetValueConverter(converter);
+            var converter = dbContext.EncryptionConverterFactory.GetConverter(dbContext, property.PropertyType);
+            entityType.GetProperty(property.Name).SetValueConverter(converter);
         }
 
-        return mutableEntityType;
+        return entityType;
+    }
+
+    /// <summary>
+    /// 针对 SQLServer 特殊的 Guid 排序方式，将 Guid 转换为字符串处理。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+    /// <param name="builder">给定的 <see cref="ModelBuilder"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
+    /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+    public static IMutableEntityType UseGuidToChars(this IMutableEntityType entityType,
+        PropertyInfo property, ModelBuilder builder, BaseDbContext dbContext)
+    {
+        // 将 Guid 类型设置为 char(36)
+        if (dbContext.DataOptions.Access.GuidToChars)
+        {
+            if (property.PropertyType == typeof(Guid))
+            {
+                builder.Entity(entityType.ClrType)
+                    .Property(property.Name)
+                    .HasColumnType("char(36)");
+            }
+
+            if (property.PropertyType == typeof(Guid?))
+            {
+                builder.Entity(entityType.ClrType)
+                    .Property(property.Name)
+                    .HasColumnType("char(36)")
+                    .IsRequired(false);
+            }
+        }
+
+        return entityType;
     }
 
     /// <summary>
     /// 使用查询过滤器集合。
     /// </summary>
-    /// <param name="mutableEntityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
     /// <param name="queryFilters">给定的查询过滤器集合。</param>
-    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
     /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
-    public static IMutableEntityType UseQueryFilters(this IMutableEntityType mutableEntityType,
-        IEnumerable<IQueryFilter> queryFilters, IAccessor accessor)
+    public static IMutableEntityType UseQueryFilters(this IMutableEntityType entityType,
+        IEnumerable<IQueryFilter> queryFilters, BaseDbContext dbContext)
     {
         foreach (var filter in queryFilters)
         {
-            if (filter.Enabling(mutableEntityType.ClrType))
+            if (filter.Enabling(entityType.ClrType))
             {
                 var method = filter.GetType()
                     .GetMethod(nameof(filter.GetQueryFilter))?
-                    .MakeGenericMethod(mutableEntityType.ClrType);
+                    .MakeGenericMethod(entityType.ClrType);
 
                 if (method is not null)
                 {
-                    var expression = (LambdaExpression?)method.Invoke(filter, new object[] { accessor });
-                    mutableEntityType.SetQueryFilter(expression);
+                    var expression = (LambdaExpression?)method.Invoke(filter, new object[] { dbContext });
+                    entityType.SetQueryFilter(expression);
                 }
             }
         }
 
-        return mutableEntityType;
+        return entityType;
     }
 
 }

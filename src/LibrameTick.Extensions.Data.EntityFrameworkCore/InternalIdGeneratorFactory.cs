@@ -26,30 +26,31 @@ class InternalIdGeneratorFactory : IIdGeneratorFactory
     {
         if (_idGenerators.Count < 1)
         {
-            var snowflake = dataOptionsMonitor.CurrentValue.SnowflakeParameters;
-            var idOptions = dataOptionsMonitor.CurrentValue.IdGeneration;
+            var snowflake = dataOptionsMonitor.CurrentValue.Snowflake;
+            var mongo = dataOptionsMonitor.CurrentValue.Mongo;
+            var idGeneration = dataOptionsMonitor.CurrentValue.IdGeneration;
             var clock = coreOptionsMonitor.CurrentValue.Clock;
 
             var combIdType = typeof(CombIdGenerator);
 
             // Base: IdentificationGenerator（Sqlite 使用与 MySQL 数据库相同的排序方式）
             _idGenerators.Add(new TypeNamedKey(combIdType, nameof(CombIdGenerators.ForMySql)),
-                CombIdGenerators.ForMySql(idOptions, clock));
+                CombIdGenerators.ForMySql(idGeneration, clock));
 
             _idGenerators.Add(new TypeNamedKey(combIdType, nameof(CombIdGenerators.ForOracle)),
-                CombIdGenerators.ForOracle(idOptions, clock));
+                CombIdGenerators.ForOracle(idGeneration, clock));
 
             _idGenerators.Add(new TypeNamedKey(combIdType, nameof(CombIdGenerators.ForSqlServer)),
-                CombIdGenerators.ForSqlServer(idOptions, clock));
+                CombIdGenerators.ForSqlServer(idGeneration, clock));
 
             _idGenerators.Add(new TypeNamedKey<CombSnowflakeIdGenerator>(),
-                new CombSnowflakeIdGenerator(idOptions, clock));
+                new CombSnowflakeIdGenerator(idGeneration, clock));
 
             _idGenerators.Add(new TypeNamedKey<MongoIdGenerator>(),
-                new MongoIdGenerator(clock));
+                new MongoIdGenerator(mongo, idGeneration));
 
             _idGenerators.Add(new TypeNamedKey<SnowflakeIdGenerator>(),
-                new SnowflakeIdGenerator(snowflake, idOptions, clock));
+                new SnowflakeIdGenerator(snowflake, idGeneration, clock));
 
             if (dataOptionsMonitor.CurrentValue.IdGenerators.Count > 0)
             {

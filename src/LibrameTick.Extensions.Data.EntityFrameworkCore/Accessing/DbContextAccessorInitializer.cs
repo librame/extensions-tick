@@ -10,17 +10,15 @@
 
 #endregion
 
-using Librame.Extensions.Specifications;
-
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义抽象继承 <see cref="AbstractAccessorInitializer{TAccessor}"/> 数据库上下文存取器初始化器的泛型实现。
+/// 定义抽象继承 <see cref="DbContextAccessorInitializer{TAccessor}"/> 数据库上下文存取器初始化器的泛型实现。
 /// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="DbContextAccessor"/> 的存取器类型。</typeparam>
+/// <typeparam name="TAccessor">指定已实现 <see cref="AbstractAccessor"/> 的存取器类型。</typeparam>
 /// <typeparam name="TSeeder">指定已实现 <see cref="IAccessorSeeder"/> 的存取器类型。</typeparam>
 public class DbContextAccessorInitializer<TAccessor, TSeeder> : DbContextAccessorInitializer<TAccessor>
-    where TAccessor : DbContextAccessor
+    where TAccessor : AbstractAccessor
     where TSeeder : IAccessorSeeder
 {
     /// <summary>
@@ -43,11 +41,11 @@ public class DbContextAccessorInitializer<TAccessor, TSeeder> : DbContextAccesso
 
 
 /// <summary>
-/// 定义抽象实现 <see cref="IAccessorInitializer"/> 的数据库上下文存取器初始化器。
+/// 定义抽象实现 <see cref="AbstractAccessorInitializer{TAccessor}"/> 的数据库上下文存取器初始化器。
 /// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="DbContextAccessor"/> 的存取器类型。</typeparam>
+/// <typeparam name="TAccessor">指定已实现 <see cref="AbstractAccessor"/> 的存取器类型。</typeparam>
 public class DbContextAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor>
-    where TAccessor : DbContextAccessor
+    where TAccessor : AbstractAccessor
 {
     /// <summary>
     /// 使用数据库上下文构造一个 <see cref="DbContextAccessorInitializer{TAccessor}"/>。

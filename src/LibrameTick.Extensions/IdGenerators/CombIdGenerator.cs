@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
+using Librame.Extensions.Core;
 
 namespace Librame.Extensions.IdGenerators;
 
@@ -19,6 +20,9 @@ namespace Librame.Extensions.IdGenerators;
 /// </summary>
 public class CombIdGenerator : AbstractClockIdGenerator<Guid>
 {
+    private static string _accuracyDescription = "100ns";
+
+
     /// <summary>
     /// 使用内置的 <see cref="Bootstrapper.GetClock()"/> 构造一个 <see cref="CombIdGenerator"/>。
     /// </summary>
@@ -55,8 +59,12 @@ public class CombIdGenerator : AbstractClockIdGenerator<Guid>
     /// <returns>返回 <see cref="Guid"/>。</returns>
     public override Guid GenerateId()
     {
-        var ticks = GetNowTicks();
-        return CreateGuid(ticks);
+        var nowTicks = GetNowTicks();
+
+        Options.GeneratingAction?.Invoke(new(nowTicks, 0, TemporalAccuracy.Nanosecond,
+            _accuracyDescription));
+
+        return CreateGuid(nowTicks);
     }
 
     /// <summary>
@@ -66,45 +74,56 @@ public class CombIdGenerator : AbstractClockIdGenerator<Guid>
     /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
     public override async Task<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var ticksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
-        return CreateGuid(ticksAsync);
+        var nowTicks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+
+        Options.GeneratingAction?.Invoke(new(nowTicks, 0, TemporalAccuracy.Millisecond,
+            _accuracyDescription));
+
+        return CreateGuid(nowTicks);
     }
 
 
     /// <summary>
     /// 创建 <see cref="Guid"/>。
     /// </summary>
-    /// <param name="ticks">给定的时间刻度。</param>
+    /// <param name="ticks">给定的时钟周期数。</param>
     /// <returns>返回 <see cref="Guid"/>。</returns>
     protected virtual Guid CreateGuid(long ticks)
     {
-        var ticksBytes = BitConverter.GetBytes(ticks / 10000); // 转为毫秒
+        var randomBytes = 8.GenerateByteArray();
+        var ticksBytes = BitConverter.GetBytes(ticks);
 
+        // 因为数组是从 long 转化过来的，如果是在小端系统中 little-endian，需要翻转
         if (BitConverter.IsLittleEndian)
             Array.Reverse(ticksBytes);
 
-        var randomBytes = 10.GenerateByteArray();
         var guidBytes = new byte[16];
 
         switch (Generation)
         {
             case CombIdGeneration.AsString:
             case CombIdGeneration.AsBinary:
-                Buffer.BlockCopy(ticksBytes, 2, guidBytes, 0, 6);
-                Buffer.BlockCopy(randomBytes, 0, guidBytes, 6, 10);
+                // 16位数组：前8位为时间戳，后8位为随机数
+                Buffer.BlockCopy(ticksBytes, 0, guidBytes, 0, 8);
+                Buffer.BlockCopy(randomBytes, 0, guidBytes, 8, 8);
 
-                // If formatting as a string, we have to reverse the order
-                // of the Data1 and Data2 blocks on little-endian systems.
+                // .NET中，Data1、Data2、Data3 块分别视为 int、short、short
+                // 跟时间戳从 long 转 byte 数组后需要翻转一个理，在小端系统，需要翻转这3个块。
                 if (Generation is CombIdGeneration.AsString && BitConverter.IsLittleEndian)
                 {
                     Array.Reverse(guidBytes, 0, 4);
                     Array.Reverse(guidBytes, 4, 2);
+                    Array.Reverse(guidBytes, 6, 2);
                 }
                 break;
 
             case CombIdGeneration.AtEnd:
-                Buffer.BlockCopy(randomBytes, 0, guidBytes, 0, 10);
-                Buffer.BlockCopy(ticksBytes, 2, guidBytes, 10, 6);
+                // 16位数组：前8位为随机数，后8位为时间戳
+                Buffer.BlockCopy(randomBytes, 0, guidBytes, 0, 8);
+
+                // 将时间戳末尾的2个字节，放到 Data4 的前2个字节
+                Buffer.BlockCopy(ticksBytes, 6, guidBytes, 8, 2);
+                Buffer.BlockCopy(ticksBytes, 0, guidBytes, 10, 6);
                 break;
         }
 

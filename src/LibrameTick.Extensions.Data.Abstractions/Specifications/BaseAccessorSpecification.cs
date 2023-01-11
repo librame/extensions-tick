@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Specifications;
 
@@ -52,6 +53,11 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     public int? Group { get; private set; }
 
     /// <summary>
+    /// 调度器选项。
+    /// </summary>
+    public DispatcherOptions? DispatcherOptions { get; private set; }
+
+    /// <summary>
     /// 规约冗余模式（默认为聚合模式）。
     /// </summary>
     public RedundancyMode Redundancy { get; private set; }
@@ -60,7 +66,7 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     /// <summary>
     /// 规约冗余存取器方法。
     /// </summary>
-    public Func<IEnumerable<IAccessor>, RedundancyMode, IAccessor> RedundancyAccessorFunc { get; private set; }
+    public Func<IEnumerable<IAccessor>, RedundancyMode, DispatcherOptions, IAccessor> RedundancyAccessorFunc { get; private set; }
         = RedundableAccessorsExtensions.GetRedundableAccessors;
 
 
@@ -99,7 +105,7 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
 
         // 使用冗余存取器
         if (enumerable.NonEnumeratedCount() > 1)
-            return RedundancyAccessorFunc(enumerable, Redundancy);
+            return RedundancyAccessorFunc(enumerable, Redundancy, DispatcherOptions ?? new());
 
         return enumerable.First();
     }
@@ -128,6 +134,30 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     }
 
     /// <summary>
+    /// 设置调度器选项。
+    /// </summary>
+    /// <param name="options">给定的 <see cref="DispatcherOptions"/>。</param>
+    /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
+    public IAccessorSpecification SetDispatcherOptions(DispatcherOptions options)
+    {
+        DispatcherOptions = options;
+        return this;
+    }
+
+    /// <summary>
+    /// 如果调度器选项为空则设置。
+    /// </summary>
+    /// <param name="options">给定的 <see cref="DispatcherOptions"/>。</param>
+    /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
+    public IAccessorSpecification SetDispatcherOptionsIfNull(DispatcherOptions options)
+    {
+        if (DispatcherOptions is null)
+            DispatcherOptions = options;
+
+        return this;
+    }
+
+    /// <summary>
     /// 设置规约冗余模式。
     /// </summary>
     /// <param name="redundancy">给定的冗余模式。</param>
@@ -143,7 +173,8 @@ public class BaseAccessorSpecification : BaseSpecification<IAccessor>, IAccessor
     /// </summary>
     /// <param name="func">给定的冗余存取器方法。</param>
     /// <returns>返回 <see cref="IAccessorSpecification"/>。</returns>
-    public IAccessorSpecification SetRedundancyAccessorFunc(Func<IEnumerable<IAccessor>, RedundancyMode, IAccessor> func)
+    public IAccessorSpecification SetRedundancyAccessorFunc(
+        Func<IEnumerable<IAccessor>, RedundancyMode, DispatcherOptions, IAccessor> func)
     {
         RedundancyAccessorFunc = func;
         return this;

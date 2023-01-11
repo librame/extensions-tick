@@ -85,10 +85,10 @@ public class MongoIdOptions : IOptions
     /// <summary>
     /// 创建标识。
     /// </summary>
-    /// <param name="ticks">给定的时间刻度。</param>
+    /// <param name="deltaTicks">给定的时钟周期数变数。</param>
     /// <param name="increment">给定的增量。</param>
     /// <returns>返回 16 进制字符串。</returns>
-    public virtual string CreateId(int ticks, int increment)
+    public virtual string CreateId(int deltaTicks, int increment)
     {
         IncrementBytes = BitConverter.GetBytes(increment);
         Increment = increment;
@@ -96,7 +96,7 @@ public class MongoIdOptions : IOptions
         var buffer = new byte[12];
         var copyIndex = 0;
 
-        var ticksBytes = BitConverter.GetBytes(ticks);
+        var ticksBytes = BitConverter.GetBytes(deltaTicks);
         Array.Reverse(ticksBytes);
         Array.Copy(ticksBytes, 0, buffer, copyIndex, 4);
 
@@ -117,9 +117,9 @@ public class MongoIdOptions : IOptions
     /// 解析标识字符串。
     /// </summary>
     /// <param name="mongoId">给定的标识字符串。</param>
-    /// <param name="ticks">输出时间刻度。</param>
+    /// <param name="deltaTicks">输出时钟周期数变数。</param>
     /// <returns>返回 <see cref="MongoIdOptions"/>。</returns>
-    public static MongoIdOptions Parse(string mongoId, out int ticks)
+    public static MongoIdOptions Parse(string mongoId, out int deltaTicks)
     {
         var ticksBytes = mongoId.FromHexString();
         if (ticksBytes.Length != 12)
@@ -131,7 +131,7 @@ public class MongoIdOptions : IOptions
         Array.Copy(ticksBytes, copyIndex, buffer, 0, 4);
         Array.Reverse(buffer);
 
-        ticks = BitConverter.ToInt32(buffer, 0);
+        deltaTicks = BitConverter.ToInt32(buffer, 0);
 
         copyIndex += 4;
         var machineIdBytes = new byte[4];

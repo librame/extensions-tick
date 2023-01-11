@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
+using Librame.Extensions.Core;
 
 namespace Librame.Extensions.IdGenerators;
 
@@ -20,6 +21,10 @@ namespace Librame.Extensions.IdGenerators;
 public class MongoIdGenerator : AbstractClockIdGenerator<string>
 {
     private int _location = Environment.TickCount;
+
+    private long _baseTicks = -1L;
+    private long _lastTicks = -1L;
+    private long _lastTicksAsync = -1L;
 
 
     /// <summary>
@@ -41,6 +46,8 @@ public class MongoIdGenerator : AbstractClockIdGenerator<string>
     public MongoIdGenerator(MongoIdOptions mongos, IdGenerationOptions options, IClockBootstrap clock)
         : base(options, clock)
     {
+        _baseTicks = base.GetBaseTicks();
+
         Mongos = mongos;
     }
 
@@ -52,11 +59,27 @@ public class MongoIdGenerator : AbstractClockIdGenerator<string>
 
 
     /// <summary>
+    /// 转换时钟周期数精度。
+    /// </summary>
+    /// <param name="ticks">给定的时钟周期数。</param>
+    /// <returns>返回长整数。</returns>
+    protected override long ConvertTicksAccuracy(long ticks)
+        => ticks / 1000_000_0; // 转为秒
+
+
+    /// <summary>
     /// 生成标识。
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string GenerateId()
-        => CreateId(GetNowTicks());
+    {
+        var nowTicks = GetNowTicks();
+
+        _lastTicks = nowTicks;
+        Options.GeneratingAction?.Invoke(new(nowTicks, _baseTicks, TemporalAccuracy.Second));
+
+        return CreateId(nowTicks - _baseTicks);
+    }
 
     /// <summary>
     /// 异步生成标识。
@@ -65,49 +88,52 @@ public class MongoIdGenerator : AbstractClockIdGenerator<string>
     /// <returns>返回一个包含字符串的异步操作。</returns>
     public override async Task<string> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var ticksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
-        return CreateId(ticksAsync);
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+
+        _lastTicksAsync = nowTicksAsync;
+        Options.GeneratingAction?.Invoke(new(nowTicksAsync, _baseTicks, TemporalAccuracy.Second));
+
+        return CreateId(nowTicksAsync - _baseTicks);
     }
 
 
     /// <summary>
     /// 创建标识。
     /// </summary>
-    /// <param name="ticks">给定的时间刻度。</param>
+    /// <param name="deltaTicks">给定的时钟周期数变数。</param>
     /// <returns>返回字符串。</returns>
-    protected virtual string CreateId(long ticks)
+    protected virtual string CreateId(long deltaTicks)
     {
         var increment = Interlocked.Increment(ref _location);
-        return Mongos.CreateId(Convert.ToInt32(ticks / 10000000), increment); // 转为秒
+        return Mongos.CreateId(Convert.ToInt32(deltaTicks), increment);
     }
 
 
     /// <summary>
-    /// 转为 <see cref="DateTimeOffset"/>。
+    /// 获取最后一次时钟周期数。
     /// </summary>
-    /// <param name="mongoId">给定的标识字符串。</param>
-    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public virtual DateTimeOffset ToDateTime(string mongoId)
-    {
-        var now = Clock.GetUtcNow();
-        var _ = MongoIdOptions.Parse(mongoId, out var ticks);
-
-        return new DateTimeOffset(AddBaseTicks(ticks * 10000000), now.Offset); // 转回纳秒计算，但精度只能到秒
-    }
+    /// <returns>返回长整数。</returns>
+    public virtual long GetLastTicks()
+        => _lastTicks;
 
     /// <summary>
-    /// 异步转为 <see cref="DateTimeOffset"/>。
+    /// 异步获取最后一次时钟周期数。
     /// </summary>
-    /// <param name="mongoId">给定的标识字符串。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public virtual async Task<DateTimeOffset> ToDateTimeAsync(string mongoId,
-        CancellationToken cancellationToken = default)
-    {
-        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).DisableAwaitContext();
-        var _ = MongoIdOptions.Parse(mongoId, out var ticks);
+    /// <returns>返回一个包含长整数的异步操作。</returns>
+    public virtual Task<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.RunTask(() => _lastTicksAsync);
 
-        return new DateTimeOffset(AddBaseTicks(ticks * 10000000), now.Offset); // 转回纳秒计算，但精度只能到秒
+
+    /// <summary>
+    /// 解析时钟周期数。
+    /// </summary>
+    /// <param name="mongoId">给定的标识字符串。</param>
+    /// <returns>返回长整数。</returns>
+    public virtual long ParseTicks(string mongoId)
+    {
+        MongoIdOptions.Parse(mongoId, out var deltaTicks);
+        return _baseTicks + deltaTicks;
     }
 
 }

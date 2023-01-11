@@ -11,11 +11,12 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
+using Librame.Extensions.Core;
 
 namespace Librame.Extensions.IdGenerators;
 
 /// <summary>
-/// 定义雪花 64 位整型标识生成器（可生成长度 19 位的长整数标识）。
+/// 定义雪花 64 位整型标识生成器。
 /// </summary>
 public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
 {
@@ -25,6 +26,7 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
     private long _sequence;
     private long _sequenceAsync;
 
+    private long _baseTicks = -1L;
     private long _lastTicks = -1L;
     private long _lastTicksAsync = -1L;
 
@@ -49,17 +51,12 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
         IClockBootstrap clock)
         : base(options, clock)
     {
+        _machineId = options.MachineId.NotGreater(snowflakes.MaxMachineId);
+        _dataCenterId = options.DataCenterId.NotGreater(snowflakes.MaxDataCenterId);
+
+        _baseTicks = base.GetBaseTicks();
+
         Snowflakes = snowflakes;
-
-        if (options.MachineId >= 0)
-            _machineId = options.MachineId.NotGreater(Snowflakes.GetMaxMachineId());
-        else
-            _machineId = Snowflakes.MachineBits;
-
-        if (options.DataCenterId >= 0)
-            _dataCenterId = options.DataCenterId.NotGreater(Snowflakes.GetMaxDataCenterId());
-        else
-            _dataCenterId = Snowflakes.DataCenterBits;
     }
 
 
@@ -70,38 +67,44 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
 
 
     /// <summary>
+    /// 转换时钟周期数精度。
+    /// </summary>
+    /// <param name="ticks">给定的时钟周期数。</param>
+    /// <returns>返回长整数。</returns>
+    protected override long ConvertTicksAccuracy(long ticks)
+        => ticks / 1000_0; // 转为毫秒
+
+
+    /// <summary>
     /// 生成标识。
     /// </summary>
     /// <returns>返回长整数。</returns>
     public override long GenerateId()
     {
-        var ticks = GetNowTicks();
+        var nowTicks = GetNowTicks();
 
-        if (_lastTicks == ticks)
+        if (nowTicks < _lastTicks)
         {
-            // 同一微妙中生成ID
-            _sequence = Snowflakes.GetSequenceMask(_sequence);
+            // 时钟回拨
+            nowTicks = GetNowTicks(_lastTicks);
+        }
+        else if (nowTicks == _lastTicks)
+        {
+            // 对序列+1并计算该周期内产生的序列号是否已经到达上限
+            _sequence = (_sequence + 1) & Snowflakes.SequenceMask;
             if (_sequence is 0)
-            {
-                ticks = GetNowTicks();
-            }
+                nowTicks = GetNowTicks(_lastTicks);
         }
         else
         {
-            // 不同微秒生成ID，计数清0
+            // 不同序列生成，序列清0
             _sequence = 0;
         }
 
-        if (ticks < _lastTicks)
-        {
-            // 如果当前时间戳比上一次生成ID时时间戳还小，抛出异常，因为不能保证现在生成的ID之前没有生成过
-            throw new ArgumentException($"Clock moved backwards. Refusing to generate id for {_lastTicks - ticks} milliseconds.");
-        }
-
-        var newId = CreateId(ticks, _sequence);
-        _lastTicks = ticks;
-
-        return newId;
+        _lastTicks = nowTicks;
+        Options.GeneratingAction?.Invoke(new(nowTicks, _baseTicks, TemporalAccuracy.Millisecond));
+        
+        return CreateId(nowTicks - _baseTicks, _sequence);
     }
 
     /// <summary>
@@ -111,16 +114,19 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
     /// <returns>返回一个包含长整数的异步操作。</returns>
     public override async Task<long> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var ticksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
 
-        if (_lastTicksAsync == ticksAsync)
+        if (nowTicksAsync < _lastTicksAsync)
         {
-            // 同一微妙中生成ID
-            _sequenceAsync = Snowflakes.GetSequenceMask(_sequenceAsync);
+            // 时钟回拨
+            nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+        }
+        else if (nowTicksAsync == _lastTicksAsync)
+        {
+            // 对序列+1并计算该周期内产生的序列号是否已经到达上限
+            _sequenceAsync = (_sequenceAsync + 1) & Snowflakes.SequenceMask;
             if (_sequenceAsync is 0)
-            {
-                ticksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
-            }
+                nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
         }
         else
         {
@@ -128,33 +134,55 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
             _sequenceAsync = 0;
         }
 
-        if (ticksAsync < _lastTicksAsync)
-        {
-            // 如果当前时间戳比上一次生成ID时时间戳还小，抛出异常，因为不能保证现在生成的ID之前没有生成过
-            throw new ArgumentException($"Clock moved backwards. Refusing to generate id for {_lastTicksAsync - ticksAsync} milliseconds.");
-        }
-
-        var newId = CreateId(ticksAsync, _sequenceAsync);
-        _lastTicksAsync = ticksAsync;
-
-        return newId;
+        _lastTicksAsync = nowTicksAsync;
+        Options.GeneratingAction?.Invoke(new(nowTicksAsync, _baseTicks, TemporalAccuracy.Millisecond));
+        
+        return CreateId(nowTicksAsync - _baseTicks, _sequenceAsync);
     }
 
 
     /// <summary>
     /// 创建雪花标识。
     /// </summary>
-    /// <param name="ticks">给定的时间刻度。</param>
+    /// <param name="deltaTicks">给定的时钟周期数变数。</param>
     /// <param name="sequence">给定的记数器。</param>
     /// <returns>返回长整数。</returns>
-    protected virtual long CreateId(long ticks, long sequence)
+    protected virtual long CreateId(long deltaTicks, long sequence)
     {
-        var newId = (ticks << Snowflakes.GetTicksLeftShift())
-            | (_dataCenterId << Snowflakes.GetDataCenterIdShift())
-            | (_machineId << Snowflakes.GetMachineIdShift())
-            | sequence;
+        // 时钟周期数变数超出最大值
+        if (deltaTicks > Snowflakes.MaxTicks)
+            throw new InvalidOperationException("delta ticks bits is exhausted. Refusing ID generate. Now: " + deltaTicks);
 
-        return newId;
+        return (deltaTicks << Snowflakes.TicksLeftShift)
+            | (_dataCenterId << Snowflakes.DataCenterIdLeftShift)
+            | (_machineId << Snowflakes.MachineIdLeftShift)
+            | sequence;
     }
+
+
+    /// <summary>
+    /// 获取最后一次时钟周期数。
+    /// </summary>
+    /// <returns>返回长整数。</returns>
+    public virtual long GetLastTicks()
+        => _lastTicks;
+
+    /// <summary>
+    /// 异步获取最后一次时钟周期数。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含长整数的异步操作。</returns>
+    public virtual Task<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.RunTask(() => _lastTicksAsync);
+
+
+    /// <summary>
+    /// 解析时钟周期数。
+    /// </summary>
+    /// <param name="id">给定的标识。</param>
+    /// <param name="isOther">使用另外一种方法还原（可选；默认 FALSE）。</param>
+    /// <returns>返回长整数。</returns>
+    public virtual long ParseTicks(long id, bool isOther = false)
+        => Snowflakes.ParseTicks(id, _baseTicks, isOther);
 
 }

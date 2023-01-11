@@ -16,16 +16,16 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义 <see cref="ModelBuilder"/> 与 <see cref="DbContextAccessor"/> 的静态扩展。
+/// 定义 <see cref="ModelBuilder"/> 与 <see cref="BaseDbContext"/> 的静态扩展。
 /// </summary>
-public static class ModelBuilderDbContextAccessorExtensions
+public static class ModelBuilderBaseDbContextExtensions
 {
 
     /// <summary>
     /// 创建指定程序集模型集合的默认配置（支持过滤 <see cref="NotMappedAttribute"/> 定义的模型）。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    /// <param name="modelAssemblies">给定包含模型的 <see cref="IEnumerable{String}"/> 程序集集合。</param>
+    /// <param name="modelAssemblies">给定包含模型的程序集数组。</param>
     /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
     public static ModelBuilder CreateAssembliesModels(this ModelBuilder modelBuilder,
         params string[] modelAssemblies)
@@ -68,24 +68,24 @@ public static class ModelBuilderDbContextAccessorExtensions
     /// 创建审计模型集合。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    /// <param name="accessor">给定的 <see cref="DbContextAccessor"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
     /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
     public static ModelBuilder CreateAuditingModels(this ModelBuilder modelBuilder,
-        DbContextAccessor accessor)
+        BaseDbContext dbContext)
     {
-        var limitableMaxLength = accessor.DataOptions.Store.LimitableMaxLengthOfProperty;
-        var mapRelationship = accessor.DataOptions.Store.MapRelationship;
+        var limitableMaxLength = dbContext.DataOptions.Store.LimitableMaxLengthOfProperty;
+        var mapRelationship = dbContext.DataOptions.Store.MapRelationship;
 
         modelBuilder.Entity<Audit>(b =>
         {
-            b.ToTableWithSharding(accessor.ShardingManager, accessor);
+            b.ToTableWithSharding(dbContext.ShardingManager, dbContext);
 
             b.HasIndex(i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
             b.HasKey(k => k.Id);
 
             b.Property(p => p.Id).ValueGeneratedNever()
-                .Sharding<ModShardingStrategy>(accessor.ShardingManager);
+                .Sharding<ModShardingStrategy>(dbContext.ShardingManager);
 
             if (limitableMaxLength > 0)
             {
@@ -98,14 +98,14 @@ public static class ModelBuilderDbContextAccessorExtensions
 
         modelBuilder.Entity<AuditProperty>(b =>
         {
-            b.ToTableWithSharding(accessor.ShardingManager, accessor);
+            b.ToTableWithSharding(dbContext.ShardingManager, dbContext);
 
             b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
 
             b.HasKey(k => k.Id);
 
             b.Property(x => x.Id).ValueGeneratedNever()
-                .Sharding<ModShardingStrategy>(accessor.ShardingManager);
+                .Sharding<ModShardingStrategy>(dbContext.ShardingManager);
 
             if (limitableMaxLength > 0)
             {

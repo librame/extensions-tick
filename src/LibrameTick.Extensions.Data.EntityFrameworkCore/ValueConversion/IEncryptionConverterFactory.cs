@@ -22,8 +22,8 @@ public interface IEncryptionConverterFactory
     /// <summary>
     /// 获取指定存取器的属性类型值转换器。
     /// </summary>
-    /// <param name="accessor">给定的 <see cref="AbstractContextAccessor"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
     /// <param name="propertyType">给定的属性类型。</param>
     /// <returns>返回 <see cref="ValueConverter"/>。</returns>
-    ValueConverter GetConverter(AbstractContextAccessor accessor, Type propertyType);
+    ValueConverter GetConverter(BaseDbContext dbContext, Type propertyType);
 }

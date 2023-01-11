@@ -153,7 +153,7 @@ public class BaseStore<T> : IStore<T>
     /// <param name="id">给定的标识。</param>
     /// <returns>返回 <typeparamref name="T"/>。</returns>
     public virtual T? FindById(object id)
-        => CurrentAccessor.Find<T>(id);
+        => CurrentAccessor.CurrentContext.Find<T>(id);
 
 
     /// <summary>
@@ -188,7 +188,7 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
     public virtual IList<T> FindListWithSpecification(IEntitySpecification<T>? entitySpecification = null)
-        => CurrentAccessor.FindListWithSpecification(entitySpecification);
+        => CurrentAccessor.FindsWithSpecification(entitySpecification);
 
     /// <summary>
     /// 异步查找带有规约的类型实例集合。
@@ -198,7 +198,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
     public virtual Task<IList<T>> FindListWithSpecificationAsync(IEntitySpecification<T>? entitySpecification = null,
         CancellationToken cancellationToken = default)
-        => CurrentAccessor.FindListWithSpecificationAsync(entitySpecification, cancellationToken);
+        => CurrentAccessor.FindsWithSpecificationAsync(entitySpecification, cancellationToken);
 
 
     /// <summary>
@@ -259,14 +259,14 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Add(params T[] entities)
-        => UseWriteAccessor().CurrentAccessor.AddRange(entities);
+        => UseWriteAccessor().CurrentAccessor.CurrentContext.AddRange(entities);
 
     /// <summary>
     /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     public virtual void Add(IEnumerable<T> entities)
-        => UseWriteAccessor().CurrentAccessor.AddRange(entities);
+        => UseWriteAccessor().CurrentAccessor.CurrentContext.AddRange(entities);
 
     #endregion
 
@@ -278,14 +278,14 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Remove(params T[] entities)
-        => UseWriteAccessor().CurrentAccessor.RemoveRange(entities);
+        => UseWriteAccessor().CurrentAccessor.CurrentContext.RemoveRange(entities);
 
     /// <summary>
     /// 移除类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     public virtual void Remove(IEnumerable<T> entities)
-        => UseWriteAccessor().CurrentAccessor.RemoveRange(entities);
+        => UseWriteAccessor().CurrentAccessor.CurrentContext.RemoveRange(entities);
 
     #endregion
 
@@ -297,14 +297,14 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Update(params T[] entities)
-        => UseWriteAccessor().CurrentAccessor.UpdateRange(entities);
+        => UseWriteAccessor().CurrentAccessor.CurrentContext.UpdateRange(entities);
 
     /// <summary>
     /// 更新类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     public virtual void Update(IEnumerable<T> entities)
-        => UseWriteAccessor().CurrentAccessor.UpdateRange(entities);
+        => UseWriteAccessor().CurrentAccessor.CurrentContext.UpdateRange(entities);
 
     #endregion
 
@@ -317,7 +317,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回受影响的行数。</returns>
     public virtual int SaveChanges()
     {
-        var value = UseWriteAccessor().CurrentAccessor.SaveChanges();
+        var value = UseWriteAccessor().CurrentAccessor.CurrentContext.SaveChanges();
         UseReadAccessor();
         return value;
     }
@@ -329,7 +329,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回一个包含受影响行数的异步操作。</returns>
     public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var value = await UseWriteAccessor().CurrentAccessor.SaveChangesAsync(cancellationToken);
+        var value = await UseWriteAccessor().CurrentAccessor.CurrentContext.SaveChangesAsync(cancellationToken);
         UseReadAccessor();
         return value;
     }
