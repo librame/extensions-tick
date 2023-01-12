@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    class InternalTestAccessorInitializer<TDbContext> : DbContextAccessorInitializer<BaseAccessor<TDbContext>, InternalTestAccessorSeeder>
+    class InternalTestAccessorInitializer<TDbContext> : BaseDbContextAccessorInitializer<TDbContext, InternalTestAccessorSeeder>
         where TDbContext : BaseDbContext
     {
         public InternalTestAccessorInitializer(BaseAccessor<TDbContext> accessor, InternalTestAccessorSeeder seeder)

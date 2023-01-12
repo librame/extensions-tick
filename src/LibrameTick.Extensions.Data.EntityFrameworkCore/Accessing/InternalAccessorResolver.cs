@@ -16,12 +16,12 @@ class InternalAccessorResolver : IAccessorResolver
 {
     private static readonly Type _accessorType
         = typeof(IAccessor);
-    private static readonly Type _dbContextType
-        = typeof(DbContext);
+    //private static readonly Type _dbContextType
+    //    = typeof(IDbContext);
 
     // 限定存取器必需实现 DbContext 和 IAccessor
     private static readonly Func<ServiceDescriptor, bool> _accessorServicePredicate
-        = sd => sd.ServiceType.IsAssignableTo(_dbContextType) && sd.ServiceType.IsAssignableTo(_accessorType);
+        = sd => sd.ServiceType.IsAssignableTo(_accessorType);
 
     private readonly DataExtensionBuilder _builder;
     private readonly IServiceProvider _provider;

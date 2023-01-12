@@ -46,15 +46,12 @@ public static class EntityTypeBuilderExtensions
         IShardingManager shardingManager, DbContext context, string? schema)
         where TEntity : class
     {
-        var entity = context.Set<TEntity>().FirstBySpecification();
-        if (entity is not null)
-        {
-            var tableName = builder.Metadata.GetTableName();
-            var descriptor = shardingManager.ShardEntity(typeof(TEntity), entity, tableName);
+        // var entity = context.Set<TEntity>().FirstBySpecification(); // 在 OnModelCreating 不能使用该模型
+        var tableName = builder.Metadata.GetTableName();
+        var descriptor = shardingManager.ShardEntity(typeof(TEntity), entity: null, tableName);
 
-            if (!descriptor.BaseName.Equals(tableName, StringComparison.Ordinal))
-                builder.Metadata.SetTableName(descriptor.BaseName);
-        }
+        if (!descriptor.BaseName.Equals(tableName, StringComparison.Ordinal))
+            builder.Metadata.SetTableName(descriptor.BaseName);
 
         builder.Metadata.SetSchema(schema);
 

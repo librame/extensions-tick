@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data;
 using Librame.Extensions.Data.Accessing;
@@ -17,6 +18,7 @@ using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -85,7 +87,7 @@ public static class DataExtensionBuilderExtensions
 
     private static DataExtensionBuilder AddStoring(this DataExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService(typeof(IStore<>), typeof(BaseStore<>));
+        builder.TryAddOrReplaceService(typeof(IStore<>), implementationType: typeof(BaseStore<>));
 
         return builder;
     }
@@ -99,7 +101,64 @@ public static class DataExtensionBuilderExtensions
 
 
     /// <summary>
-    /// 添加 <see cref="IAccessorInitializer"/>（支持多次添加）。
+    /// 添加存取器。
+    /// </summary>
+    /// <typeparam name="TAccessor">指定实现 <see cref="AbstractAccessor"/> 的存取器类型。</typeparam>
+    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
+    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+    public static DataExtensionBuilder AddAccessor<TAccessor>(this DataExtensionBuilder builder)
+        where TAccessor : AbstractAccessor
+    {
+        builder.TryAddOrReplaceService<TAccessor>(characteristicType: typeof(BaseAccessor<>));
+
+        return builder;
+    }
+
+    /// <summary>
+    /// 添加存取器。
+    /// </summary>
+    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
+    /// <param name="accessorType">给定的存取器类型。</param>
+    /// <param name="autoReferenceDbContext">自动引用当前注册的数据库上下文（可选；默认不自动引用；如果要启用，需确保存取器类型为泛型，且类型定义仅为 <see cref="DbContext"/> 或其扩展）。</param>
+    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+    public static DataExtensionBuilder AddAccessor(this DataExtensionBuilder builder, Type accessorType,
+        bool autoReferenceDbContext = false)
+    {
+        var baseAccessorType = typeof(IAccessor);
+
+        if (!accessorType.IsImplementedType(baseAccessorType))
+            throw new ArgumentException($"Invalid accessor type, the required interface '{baseAccessorType}' was not implemented.");
+
+        var characteristicType = typeof(BaseAccessor<>);
+
+        if (autoReferenceDbContext && accessorType.IsGenericTypeDefinition)
+        {
+            var parameterType = accessorType.GetTypeInfo().GenericTypeParameters[0];
+            if (parameterType?.BaseType?.IsImplementedType(typeof(DbContext)) != true)
+                throw new ArgumentException($"Invalid generic accessor definition, see {characteristicType} for details.");
+
+            var dbContextType = typeof(DbContext);
+            var implementedTypes = builder.Services
+                .Where(s => dbContextType.IsAssignableFrom(s.ServiceType))
+                .Select(s => accessorType.MakeGenericType(s.ServiceType))
+                .ToArray();
+
+            foreach (var implementedType in implementedTypes)
+            {
+                builder.TryAddOrReplaceService(implementedType, implementedType, characteristicType);
+            }
+        }
+        else
+        {
+            builder.TryAddOrReplaceService(accessorType, accessorType, characteristicType);
+        }
+
+        return builder;
+    }
+
+
+    /// <summary>
+    /// 添加初始化器（支持多次添加）。
     /// </summary>
     /// <typeparam name="TInitializer">指定的初始化器类型。</typeparam>
     /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
@@ -113,6 +172,49 @@ public static class DataExtensionBuilderExtensions
     }
 
     /// <summary>
+    /// 添加初始化器。
+    /// </summary>
+    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
+    /// <param name="initializerType">给定的初始化器类型。</param>
+    /// <param name="autoReferenceDbContext">自动引用当前注册的数据库上下文（可选；默认不自动引用；如果要启用，需确保初始化器类型为泛型，且类型定义仅为 <see cref="DbContext"/> 或其扩展）。</param>
+    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+    public static DataExtensionBuilder AddInitializer(this DataExtensionBuilder builder, Type initializerType,
+        bool autoReferenceDbContext = false)
+    {
+        var baseInitializerType = typeof(IAccessorInitializer);
+
+        if (!initializerType.IsImplementedType(baseInitializerType))
+            throw new ArgumentException($"Invalid initializer type, the required interface '{baseInitializerType}' was not implemented.");
+
+        var characteristicType = baseInitializerType;
+
+        if (autoReferenceDbContext && initializerType.IsGenericTypeDefinition)
+        {
+            var parameterType = initializerType.GetTypeInfo().GenericTypeParameters[0];
+            if (parameterType?.BaseType?.IsImplementedType(typeof(DbContext)) != true)
+                throw new ArgumentException($"Invalid generic initializer definition, see {typeof(BaseDbContextAccessorInitializer<,>)} for details.");
+
+            var dbContextType = typeof(DbContext);
+            var implementedTypes = builder.Services
+                .Where(s => dbContextType.IsAssignableFrom(s.ServiceType))
+                .Select(s => initializerType.MakeGenericType(s.ServiceType))
+                .ToArray();
+
+            foreach (var implementedType in implementedTypes)
+            {
+                builder.TryAddOrReplaceService(implementedType, implementedType, characteristicType);
+            }
+        }
+        else
+        {
+            builder.TryAddOrReplaceService(initializerType, initializerType, characteristicType);
+        }
+
+        return builder;
+    }
+
+
+    /// <summary>
     /// 添加 <typeparamref name="TSeeder"/>。
     /// </summary>
     /// <typeparam name="TSeeder">指定的种子机类型。</typeparam>
@@ -121,7 +223,7 @@ public static class DataExtensionBuilderExtensions
     public static DataExtensionBuilder AddSeeder<TSeeder>(this DataExtensionBuilder builder)
         where TSeeder : class, IAccessorSeeder
     {
-        builder.TryAddOrReplaceService<IAccessorSeeder, TSeeder>();
+        builder.TryAddOrReplaceService<TSeeder>(characteristicType: typeof(IAccessorSeeder));
 
         return builder;
     }

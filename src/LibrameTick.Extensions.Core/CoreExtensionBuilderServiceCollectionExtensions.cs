@@ -97,8 +97,8 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
 
     private static CoreExtensionBuilder AddCommon(this CoreExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService(typeof(ICloneable<>), typeof(Cloneable<>));
-        builder.TryAddOrReplaceService(typeof(IDecoratable<>), typeof(Decoratable<>));
+        builder.TryAddOrReplaceService(typeof(ICloneable<>), implementationType: typeof(Cloneable<>));
+        builder.TryAddOrReplaceService(typeof(IDecoratable<>), implementationType: typeof(Decoratable<>));
 
         return builder;
     }

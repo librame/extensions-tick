@@ -19,6 +19,7 @@ class InternalShardingManager : AbstractShardingManager
         AddStrategy(new DateTimeShardingStrategy());
         AddStrategy(new DateTimeOffsetShardingStrategy());
         AddStrategy(new CultureInfoShardingStrategy());
+        AddStrategy(new ModShardingStrategy());
 
         // 合并选项自定义策略集合
         if (dataOptions.CurrentValue.ShardingStrategies.Count > 0)

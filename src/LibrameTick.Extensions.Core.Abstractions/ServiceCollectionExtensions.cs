@@ -92,7 +92,14 @@ public static class ServiceCollectionExtensions
         return services.TryAddOrReplaceByCharacteristic(characteristic, descriptor);
     }
 
-    internal static IServiceCollection TryAddOrReplaceByCharacteristic(this IServiceCollection services,
+    /// <summary>
+    /// 通过特征尝试添加或替换服务。
+    /// </summary>
+    /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
+    /// <param name="characteristic">给定的 <see cref="ServiceCharacteristic"/>。</param>
+    /// <param name="descriptor">给定的 <see cref="ServiceDescriptor"/>。</param>
+    /// <returns>返回 <see cref="IServiceCollection"/>。</returns>
+    public static IServiceCollection TryAddOrReplaceByCharacteristic(this IServiceCollection services,
         ServiceCharacteristic characteristic, ServiceDescriptor descriptor)
     {
         // 如果已存在相同服务类型

@@ -13,47 +13,23 @@
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义抽象继承 <see cref="DbContextAccessorInitializer{TAccessor}"/> 数据库上下文存取器初始化器的泛型实现。
+/// 定义实现 <see cref="BaseAccessorInitializer{TAccessor, TSeeder}"/> 的基础存取器初始化器。
 /// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="AbstractAccessor"/> 的存取器类型。</typeparam>
-/// <typeparam name="TSeeder">指定已实现 <see cref="IAccessorSeeder"/> 的存取器类型。</typeparam>
-public class DbContextAccessorInitializer<TAccessor, TSeeder> : DbContextAccessorInitializer<TAccessor>
+/// <typeparam name="TAccessor">指定实现 <see cref="AbstractAccessor"/> 的存取器类型。</typeparam>
+/// <typeparam name="TSeeder">指定实现 <see cref="AbstractAccessorSeeder"/> 的存取器种子机类型。</typeparam>
+public class BaseAccessorInitializer<TAccessor, TSeeder> : AbstractAccessorInitializer<TAccessor, TSeeder>
     where TAccessor : AbstractAccessor
-    where TSeeder : IAccessorSeeder
+    where TSeeder : AbstractAccessorSeeder
 {
     /// <summary>
-    /// 使用数据库上下文构造一个 <see cref="DbContextAccessorInitializer{TAccessor, TSeeder}"/>。
+    /// 构造一个 <see cref="BaseAccessorInitializer{TAccessor, TSeeder}"/>。
     /// </summary>
     /// <param name="accessor">给定的 <typeparamref name="TAccessor"/>。</param>
     /// <param name="seeder">给定的 <typeparamref name="TSeeder"/>。</param>
-    public DbContextAccessorInitializer(TAccessor accessor, TSeeder seeder)
-        : base(accessor)
+    public BaseAccessorInitializer(TAccessor accessor, TSeeder seeder)
+        : base(accessor, seeder)
     {
         Seeder = seeder;
-    }
-
-
-    /// <summary>
-    /// 存取器种子机。
-    /// </summary>
-    protected TSeeder Seeder { get; init; }
-}
-
-
-/// <summary>
-/// 定义抽象实现 <see cref="AbstractAccessorInitializer{TAccessor}"/> 的数据库上下文存取器初始化器。
-/// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="AbstractAccessor"/> 的存取器类型。</typeparam>
-public class DbContextAccessorInitializer<TAccessor> : AbstractAccessorInitializer<TAccessor>
-    where TAccessor : AbstractAccessor
-{
-    /// <summary>
-    /// 使用数据库上下文构造一个 <see cref="DbContextAccessorInitializer{TAccessor}"/>。
-    /// </summary>
-    /// <param name="accessor">给定的 <typeparamref name="TAccessor"/>。</param>
-    public DbContextAccessorInitializer(TAccessor accessor)
-        : base(accessor)
-    {
     }
 
 

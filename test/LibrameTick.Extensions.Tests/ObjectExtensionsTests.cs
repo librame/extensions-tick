@@ -10,7 +10,7 @@ namespace Librame.Extensions
         public void AsTest()
         {
             object? obj = null;
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 obj!.As<int>(nameof(obj));
             });

@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义一个实现 <see cref="AbstractAccessor"/> 的基础访问器。
+/// 定义一个实现 <see cref="AbstractAccessor"/> 的基础存取器。
 /// </summary>
 /// <typeparam name="TDbContext">指定实现 <see cref="BaseDbContext"/> 的数据库上下文类型。</typeparam>
 public class BaseAccessor<TDbContext> : AbstractAccessor

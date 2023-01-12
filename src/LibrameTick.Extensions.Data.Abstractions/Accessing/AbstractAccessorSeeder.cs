@@ -15,7 +15,7 @@ using Librame.Extensions.Bootstraps;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 抽象实现 <see cref="IAccessorSeeder"/>。
+/// 抽象实现 <see cref="IAccessorSeeder"/> 的存取器种子机。
 /// </summary>
 public abstract class AbstractAccessorSeeder : IAccessorSeeder
 {

@@ -13,54 +13,36 @@
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义抽象继承 <see cref="AbstractAccessorInitializer{TAccessor}"/> 的存取器初始化器的泛型实现。
+/// 定义抽象实现 <see cref="IAccessorInitializer"/> 的存取器初始化器。
 /// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="IAccessor"/> 的存取器类型。</typeparam>
-/// <typeparam name="TSeeder">指定已实现 <see cref="IAccessorSeeder"/> 的存取器类型。</typeparam>
-public abstract class AbstractAccessorInitializer<TAccessor, TSeeder> : AbstractAccessorInitializer<TAccessor>
+/// <typeparam name="TAccessor">指定实现 <see cref="IAccessor"/> 的存取器类型。</typeparam>
+/// <typeparam name="TSeeder">指定实现 <see cref="AbstractAccessorSeeder"/> 的存取器种子机类型。</typeparam>
+public abstract class AbstractAccessorInitializer<TAccessor, TSeeder> : IAccessorInitializer
     where TAccessor : IAccessor
-    where TSeeder : IAccessorSeeder
+    where TSeeder : AbstractAccessorSeeder
 {
     /// <summary>
-    /// 使用数据库上下文构造一个 <see cref="AbstractAccessorInitializer{TAccessor, TSeeder}"/>。
+    /// 构造一个 <see cref="AbstractAccessorInitializer{TAccessor, TSeeder}"/>。
     /// </summary>
     /// <param name="accessor">给定的 <typeparamref name="TAccessor"/>。</param>
     /// <param name="seeder">给定的 <typeparamref name="TSeeder"/>。</param>
     protected AbstractAccessorInitializer(TAccessor accessor, TSeeder seeder)
-        : base(accessor)
-    {
-        Seeder = seeder;
-    }
-
-
-    /// <summary>
-    /// 存取器种子机。
-    /// </summary>
-    protected TSeeder Seeder { get; init; }
-}
-
-
-/// <summary>
-/// 定义抽象实现 <see cref="IAccessorInitializer"/> 的存取器初始化器。
-/// </summary>
-/// <typeparam name="TAccessor">指定已实现 <see cref="IAccessor"/> 的存取器类型。</typeparam>
-public abstract class AbstractAccessorInitializer<TAccessor> : IAccessorInitializer
-    where TAccessor : IAccessor
-{
-    /// <summary>
-    /// 使用数据库上下文构造一个 <see cref="AbstractAccessorInitializer{TAccessor}"/>。
-    /// </summary>
-    /// <param name="accessor">给定的 <typeparamref name="TAccessor"/>。</param>
-    protected AbstractAccessorInitializer(TAccessor accessor)
     {
         Accessor = accessor;
+        Seeder = seeder;
     }
 
 
     /// <summary>
     /// 存取器。
     /// </summary>
-    protected TAccessor Accessor { get; init; }
+    public TAccessor Accessor { get; init; }
+
+    /// <summary>
+    /// 存取器种子机。
+    /// </summary>
+    public TSeeder Seeder { get; init; }
+
 
     /// <summary>
     /// 是否已填充。

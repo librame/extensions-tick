@@ -42,7 +42,8 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         ServiceCharacteristics.AddScope<IAccessorMigrator>();
         ServiceCharacteristics.AddScope<IAccessorResolver>();
 
-        ServiceCharacteristics.AddScope<IAccessorSeeder>(addImplementationType: true);
+        ServiceCharacteristics.AddScope(typeof(BaseAccessor<>));
+        ServiceCharacteristics.AddScope<IAccessorSeeder>();
         ServiceCharacteristics.AddScope<IAccessorInitializer>();
 
         // Sharding

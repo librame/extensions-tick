@@ -18,8 +18,8 @@ class InternalAccessorMigrator : IAccessorMigrator
     {
         foreach (var accessor in accessors)
         {
-            var context = (DbContext)accessor;
-            context.Database.Migrate();
+            if (accessor.CurrentContext is DbContext dbContext)
+                dbContext.Database.Migrate();
         }
     }
 
@@ -28,8 +28,8 @@ class InternalAccessorMigrator : IAccessorMigrator
     {
         foreach (var accessor in accessors)
         {
-            var context = (DbContext)accessor;
-            await context.Database.MigrateAsync(cancellationToken);
+            if (accessor.CurrentContext is DbContext dbContext)
+                await dbContext.Database.MigrateAsync(cancellationToken);
         }
     }
 

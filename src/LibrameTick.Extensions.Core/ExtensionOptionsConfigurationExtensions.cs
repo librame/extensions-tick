@@ -10,13 +10,13 @@
 
 #endregion
 
-namespace Librame.Extensions.Core;
+//namespace Librame.Extensions.Core;
 
-/// <summary>
-/// <see cref="IExtensionOptions"/> 与 <see cref="IConfiguration"/> 静态扩展。
-/// </summary>
-public static class ExtensionOptionsConfigurationExtensions
-{
+///// <summary>
+///// <see cref="IExtensionOptions"/> 与 <see cref="IConfiguration"/> 静态扩展。
+///// </summary>
+//public static class ExtensionOptionsConfigurationExtensions
+//{
 
     ///// <summary>
     ///// 从 JSON 文件获取配置选项。
@@ -76,4 +76,4 @@ public static class ExtensionOptionsConfigurationExtensions
     //    return false;
     //}
 
-}
+//}
