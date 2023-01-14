@@ -87,6 +87,18 @@ public static class ShardingManagerExtensions
         return descriptor;
     }
 
+    /// <summary>
+    /// 对实体映射的数据表分片。
+    /// </summary>
+    /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
+    /// <param name="entityType">给定的实体类型。</param>
+    /// <param name="entity">给定的实体对象。</param>
+    /// <param name="tableName">给定的表名。</param>
+    /// <returns>返回分片字符串。</returns>
+    public static string ShardEntityString(this IShardingManager manager,
+        Type entityType, object? entity, string? tableName)
+        => manager.ShardEntity(entityType, entity, tableName);
+
 
     private static ShardedDescriptor CreateDescriptor(this IShardingManager manager,
         ShardedAttribute attribute)

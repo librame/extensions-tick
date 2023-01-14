@@ -15,7 +15,7 @@ namespace Librame.Extensions.Data.Sharding;
 /// <summary>
 /// 定义针对库或表的分片描述符。
 /// </summary>
-public class ShardedDescriptor : IEquatable<ShardedDescriptor>
+public class ShardedDescriptor : IEquatable<ShardedDescriptor>, IEquatable<string>
 {
     /// <summary>
     /// 默认后缀连接符。
@@ -89,6 +89,36 @@ public class ShardedDescriptor : IEquatable<ShardedDescriptor>
 
 
     /// <summary>
+    /// 修改实体。
+    /// </summary>
+    /// <param name="newEntity">给定的新 <see cref="ShardingEntity"/>。</param>
+    /// <returns>返回 <see cref="ShardedDescriptor"/>。</returns>
+    public ShardedDescriptor ChangeEntity(ShardingEntity newEntity)
+    {
+        Entity = newEntity;
+
+        return this;
+    }
+
+    /// <summary>
+    /// 修改引用。
+    /// </summary>
+    /// <param name="newReferenceValue">给定的新引用值。</param>
+    /// <param name="newReferenceName">给定的新引用名称（可选）。</param>
+    /// <returns>返回 <see cref="ShardedDescriptor"/>。</returns>
+    public ShardedDescriptor ChangeReference(object newReferenceValue, string? newReferenceName = null)
+    {
+        ReferenceValue = newReferenceValue;
+        ReferenceType = newReferenceValue.GetType();
+
+        if (!string.IsNullOrEmpty(newReferenceName))
+            ReferenceName = newReferenceName;
+
+        return this;
+    }
+
+
+    /// <summary>
     /// 带指定新后缀的新 <see cref="ShardedDescriptor"/>。
     /// </summary>
     /// <param name="newSuffix">给定的新后缀。</param>
@@ -104,6 +134,14 @@ public class ShardedDescriptor : IEquatable<ShardedDescriptor>
     /// <returns>返回布尔值。</returns>
     public bool Equals(ShardedDescriptor? other)
         => other is not null && ToString() == other.ToString();
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="other">给定的字符串。</param>
+    /// <returns>返回布尔值。</returns>
+    public bool Equals(string? other)
+        => ToString() == other;
 
 
     /// <summary>

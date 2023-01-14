@@ -16,15 +16,9 @@ namespace Librame.Extensions.Data.Sharding;
 /// 定义抽象实现 <see cref="IShardingStrategy"/> 的泛型分片策略。
 /// </summary>
 /// <typeparam name="TValue">指定的分片值类型。</typeparam>
-public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy
+public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy, IEnumerable<ShardedStrategyParameter<TValue>>
 {
-    /// <summary>
-    /// 默认参数键指示符。
-    /// </summary>
-    public const string DefaultParameterKeyIndicator = "%";
-
-
-    private readonly ConcurrentDictionary<string, Func<TValue, string>> _parameters;
+    private readonly ConcurrentDictionary<string, ShardedStrategyParameter<TValue>> _parameters;
 
 
     /// <summary>
@@ -43,6 +37,29 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy
         => GetType();
 
     /// <summary>
+    /// 所有键名集合。
+    /// </summary>
+    public ICollection<string> AllKeys
+        => _parameters.Keys;
+
+    /// <summary>
+    /// 获取指定键名的参数。
+    /// </summary>
+    /// <param name="key">给定的键名。</param>
+    /// <returns>返回 <see cref="ShardedStrategyParameter{TValue}"/>。</returns>
+    public ShardedStrategyParameter<TValue> this[string key]
+        => _parameters[key];
+
+    /// <summary>
+    /// 获取指定索引的参数。
+    /// </summary>
+    /// <param name="index">给定的索引。</param>
+    /// <returns>返回 <see cref="ShardedStrategyParameter{TValue}"/>。</returns>
+    public ShardedStrategyParameter<TValue> this[int index]
+        => _parameters.Values.ElementAt(index);
+
+
+    /// <summary>
     /// 参数比较（默认区分大小写）。
     /// </summary>
     protected virtual StringComparison ParameterComparison
@@ -50,20 +67,22 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy
 
 
     /// <summary>
-    /// 建立参数键。
+    /// 添加参数。
     /// </summary>
     /// <param name="name">给定的名称。</param>
-    /// <returns>返回字符串。</returns>
-    protected string BuildParameterKey(string name)
-        => $"{DefaultParameterKeyIndicator}{name}";
+    /// <param name="valueFormatter">给定的值格式化器。</param>
+    /// <param name="defaultValue">给定的默认值（可选；默认为 <see cref="string.Empty"/>）。</param>
+    /// <param name="keyIndicator">给定的键指示符（可选；默认为 <see cref="ShardedStrategyParameter{TValue}.DefaultKeyIndicator"/>）。</param>
+    protected void AddParameter(string name, Func<TValue, string> valueFormatter,
+        string? defaultValue = null, string? keyIndicator = null)
+        => AddParameter(new ShardedStrategyParameter<TValue>(name, valueFormatter, defaultValue, keyIndicator));
 
     /// <summary>
     /// 添加参数。
     /// </summary>
-    /// <param name="name">给定的参数名称。</param>
-    /// <param name="formatFunc">给定的格式化方法。</param>
-    protected void AddParameter(string name, Func<TValue, string> formatFunc)
-        => _parameters.AddOrUpdate(BuildParameterKey(name), formatFunc, (key, value) => formatFunc);
+    /// <param name="parameter">给定的 <see cref="ShardedStrategyParameter{TValue}"/>。</param>
+    protected void AddParameter(ShardedStrategyParameter<TValue> parameter)
+        => _parameters.AddOrUpdate(parameter.Key, parameter, (key, value) => parameter);
 
 
     /// <summary>
@@ -141,11 +160,25 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy
         {
             foreach (var p in _parameters)
             {
-                suffix = suffix.Replace(p.Key, p.Value(value), ParameterComparison);
+                suffix = suffix.Replace(p.Key, p.Value.ValueFormatter(value), ParameterComparison);
+
+                if (suffix.Contains(p.Key))
+                    suffix = suffix.Replace(p.Key, p.Value.DefaultValue);
             }
         }
         
         return sharded.Suffix = suffix;
     }
+
+
+    /// <summary>
+    /// 获取参数枚举器。
+    /// </summary>
+    /// <returns>返回 <see cref="IEnumerator{T}"/>。</returns>
+    public IEnumerator<ShardedStrategyParameter<TValue>> GetEnumerator()
+        => _parameters.Values.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
 
 }

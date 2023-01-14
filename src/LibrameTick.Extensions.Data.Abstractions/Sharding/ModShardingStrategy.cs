@@ -26,7 +26,7 @@ public class ModShardingStrategy : AbstractShardingStrategy<long>
     public ModShardingStrategy()
         : base()
     {
-        AddParameter("%m", id => (id % 2).ToString());
+        AddParameter("m", id => (id % 2).ToString());
     }
 
 }

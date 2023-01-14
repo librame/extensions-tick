@@ -48,10 +48,10 @@ public static class EntityTypeBuilderExtensions
     {
         // var entity = context.Set<TEntity>().FirstBySpecification(); // 在 OnModelCreating 不能使用该模型
         var tableName = builder.Metadata.GetTableName();
-        var descriptor = shardingManager.ShardEntity(typeof(TEntity), entity: null, tableName);
+        var descriptor = shardingManager.ShardEntityString(typeof(TEntity), entity: null, tableName);
 
-        if (!descriptor.BaseName.Equals(tableName, StringComparison.Ordinal))
-            builder.Metadata.SetTableName(descriptor.BaseName);
+        if (!descriptor.Equals(tableName, StringComparison.Ordinal))
+            builder.Metadata.SetTableName(descriptor);
 
         builder.Metadata.SetSchema(schema);
 
