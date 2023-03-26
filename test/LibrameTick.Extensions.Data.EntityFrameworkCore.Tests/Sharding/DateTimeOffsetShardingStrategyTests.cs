@@ -2,16 +2,16 @@
 
 namespace Librame.Extensions.Data.Sharding
 {
-    public class CultureInfoShardingStrategyTests
+    public class DateTimeOffsetShardingStrategyTests
     {
 
         [Fact]
         public void AllTest()
         {
-            var sharded = new ShardedDescriptor("sharding", "%c");
+            var sharded = new ShardedDescriptor("sharding", "%qq");
             var original = sharded.ToString();
 
-            var strategy = new CultureInfoShardingStrategy();
+            var strategy = new DateTimeOffsetShardingStrategy();
             strategy.FormatSuffix(sharded);
 
             var format = sharded.ToString();

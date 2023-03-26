@@ -13,10 +13,10 @@
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
-/// 定义基于当前文化信息的分片策略。
+/// 定义基于文化信息的分片策略。
 /// </summary>
 /// <remarks>
-/// 当前文化信息的分片策略支持的参数（区分大小写）包括：%c（名称）。
+/// 文化信息的分片策略支持的参数（区分大小写）包括：%c（名称）。
 /// </remarks>
 public class CultureInfoShardingStrategy : AbstractShardingStrategy<CultureInfo>
 {
@@ -28,5 +28,12 @@ public class CultureInfoShardingStrategy : AbstractShardingStrategy<CultureInfo>
     {
         AddParameter("c", uic => uic.Name.Replace('-', '_'));
     }
+
+
+    /// <summary>
+    /// 重写默认值为当前文化信息 <see cref="CultureInfo.CurrentCulture"/>。
+    /// </summary>
+    public override Lazy<CultureInfo> DefaultValue
+        => new Lazy<CultureInfo>(CultureInfo.CurrentCulture);
 
 }

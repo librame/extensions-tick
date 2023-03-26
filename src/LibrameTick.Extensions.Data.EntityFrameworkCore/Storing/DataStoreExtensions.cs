@@ -25,10 +25,10 @@ public static class DataStoreExtensions
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>（可选；默认使用 <see cref="ReadAccessorSpec"/> 规约）。</param>
     /// <returns>返回 <see cref="DbSet{TEntity}"/>。</returns>
     public static DbSet<TEntity> GetSet<TEntity>(this IStore<TEntity> store,
-        IAccessorSpecification? specification = null)
+        AccessorSpec? specification = null)
         where TEntity : class
     {
         var accessor = specification is null
@@ -43,10 +43,10 @@ public static class DataStoreExtensions
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>（可选；默认使用 <see cref="ReadAccessorSpec"/> 规约）。</param>
     /// <returns>返回表名字符串。</returns>
     public static string? GetSchema<TEntity>(this IStore<TEntity> store,
-        IAccessorSpecification? specification = null)
+        AccessorSpec? specification = null)
     {
         var accessor = specification is null
             ? store.Accessors.GetReadAccessor()
@@ -60,10 +60,10 @@ public static class DataStoreExtensions
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="store">给定的 <see cref="IStore{TEntity}"/>。</param>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>（可选；默认使用 <see cref="ReadAccessorSpec"/> 规约）。</param>
     /// <returns>返回表名字符串。</returns>
     public static string? GetTableName<TEntity>(this IStore<TEntity> store,
-        IAccessorSpecification? specification = null)
+        AccessorSpec? specification = null)
     {
         var accessor = specification is null
             ? store.Accessors.GetReadAccessor()

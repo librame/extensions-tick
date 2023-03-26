@@ -6,13 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestSqlServerDbContext : BaseDbContext
+    public class TestSqlServerDbContext : TestDbContext<TestSqlServerDbContext>
     {
         public TestSqlServerDbContext(IEncryptionConverterFactory encryptionConverterFactory,
             IShardingManager shardingManager,
             IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
             IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
-            DbContextOptions options)
+            DbContextOptions<TestSqlServerDbContext> options)
             : base(encryptionConverterFactory, shardingManager, dataOptionsMonitor, coreOptionsMonitor, options)
         {
         }

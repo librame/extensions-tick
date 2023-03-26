@@ -6,13 +6,14 @@ using Microsoft.Extensions.Options;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestDbContext : BaseDbContext
+    public class TestDbContext<TDbContext> : BaseDbContext
+        where TDbContext : DbContext
     {
         public TestDbContext(IEncryptionConverterFactory encryptionConverterFactory,
             IShardingManager shardingManager,
             IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
             IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
-            DbContextOptions options)
+            DbContextOptions<TDbContext> options)
             : base(encryptionConverterFactory, shardingManager, dataOptionsMonitor, coreOptionsMonitor, options)
         {
         }
@@ -22,7 +23,7 @@ namespace Librame.Extensions.Data.Accessing
         {
             modelBuilder.Entity<User>(b =>
             {
-                b.ToTableWithSharding(ShardingManager, this);
+                b.ToTableWithSharding(ShardingManager);
 
                 b.HasKey(k => k.Id);
 

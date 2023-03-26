@@ -6,13 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestSqliteDbContext : TestDbContext
+    public class TestSqliteDbContext : TestDbContext<TestSqliteDbContext>
     {
         public TestSqliteDbContext(IEncryptionConverterFactory encryptionConverterFactory,
             IShardingManager shardingManager,
             IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
             IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
-            DbContextOptions options)
+            DbContextOptions<TestSqliteDbContext> options)
             : base(encryptionConverterFactory, shardingManager, dataOptionsMonitor, coreOptionsMonitor, options)
         {
         }

@@ -21,33 +21,48 @@ public static class ShardingManagerExtensions
 {
 
     /// <summary>
-    /// 对存取器的数据库分片。
+    /// 创建分片描述符。
     /// </summary>
-    /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
-    /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    public static IAccessor ShardDatabase(this IShardingManager shardingManager, IAccessor accessor)
-        => shardingManager.ShardDatabase(accessor, out _);
+    /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
+    /// <param name="attribute">给定的 <see cref="ShardedAttribute"/>。</param>
+    /// <returns>返回 <see cref="ShardedDescriptor"/>。</returns>
+    /// <exception cref="ArgumentException">
+    /// <see cref="ShardedAttribute.BaseName"/> is null or empty.
+    /// </exception>
+    public static ShardedDescriptor CreateDescriptor(this IShardingManager manager, ShardedAttribute attribute)
+    {
+        if (string.IsNullOrEmpty(attribute.BaseName))
+            throw new ArgumentException($"The {nameof(attribute)}.{nameof(attribute.BaseName)} is null or empty.");
+
+        var descriptor = new ShardedDescriptor(attribute.BaseName, attribute.Suffix);
+
+        if (attribute.DefaultStrategyType is not null)
+            descriptor.DefaultStrategy = manager.GetStrategy(attribute.DefaultStrategyType);
+
+        return descriptor;
+    }
+
 
     /// <summary>
     /// 对存取器的数据库分片。
     /// </summary>
-    /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
+    /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
     /// <param name="descriptor">输出 <see cref="ShardedDescriptor"/>。</param>
-    /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    public static IAccessor ShardDatabase(this IShardingManager shardingManager, IAccessor accessor,
+    /// <returns>返回是否分片的布尔值。</returns>
+    public static bool ShardDatabase(this IShardingManager manager, IAccessor accessor,
         [MaybeNullWhen(false)] out ShardedDescriptor descriptor)
     {
         var attribute = accessor.AccessorDescriptor?.Sharded;
         if (attribute is null)
         {
             descriptor = null;
-            return accessor;
+            return false;
         }
 
-        descriptor = shardingManager.CreateDescriptor(attribute);
+        descriptor = manager.CreateDescriptor(attribute);
 
+        // 使用分片策略格式化分片名称
         descriptor.DefaultStrategy?.FormatSuffix(descriptor);
 
         var shardedName = descriptor.ToString();
@@ -56,22 +71,37 @@ public static class ShardingManagerExtensions
             var newConnectionString = accessor.CurrentConnectionString!
                 .Replace(attribute.BaseName!, shardedName);
 
+            // 切换为分片数据连接
             accessor.ChangeConnection(newConnectionString);
+
+            return true;
         }
 
-        return accessor;
+        return false;
     }
 
 
     /// <summary>
-    /// 对实体映射的数据表分片。
+    /// 通过实体类型特性获取分片信息。
+    /// </summary>
+    /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
+    /// <param name="entityType">给定的实体类型。</param>
+    /// <param name="entity">给定的实体对象。</param>
+    /// <param name="tableName">给定的表名。</param>
+    /// <returns>返回分片字符串。</returns>
+    public static string GetShardedStringByEntity(this IShardingManager manager,
+        Type entityType, object? entity, string? tableName)
+        => manager.GetShardedByEntity(entityType, entity, tableName);
+
+    /// <summary>
+    /// 通过实体类型特性获取分片信息。
     /// </summary>
     /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="entityType">给定的实体类型。</param>
     /// <param name="entity">给定的实体对象。</param>
     /// <param name="tableName">给定的表名。</param>
     /// <returns>返回 <see cref="ShardedDescriptor"/>。</returns>
-    public static ShardedDescriptor ShardEntity(this IShardingManager manager,
+    public static ShardedDescriptor GetShardedByEntity(this IShardingManager manager,
         Type entityType, object? entity, string? tableName)
     {
         var attribute = ShardedAttribute.ParseFromEntity(entityType, tableName);
@@ -81,35 +111,9 @@ public static class ShardingManagerExtensions
         descriptor.ReferenceValue = entity;
         descriptor.ReferenceName = tableName;
 
+        // 使用分片策略格式化分片名称
         descriptor.DefaultStrategy?.FormatSuffix(descriptor);
         descriptor.Entity?.Properties.ForEach(p => p.Strategy.FormatSuffix(descriptor));
-
-        return descriptor;
-    }
-
-    /// <summary>
-    /// 对实体映射的数据表分片。
-    /// </summary>
-    /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="entity">给定的实体对象。</param>
-    /// <param name="tableName">给定的表名。</param>
-    /// <returns>返回分片字符串。</returns>
-    public static string ShardEntityString(this IShardingManager manager,
-        Type entityType, object? entity, string? tableName)
-        => manager.ShardEntity(entityType, entity, tableName);
-
-
-    private static ShardedDescriptor CreateDescriptor(this IShardingManager manager,
-        ShardedAttribute attribute)
-    {
-        if (string.IsNullOrEmpty(attribute.BaseName))
-            throw new ArgumentException($"The {nameof(attribute)}.{nameof(attribute.BaseName)} is null or empty.");
-
-        var descriptor = new ShardedDescriptor(attribute.BaseName, attribute.Suffix);
-
-        if (attribute.DefaultStrategyType is not null)
-            descriptor.DefaultStrategy = manager.GetStrategy(attribute.DefaultStrategyType);
 
         return descriptor;
     }

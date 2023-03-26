@@ -27,7 +27,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <param name="serviceType">给定的服务类型。</param>
     /// <param name="group">给定的所属群组。</param>
     /// <param name="access">给定的访问模式。</param>
-    /// <param name="pooling">是否池化。</param>
+    /// <param name="redundancy">给定的冗余模式。</param>
     /// <param name="priority">给定的优先级。</param>
     /// <param name="algorithm">给定的算法选项。</param>
     /// <param name="sharded">给定的分库特性。</param>
@@ -35,7 +35,8 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
         Type serviceType,
         int group,
         AccessMode access,
-        bool pooling,
+        RedundancyMode redundancy,
+        //bool pooling,
         float priority,
         AlgorithmOptions algorithm,
         ShardedAttribute? sharded)
@@ -44,7 +45,8 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
         ServiceType = serviceType;
         Group = group;
         Access = access;
-        Pooling = pooling;
+        Redundancy = redundancy;
+        //Pooling = pooling;
         Priority = priority;
         Algorithm = algorithm;
         Sharded = sharded;
@@ -72,9 +74,14 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     public AccessMode Access { get; init; }
 
     /// <summary>
-    /// 是否池化。
+    /// 冗余模式。
     /// </summary>
-    public bool Pooling { get; init; }
+    public RedundancyMode Redundancy { get; init; }
+
+    ///// <summary>
+    ///// 是否池化。
+    ///// </summary>
+    //public bool Pooling { get; init; }
 
     /// <summary>
     /// 优先级。

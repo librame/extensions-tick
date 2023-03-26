@@ -112,7 +112,7 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
     /// </summary>
     /// <param name="template">给定的模板字符串。</param>
     /// <returns>返回经过格式化的字符串。</returns>
-    public virtual string Format(string template)
+    public virtual string Format(string? template)
         => Format(template, out _);
 
     /// <summary>
@@ -121,7 +121,7 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
     /// <param name="template">给定的模板字符串。</param>
     /// <param name="replaced">输出是否已替换的布尔值。</param>
     /// <returns>返回经过格式化的字符串。</returns>
-    public virtual string Format(string template, out bool replaced)
+    public virtual string Format(string? template, out bool replaced)
     {
         var _replaced = false;
 

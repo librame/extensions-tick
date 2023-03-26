@@ -18,6 +18,16 @@ namespace Librame.Extensions.Data.Accessing;
 public enum RedundancyMode
 {
     /// <summary>
+    /// 未启用。
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// 复合模式。在此模式下，同分组的存取器将复合为一，所有存取器均遍历执行。
+    /// </summary>
+    Compositing,
+
+    /// <summary>
     /// 镜像模式。在此模式下，同分组的存取器将组合为镜像，互为主备存取，适用于高安全性部署场景。
     /// </summary>
     Mirroring,

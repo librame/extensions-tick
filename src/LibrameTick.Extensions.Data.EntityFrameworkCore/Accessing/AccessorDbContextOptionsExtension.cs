@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Core;
 using Librame.Extensions.Cryptography;
 using Librame.Extensions.Data.Sharding;
 
@@ -22,13 +23,15 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 {
     // 异构数据源数据同步功能的标识必须使用统一的生成方案
     //private IIdentificationGenerator<Guid>? _guidGenerator;
+    // 表示是否为 DbContextPool
+    //private bool _pooling;
 
-    private int _group; // 默认为 0；表示所有存取器在同一组，配置访问模式实现对应的功能
-    private AccessMode _access = AccessMode.ReadWrite; // 默认为读/写模式；表示存取器可以进行读/写数据库操作
-    private bool _pooling; // 默认为 FALSE；表示是否为 DbContextPool。
-    private float _priority = -1; // 默认为 -1；表示使用存取器实现 ISortable 的优先级属性值
-    private AlgorithmOptions? _algorithm; // 默认为 NULL；表示使用 CoreExtensionOptions.Algorithm 全局配置，提供对数据字段值的加解密功能
-    private ShardedAttribute? _sharded; // 默认为 NULL；表示不分库
+    private int _group;
+    private AccessMode _access = AccessMode.ReadWrite;
+    private RedundancyMode _redundancy = RedundancyMode.Mirroring;
+    private float _priority = -1;
+    private AlgorithmOptions? _algorithm;
+    private ShardedAttribute? _sharded;
     private Type? _serviceType;
 
     private DbContextOptionsExtensionInfo? _info;
@@ -49,7 +52,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     {
         _group = copyFrom.Group;
         _access = copyFrom.Access;
-        _pooling = copyFrom.Pooling;
+        _redundancy = copyFrom.Redundancy;
+        //_pooling = copyFrom.Pooling;
         _priority = copyFrom.Priority;
         _algorithm = copyFrom.Algorithm;
         _sharded = copyFrom.Sharded;
@@ -58,45 +62,51 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
 
     /// <summary>
-    /// 所属群组。
+    /// 所属群组（默认为 0）。
     /// </summary>
-    public virtual int Group
+    public int Group
         => _group;
 
     /// <summary>
-    /// 访问模式。
+    /// 访问模式（默认为 <see cref="AccessMode.ReadWrite"/>，表示存取器可以进行读/写数据库操作）。
     /// </summary>
-    public virtual AccessMode Access
+    public AccessMode Access
         => _access;
 
     /// <summary>
-    /// 是否池化。
+    /// 冗余模式（默认为 <see cref="RedundancyMode.Mirroring"/>，表示多库环境中可互为主备）。
     /// </summary>
-    public virtual bool Pooling
-        => _pooling;
+    public RedundancyMode Redundancy
+        => _redundancy;
+
+    ///// <summary>
+    ///// 是否池化（默认为 FALSE）。
+    ///// </summary>
+    //public bool Pooling
+    //    => _pooling;
 
     /// <summary>
-    /// 存取器优先级。
+    /// 存取器优先级（默认为 -1，表示优先使用存取器实现的 <see cref="ISortable.Priority"/> 的优先级属性值）。
     /// </summary>
-    public virtual float Priority
+    public float Priority
         => _priority;
 
     /// <summary>
-    /// 算法选项。
+    /// 算法选项（默认为 NULL，表示优先使用 <see cref="CoreExtensionOptions.Algorithm"/> 全局配置，提供对数据字段值的加解密功能）。
     /// </summary>
-    public virtual AlgorithmOptions? Algorithm
+    public AlgorithmOptions? Algorithm
         => _algorithm;
 
     /// <summary>
-    /// 分库特性。
+    /// 分库特性（默认为 NULL，表示不启用分库）。
     /// </summary>
-    public virtual ShardedAttribute? Sharded
+    public ShardedAttribute? Sharded
         => _sharded;
 
     /// <summary>
     /// 服务类型。
     /// </summary>
-    public virtual Type? ServiceType
+    public Type? ServiceType
         => _serviceType;
 
 
@@ -144,18 +154,32 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     }
 
     /// <summary>
-    /// 使用指定的是否池化创建一个选项扩展实例副本。
+    /// 使用指定的冗余模式创建一个选项扩展实例副本。
     /// </summary>
-    /// <param name="pooling">是否池化。</param>
+    /// <param name="redundancy">给定的 <see cref="RedundancyMode"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-    public virtual AccessorDbContextOptionsExtension WithPooling(bool pooling)
+    public virtual AccessorDbContextOptionsExtension WithAccess(RedundancyMode redundancy)
     {
         var clone = Clone();
 
-        clone._pooling = pooling;
+        clone._redundancy = redundancy;
 
         return clone;
     }
+
+    ///// <summary>
+    ///// 使用指定的是否池化创建一个选项扩展实例副本。
+    ///// </summary>
+    ///// <param name="pooling">是否池化。</param>
+    ///// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+    //public virtual AccessorDbContextOptionsExtension WithPooling(bool pooling)
+    //{
+    //    var clone = Clone();
+
+    //    clone._pooling = pooling;
+
+    //    return clone;
+    //}
 
     /// <summary>
     /// 使用指定的优先级创建一个选项扩展实例副本。
@@ -264,9 +288,13 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                     builder.Append(": ");
                     builder.Append(Extension.Access).Append(' ');
 
-                    builder.Append(nameof(Extension.Pooling));
+                    builder.Append(nameof(Extension.Redundancy));
                     builder.Append(": ");
-                    builder.Append(Extension.Pooling ? "True" : "False").Append(' ');
+                    builder.Append(Extension.Redundancy).Append(' ');
+
+                    //builder.Append(nameof(Extension.Pooling));
+                    //builder.Append(": ");
+                    //builder.Append(Extension.Pooling ? "True" : "False").Append(' ');
 
                     builder.Append(nameof(Extension.Priority));
                     builder.Append(": ");
@@ -304,7 +332,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
                 hashCode.Add(Extension._group);
                 hashCode.Add(Extension._access);
-                hashCode.Add(Extension._pooling);
+                hashCode.Add(Extension._redundancy);
+                //hashCode.Add(Extension._pooling);
                 hashCode.Add(Extension._priority);
 
                 if (Extension._algorithm is not null)
@@ -326,7 +355,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             => other is ExtensionInfo otherInfo
                 && Extension._group == otherInfo.Extension._group
                 && Extension._access == otherInfo.Extension._access
-                && Extension._pooling == otherInfo.Extension._pooling
+                && Extension._redundancy == otherInfo.Extension._redundancy
+                //&& Extension._pooling == otherInfo.Extension._pooling
                 && Extension._priority == otherInfo.Extension._priority
                 && Extension._algorithm?.ToString() == otherInfo.Extension._algorithm?.ToString()
                 && Extension._sharded?.ToString() == otherInfo.Extension._sharded?.ToString()
@@ -340,8 +370,11 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             debugInfo["Accessor:" + nameof(Extension.Access)] =
                 Extension.Access.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
-            debugInfo["Accessor:" + nameof(Extension.Pooling)] =
-                Extension.Pooling.GetHashCode().ToString(CultureInfo.InvariantCulture);
+            debugInfo["Accessor:" + nameof(Extension.Redundancy)] =
+                Extension.Redundancy.GetHashCode().ToString(CultureInfo.InvariantCulture);
+
+            //debugInfo["Accessor:" + nameof(Extension.Pooling)] =
+                //Extension.Pooling.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
             debugInfo["Accessor:" + nameof(Extension.Priority)] =
                 Extension.Priority.GetHashCode().ToString(CultureInfo.InvariantCulture);

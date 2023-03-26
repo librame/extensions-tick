@@ -42,16 +42,16 @@ public interface IStore<T>
     /// <summary>
     /// 使用读取访问器。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>（可选；默认使用 <see cref="ReadAccessorSpec"/> 规约）。</param>
     /// <returns>返回 <see cref="IStore{T}"/>。</returns>
-    IStore<T> UseReadAccessor(IAccessorSpecification? specification = null);
+    IStore<T> UseReadAccessor(AccessorSpec? specification = null);
 
     /// <summary>
     /// 使用写入访问器。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>（可选；默认使用 <see cref="WriteAccessorSpec"/> 规约）。</param>
     /// <returns>返回 <see cref="IStore{T}"/>。</returns>
-    IStore<T> UseWriteAccessor(IAccessorSpecification? specification = null);
+    IStore<T> UseWriteAccessor(AccessorSpec? specification = null);
 
 
     #region Query
@@ -143,17 +143,17 @@ public interface IStore<T>
     /// <summary>
     /// 查找带有规约的类型实例集合。
     /// </summary>
-    /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
+    /// <param name="entitySpecification">给定的 <see cref="ISpec{T}"/>（可选）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
-    IList<T> FindListWithSpecification(IEntitySpecification<T>? entitySpecification = null);
+    IList<T> FindListWithSpecification(ISpec<T>? entitySpecification = null);
 
     /// <summary>
     /// 异步查找带有规约的类型实例集合。
     /// </summary>
-    /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
+    /// <param name="entitySpecification">给定的 <see cref="ISpec{T}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
-    Task<IList<T>> FindListWithSpecificationAsync(IEntitySpecification<T>? entitySpecification = null,
+    Task<IList<T>> FindListWithSpecificationAsync(ISpec<T>? entitySpecification = null,
         CancellationToken cancellationToken = default);
 
 
@@ -178,20 +178,20 @@ public interface IStore<T>
     /// 查找带有规约的类型实例分页集合。
     /// </summary>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
+    /// <param name="entitySpecification">给定的 <see cref="ISpec{T}"/>（可选）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
     IPagingList<T> FindPagingListWithSpecification(Action<IPagingList<T>> pageAction,
-        IEntitySpecification<T>? entitySpecification = null);
+        ISpec<T>? entitySpecification = null);
 
     /// <summary>
     /// 异步查找带有规约的类型实例分页集合。
     /// </summary>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="entitySpecification">给定的 <see cref="IEntitySpecification{T}"/>（可选）。</param>
+    /// <param name="entitySpecification">给定的 <see cref="ISpec{T}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
     Task<IPagingList<T>> FindPagingListWithSpecificationAsync(Action<IPagingList<T>> pageAction,
-        IEntitySpecification<T>? entitySpecification = null, CancellationToken cancellationToken = default);
+        ISpec<T>? entitySpecification = null, CancellationToken cancellationToken = default);
 
     #endregion
 

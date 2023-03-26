@@ -1,3 +1,4 @@
+using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,28 +19,29 @@ namespace Librame.Extensions.Data.Accessing
 
             var services = new ServiceCollection();
 
-            //services.AddDbContext<TestMySqlDbContext>(opts =>
-            //{
-            //    opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
-            //        a => a.MigrationsAssembly(modelAssemblyName));
+            services.AddDbContext<TestSqlServerDbContext>(opts =>
+            {
+                // server=.;database=librame_extensions;integrated security=true;trustservercertificate=true;
+                opts.UseSqlServer("Data Source=.;Initial Catalog=librame_extensions;Integrated Security=true;TrustServerCertificate=true;",
+                    a => a.MigrationsAssembly(modelAssemblyName));
 
-            //    opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(1));
-            //});
+                opts.UseAccessor(b => b.WithAccess(AccessMode.ReadWrite).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(1));
+            });
 
-            //services.AddDbContextPool<TestSqlServerDbContext>(opts =>
-            //{
-            //    opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;",
-            //        a => a.MigrationsAssembly(modelAssemblyName));
+            services.AddDbContext<TestMySqlDbContext>(opts =>
+            {
+                opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
+                    a => a.MigrationsAssembly(modelAssemblyName));
 
-            //    opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(2));
-            //});
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(2));
+            });
 
             services.AddDbContext<TestSqliteDbContext>(opts =>
             {
                 opts.UseSqlite("Data Source=librame_extensions.db",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.ReadWrite)); //.WithSharding<DateTimeOffsetShardingStrategy>("%y")
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Read).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(3));
             });
 
             var builder = services.AddLibrameCore()

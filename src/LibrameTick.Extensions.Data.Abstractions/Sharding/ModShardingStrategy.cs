@@ -29,4 +29,11 @@ public class ModShardingStrategy : AbstractShardingStrategy<long>
         AddParameter("m", id => (id % 2).ToString());
     }
 
+
+    /// <summary>
+    /// 重写默认值为 0。
+    /// </summary>
+    public override Lazy<long> DefaultValue
+        => new Lazy<long>(0L);
+
 }

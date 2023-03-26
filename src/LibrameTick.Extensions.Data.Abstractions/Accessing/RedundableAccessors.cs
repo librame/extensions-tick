@@ -94,7 +94,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// 存取器标识（默认返回读存取器的所有项存取器标识集合）。
     /// </summary>
     public string AccessorId
-        => string.Join(",", ReadingDispatcher.InvokeFunc(a => a.CurrentSource.AccessorId));
+        => DefaultAccessor.AccessorId;
 
     /// <summary>
     /// 存取器类型。
@@ -109,7 +109,7 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// 当前连接字符串（默认返回读存取器的所有项连接字符串集合）。
     /// </summary>
     public virtual string? CurrentConnectionString
-        => string.Join(",", ReadingDispatcher.InvokeFunc(a => a.CurrentSource.CurrentConnectionString));
+        => DefaultAccessor.CurrentConnectionString;
 
 
     /// <summary>
@@ -284,10 +284,10 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// 查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
     public virtual IList<TEntity> FindsWithSpecification<TEntity>(
-        IEntitySpecification<TEntity>? specification = null)
+        ISpec<TEntity>? specification = null)
         where TEntity : class
         => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindsWithSpecification(specification)).SelectMany(s => s).ToList();
 
@@ -295,11 +295,11 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// 异步查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
     public virtual async Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(
-        IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
+        ISpec<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
     {
         var result = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindsWithSpecificationAsync(specification, cancellationToken));
@@ -344,10 +344,10 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
     public virtual IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        IEntitySpecification<TEntity>? specification = null)
+        ISpec<TEntity>? specification = null)
         where TEntity : class
     {
         var pagings = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingListWithSpecification(pageAction, specification));
@@ -360,11 +360,11 @@ public class RedundableAccessors : AbstractSortable, IAccessor
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
     public virtual async Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
+        ISpec<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
     {
         var pagings = await ReadingDispatcher.InvokeFuncAsync(a

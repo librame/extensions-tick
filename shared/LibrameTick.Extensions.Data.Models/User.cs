@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data
     /// <summary>
     /// 用户模型。
     /// </summary>
-    [Sharded("%c", DefaultStrategyType = typeof(CultureInfoShardingStrategy))]
+    [Sharded<CultureInfoShardingStrategy>("%c")]
     public class User : AbstractCreationIdentifier<string, string>
     {
         /// <summary>

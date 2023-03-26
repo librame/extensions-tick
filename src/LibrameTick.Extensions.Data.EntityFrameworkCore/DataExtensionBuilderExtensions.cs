@@ -204,10 +204,13 @@ public static class DataExtensionBuilderExtensions
             {
                 builder.TryAddOrReplaceService(implementedType, implementedType, characteristicType);
             }
+
+            builder.TryAddEnumerableServices(baseInitializerType, implementedTypes, characteristicType);
         }
         else
         {
             builder.TryAddOrReplaceService(initializerType, initializerType, characteristicType);
+            builder.TryAddEnumerableServices(baseInitializerType, initializerType, characteristicType);
         }
 
         return builder;

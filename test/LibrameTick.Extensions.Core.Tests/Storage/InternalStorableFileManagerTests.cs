@@ -43,7 +43,7 @@ namespace Librame.Extensions.Core.Storage
             {
                 await manager.WriteAsync(fileInfo, readStream).DisableAwaitContext();
             }
-            Assert.Equal(text, File.ReadAllText(fileInfo.PhysicalPath));
+            Assert.Equal(text, File.ReadAllText(fileInfo.PhysicalPath!));
 
             File.Delete(copyFile);
             File.Delete(file);

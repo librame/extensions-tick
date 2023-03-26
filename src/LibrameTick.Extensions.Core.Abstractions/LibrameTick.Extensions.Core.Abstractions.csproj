@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="7.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.25.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.26.0" />
   </ItemGroup>
     
   <ItemGroup>

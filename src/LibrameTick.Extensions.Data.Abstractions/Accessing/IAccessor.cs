@@ -152,19 +152,19 @@ public interface IAccessor : ISortable, IShardable
     /// 查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
-    IList<TEntity> FindsWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
+    IList<TEntity> FindsWithSpecification<TEntity>(ISpec<TEntity>? specification = null)
         where TEntity : class;
 
     /// <summary>
     /// 异步查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
-    Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
+    Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(ISpec<TEntity>? specification = null,
         CancellationToken cancellationToken = default)
         where TEntity : class;
 
@@ -195,10 +195,10 @@ public interface IAccessor : ISortable, IShardable
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
     IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        IEntitySpecification<TEntity>? specification = null)
+        ISpec<TEntity>? specification = null)
         where TEntity : class;
 
     /// <summary>
@@ -206,11 +206,11 @@ public interface IAccessor : ISortable, IShardable
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
     Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
+        ISpec<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class;
 
     #endregion

@@ -21,7 +21,7 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public class AccessorDbContextOptionsBuilder
 {
-    private readonly CoreOptionsExtension? _coreOptionsExtension;
+    //private readonly CoreOptionsExtension? _coreOptionsExtension;
     private readonly RelationalOptionsExtension? _relationalOptionsExtension;
 
 
@@ -33,11 +33,11 @@ public class AccessorDbContextOptionsBuilder
     {
         ParentBuilder = parentBuilder;
 
-        _coreOptionsExtension = parentBuilder.Options.FindExtension<CoreOptionsExtension>();
-        _relationalOptionsExtension = parentBuilder.Options.FindExtension<RelationalOptionsExtension>();
+        //_coreOptionsExtension = parentBuilder.Options.FindExtension<CoreOptionsExtension>();
+        _relationalOptionsExtension = parentBuilder.Options.LikeExtensions<RelationalOptionsExtension>()?.FirstOrDefault();
 
-        if (_coreOptionsExtension?.MaxPoolSize > 0)
-            WithOption(e => e.WithPooling(true));
+        //if (_coreOptionsExtension?.MaxPoolSize > 0)
+        //    WithOption(e => e.WithPooling(true));
     }
 
 

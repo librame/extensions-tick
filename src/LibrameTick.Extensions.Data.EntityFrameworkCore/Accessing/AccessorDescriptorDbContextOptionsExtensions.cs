@@ -32,7 +32,7 @@ public static class AccessorDescriptorDbContextOptionsExtensions
         var algorithms = extension.Algorithm ?? accessor.CoreOptions.Algorithm;
 
         return new AccessorDescriptor(accessor, extension.ServiceType!, extension.Group,
-            extension.Access, extension.Pooling, priority, algorithms, extension.Sharded);
+            extension.Access, extension.Redundancy, priority, algorithms, extension.Sharded);
     }
 
 }

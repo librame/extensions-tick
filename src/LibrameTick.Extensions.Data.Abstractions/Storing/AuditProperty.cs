@@ -19,7 +19,7 @@ namespace Librame.Extensions.Data.Storing;
 /// 定义实现 <see cref="IIdentifier{Int64}"/> 的数据审计属性。
 /// </summary>
 [NotAudited]
-[Sharded("%m")]
+[Sharded<DateTimeOffsetShardingStrategy>("%MM")]
 public class AuditProperty : AbstractIdentifier<long>
 {
     /// <summary>

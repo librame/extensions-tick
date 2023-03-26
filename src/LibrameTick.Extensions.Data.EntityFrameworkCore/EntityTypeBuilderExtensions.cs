@@ -26,12 +26,11 @@ public static class EntityTypeBuilderExtensions
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
     /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="context">给定的 <see cref="DbContext"/>。</param>
     /// <returns>返回 <see cref="EntityTypeBuilder{TEntity}"/>。</returns>
     public static EntityTypeBuilder<TEntity> ToTableWithSharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
-        IShardingManager shardingManager, DbContext context)
+        IShardingManager shardingManager)
         where TEntity : class
-        => builder.ToTableWithSharding(shardingManager, context, schema: null);
+        => builder.ToTableWithSharding(shardingManager, schema: null);
 
     /// <summary>
     /// 通过带分片与复数化实体类型名称映射表名（此方法仅支持关系型数据库，同时要求实体添加 <see cref="ShardedAttribute"/> 特性）。
@@ -39,16 +38,16 @@ public static class EntityTypeBuilderExtensions
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
     /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="context">给定的 <see cref="DbContext"/>。</param>
     /// <param name="schema">给定的架构。</param>
     /// <returns>返回 <see cref="EntityTypeBuilder{TEntity}"/>。</returns>
     public static EntityTypeBuilder<TEntity> ToTableWithSharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
-        IShardingManager shardingManager, DbContext context, string? schema)
+        IShardingManager shardingManager, string? schema)
         where TEntity : class
     {
-        // var entity = context.Set<TEntity>().FirstBySpecification(); // 在 OnModelCreating 不能使用该模型
         var tableName = builder.Metadata.GetTableName();
-        var descriptor = shardingManager.ShardEntityString(typeof(TEntity), entity: null, tableName);
+
+        // 在 OnModelCreating 不能使用 Query 查询
+        var descriptor = shardingManager.GetShardedStringByEntity(typeof(TEntity), entity: null, tableName);
 
         if (!descriptor.Equals(tableName, StringComparison.Ordinal))
             builder.Metadata.SetTableName(descriptor);

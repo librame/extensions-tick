@@ -22,27 +22,27 @@ public interface IAccessorManager
     /// <summary>
     /// 已注册的存取器列表。
     /// </summary>
-    IReadOnlyList<IAccessor> Accessors { get; }
+    IReadOnlyList<IAccessor> ResolvedAccessors { get; }
 
 
     /// <summary>
     /// 获取指定规约的存取器。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    IAccessor GetAccessor(IAccessorSpecification specification);
+    IAccessor GetAccessor(AccessorSpec specification);
 
     /// <summary>
     /// 获取读取存取器。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="ReadAccessorSpecification"/> 规约）。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>（可选；默认使用 <see cref="ReadAccessorSpec"/> 规约）。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    IAccessor GetReadAccessor(IAccessorSpecification? specification = null);
+    IAccessor GetReadAccessor(AccessorSpec? specification = null);
 
     /// <summary>
     /// 获取写入存取器。
     /// </summary>
-    /// <param name="specification">给定的 <see cref="IAccessorSpecification"/>（可选；默认使用 <see cref="WriteAccessorSpecification"/> 规约）。</param>
+    /// <param name="specification">给定的 <see cref="AccessorSpec"/>（可选；默认使用 <see cref="WriteAccessorSpec"/> 规约）。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
-    IAccessor GetWriteAccessor(IAccessorSpecification? specification = null);
+    IAccessor GetWriteAccessor(AccessorSpec? specification = null);
 }

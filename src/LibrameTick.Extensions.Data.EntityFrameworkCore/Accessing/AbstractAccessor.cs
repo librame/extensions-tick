@@ -294,23 +294,27 @@ public abstract class AbstractAccessor : IAccessor
     /// 查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IEnumerable{TEntity}"/>。</returns>
-    public virtual IList<TEntity> FindsWithSpecification<TEntity>(IEntitySpecification<TEntity>? specification = null)
+    public virtual IList<TEntity> FindsWithSpecification<TEntity>(ISpec<TEntity>? specification = null)
         where TEntity : class
-        => Query<TEntity>().EvaluateList(specification);
+        => specification is null
+            ? Query<TEntity>().ToList()
+            : Query<TEntity>().Where(specification.IsSatisfiedBy).ToList();
 
     /// <summary>
     /// 异步查找带有规约的实体集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IEnumerable{TEntity}"/> 的异步操作。</returns>
-    public virtual async Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(IEntitySpecification<TEntity>? specification = null,
+    public virtual async Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(ISpec<TEntity>? specification = null,
         CancellationToken cancellationToken = default)
         where TEntity : class
-        => await Query<TEntity>().EvaluateListAsync(specification, cancellationToken);
+        => specification is null
+            ? await Query<TEntity>().ToListAsync(cancellationToken)
+            : await cancellationToken.RunTask(() => Query<TEntity>().Where(specification.IsSatisfiedBy).ToList());
 
 
     /// <summary>
@@ -341,25 +345,29 @@ public abstract class AbstractAccessor : IAccessor
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
     public virtual IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        IEntitySpecification<TEntity>? specification = null)
+        ISpec<TEntity>? specification = null)
         where TEntity : class
-        => Query<TEntity>().EvaluatePagingList(pageAction, specification);
+        => specification is null
+            ? Query<TEntity>().AsPaging(pageAction)
+            : Query<TEntity>().Where(specification.IsSatisfiedBy).AsPaging(pageAction);
 
     /// <summary>
     /// 异步查找带有规约的实体分页集合。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="pageAction">给定的分页动作。</param>
-    /// <param name="specification">给定的 <see cref="IEntitySpecification{TEntity}"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpec{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
-    public virtual Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
-        IEntitySpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
+    public virtual async Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+        ISpec<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
-        => Query<TEntity>().EvaluatePagingListAsync(pageAction, specification, cancellationToken);
+        => specification is null
+            ? await Query<TEntity>().AsPagingAsync(pageAction, cancellationToken)
+            : await Query<TEntity>().Where(specification.IsSatisfiedBy).AsPagingAsync(pageAction, cancellationToken);
 
     #endregion
 

@@ -5,10 +5,10 @@
     <ApplicationIcon>..\..\Librame.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Librame Pong</Authors>
+    <Authors>Librame Peng</Authors>
     <Company>https://github.com/librame</Company>
-    <Copyright>Copyright © Librame 2012-2021</Copyright>
-    <PackageTags>net6</PackageTags>
+    <Copyright>Copyright © Librame 2012-2023</Copyright>
+    <PackageTags>net7</PackageTags>
     <PackageIcon>Librame.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/librame/extensions-tick</PackageProjectUrl>

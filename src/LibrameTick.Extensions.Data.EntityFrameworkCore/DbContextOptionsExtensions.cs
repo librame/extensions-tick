@@ -30,4 +30,23 @@ public static class DbContextOptionsExtensions
         where TExtension : class, IDbContextOptionsExtension, new()
         => options?.FindExtension<TExtension>() ?? defaultExtension ?? new TExtension();
 
+
+    /// <summary>
+    /// 查找类似的上下文选项扩展集合。
+    /// </summary>
+    /// <typeparam name="TExtension">指定的上下文选项扩展类型。</typeparam>
+    /// <param name="options">给定的 <see cref="IDbContextOptions"/>。</param>
+    /// <returns>返回 <see cref="IEnumerable{TExtension}"/>。</returns>
+    public static IEnumerable<TExtension> LikeExtensions<TExtension>(this IDbContextOptions options)
+        where TExtension : class, IDbContextOptionsExtension
+    {
+        foreach (var extension in options.Extensions)
+        {
+            if (extension is TExtension exist)
+            {
+                yield return exist;
+            }
+        }
+    }
+
 }

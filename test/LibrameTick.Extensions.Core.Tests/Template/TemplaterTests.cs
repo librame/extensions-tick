@@ -28,6 +28,7 @@ namespace Librame.Extensions.Core.Template
 
                 // 支持值引用
                 result = finder.Format(section.Value, out replaced);
+
                 if (replaced)
                     Assert.NotEqual(section.Value, result);
                 else

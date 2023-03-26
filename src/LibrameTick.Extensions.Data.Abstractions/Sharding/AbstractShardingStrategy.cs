@@ -31,6 +31,11 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy, IEnu
 
 
     /// <summary>
+    /// 默认值。
+    /// </summary>
+    public abstract Lazy<TValue> DefaultValue { get; }
+
+    /// <summary>
     /// 策略类型。
     /// </summary>
     public virtual Type StrategyType
@@ -86,6 +91,61 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy, IEnu
 
 
     /// <summary>
+    /// 格式化分片后缀。
+    /// </summary>
+    /// <param name="sharded">给定的 <see cref="ShardedDescriptor"/>。</param>
+    /// <returns>返回字符串。</returns>
+    public virtual string FormatSuffix(ShardedDescriptor sharded)
+    {
+        var suffix = sharded.Suffix;
+        var isDefaultValue = IsDefaultValue(sharded, out TValue value);
+
+        foreach (var p in _parameters)
+        {
+            suffix = suffix.Replace(p.Key, p.Value.ValueFormatter(value), ParameterComparison);
+
+            if (suffix.Contains(p.Key))
+                suffix = suffix.Replace(p.Key, p.Value.DefaultValue);
+        }
+
+        return sharded.Suffix = suffix;
+    }
+
+    /// <summary>
+    /// 是否为默认值。
+    /// </summary>
+    /// <param name="sharded">给定的 <see cref="ShardedDescriptor"/>。</param>
+    /// <param name="value">输出 <typeparamref name="TValue"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    protected virtual bool IsDefaultValue(ShardedDescriptor sharded, out TValue value)
+    {
+        // 如果引用对象是值对象
+        if (sharded.ReferenceValue is TValue referenceValue)
+        {
+            value = referenceValue;
+            return false;
+        }
+
+        // 如果引用对象是属性值对象
+        if (sharded.ReferenceValue is not null && sharded.Entity is not null
+            && sharded.Entity.EntityType == (sharded.ReferenceType ?? sharded.ReferenceValue.GetType()))
+        {
+            var property = GetEntityProperty(sharded.Entity);
+            if (property is not null)
+            {
+                var propertyValue = property.GetValue(sharded.ReferenceValue);
+                ArgumentNullException.ThrowIfNull(propertyValue);
+
+                value = (TValue)propertyValue!;
+                return false;
+            }
+        }
+
+        value = DefaultValue.Value;
+        return true;
+    }
+
+    /// <summary>
     /// 获取分片实体的属性信息。
     /// </summary>
     /// <param name="entity">给定的 <see cref="ShardingEntity"/>。</param>
@@ -111,63 +171,6 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy, IEnu
         }
 
         return propertyInfo;
-    }
-
-    /// <summary>
-    /// 启动分片（默认启用）。
-    /// </summary>
-    /// <param name="sharded">给定的 <see cref="ShardedDescriptor"/>。</param>
-    /// <param name="value">输出 <typeparamref name="TValue"/>。</param>
-    /// <returns>返回布尔值。</returns>
-    protected virtual bool Enabling(ShardedDescriptor sharded, [MaybeNullWhen(false)] out TValue value)
-    {
-        // 如果引用对象是值对象
-        if (sharded.ReferenceValue is TValue referenceValue)
-        {
-            value = referenceValue;
-            return true;
-        }
-
-        // 如果引用对象是属性值对象
-        if (sharded.ReferenceValue is not null && sharded.Entity is not null
-            && sharded.Entity.EntityType == (sharded.ReferenceType ?? sharded.ReferenceValue.GetType()))
-        {
-            var property = GetEntityProperty(sharded.Entity);
-            if (property is not null)
-            {
-                var propertyValue = property.GetValue(sharded.ReferenceValue);
-                ArgumentNullException.ThrowIfNull(propertyValue);
-
-                value = (TValue)propertyValue!;
-                return true;
-            }
-        }
-
-        value = default;
-        return false;
-    }
-
-    /// <summary>
-    /// 格式化分片后缀。
-    /// </summary>
-    /// <param name="sharded">给定的 <see cref="ShardedDescriptor"/>。</param>
-    /// <returns>返回字符串。</returns>
-    public virtual string FormatSuffix(ShardedDescriptor sharded)
-    {
-        var suffix = sharded.Suffix;
-
-        if (Enabling(sharded, out TValue? value))
-        {
-            foreach (var p in _parameters)
-            {
-                suffix = suffix.Replace(p.Key, p.Value.ValueFormatter(value), ParameterComparison);
-
-                if (suffix.Contains(p.Key))
-                    suffix = suffix.Replace(p.Key, p.Value.DefaultValue);
-            }
-        }
-        
-        return sharded.Suffix = suffix;
     }
 
 

@@ -78,7 +78,7 @@ public static class ModelBuilderBaseDbContextExtensions
 
         modelBuilder.Entity<Audit>(b =>
         {
-            b.ToTableWithSharding(dbContext.ShardingManager, dbContext);
+            b.ToTableWithSharding(dbContext.ShardingManager);
 
             b.HasIndex(i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
@@ -98,7 +98,7 @@ public static class ModelBuilderBaseDbContextExtensions
 
         modelBuilder.Entity<AuditProperty>(b =>
         {
-            b.ToTableWithSharding(dbContext.ShardingManager, dbContext);
+            b.ToTableWithSharding(dbContext.ShardingManager);
 
             b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
 

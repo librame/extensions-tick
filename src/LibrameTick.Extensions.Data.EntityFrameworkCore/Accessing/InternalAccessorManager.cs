@@ -29,8 +29,8 @@ class InternalAccessorManager : IAccessorManager
         _migrator = migrator;
         _shardingManager = shardingManager;
 
-        Accessors = resolver.ResolveAccessors();
-        if (Accessors.Count < 1)
+        ResolvedAccessors = resolver.ResolveAccessors();
+        if (ResolvedAccessors.Count < 1)
             throw new ArgumentNullException($"The accessors not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
     }
 
@@ -39,25 +39,45 @@ class InternalAccessorManager : IAccessorManager
         => _optionsMonitor.CurrentValue;
 
 
-    public IReadOnlyList<IAccessor> Accessors { get; init; }
+    public IReadOnlyList<IAccessor> ResolvedAccessors { get; init; }
+
+    public Dictionary<IAccessor, ShardedDescriptor?>? CurrentAccessors { get; private set; }
 
 
-    public IAccessor GetAccessor(IAccessorSpecification specification)
+    public IAccessor GetAccessor(AccessorSpec specification)
     {
         if (Options.Access.AutoMigration)
-            _migrator.Migrate(Accessors);
+            _migrator.Migrate(ResolvedAccessors);
 
-        var accessor = specification
-            .SetDispatcherOptionsIfNull(Options.Access.Dispatcher)
-            .IssueEvaluate(Accessors);
+        var filterAccessors = ResolvedAccessors.Where(specification.IsSatisfiedBy);
+        if (filterAccessors.Any())
+            throw new ArgumentNullException($"The filter accessors not found.");
 
-        return _shardingManager.ShardDatabase(accessor);
+        CurrentAccessors = new Dictionary<IAccessor, ShardedDescriptor?>();
+        foreach (var filterAccessor in filterAccessors)
+        {
+            _shardingManager.ShardDatabase(filterAccessor, out var descriptor);
+            CurrentAccessors.Add(filterAccessor, descriptor);
+        }
+
+        var mirroringAccessors = filterAccessors.Where(specification.IsMirroringRedundancyMode);
+        var stripingAccessors = filterAccessors.Where(specification.IsStripingRedundancyMode);
+
+        var allAccessors = new List<IAccessor>();
+
+        if (mirroringAccessors.Any())
+            allAccessors.Add(new MirroringAccessors(mirroringAccessors, Options.Access.Dispatcher));
+
+        if (stripingAccessors.Any())
+            allAccessors.Add(new StripingAccessors(stripingAccessors, Options.Access.Dispatcher));
+
+        return new CompositingAccessors(allAccessors, Options.Access.Dispatcher);
     }
 
-    public IAccessor GetReadAccessor(IAccessorSpecification? specification = null)
-        => GetAccessor(specification ?? AccessorSpecifications.Read);
+    public IAccessor GetReadAccessor(AccessorSpec? specification = null)
+        => GetAccessor(specification ?? new ReadAccessorSpec());
 
-    public IAccessor GetWriteAccessor(IAccessorSpecification? specification = null)
-        => GetAccessor(specification ?? AccessorSpecifications.Write);
+    public IAccessor GetWriteAccessor(AccessorSpec? specification = null)
+        => GetAccessor(specification ?? new WriteAccessorSpec());
 
 }

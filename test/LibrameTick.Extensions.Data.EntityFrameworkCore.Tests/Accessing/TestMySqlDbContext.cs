@@ -6,13 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestMySqlDbContext : TestDbContext
+    public class TestMySqlDbContext : TestDbContext<TestMySqlDbContext>
     {
         public TestMySqlDbContext(IEncryptionConverterFactory encryptionConverterFactory,
             IShardingManager shardingManager,
             IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
             IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
-            DbContextOptions options)
+            DbContextOptions<TestMySqlDbContext> options)
             : base(encryptionConverterFactory, shardingManager, dataOptionsMonitor, coreOptionsMonitor, options)
         {
         }

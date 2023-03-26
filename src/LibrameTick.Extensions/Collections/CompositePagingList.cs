@@ -63,6 +63,14 @@ public class CompositePagingList<T> : PagingList<T>
     }
 
 
+    /// <summary>
+    /// 返回一个循环访问集合的枚举器。
+    /// </summary>
+    /// <returns>返回枚举器。</returns>
+    public override IEnumerator<T> GetEnumerator()
+        => _collection.SelectMany(p => p.AsEnumerable()).GetEnumerator();
+
+
     private static IEnumerable<T> CombineList(IEnumerable<IPagingList<T>> collection)
         => collection.SelectMany(s => s.AsEnumerable());
 

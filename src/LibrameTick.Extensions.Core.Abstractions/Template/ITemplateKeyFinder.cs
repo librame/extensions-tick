@@ -65,7 +65,7 @@ public interface ITemplateKeyFinder
     /// </summary>
     /// <param name="template">给定的模板字符串。</param>
     /// <returns>返回经过格式化的字符串。</returns>
-    string Format(string template);
+    string Format(string? template);
 
     /// <summary>
     /// 格式化模板中包含的引用键值。
@@ -73,7 +73,7 @@ public interface ITemplateKeyFinder
     /// <param name="template">给定的模板字符串。</param>
     /// <param name="replaced">输出是否已替换的布尔值。</param>
     /// <returns>返回经过格式化的字符串。</returns>
-    string Format(string template, out bool replaced);
+    string Format(string? template, out bool replaced);
 
 
     /// <summary>

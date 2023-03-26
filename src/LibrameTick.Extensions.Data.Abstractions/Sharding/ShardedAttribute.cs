@@ -18,15 +18,8 @@ namespace Librame.Extensions.Data.Sharding;
 /// 定义用于分片的命名特性（构成方式为：BaseName+Suffix，可用于分库、分表操作）。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public sealed class ShardedAttribute : Attribute
+public class ShardedAttribute : Attribute
 {
-    /// <summary>
-    /// 默认已支持的数据库键集合。
-    /// </summary>
-    public static readonly string[] DefaultSupportedDatabaseKeys
-        = new string[] { "Database", "Initial Catalog", "Data Source" };
-
-
     /// <summary>
     /// 构造一个 <see cref="ShardedAttribute"/>。
     /// </summary>
@@ -40,7 +33,7 @@ public sealed class ShardedAttribute : Attribute
     /// 构造一个 <see cref="ShardedAttribute"/>。
     /// </summary>
     /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
-    /// <param name="defaultStrategyType">给定的默认分片策略（可空）。</param>
+    /// <param name="defaultStrategyType">给定的默认分片策略类型（可空）。</param>
     public ShardedAttribute(string suffix, Type? defaultStrategyType)
         : this(suffix, defaultStrategyType, baseName: null)
     {
@@ -50,7 +43,7 @@ public sealed class ShardedAttribute : Attribute
     /// 构造一个 <see cref="ShardedAttribute"/>。
     /// </summary>
     /// <param name="suffix">给定的后缀（支持的参数可参考指定的分片策略类型）。</param>
-    /// <param name="defaultStrategyType">给定的默认分片策略（可空）。</param>
+    /// <param name="defaultStrategyType">给定的默认分片策略类型（可空）。</param>
     /// <param name="baseName">给定的基础名称（可空；针对分表默认使用实体名称复数，针对数据库默认使用数据库名）。</param>
     public ShardedAttribute(string suffix, Type? defaultStrategyType, string? baseName)
     {
@@ -79,84 +72,6 @@ public sealed class ShardedAttribute : Attribute
     /// 分片配置。
     /// </summary>
     public IConfiguration? Configuration { get; set; }
-
-
-    /// <summary>
-    /// 尝试从数据库连接字符串包含的数据库键值中更新基础名称。
-    /// </summary>
-    /// <param name="connectionString">给定的连接字符串。</param>
-    /// <returns>返回是否更新的布尔值。</returns>
-    public bool TryUpdateBaseNameFromConnectionString(string? connectionString)
-        => TryUpdateBaseNameFromConnectionString(connectionString, out _);
-
-    /// <summary>
-    /// 尝试从数据库连接字符串包含的数据库键值中更新基础名称。
-    /// </summary>
-    /// <param name="connectionString">给定的连接字符串。</param>
-    /// <param name="segments">输出连接字符串的键值对集合。</param>
-    /// <param name="keyValueSeparator">给定的键值对分隔符（可选；默认为等号）。</param>
-    /// <param name="pairDelimiter">给定的键值对集合界定符（可选；默认为分号）。</param>
-    /// <param name="databaseKey">给定的数据库键（可选；默认使用 <see cref="DefaultSupportedDatabaseKeys"/>）。</param>
-    /// <returns>返回是否更新的布尔值。</returns>
-    /// <exception cref="ArgumentException">
-    /// A matching supported database keys was not found from the current connection string, Please specify the database key.
-    /// </exception>
-    /// <exception cref="ArgumentNullException">
-    /// The database key for the current connection string is null or empty.
-    /// </exception>
-    public bool TryUpdateBaseNameFromConnectionString(string? connectionString,
-        [MaybeNullWhen(false)] out Dictionary<string, string>? segments,
-        string keyValueSeparator = "=", string pairDelimiter = ";", string? databaseKey = null)
-    {
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            segments = null;
-            return false;
-        }
-
-        // 提取连接字符串的键值对集合
-        segments = connectionString
-            .TrimEnd(pairDelimiter)
-            .Split(pairDelimiter)
-            .Select(part =>
-            {
-                var pairPart = part.Split(keyValueSeparator);
-                return new KeyValuePair<string, string>(pairPart[0], pairPart[pairPart.Length - 1]);
-            })
-            .ToDictionary(ks => ks.Key, ele => ele.Value);
-
-        var database = string.Empty;
-
-        // 解析数据库键值
-        if (string.IsNullOrEmpty(databaseKey))
-        {
-            foreach (var key in DefaultSupportedDatabaseKeys)
-            {
-                if (segments.TryGetValue(key, out var value))
-                {
-                    databaseKey = key;
-                    database = value;
-                }
-            }
-
-            throw new ArgumentException($"A matching supported database keys '{DefaultSupportedDatabaseKeys.JoinString(',')}' was not found from the current connection string '{connectionString}', Please specify the database key.");
-        }
-        else
-        {
-            database = segments[databaseKey];
-        }
-
-        if (string.IsNullOrEmpty(database))
-            throw new ArgumentNullException($"The database key '{databaseKey}' for the current connection string '{connectionString}' is null or empty.");
-
-        // 修剪可能存在的路径和文件扩展名
-        if (database.Contains('.') || database.Contains(Path.DirectorySeparatorChar))
-            BaseName = Path.GetFileNameWithoutExtension(database);
-        else
-            BaseName = database;
-
-        return true;
-    }
 
 
     /// <summary>
