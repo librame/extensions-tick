@@ -25,10 +25,11 @@ public abstract class AbstractAccessor : IAccessor
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessor"/>。
     /// </summary>
-    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
-    protected AbstractAccessor(BaseDbContext dbContext)
+    /// <param name="context">给定的 <see cref="BaseDbContext"/>。</param>
+    protected AbstractAccessor(BaseDbContext context)
     {
-        OriginalContext = dbContext;
+        OriginalContext = context;
+        CurrentContext = context;
     }
 
 
@@ -40,7 +41,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <summary>
     /// 当前数据库上下文。
     /// </summary>
-    public abstract IDbContext CurrentContext { get; protected set; }
+    public virtual IDbContext CurrentContext { get; protected set; }
 
 
     /// <summary>
@@ -87,8 +88,6 @@ public abstract class AbstractAccessor : IAccessor
         => OriginalContext.RelationalExtension;
 
 
-    #region Connection
-
     /// <summary>
     /// 关系连接接口。
     /// </summary>
@@ -99,7 +98,7 @@ public abstract class AbstractAccessor : IAccessor
     /// 当前连接字符串。
     /// </summary>
     public virtual string? CurrentConnectionString
-        => RelationalConnection?.ConnectionString;
+        => RelationalConnection.ConnectionString;
 
 
     /// <summary>
@@ -109,33 +108,39 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
     public virtual IAccessor ChangeConnection(string newConnectionString)
     {
-        var connection = RelationalExtension?.Connection
-            ?? RelationalConnection.DbConnection;
+        if (newConnectionString.Equals(RelationalConnection.ConnectionString, StringComparison.Ordinal))
+            return this;
 
-        if (connection is not null)
-        {
-            DataOptions.Access.ConnectionChangingAction?.Invoke(this);
+        DataOptions.Access.ConnectionChangingAction?.Invoke(this);
 
-            connection.ConnectionString = newConnectionString;
+        RelationalConnection.ConnectionString = newConnectionString;
 
-            DataOptions.Access.ConnectionChangedAction?.Invoke(this);
-        }
+        DataOptions.Access.ConnectionChangedAction?.Invoke(this);
 
         return this;
     }
 
 
     /// <summary>
-    /// 尝试创建数据库（已集成是否需要先删除数据库功能）。
+    /// 尝试创建数据库。
     /// </summary>
     /// <returns>返回布尔值。</returns>
     public virtual bool TryCreateDatabase()
     {
-        if (DataOptions.Access.EnsureDatabaseDeleted)
-            OriginalContext.Database.EnsureDeleted();
-
         if (DataOptions.Access.EnsureDatabaseCreated)
-            return OriginalContext.Database.EnsureCreated();
+        {
+            try
+            {
+                OriginalContext.Database.EnsureCreated();
+            }
+            catch (Exception ex)
+            {
+                // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
+                // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
+                if (!ex.Message.Contains("already exists"))
+                    throw;
+            }
+        }
 
         return false;
     }
@@ -147,16 +152,23 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回一个包含布尔值的异步操作。</returns>
     public virtual async Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        if (DataOptions.Access.EnsureDatabaseDeleted)
-            await OriginalContext.Database.EnsureDeletedAsync(cancellationToken);
-
         if (DataOptions.Access.EnsureDatabaseCreated)
-            await OriginalContext.Database.EnsureCreatedAsync(cancellationToken);
-
+        {
+            try
+            {
+                await OriginalContext.Database.EnsureCreatedAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
+                // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
+                if (!ex.Message.Contains("already exists"))
+                    throw;
+            }
+        }
+        
         return false;
     }
-
-    #endregion
 
 
     #region IShardable
@@ -176,7 +188,7 @@ public abstract class AbstractAccessor : IAccessor
     /// 排序优先级（数值越小越优先）。
     /// </summary>
     public virtual float Priority
-        => DataOptions.Access.DefaultPriority;
+        => AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
 
 
     /// <summary>

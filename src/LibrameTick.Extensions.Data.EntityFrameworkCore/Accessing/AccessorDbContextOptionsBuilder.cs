@@ -102,8 +102,8 @@ public class AccessorDbContextOptionsBuilder
     public virtual AccessorDbContextOptionsBuilder WithSharding(Type strategyType,
         string suffix, Action<ShardedAttribute>? configureAction = null)
     {
-        var attribute = new ShardedAttribute(suffix, strategyType);
-        attribute.TryUpdateBaseNameFromConnectionString(_relationalOptionsExtension?.ConnectionString);
+        var attribute = ShardedAttribute.ParseFromConnectionString(strategyType,
+            suffix, _relationalOptionsExtension?.ConnectionString);
 
         configureAction?.Invoke(attribute);
 

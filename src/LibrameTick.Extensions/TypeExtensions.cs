@@ -61,19 +61,50 @@ public static class TypeExtensions
 
 
     /// <summary>
-    /// 获取所有字段和属性成员集合（私有字段包含属性实现）。
+    /// 尝试获取指定名称字段（支持私有字段）。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <param name="name">给定的字段名称。</param>
+    /// <param name="field">输出获取的 <see cref="FieldInfo"/>。</param>
+    /// <returns>返回是否存在的布尔值。</returns>
+    public static bool TryGetField(this Type type, string name,
+        [MaybeNullWhen(false)] out FieldInfo field)
+    {
+        field = type.GetTypeInfo().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+        return field is not null;
+    }
+
+    /// <summary>
+    /// 尝试获取包含静态在内的指定名称字段（支持私有字段）。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <param name="name">给定的字段名称。</param>
+    /// <param name="field">输出获取的 <see cref="FieldInfo"/>。</param>
+    /// <returns>返回是否存在的布尔值。</returns>
+    public static bool TryGetFieldWithStatic(this Type type, string name,
+        [MaybeNullWhen(false)] out FieldInfo field)
+    {
+        field = type.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+
+        return field is not null;
+    }
+
+
+    /// <summary>
+    /// 获取所有字段成员集合（私有字段包含属性实现）。
     /// </summary>
     /// <param name="type">给定的类型。</param>
     /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
-    public static FieldInfo[] GetAllFieldsAndProperties(this Type type)
+    public static FieldInfo[] GetAllFields(this Type type)
         => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
     /// <summary>
-    /// 获取包含静态在内的所有字段和属性成员集合（私有字段包含属性实现）。
+    /// 获取包含静态在内的所有字段成员集合（私有字段包含属性实现）。
     /// </summary>
     /// <param name="type">给定的类型。</param>
     /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
-    public static FieldInfo[] GetAllFieldsAndPropertiesWithStatic(this Type type)
+    public static FieldInfo[] GetAllFieldsWithStatic(this Type type)
         => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
     /// <summary>
@@ -85,22 +116,22 @@ public static class TypeExtensions
         => type.GetFields(BindingFlags.Public | BindingFlags.Static);
 
 
-    /// <summary>
-    /// 获取指定类型的私有构造函数。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <param name="isUnique">要求是唯一构造函数。</param>
-    /// <returns>返回 <see cref="ConstructorInfo"/>。</returns>
-    /// <exception cref="MissingMethodException">
-    /// The type must have a private constructor.
-    /// </exception>
-    public static ConstructorInfo GetPrivateConstructor(this Type type, bool isUnique)
-    {
-        if (!type.TryGetPrivateConstructor(isUnique, out var info))
-            throw new MissingMethodException($"The type '{type.FullName}' must have a private constructor.");
+    ///// <summary>
+    ///// 获取指定类型的私有构造函数。
+    ///// </summary>
+    ///// <param name="type">给定的类型。</param>
+    ///// <param name="isUnique">要求是唯一构造函数。</param>
+    ///// <returns>返回 <see cref="ConstructorInfo"/>。</returns>
+    ///// <exception cref="MissingMethodException">
+    ///// The type must have a private constructor.
+    ///// </exception>
+    //public static ConstructorInfo GetPrivateConstructor(this Type type, bool isUnique)
+    //{
+    //    if (!type.TryGetPrivateConstructor(isUnique, out var info))
+    //        throw new MissingMethodException($"The type '{type.FullName}' must have a private constructor.");
 
-        return info;
-    }
+    //    return info;
+    //}
 
     /// <summary>
     /// 尝试获取指定类型的私有构造函数。

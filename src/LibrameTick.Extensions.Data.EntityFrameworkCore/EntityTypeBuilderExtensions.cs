@@ -44,13 +44,14 @@ public static class EntityTypeBuilderExtensions
         IShardingManager shardingManager, string? schema)
         where TEntity : class
     {
-        var tableName = builder.Metadata.GetTableName();
+        var entityType = typeof(TEntity);
+        var tableName = builder.Metadata.GetTableName(); // 可能是已分片表名
 
         // 在 OnModelCreating 不能使用 Query 查询
-        var descriptor = shardingManager.GetShardedStringByEntity(typeof(TEntity), entity: null, tableName);
+        var descriptor = shardingManager.GetShardedByEntity(entityType, entity: null, tableName);
 
-        if (!descriptor.Equals(tableName, StringComparison.Ordinal))
-            builder.Metadata.SetTableName(descriptor);
+        if (descriptor.IsNeedShardingForEntity(entityType, out var newTableName))
+            builder.Metadata.SetTableName(newTableName);
 
         builder.Metadata.SetSchema(schema);
 

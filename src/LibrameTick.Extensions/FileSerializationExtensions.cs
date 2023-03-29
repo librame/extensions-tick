@@ -67,7 +67,7 @@ public static class FileSerializationExtensions
             throw new ArgumentNullException(nameof(obj));
 
         var fields = flags is null
-            ? objType.GetAllFieldsAndPropertiesWithStatic()
+            ? objType.GetAllFieldsWithStatic()
             : objType.GetFields(flags.Value);
 
         foreach (var field in fields)
@@ -172,7 +172,7 @@ public static class FileSerializationExtensions
             objType = obj.GetType();
 
         var fields = flags is null
-            ? objType.GetAllFieldsAndPropertiesWithStatic()
+            ? objType.GetAllFieldsWithStatic()
             : objType.GetFields(flags.Value);
 
         foreach (var field in fields)

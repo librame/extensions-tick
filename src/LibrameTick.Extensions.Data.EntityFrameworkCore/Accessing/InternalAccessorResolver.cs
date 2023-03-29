@@ -43,6 +43,7 @@ class InternalAccessorResolver : IAccessorResolver
             _accessors = _builder.Services
                 .Where(_accessorServicePredicate)
                 .Select(s => (IAccessor)_provider.GetRequiredService(s.ServiceType))
+                .OrderBy(a => a.Priority)
                 .ToList();
         }
         

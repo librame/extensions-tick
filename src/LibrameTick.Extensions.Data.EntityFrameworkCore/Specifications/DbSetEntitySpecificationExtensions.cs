@@ -31,9 +31,18 @@ public static class DbSetEntitySpecificationExtensions
     public static TEntity? FirstBySpecification<TEntity>(this DbSet<TEntity> dbSet,
         Expression<Func<TEntity, bool>>? predicate = null, bool checkLocal = true)
         where TEntity : class
-        => predicate is null
-            ? (checkLocal ? dbSet.Local.FirstOrDefault() : dbSet.FirstOrDefault())
-            : (checkLocal ? dbSet.Local.FirstOrDefault(predicate.Compile()) : dbSet.FirstOrDefault(predicate));
+    {
+        if (predicate is null)
+        {
+            return checkLocal
+                ? dbSet.Local.FirstOrDefault()
+                : dbSet.FirstOrDefault();
+        }
+
+        return checkLocal
+                ? dbSet.Local.FirstOrDefault(predicate.Compile())
+                : dbSet.FirstOrDefault(predicate);
+    }
 
     /// <summary>
     /// 异步通过表达式规约进行筛选并取得第一项（如果本地缓存不为空时，支持查找本地缓存）。
@@ -73,9 +82,18 @@ public static class DbSetEntitySpecificationExtensions
     public static bool ExistsBySpecification<TEntity>(this DbSet<TEntity> dbSet,
         Expression<Func<TEntity, bool>>? predicate, bool checkLocal = true)
         where TEntity : class
-        => predicate is null
-            ? (checkLocal ? dbSet.Local.Any() : dbSet.Any())
-            : (checkLocal ? dbSet.Local.Any(predicate.Compile()) : dbSet.Any(predicate));
+    {
+        if (predicate is null)
+        {
+            return checkLocal
+                ? dbSet.Local.Any()
+                : dbSet.Any();
+        }
+
+        return checkLocal
+                ? dbSet.Local.Any(predicate.Compile())
+                : dbSet.Any(predicate);
+    }
 
     /// <summary>
     /// 异步通过表达式规约判断是否存在指定条件的对象（如果本地缓存不为空时，支持查找本地缓存）。
@@ -115,8 +133,17 @@ public static class DbSetEntitySpecificationExtensions
     public static IEnumerable<TEntity> WhereBySpecification<TEntity>(this DbSet<TEntity> dbSet,
         Expression<Func<TEntity, bool>>? predicate = null, bool checkLocal = true)
         where TEntity : class
-        => predicate is null
-            ? (checkLocal ? dbSet.Local : dbSet.AsEnumerable())
-            : (checkLocal ? dbSet.Local.Where(predicate.Compile()) : dbSet.Where(predicate));
+    {
+        if (predicate is null)
+        {
+            return checkLocal
+                ? dbSet.Local
+                : dbSet.AsEnumerable();
+        }
+
+        return checkLocal
+                ? dbSet.Local.Where(predicate.Compile())
+                : dbSet.Where(predicate);
+    }
 
 }

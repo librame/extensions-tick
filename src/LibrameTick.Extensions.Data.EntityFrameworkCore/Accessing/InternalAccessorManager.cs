@@ -18,20 +18,20 @@ namespace Librame.Extensions.Data.Accessing;
 class InternalAccessorManager : IAccessorManager
 {
     private readonly IOptionsMonitor<DataExtensionOptions> _optionsMonitor;
-    private readonly IAccessorMigrator _migrator;
-    private readonly IShardingManager _shardingManager;
 
 
     public InternalAccessorManager(IOptionsMonitor<DataExtensionOptions> optionsMonitor,
         IAccessorMigrator migrator, IAccessorResolver resolver, IShardingManager shardingManager)
     {
         _optionsMonitor = optionsMonitor;
-        _migrator = migrator;
-        _shardingManager = shardingManager;
+        Migrator = migrator;
+        ShardingManager = shardingManager;
 
-        ResolvedAccessors = resolver.ResolveAccessors();
-        if (ResolvedAccessors.Count < 1)
+        var accessors = resolver.ResolveAccessors();
+        if (accessors.Count < 1)
             throw new ArgumentNullException($"The accessors not found, verify that accessor extensions are registered. ex. \"services.AddDbContext<TContext>(opts => opts.UseXXX<Database>().UseAccessor());\"");
+
+        ResolvedAccessors = accessors;
     }
 
 
@@ -39,26 +39,34 @@ class InternalAccessorManager : IAccessorManager
         => _optionsMonitor.CurrentValue;
 
 
+    public IAccessorMigrator Migrator { get; init; }
+
+    public IShardingManager ShardingManager { get; init; }
+
+
     public IReadOnlyList<IAccessor> ResolvedAccessors { get; init; }
 
-    public Dictionary<IAccessor, ShardedDescriptor?>? CurrentAccessors { get; private set; }
+    public IReadOnlyDictionary<IAccessor, ShardedDescriptor?>? CurrentAccessors { get; private set; }
 
 
     public IAccessor GetAccessor(AccessorSpec specification)
     {
         if (Options.Access.AutoMigration)
-            _migrator.Migrate(ResolvedAccessors);
+            Migrator.Migrate(ResolvedAccessors);
 
         var filterAccessors = ResolvedAccessors.Where(specification.IsSatisfiedBy);
-        if (filterAccessors.Any())
+        if (!filterAccessors.Any())
             throw new ArgumentNullException($"The filter accessors not found.");
 
-        CurrentAccessors = new Dictionary<IAccessor, ShardedDescriptor?>();
+        // 尝试对过滤存取器分库
+        var currentAccessors = new ConcurrentDictionary<IAccessor, ShardedDescriptor?>();
         foreach (var filterAccessor in filterAccessors)
         {
-            _shardingManager.ShardDatabase(filterAccessor, out var descriptor);
-            CurrentAccessors.Add(filterAccessor, descriptor);
+            ShardingManager.ShardDatabase(filterAccessor, out var descriptor);
+
+            currentAccessors.TryAdd(filterAccessor, descriptor);
         }
+        CurrentAccessors = currentAccessors;
 
         var mirroringAccessors = filterAccessors.Where(specification.IsMirroringRedundancyMode);
         var stripingAccessors = filterAccessors.Where(specification.IsStripingRedundancyMode);

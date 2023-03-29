@@ -26,15 +26,17 @@ public interface IAccessorInitializer
     /// <summary>
     /// 初始化存取器。
     /// </summary>
+    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
-    void Initialize(IServiceProvider services);
+    void Initialize(IAccessor accessor, IServiceProvider services);
 
     /// <summary>
     /// 异步初始化存取器。
     /// </summary>
+    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
     /// <param name="services">给定的 <see cref="IServiceProvider"/>。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个异步操作。</returns>
-    Task InitializeAsync(IServiceProvider services,
+    Task InitializeAsync(IAccessor accessor, IServiceProvider services,
         CancellationToken cancellationToken = default);
 }

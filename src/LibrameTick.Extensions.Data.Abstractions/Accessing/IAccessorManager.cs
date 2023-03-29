@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
@@ -20,9 +21,24 @@ namespace Librame.Extensions.Data.Accessing;
 public interface IAccessorManager
 {
     /// <summary>
-    /// 已注册的存取器列表。
+    /// 存取器移植器。
+    /// </summary>
+    IAccessorMigrator Migrator { get; }
+
+    /// <summary>
+    /// 分片管理器。
+    /// </summary>
+    IShardingManager ShardingManager { get; }
+
+    /// <summary>
+    /// 已注册的存取器集合。
     /// </summary>
     IReadOnlyList<IAccessor> ResolvedAccessors { get; }
+
+    /// <summary>
+    /// 当前获取的规约存取器集合。
+    /// </summary>
+    IReadOnlyDictionary<IAccessor, ShardedDescriptor?>? CurrentAccessors { get; }
 
 
     /// <summary>

@@ -1,28 +1,29 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    class InternalTestAccessorInitializer<TDbContext> : BaseDbContextAccessorInitializer<TDbContext, InternalTestAccessorSeeder>
-        where TDbContext : BaseDbContext
+    class InternalTestAccessorInitializer : BaseAccessorInitializer<InternalTestAccessorSeeder>
     {
-        public InternalTestAccessorInitializer(BaseAccessor<TDbContext> accessor, InternalTestAccessorSeeder seeder)
-            : base(accessor, seeder)
+        public InternalTestAccessorInitializer(InternalTestAccessorSeeder seeder)
+            : base(seeder)
         {
         }
 
 
-        protected override void Populate(IServiceProvider services)
+        protected override void Populate(IAccessor accessor, IServiceProvider services)
         {
-            TryPopulateDbSet(Seeder.GetUsers, accssor => accssor.OriginalContext.Set<User>());
+            if (accessor.CurrentContext is DbContext context)
+                TryPopulateDbSet(context, Seeder.GetUsers());
         }
 
-        protected override async Task PopulateAsync(IServiceProvider services,
+        protected override async Task PopulateAsync(IAccessor accessor, IServiceProvider services,
             CancellationToken cancellationToken = default)
         {
-            await TryPopulateDbSetAsync(async token => await Seeder.GetUsersAsync(token),
-                accessor => accessor.OriginalContext.Set<User>(), cancellationToken);
+            if (accessor.CurrentContext is DbContext context)
+                await TryPopulateDbSetAsync(context, await Seeder.GetUsersAsync(cancellationToken), cancellationToken);
         }
 
     }

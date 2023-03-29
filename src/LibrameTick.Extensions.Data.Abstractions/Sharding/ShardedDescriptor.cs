@@ -128,6 +128,51 @@ public class ShardedDescriptor : IEquatable<ShardedDescriptor>, IEquatable<strin
 
 
     /// <summary>
+    /// 为数据库连接字符串验证是否需要分片。
+    /// </summary>
+    /// <param name="connectionString">给定的连接字符串。</param>
+    /// <param name="newConnectionString">输出的新连接字符串。</param>
+    /// <returns>返回是否需要分片的布尔值。</returns>
+    public bool IsNeedShardingForConnectionString(string connectionString,
+        [MaybeNullWhen(false)] out string? newConnectionString)
+    {
+        var database = connectionString.ParseDatabaseFromConnectionString();
+        var sharding = ToString();
+
+        if (!sharding.Equals(database, StringComparison.Ordinal))
+        {
+            newConnectionString = connectionString.Replace(database, sharding);
+            return true;
+        }
+
+        newConnectionString = null;
+        return false;
+    }
+
+    /// <summary>
+    /// 为实体定义的分片特性验证是否需要分片。
+    /// </summary>
+    /// <param name="entityType">给定的实体类型。</param>
+    /// <param name="newTableName">输出的新表名。</param>
+    /// <returns>返回是否需要分片的布尔值。</returns>
+    public bool IsNeedShardingForEntity(Type entityType,
+        [MaybeNullWhen(false)] out string? newTableName)
+    {
+        var attribute = ShardedAttribute.ParseFromEntity(entityType, tableName: null);
+        var sharding = ToString();
+
+        if (!sharding.Equals(attribute.BaseName, StringComparison.Ordinal))
+        {
+            newTableName = sharding;
+            return true;
+        }
+
+        newTableName = null;
+        return false;
+    }
+
+
+    /// <summary>
     /// 比较相等。
     /// </summary>
     /// <param name="other">给定的 <see cref="ShardedDescriptor"/>。</param>

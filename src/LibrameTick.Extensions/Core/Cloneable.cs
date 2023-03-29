@@ -93,7 +93,7 @@ public class Cloneable<TSource> : ICloneable<TSource>
         // 创建默认实例副本
         var copy = objType.NewByExpression();
 
-        foreach (var field in objType.GetAllFieldsAndPropertiesWithStatic())
+        foreach (var field in objType.GetAllFieldsWithStatic())
         {
             var fieldValue = objMembers.GetOrAdd(objType.Name + field.Name, key =>
             {

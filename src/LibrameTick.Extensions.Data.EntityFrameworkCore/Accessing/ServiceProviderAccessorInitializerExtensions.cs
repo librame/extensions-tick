@@ -10,15 +10,17 @@
 
 #endregion
 
-using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Data.Sharding;
 
-namespace Librame.Extensions.Data;
+namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
 /// <see cref="IServiceProvider"/> 与 <see cref="IAccessorInitializer"/> 静态扩展。
 /// </summary>
 public static class ServiceProviderAccessorInitializerExtensions
 {
+    private static bool _isInitialized = false;
+
 
     /// <summary>
     /// 使用 <see cref="IAccessorInitializer"/>。
@@ -27,8 +29,21 @@ public static class ServiceProviderAccessorInitializerExtensions
     /// <returns>返回 <see cref="IServiceProvider"/>。</returns>
     public static IServiceProvider UseAccessorInitializer(this IServiceProvider services)
     {
-        var initializers = services.GetServices<IAccessorInitializer>();
-        initializers.ForEach(a => a.Initialize(services));
+        if (!_isInitialized)
+        {
+            var initializer = services.GetRequiredService<IAccessorInitializer>();
+            var manager = services.GetRequiredService<IAccessorManager>();
+
+            foreach (var accessor in manager.ResolvedAccessors)
+            {
+                // 初始尝试对所有存取器分库
+                manager.ShardingManager.ShardDatabase(accessor);
+
+                initializer.Initialize(accessor, services);
+            }
+
+            _isInitialized = true;
+        }
 
         return services;
     }

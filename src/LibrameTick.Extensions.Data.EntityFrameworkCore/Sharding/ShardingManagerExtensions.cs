@@ -48,6 +48,15 @@ public static class ShardingManagerExtensions
     /// </summary>
     /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
     /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    /// <returns>返回是否分片的布尔值。</returns>
+    public static bool ShardDatabase(this IShardingManager manager, IAccessor accessor)
+        => manager.ShardDatabase(accessor, out _);
+
+    /// <summary>
+    /// 对存取器的数据库分片。
+    /// </summary>
+    /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
+    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
     /// <param name="descriptor">输出 <see cref="ShardedDescriptor"/>。</param>
     /// <returns>返回是否分片的布尔值。</returns>
     public static bool ShardDatabase(this IShardingManager manager, IAccessor accessor,
@@ -65,14 +74,11 @@ public static class ShardingManagerExtensions
         // 使用分片策略格式化分片名称
         descriptor.DefaultStrategy?.FormatSuffix(descriptor);
 
-        var shardedName = descriptor.ToString();
-        if (!shardedName.Equals(descriptor.BaseName, StringComparison.Ordinal))
+        if (descriptor.IsNeedShardingForConnectionString(accessor.CurrentConnectionString!,
+            out var newConnectionString))
         {
-            var newConnectionString = accessor.CurrentConnectionString!
-                .Replace(attribute.BaseName!, shardedName);
-
             // 切换为分片数据连接
-            accessor.ChangeConnection(newConnectionString);
+            accessor.ChangeConnection(newConnectionString!);
 
             return true;
         }
@@ -80,18 +86,6 @@ public static class ShardingManagerExtensions
         return false;
     }
 
-
-    /// <summary>
-    /// 通过实体类型特性获取分片信息。
-    /// </summary>
-    /// <param name="manager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="entity">给定的实体对象。</param>
-    /// <param name="tableName">给定的表名。</param>
-    /// <returns>返回分片字符串。</returns>
-    public static string GetShardedStringByEntity(this IShardingManager manager,
-        Type entityType, object? entity, string? tableName)
-        => manager.GetShardedByEntity(entityType, entity, tableName);
 
     /// <summary>
     /// 通过实体类型特性获取分片信息。

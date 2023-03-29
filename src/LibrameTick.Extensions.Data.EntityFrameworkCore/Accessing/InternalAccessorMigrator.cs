@@ -19,7 +19,19 @@ class InternalAccessorMigrator : IAccessorMigrator
         foreach (var accessor in accessors)
         {
             if (accessor.CurrentContext is DbContext dbContext)
-                dbContext.Database.Migrate();
+            {
+                try
+                {
+                    dbContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
+                    // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
+                    if (!ex.Message.Contains("already exists"))
+                        throw;
+                }
+            }
         }
     }
 
@@ -29,7 +41,19 @@ class InternalAccessorMigrator : IAccessorMigrator
         foreach (var accessor in accessors)
         {
             if (accessor.CurrentContext is DbContext dbContext)
-                await dbContext.Database.MigrateAsync(cancellationToken);
+            {
+                try
+                {
+                    await dbContext.Database.MigrateAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
+                    // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
+                    if (!ex.Message.Contains("already exists"))
+                        throw;
+                }
+            }
         }
     }
 

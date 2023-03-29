@@ -33,11 +33,6 @@ public class AccessOptions : IOptions
 
 
     /// <summary>
-    /// 当连接数据库时，如果数据库已存在，则可以确保将可能已存在的数据库删除（默认未启用功能。注：务必慎用此功能，推荐用于测试环境，不可用于正式环境）。
-    /// </summary>
-    public bool EnsureDatabaseDeleted { get; set; }
-
-    /// <summary>
     /// 当连接数据库时，如果数据库不存在，则可以确保新建数据库（默认启用此功能）。
     /// </summary>
     public bool EnsureDatabaseCreated { get; set; } = true;

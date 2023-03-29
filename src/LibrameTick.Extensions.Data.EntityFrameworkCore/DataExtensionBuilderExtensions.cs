@@ -157,8 +157,68 @@ public static class DataExtensionBuilderExtensions
     }
 
 
+    ///// <summary>
+    ///// 添加初始化器（支持多次添加）。
+    ///// </summary>
+    ///// <typeparam name="TInitializer">指定的初始化器类型。</typeparam>
+    ///// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
+    ///// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+    //public static DataExtensionBuilder AddInitializer<TInitializer>(this DataExtensionBuilder builder)
+    //    where TInitializer : class, IAccessorInitializer
+    //{
+    //    builder.TryAddEnumerableServices<IAccessorInitializer, TInitializer>();
+
+    //    return builder;
+    //}
+
+    ///// <summary>
+    ///// 添加初始化器。
+    ///// </summary>
+    ///// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
+    ///// <param name="initializerType">给定的初始化器类型。</param>
+    ///// <param name="autoReferenceDbContext">自动引用当前注册的数据库上下文（可选；默认不自动引用；如果要启用，需确保初始化器类型为泛型，且类型定义仅为 <see cref="DbContext"/> 或其扩展）。</param>
+    ///// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
+    //public static DataExtensionBuilder AddInitializer(this DataExtensionBuilder builder, Type initializerType,
+    //    bool autoReferenceDbContext = false)
+    //{
+    //    var baseInitializerType = typeof(IAccessorInitializer);
+
+    //    if (!initializerType.IsImplementedType(baseInitializerType))
+    //        throw new ArgumentException($"Invalid initializer type, the required interface '{baseInitializerType}' was not implemented.");
+
+    //    var characteristicType = baseInitializerType;
+
+    //    if (autoReferenceDbContext && initializerType.IsGenericTypeDefinition)
+    //    {
+    //        var parameterType = initializerType.GetTypeInfo().GenericTypeParameters[0];
+    //        if (parameterType?.BaseType?.IsImplementedType(typeof(DbContext)) != true)
+    //            throw new ArgumentException($"Invalid generic initializer definition, see {typeof(BaseAccessorInitializer<>)} for details.");
+
+    //        var dbContextType = typeof(DbContext);
+    //        var implementedTypes = builder.Services
+    //            .Where(s => dbContextType.IsAssignableFrom(s.ServiceType))
+    //            .Select(s => initializerType.MakeGenericType(s.ServiceType))
+    //            .ToArray();
+
+    //        foreach (var implementedType in implementedTypes)
+    //        {
+    //            builder.TryAddOrReplaceService(implementedType, implementedType, characteristicType);
+    //        }
+
+    //        builder.TryAddEnumerableServices(baseInitializerType, implementedTypes, characteristicType);
+    //    }
+    //    else
+    //    {
+    //        builder.TryAddOrReplaceService(initializerType, initializerType, characteristicType);
+    //        builder.TryAddEnumerableServices(baseInitializerType, initializerType, characteristicType);
+    //    }
+
+    //    return builder;
+    //}
+
+
     /// <summary>
-    /// 添加初始化器（支持多次添加）。
+    /// 添加 <typeparamref name="TInitializer"/>。
     /// </summary>
     /// <typeparam name="TInitializer">指定的初始化器类型。</typeparam>
     /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
@@ -166,52 +226,7 @@ public static class DataExtensionBuilderExtensions
     public static DataExtensionBuilder AddInitializer<TInitializer>(this DataExtensionBuilder builder)
         where TInitializer : class, IAccessorInitializer
     {
-        builder.TryAddEnumerableServices<IAccessorInitializer, TInitializer>();
-
-        return builder;
-    }
-
-    /// <summary>
-    /// 添加初始化器。
-    /// </summary>
-    /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
-    /// <param name="initializerType">给定的初始化器类型。</param>
-    /// <param name="autoReferenceDbContext">自动引用当前注册的数据库上下文（可选；默认不自动引用；如果要启用，需确保初始化器类型为泛型，且类型定义仅为 <see cref="DbContext"/> 或其扩展）。</param>
-    /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
-    public static DataExtensionBuilder AddInitializer(this DataExtensionBuilder builder, Type initializerType,
-        bool autoReferenceDbContext = false)
-    {
-        var baseInitializerType = typeof(IAccessorInitializer);
-
-        if (!initializerType.IsImplementedType(baseInitializerType))
-            throw new ArgumentException($"Invalid initializer type, the required interface '{baseInitializerType}' was not implemented.");
-
-        var characteristicType = baseInitializerType;
-
-        if (autoReferenceDbContext && initializerType.IsGenericTypeDefinition)
-        {
-            var parameterType = initializerType.GetTypeInfo().GenericTypeParameters[0];
-            if (parameterType?.BaseType?.IsImplementedType(typeof(DbContext)) != true)
-                throw new ArgumentException($"Invalid generic initializer definition, see {typeof(BaseDbContextAccessorInitializer<,>)} for details.");
-
-            var dbContextType = typeof(DbContext);
-            var implementedTypes = builder.Services
-                .Where(s => dbContextType.IsAssignableFrom(s.ServiceType))
-                .Select(s => initializerType.MakeGenericType(s.ServiceType))
-                .ToArray();
-
-            foreach (var implementedType in implementedTypes)
-            {
-                builder.TryAddOrReplaceService(implementedType, implementedType, characteristicType);
-            }
-
-            builder.TryAddEnumerableServices(baseInitializerType, implementedTypes, characteristicType);
-        }
-        else
-        {
-            builder.TryAddOrReplaceService(initializerType, initializerType, characteristicType);
-            builder.TryAddEnumerableServices(baseInitializerType, initializerType, characteristicType);
-        }
+        builder.TryAddOrReplaceService<IAccessorInitializer, TInitializer>();
 
         return builder;
     }
