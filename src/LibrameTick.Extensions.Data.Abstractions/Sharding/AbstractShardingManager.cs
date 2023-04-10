@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Dispatchers;
+
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
@@ -24,11 +26,20 @@ public abstract class AbstractShardingManager : IShardingManager
     /// <summary>
     /// 构造一个 <see cref="AbstractShardingManager"/>。
     /// </summary>
-    protected AbstractShardingManager()
+    /// <param name="dispatcherFactory">给定的 <see cref="IDispatcherFactory"/>。</param>
+    protected AbstractShardingManager(IDispatcherFactory dispatcherFactory)
     {
         _entities = new();
         _strategies = new();
+
+        DispatcherFactory = dispatcherFactory;
     }
+
+
+    /// <summary>
+    /// 调度器工厂。
+    /// </summary>
+    public IDispatcherFactory DispatcherFactory { get; init; }
 
 
     #region ShardingEntity

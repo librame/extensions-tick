@@ -16,7 +16,7 @@ namespace Librame.Extensions.Data;
 /// 定义泛型更新时间接口。
 /// </summary>
 /// <typeparam name="TUpdatedTime">指定的更新时间类型（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）。</typeparam>
-public interface IUpdationTime<TUpdatedTime> : ICreationTime<TUpdatedTime>, IObjectUpdationTime
+public interface IUpdationTime<TUpdatedTime> : IEquatable<IUpdationTime<TUpdatedTime>>, IObjectUpdationTime
     where TUpdatedTime : struct
 {
     /// <summary>

@@ -12,7 +12,6 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Core.Template;
-using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -21,11 +20,6 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public class AccessOptions : IOptions
 {
-    /// <summary>
-    /// 调度器选项。
-    /// </summary>
-    public DispatcherOptions Dispatcher { get; set; } = new();
-
     /// <summary>
     /// 模板选项。
     /// </summary>

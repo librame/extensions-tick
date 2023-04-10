@@ -10,11 +10,15 @@
 
 #endregion
 
-namespace Librame.Extensions.Data;
+using Librame.Extensions.Core;
 
-/// <summary>
-/// 定义对象更新接口。
-/// </summary>
-public interface IObjectUpdation : IObjectUpdator, IObjectUpdationTime
+namespace Librame.Extensions.Dispatchers;
+
+class InternalDispatcherFactory : AbstractDispatcherFactory
 {
+    public InternalDispatcherFactory(IOptionsMonitor<CoreExtensionOptions> optionsMonitor)
+        : base(optionsMonitor.CurrentValue.Dispatching)
+    {
+    }
+
 }

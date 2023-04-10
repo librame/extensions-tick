@@ -14,6 +14,7 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
 using Librame.Extensions.Cryptography;
+using Librame.Extensions.Dispatchers;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -91,6 +92,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
             .AddCommon()
             .AddCryptography()
             .AddNetwork()
+            .AddPlugins()
             .AddStorage();
     }
 
@@ -99,6 +101,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
     {
         builder.TryAddOrReplaceService(typeof(ICloneable<>), implementationType: typeof(Cloneable<>));
         builder.TryAddOrReplaceService(typeof(IDecoratable<>), implementationType: typeof(Decoratable<>));
+        builder.TryAddOrReplaceService<IDispatcherFactory, InternalDispatcherFactory>();
 
         return builder;
     }
@@ -117,6 +120,11 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         builder.TryAddOrReplaceService<IHttpClientInvokerFactory, InternalHttpClientInvokerFactory>();
         builder.TryAddOrReplaceService<IHttpEndpointsInvoker, InternalHttpEndpointsInvoker>();
 
+        return builder;
+    }
+
+    private static CoreExtensionBuilder AddPlugins(this CoreExtensionBuilder builder)
+    {
         return builder;
     }
 

@@ -31,7 +31,11 @@ public static class AccessorDescriptorDbContextOptionsExtensions
         var priority = extension.Priority < 0 ? accessor.Priority : extension.Priority;
         var algorithms = extension.Algorithm ?? accessor.CoreOptions.Algorithm;
 
-        return new AccessorDescriptor(accessor, extension.ServiceType!, extension.Group,
+        var name = string.IsNullOrEmpty(extension.Name)
+            ? accessor.CurrentContext.GetType().Name.TrimEnd(nameof(DbContext))
+            : extension.Name;
+
+        return new AccessorDescriptor(accessor, extension.ServiceType!, name, extension.Group,
             extension.Access, extension.Redundancy, priority, algorithms, extension.Sharded);
     }
 

@@ -14,6 +14,7 @@ using Librame.Extensions.Bootstraps;
 using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
 using Librame.Extensions.Cryptography;
+using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Core;
 
@@ -22,6 +23,11 @@ namespace Librame.Extensions.Core;
 /// </summary>
 public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOptions>
 {
+    /// <summary>
+    /// 调度选项。
+    /// </summary>
+    public DispatchingOptions Dispatching { get; set; } = new();
+
     /// <summary>
     /// 算法选项。
     /// </summary>

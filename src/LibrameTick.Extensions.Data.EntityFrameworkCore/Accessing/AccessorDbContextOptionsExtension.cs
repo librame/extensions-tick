@@ -26,6 +26,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     // 表示是否为 DbContextPool
     //private bool _pooling;
 
+    private string? _name;
     private int _group;
     private AccessMode _access = AccessMode.ReadWrite;
     private RedundancyMode _redundancy = RedundancyMode.Mirroring;
@@ -62,22 +63,24 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
 
     /// <summary>
+    /// 名称。
+    /// </summary>
+    public string? Name => _name;
+
+    /// <summary>
     /// 所属群组（默认为 0）。
     /// </summary>
-    public int Group
-        => _group;
+    public int Group => _group;
 
     /// <summary>
     /// 访问模式（默认为 <see cref="AccessMode.ReadWrite"/>，表示存取器可以进行读/写数据库操作）。
     /// </summary>
-    public AccessMode Access
-        => _access;
+    public AccessMode Access => _access;
 
     /// <summary>
     /// 冗余模式（默认为 <see cref="RedundancyMode.Mirroring"/>，表示多库环境中可互为主备）。
     /// </summary>
-    public RedundancyMode Redundancy
-        => _redundancy;
+    public RedundancyMode Redundancy => _redundancy;
 
     ///// <summary>
     ///// 是否池化（默认为 FALSE）。
@@ -88,26 +91,22 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// <summary>
     /// 存取器优先级（默认为 -1，表示优先使用存取器实现的 <see cref="ISortable.Priority"/> 的优先级属性值）。
     /// </summary>
-    public float Priority
-        => _priority;
+    public float Priority => _priority;
 
     /// <summary>
     /// 算法选项（默认为 NULL，表示优先使用 <see cref="CoreExtensionOptions.Algorithm"/> 全局配置，提供对数据字段值的加解密功能）。
     /// </summary>
-    public AlgorithmOptions? Algorithm
-        => _algorithm;
+    public AlgorithmOptions? Algorithm => _algorithm;
 
     /// <summary>
     /// 分库特性（默认为 NULL，表示不启用分库）。
     /// </summary>
-    public ShardedAttribute? Sharded
-        => _sharded;
+    public ShardedAttribute? Sharded => _sharded;
 
     /// <summary>
     /// 服务类型。
     /// </summary>
-    public Type? ServiceType
-        => _serviceType;
+    public Type? ServiceType => _serviceType;
 
 
     /// <summary>
@@ -124,6 +123,20 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     protected virtual AccessorDbContextOptionsExtension Clone()
         => new(this);
 
+
+    /// <summary>
+    /// 使用指定的名称创建一个选项扩展实例副本。
+    /// </summary>
+    /// <param name="name">给定的名称。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+    public virtual AccessorDbContextOptionsExtension WithName(string name)
+    {
+        var clone = Clone();
+
+        clone._name = name;
+
+        return clone;
+    }
 
     /// <summary>
     /// 使用指定的所属群组创建一个选项扩展实例副本。
@@ -280,6 +293,10 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 {
                     var builder = new StringBuilder();
 
+                    builder.Append(nameof(Extension.Name));
+                    builder.Append(": ");
+                    builder.Append(Extension.Name).Append(' ');
+
                     builder.Append(nameof(Extension.Group));
                     builder.Append(": ");
                     builder.Append(Extension.Group).Append(' ');
@@ -330,6 +347,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             {
                 var hashCode = new HashCode();
 
+                hashCode.Add(Extension._name);
                 hashCode.Add(Extension._group);
                 hashCode.Add(Extension._access);
                 hashCode.Add(Extension._redundancy);
@@ -353,6 +371,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
         public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other)
             => other is ExtensionInfo otherInfo
+                && Extension._name == otherInfo.Extension._name
                 && Extension._group == otherInfo.Extension._group
                 && Extension._access == otherInfo.Extension._access
                 && Extension._redundancy == otherInfo.Extension._redundancy
@@ -364,6 +383,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
         public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
         {
+            debugInfo["Accessor:" + nameof(Extension.Name)] =
+                (Extension.Name?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
+
             debugInfo["Accessor:" + nameof(Extension.Group)] =
                 Extension.Group.GetHashCode().ToString(CultureInfo.InvariantCulture);
 

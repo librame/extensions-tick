@@ -25,6 +25,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// </summary>
     /// <param name="accessor">给定的存取器实例。</param>
     /// <param name="serviceType">给定的服务类型。</param>
+    /// <param name="name">给定的名称。</param>
     /// <param name="group">给定的所属群组。</param>
     /// <param name="access">给定的访问模式。</param>
     /// <param name="redundancy">给定的冗余模式。</param>
@@ -33,6 +34,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <param name="sharded">给定的分库特性。</param>
     public AccessorDescriptor(IAccessor accessor,
         Type serviceType,
+        string name,
         int group,
         AccessMode access,
         RedundancyMode redundancy,
@@ -43,6 +45,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     {
         Accessor = accessor;
         ServiceType = serviceType;
+        Name = name;
         Group = group;
         Access = access;
         Redundancy = redundancy;
@@ -62,6 +65,11 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// 存取器实例。
     /// </summary>
     public IAccessor Accessor { get; init; }
+
+    /// <summary>
+    /// 名称。
+    /// </summary>
+    public string Name { get; init; }
 
     /// <summary>
     /// 所属群组。

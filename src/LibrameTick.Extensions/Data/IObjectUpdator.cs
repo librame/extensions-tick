@@ -15,7 +15,7 @@ namespace Librame.Extensions.Data;
 /// <summary>
 /// 定义对象更新者接口。
 /// </summary>
-public interface IObjectUpdator : IObjectCreator
+public interface IObjectUpdator
 {
     /// <summary>
     /// 更新者类型。

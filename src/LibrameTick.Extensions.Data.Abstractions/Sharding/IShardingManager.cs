@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Dispatchers;
+
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
@@ -17,6 +19,11 @@ namespace Librame.Extensions.Data.Sharding;
 /// </summary>
 public interface IShardingManager
 {
+    /// <summary>
+    /// 调度器工厂。
+    /// </summary>
+    IDispatcherFactory DispatcherFactory { get; }
+
 
     #region ShardingEntity
 

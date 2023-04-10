@@ -10,11 +10,15 @@
 
 #endregion
 
+using Librame.Extensions.Dispatchers;
+
 namespace Librame.Extensions.Data.Sharding;
 
 class InternalShardingManager : AbstractShardingManager
 {
-    public InternalShardingManager(IOptionsMonitor<DataExtensionOptions> dataOptions)
+    public InternalShardingManager(IOptionsMonitor<DataExtensionOptions> dataOptions,
+        IDispatcherFactory dispatcherFactory)
+        : base(dispatcherFactory)
     {
         AddStrategy(new DateTimeShardingStrategy());
         AddStrategy(new DateTimeOffsetShardingStrategy());

@@ -31,8 +31,8 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy>
     /// </summary>
     protected AbstractUpdationIdentifier()
     {
-        UpdatedTime = CreatedTime = DateTimeOffset.UtcNow;
-        UpdatedTimeTicks = CreatedTimeTicks = UpdatedTime.Ticks;
+        UpdatedTime = DateTimeOffset.UtcNow;
+        UpdatedTimeTicks = UpdatedTime.Ticks;
     }
 
 
@@ -50,47 +50,13 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy>
 
 
     /// <summary>
-    /// 设置对象创建时间。
-    /// </summary>
-    /// <param name="newCreatedTime">给定的新创建时间对象。</param>
-    /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
-    public override object SetObjectCreatedTime(object newCreatedTime)
-    {
-        CreatedTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
-        CreatedTimeTicks = CreatedTime.Ticks;
-
-        return newCreatedTime;
-    }
-
-    /// <summary>
-    /// 异步设置对象创建时间。
-    /// </summary>
-    /// <param name="newCreatedTime">给定的新创建时间对象。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-    public override ValueTask<object> SetObjectCreatedTimeAsync(object newCreatedTime,
-        CancellationToken cancellationToken = default)
-    {
-        var createdTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
-
-        return cancellationToken.RunValueTask(() =>
-        {
-            CreatedTime = createdTime;
-            CreatedTimeTicks = CreatedTime.Ticks;
-
-            return newCreatedTime;
-        });
-    }
-
-
-    /// <summary>
     /// 设置对象更新时间。
     /// </summary>
     /// <param name="newUpdatedTime">给定的新更新时间对象。</param>
     /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
     public override object SetObjectUpdatedTime(object newUpdatedTime)
     {
-        UpdatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
+        UpdatedTime = ToUpdatedTime(newUpdatedTime, nameof(newUpdatedTime));
         UpdatedTimeTicks = UpdatedTime.Ticks;
 
         return newUpdatedTime;
@@ -104,7 +70,7 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy>
     /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
     public override ValueTask<object> SetObjectUpdatedTimeAsync(object newUpdatedTime, CancellationToken cancellationToken = default)
     {
-        var updatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
+        var updatedTime = ToUpdatedTime(newUpdatedTime, nameof(newUpdatedTime));
 
         return cancellationToken.RunValueTask(() =>
         {
@@ -133,7 +99,7 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy>
 /// <typeparam name="TUpdatedTime">指定的更新时间类型（提供对 DateTime 或 DateTimeOffset 的支持）。</typeparam>
 [NotMapped]
 public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
-    : AbstractCreationIdentifier<TId, TUpdatedBy, TUpdatedTime>, IUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
+    : AbstractIdentifier<TId>, IUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
     where TId : IEquatable<TId>
     where TUpdatedBy : IEquatable<TUpdatedBy>
     where TUpdatedTime : struct
@@ -156,14 +122,52 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
     /// </summary>
     [NotMapped]
     public virtual Type UpdatedByType
-        => CreatedByType;
+        => typeof(TUpdatedBy);
 
     /// <summary>
     /// 更新时间类型。
     /// </summary>
     [NotMapped]
     public virtual Type UpdatedTimeType
-        => CreatedTimeType;
+        => typeof(TUpdatedTime);
+
+
+    /// <summary>
+    /// 比较更新者相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="IUpdator{TUpdatedBy}"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    public virtual bool Equals(IUpdator<TUpdatedBy>? other)
+        => other is not null && UpdatedBy is not null && UpdatedBy.Equals(other.UpdatedBy);
+
+    /// <summary>
+    /// 比较更新时间相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="IUpdationTime{TUpdatedTime}"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    public virtual bool Equals(IUpdationTime<TUpdatedTime>? other)
+        => other is not null && UpdatedTime.Equals(other.UpdatedTime);
+
+
+    /// <summary>
+    /// 转换为更新者。
+    /// </summary>
+    /// <param name="updatedBy">给定的更新者对象。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="updatedBy"/> 调用参数名）。</param>
+    /// <returns>返回 <typeparamref name="TUpdatedBy"/>。</returns>
+    public virtual TUpdatedBy ToUpdatedBy(object? updatedBy,
+        [CallerArgumentExpression("updatedBy")] string? paramName = null)
+        => updatedBy.As<TUpdatedBy>(paramName);
+
+    /// <summary>
+    /// 转换为更新时间。
+    /// </summary>
+    /// <param name="updatedTime">给定的更新时间对象。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="updatedTime"/> 调用参数名）。</param>
+    /// <returns>返回 <typeparamref name="TUpdatedTime"/>。</returns>
+    public virtual TUpdatedTime ToUpdatedTime(object updatedTime,
+        [CallerArgumentExpression("updatedTime")] string? paramName = null)
+        => updatedTime.As<TUpdatedTime>(paramName);
 
 
     /// <summary>
@@ -205,7 +209,7 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
     /// <returns>返回创建者（兼容标识或字符串）。</returns>
     public virtual object? SetObjectUpdatedBy(object? newUpdatedBy)
     {
-        UpdatedBy = ToCreatedBy(newUpdatedBy, nameof(newUpdatedBy));
+        UpdatedBy = ToUpdatedBy(newUpdatedBy, nameof(newUpdatedBy));
         return newUpdatedBy;
     }
 
@@ -218,7 +222,7 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
     public virtual ValueTask<object?> SetObjectUpdatedByAsync(object? newUpdatedBy,
         CancellationToken cancellationToken = default)
     {
-        var updatedBy = ToCreatedBy(newUpdatedBy, nameof(newUpdatedBy));
+        var updatedBy = ToUpdatedBy(newUpdatedBy, nameof(newUpdatedBy));
 
         return cancellationToken.RunValueTask(() =>
         {
@@ -235,7 +239,7 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
     /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
     public virtual object SetObjectUpdatedTime(object newUpdatedTime)
     {
-        UpdatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
+        UpdatedTime = ToUpdatedTime(newUpdatedTime, nameof(newUpdatedTime));
         return newUpdatedTime;
     }
 
@@ -248,7 +252,7 @@ public abstract class AbstractUpdationIdentifier<TId, TUpdatedBy, TUpdatedTime>
     public virtual ValueTask<object> SetObjectUpdatedTimeAsync(object newUpdatedTime,
         CancellationToken cancellationToken = default)
     {
-        var updatedTime = ToCreatedTime(newUpdatedTime, nameof(newUpdatedTime));
+        var updatedTime = ToUpdatedTime(newUpdatedTime, nameof(newUpdatedTime));
 
         return cancellationToken.RunValueTask(() =>
         {

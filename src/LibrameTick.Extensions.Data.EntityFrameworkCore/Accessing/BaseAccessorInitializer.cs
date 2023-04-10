@@ -10,6 +10,7 @@
 
 #endregion
 
+
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
@@ -41,7 +42,7 @@ public class BaseAccessorInitializer<TSeeder> : AbstractAccessorInitializer<TSee
     {
         var dbSet = context.Set<TEntity>();
 
-        if (!dbSet.ExistsBySpecification(predicate: null))
+        if (!dbSet.ExistsWithLocal(predicate: null))
         {
             dbSet.AddRange(initialEntities);
 
@@ -64,7 +65,7 @@ public class BaseAccessorInitializer<TSeeder> : AbstractAccessorInitializer<TSee
     {
         var dbSet = context.Set<TEntity>();
 
-        if (!await dbSet.ExistsBySpecificationAsync(predicate: null, cancellationToken: cancellationToken))
+        if (!await dbSet.ExistsWithLocalAsync(predicate: null, cancellationToken: cancellationToken))
         {
             await dbSet.AddRangeAsync(initialEntities, cancellationToken);
 

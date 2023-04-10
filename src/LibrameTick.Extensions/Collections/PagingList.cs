@@ -97,6 +97,12 @@ public class PagingList<T> : IPagingList<T>
     public virtual PagingInfo Info
         => _info;
 
+    /// <summary>
+    /// 列表长度（需要先分页后才有效）。
+    /// </summary>
+    public virtual int Length
+        => _filter?.Count() ?? 0;
+
 
     /// <summary>
     /// 筛选列表（通常用于内存分页）。

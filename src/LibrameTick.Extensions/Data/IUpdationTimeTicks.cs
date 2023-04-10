@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data;
 /// <remarks>
 /// 主要用于解决 <see cref="DateTimeOffset"/> 在不同数据库中 LINQ 查询的兼容性问题。
 /// </remarks>
-public interface IUpdationTimeTicks : ICreationTimeTicks
+public interface IUpdationTimeTicks
 {
     /// <summary>
     /// 更新时间周期数。

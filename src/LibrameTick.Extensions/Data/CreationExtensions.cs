@@ -65,62 +65,6 @@ public static class CreationExtensions
     #endregion
 
 
-    #region IObjectCreation (与泛型产生二义性)
-
-    ///// <summary>
-    ///// 填充创建属性（支持日期时间为可空类型）。
-    ///// </summary>
-    ///// <exception cref="ArgumentNullException">
-    ///// <paramref name="creation"/> is null.
-    ///// </exception>
-    ///// <typeparam name="TCreation">指定的创建类型。</typeparam>
-    ///// <param name="creation">给定的 <typeparamref name="TCreation"/>。</param>
-    ///// <param name="newCreatedTime">给定的新创建日期对象（可选）。</param>
-    ///// <param name="newCreatedBy">给定的新创建者对象。</param>
-    ///// <returns>返回 <typeparamref name="TCreation"/>。</returns>
-    //public static TCreation PopulateCreation<TCreation>(this TCreation creation,
-    //    object newCreatedBy, object? newCreatedTime = null)
-    //    where TCreation : IObjectCreation
-    //{
-    //    if (newCreatedTime.IsNotNull())
-    //        creation.SetObjectCreatedTime(newCreatedTime);
-
-    //    creation.SetObjectCreatedBy(newCreatedBy);
-
-    //    return creation;
-    //}
-
-    ///// <summary>
-    ///// 异步填充创建属性（支持日期时间为可空类型）。
-    ///// </summary>
-    ///// <exception cref="ArgumentNullException">
-    ///// <paramref name="creation"/> is null.
-    ///// </exception>
-    ///// <typeparam name="TCreation">指定的创建类型。</typeparam>
-    ///// <param name="creation">给定的 <typeparamref name="TCreation"/>。</param>
-    ///// <param name="newCreatedBy">给定的新创建者对象。</param>
-    ///// <param name="newCreatedTime">给定的新创建日期对象（可选）。</param>
-    ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    ///// <returns>返回一个包含 <typeparamref name="TCreation"/> 的异步操作。</returns>
-    //public static async Task<TCreation> PopulateCreationAsync<TCreation>(this TCreation creation,
-    //    object? newCreatedBy, object? newCreatedTime = null, CancellationToken cancellationToken = default)
-    //    where TCreation : IObjectCreation
-    //{
-    //    if (newCreatedTime.IsNotNull())
-    //    {
-    //        await creation.SetObjectCreatedTimeAsync(newCreatedTime, cancellationToken)
-    //            .ConfigureAwaitWithoutContext();
-    //    }
-
-    //    await creation.SetObjectCreatedByAsync(newCreatedBy, cancellationToken)
-    //        .ConfigureAwaitWithoutContext();
-
-    //    return creation;
-    //}
-
-    #endregion
-
-
     #region ICreator<TCreatedBy>
 
     /// <summary>
@@ -177,76 +121,6 @@ public static class CreationExtensions
         Func<TCreatedTime, TCreatedTime> newCreatedTimeFactory, CancellationToken cancellationToken = default)
         where TCreatedTime : struct
         => cancellationToken.RunValueTask(() => creationTime.CreatedTime = newCreatedTimeFactory(creationTime.CreatedTime));
-
-    #endregion
-
-
-    #region IObjectCreator (与泛型产生二义性)
-
-    ///// <summary>
-    ///// 设置对象创建者。
-    ///// </summary>
-    ///// <param name="creator">给定的 <see cref="IObjectCreator"/>。</param>
-    ///// <param name="newCreatedByFactory">给定的新对象创建者工厂方法。</param>
-    ///// <returns>返回创建者（兼容标识或字符串）。</returns>
-    //public static object? SetObjectCreatedBy(this IObjectCreator creator,
-    //    Func<object?, object?> newCreatedByFactory)
-    //{
-    //    var currentCreatedBy = creator.GetObjectCreatedBy();
-    //    return creator.SetObjectCreatedBy(newCreatedByFactory(currentCreatedBy));
-    //}
-
-    ///// <summary>
-    ///// 异步设置对象创建者。
-    ///// </summary>
-    ///// <param name="creator">给定的 <see cref="IObjectCreator"/>。</param>
-    ///// <param name="newCreatedByFactory">给定的新对象创建者工厂方法。</param>
-    ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    ///// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
-    //public static async ValueTask<object?> SetObjectCreatedByAsync(this IObjectCreator creator,
-    //    Func<object?, object?> newCreatedByFactory, CancellationToken cancellationToken = default)
-    //{
-    //    var currentCreatedBy = await creator.GetObjectCreatedByAsync(cancellationToken)
-    //        .ConfigureAwaitWithoutContext();
-
-    //    return await creator.SetObjectCreatedByAsync(newCreatedByFactory(currentCreatedBy), cancellationToken)
-    //        .ConfigureAwaitWithoutContext();
-    //}
-
-    #endregion
-
-
-    #region IObjectCreationTime (与泛型产生二义性)
-
-    ///// <summary>
-    ///// 设置对象创建时间。
-    ///// </summary>
-    ///// <param name="creationTime">给定的 <see cref="IObjectCreationTime"/>。</param>
-    ///// <param name="newCreatedTimeFactory">给定的新对象创建时间工厂方法。</param>
-    ///// <returns>返回创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
-    //public static object SetObjectCreatedTime(this IObjectCreationTime creationTime,
-    //    Func<object, object> newCreatedTimeFactory)
-    //{
-    //    var currentCreatedTime = creationTime.GetObjectCreatedTime();
-    //    return creationTime.SetObjectCreatedTime(newCreatedTimeFactory(currentCreatedTime));
-    //}
-
-    ///// <summary>
-    ///// 异步设置对象创建时间。
-    ///// </summary>
-    ///// <param name="creationTime">给定的 <see cref="IObjectCreationTime"/>。</param>
-    ///// <param name="newCreatedTimeFactory">给定的新对象创建时间工厂方法。</param>
-    ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    ///// <returns>返回一个包含创建时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-    //public static async ValueTask<object> SetObjectCreatedTimeAsync(this IObjectCreationTime creationTime,
-    //    Func<object, object> newCreatedTimeFactory, CancellationToken cancellationToken = default)
-    //{
-    //    var currentCreatedTime = await creationTime.GetObjectCreatedTimeAsync(cancellationToken)
-    //        .ConfigureAwaitWithoutContext();
-
-    //    return await creationTime.SetObjectCreatedTimeAsync(newCreatedTimeFactory(currentCreatedTime), cancellationToken)
-    //        .ConfigureAwaitWithoutContext();
-    //}
 
     #endregion
 

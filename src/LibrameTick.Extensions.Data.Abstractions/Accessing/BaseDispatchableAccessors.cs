@@ -13,48 +13,88 @@
 using Librame.Extensions.Collections;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
+using Librame.Extensions.Dispatchers;
 using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义一个抽象实现 <see cref="IAccessor"/> 的存取器。
+/// 定义一个实现 <see cref="IAccessor"/> 的基础可调度存取器集合。
 /// </summary>
-public abstract class AbstractAccessor : IAccessor
+public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessors
 {
     /// <summary>
-    /// 构造一个 <see cref="AbstractAccessor"/>。
+    /// 构造一个 <see cref="BaseDispatchableAccessors"/>。
     /// </summary>
-    /// <param name="context">给定的 <see cref="BaseDbContext"/>。</param>
-    protected AbstractAccessor(BaseDbContext context)
+    /// <param name="dispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 读写存取器调度器。</param>
+    public BaseDispatchableAccessors(IDispatcher<IAccessor> dispatcher)
+        : this(dispatcher, dispatcher)
     {
-        OriginalContext = context;
-        CurrentContext = context;
+        IsWritingSeparation = false;
+    }
+
+    /// <summary>
+    /// 构造一个 <see cref="BaseDispatchableAccessors"/>。
+    /// </summary>
+    /// <param name="readingDispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 读存取器调度器。</param>
+    /// <param name="writingDispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 写存取器调度器。</param>
+    public BaseDispatchableAccessors(IDispatcher<IAccessor> readingDispatcher,
+        IDispatcher<IAccessor> writingDispatcher)
+    {
+        ReadingDispatcher = readingDispatcher;
+        WritingDispatcher = writingDispatcher;
+
+        IsWritingSeparation = true;
     }
 
 
     /// <summary>
-    /// 原始数据库上下文。
+    /// 默认访问器（初始返回 <see cref="ReadingDispatcher"/> 第一项）。
     /// </summary>
-    public BaseDbContext OriginalContext { get; init; }
+    public virtual IAccessor DefaultAccessor
+        => ReadingDispatcher.First;
 
     /// <summary>
-    /// 当前数据库上下文。
+    /// 默认写访问器（如果启用读写分离，则初始返回 <see cref="WritingDispatcher"/> 第一项，反之则返回 <see cref="DefaultAccessor"/>）。
     /// </summary>
-    public virtual IDbContext CurrentContext { get; protected set; }
+    public virtual IAccessor DefaultWritingAccessor
+        => IsWritingSeparation ? WritingDispatcher.First : DefaultAccessor;
 
 
     /// <summary>
-    /// 存取器描述符。
+    /// 读存取器调度器。
+    /// </summary>
+    public IDispatcher<IAccessor> ReadingDispatcher { get; init; }
+
+    /// <summary>
+    /// 写存取器调度器。
+    /// </summary>
+    public IDispatcher<IAccessor> WritingDispatcher { get; init; }
+
+    /// <summary>
+    /// 是否读写分离。
+    /// </summary>
+    public bool IsWritingSeparation { get; init; }
+
+
+    /// <summary>
+    /// 当前数据库上下文（默认返回读存取器的第一项 <see cref="IDbContext"/>）。
+    /// </summary>
+    public virtual IDbContext CurrentContext
+        => DefaultAccessor.CurrentContext;
+
+
+    /// <summary>
+    /// 存取器描述符（默认返回读存取器的第一项 <see cref="AccessorDescriptor"/>）。
     /// </summary>
     public AccessorDescriptor? AccessorDescriptor
-        => OriginalContext.AccessorExtension?.ToDescriptor(this);
+        => DefaultAccessor.AccessorDescriptor;
 
     /// <summary>
-    /// 存取器标识。
+    /// 存取器标识（默认返回读存取器的所有项存取器标识集合）。
     /// </summary>
     public string AccessorId
-        => OriginalContext.ContextId.ToString();
+        => DefaultAccessor.AccessorId;
 
     /// <summary>
     /// 存取器类型。
@@ -63,86 +103,41 @@ public abstract class AbstractAccessor : IAccessor
         => GetType();
 
 
-    /// <summary>
-    /// 数据扩展选项。
-    /// </summary>
-    public DataExtensionOptions DataOptions
-        => OriginalContext.DataOptions;
+    #region Connection
 
     /// <summary>
-    /// 核心扩展选项。
-    /// </summary>
-    public CoreExtensionOptions CoreOptions
-        => OriginalContext.CoreOptions;
-
-    /// <summary>
-    /// 存取器选项扩展。
-    /// </summary>
-    public AccessorDbContextOptionsExtension? AccessorExtension
-        => OriginalContext.AccessorExtension;
-
-    /// <summary>
-    /// 关系型选项扩展。
-    /// </summary>
-    public RelationalOptionsExtension? RelationalExtension
-        => OriginalContext.RelationalExtension;
-
-
-    /// <summary>
-    /// 关系连接接口。
-    /// </summary>
-    protected IRelationalConnection RelationalConnection
-        => OriginalContext.GetService<IRelationalConnection>();
-
-    /// <summary>
-    /// 当前连接字符串。
+    /// 当前连接字符串（默认返回读存取器的所有项连接字符串集合）。
     /// </summary>
     public virtual string? CurrentConnectionString
-        => RelationalConnection.ConnectionString;
+        => DefaultAccessor.CurrentConnectionString;
 
 
     /// <summary>
-    /// 改变数据库连接。
+    /// 改变默认访问器数据库连接。
     /// </summary>
     /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
     /// <returns>返回 <see cref="IAccessor"/>。</returns>
+    /// <exception cref="NotImplementedException">
+    /// The redundable accessors does not support this operation.
+    /// </exception>
     public virtual IAccessor ChangeConnection(string newConnectionString)
-    {
-        if (newConnectionString.Equals(RelationalConnection.ConnectionString, StringComparison.Ordinal))
-            return this;
-
-        DataOptions.Access.ConnectionChangingAction?.Invoke(this);
-
-        RelationalConnection.ConnectionString = newConnectionString;
-
-        DataOptions.Access.ConnectionChangedAction?.Invoke(this);
-
-        return this;
-    }
+        => DefaultAccessor.ChangeConnection(newConnectionString);
 
 
     /// <summary>
-    /// 尝试创建数据库。
+    /// 尝试创建数据库（已集成是否需要先删除数据库功能）。
     /// </summary>
     /// <returns>返回布尔值。</returns>
     public virtual bool TryCreateDatabase()
     {
-        if (DataOptions.Access.EnsureDatabaseCreated)
-        {
-            try
-            {
-                OriginalContext.Database.EnsureCreated();
-            }
-            catch (Exception ex)
-            {
-                // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
-                // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
-                if (!ex.Message.Contains("already exists"))
-                    throw;
-            }
-        }
+        var results = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.TryCreateDatabase()).ToList();
 
-        return false;
+        // 启用写入分离时需确保写入库已存在
+        if (IsWritingSeparation)
+            results.AddRange(WritingDispatcher.InvokeFunc(a => a.CurrentSource.TryCreateDatabase()));
+
+        // 只要有一个 FALSE 就返回 FALSE
+        return !results.Any(result => false);
     }
 
     /// <summary>
@@ -152,23 +147,21 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回一个包含布尔值的异步操作。</returns>
     public virtual async Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        if (DataOptions.Access.EnsureDatabaseCreated)
+        var results = (await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.TryCreateDatabaseAsync(cancellationToken),
+            cancellationToken: cancellationToken)).ToList();
+
+        // 启用写入分离时需确保写入库已存在
+        if (IsWritingSeparation)
         {
-            try
-            {
-                await OriginalContext.Database.EnsureCreatedAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
-                // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
-                if (!ex.Message.Contains("already exists"))
-                    throw;
-            }
+            results.AddRange(await WritingDispatcher.InvokeFuncAsync(a => a.CurrentSource.TryCreateDatabaseAsync(cancellationToken),
+                cancellationToken: cancellationToken));
         }
-        
-        return false;
+
+        // 只要有一个 FALSE 就返回 FALSE
+        return !results.Any(result => false);
     }
+
+    #endregion
 
 
     #region IShardable
@@ -177,7 +170,7 @@ public abstract class AbstractAccessor : IAccessor
     /// 分片管理器。
     /// </summary>
     public IShardingManager ShardingManager
-        => OriginalContext.GetService<IShardingManager>();
+        => DefaultAccessor.ShardingManager;
 
     #endregion
 
@@ -187,17 +180,8 @@ public abstract class AbstractAccessor : IAccessor
     /// <summary>
     /// 排序优先级（数值越小越优先）。
     /// </summary>
-    public virtual float Priority
-        => AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
-
-
-    /// <summary>
-    /// 与指定的 <see cref="ISortable"/> 比较大小。
-    /// </summary>
-    /// <param name="other">给定的 <see cref="ISortable"/>。</param>
-    /// <returns>返回整数。</returns>
-    public virtual int CompareTo(ISortable? other)
-        => Priority.CompareTo(other?.Priority ?? 0);
+    public override float Priority
+        => ReadingDispatcher.Sources.Max(s => s.Priority) + 1; // 复合访问器优先级最低
 
     #endregion
 
@@ -205,27 +189,27 @@ public abstract class AbstractAccessor : IAccessor
     #region Query
 
     /// <summary>
-    /// 创建指定实体类型的可查询接口。
+    /// 创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
     public virtual IQueryable<TEntity> Query<TEntity>()
         where TEntity : class
-        => OriginalContext.Set<TEntity>();
+        => DefaultAccessor.Query<TEntity>();
 
     /// <summary>
-    /// 创建指定实体类型的可查询接口。
+    /// 创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="name">要使用的共享类型实体类型的名称。</param>
     /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
     public virtual IQueryable<TEntity> Query<TEntity>(string name)
         where TEntity : class
-        => OriginalContext.Set<TEntity>(name);
+        => DefaultAccessor.Query<TEntity>(name);
 
 
     /// <summary>
-    /// 通过 SQL 语句创建指定实体类型的可查询接口。
+    /// 通过 SQL 语句创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="sql">给定的 SQL 语句（可使用“${Schema}、${Table}/${TableName}”模板关键字分别代替架构、表名等参数值）。</param>
@@ -234,19 +218,10 @@ public abstract class AbstractAccessor : IAccessor
     public virtual IQueryable<TEntity> QueryBySql<TEntity>(string sql,
         params object[] parameters)
         where TEntity : class
-    {
-        var entityType = OriginalContext.Model.FindEntityType(typeof(TEntity));
-        if (entityType is not null)
-        {
-            sql = DataOptions.Access.FormatSchema(sql, entityType.GetSchema());
-            sql = DataOptions.Access.FormatTableName(sql, entityType.GetTableName());
-        }
-
-        return OriginalContext.Set<TEntity>().FromSqlRaw(sql, parameters);
-    }
+        => DefaultAccessor.QueryBySql<TEntity>(sql, parameters);
 
     /// <summary>
-    /// 通过 SQL 语句创建指定实体类型的可查询接口。
+    /// 通过 SQL 语句创建指定实体类型的可查询接口（默认返回读存取器的第一项 <see cref="IQueryable{TEntity}"/>）。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="name">要使用的共享类型实体类型的名称。</param>
@@ -256,16 +231,7 @@ public abstract class AbstractAccessor : IAccessor
     public virtual IQueryable<TEntity> QueryBySql<TEntity>(string name,
         string sql, params object[] parameters)
         where TEntity : class
-    {
-        var entityType = OriginalContext.Model.FindEntityType(typeof(TEntity));
-        if (entityType is not null)
-        {
-            sql = DataOptions.Access.FormatSchema(sql, entityType.GetSchema());
-            sql = DataOptions.Access.FormatTableName(sql, entityType.GetTableName());
-        }
-
-        return OriginalContext.Set<TEntity>(name).FromSqlRaw(sql, parameters);
-    }
+        => DefaultAccessor.QueryBySql<TEntity>(name, sql, parameters);
 
     #endregion
 
@@ -282,7 +248,13 @@ public abstract class AbstractAccessor : IAccessor
     public virtual bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true)
         where TEntity : class
-        => OriginalContext.Set<TEntity>().ExistsWithLocal(predicate, checkLocal);
+    {
+        var results = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.Exists(predicate, checkLocal),
+            (a, result) => result);
+
+        // 只要有一个 TRUE 就返回 TRUE
+        return results.Any(result => true);
+    }
 
     /// <summary>
     /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
@@ -292,10 +264,16 @@ public abstract class AbstractAccessor : IAccessor
     /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含布尔值的异步操作。</returns>
-    public virtual Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
+    public virtual async Task<bool> ExistsAsync<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true, CancellationToken cancellationToken = default)
         where TEntity : class
-        => OriginalContext.Set<TEntity>().ExistsWithLocalAsync(predicate, checkLocal, cancellationToken);
+    {
+        var results = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.ExistsAsync(predicate, checkLocal, cancellationToken),
+            (a, result) => result, cancellationToken: cancellationToken);
+        
+        // 只要有一个 TRUE 就返回 TRUE
+        return results.Any(result => true);
+    }
 
     #endregion
 
@@ -307,12 +285,11 @@ public abstract class AbstractAccessor : IAccessor
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
-    /// <returns>返回 <see cref="IEnumerable{TEntity}"/>。</returns>
-    public virtual IList<TEntity> FindsWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
+    /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
+    public virtual IList<TEntity> FindsWithSpecification<TEntity>(
+        ISpecification<TEntity>? specification = null)
         where TEntity : class
-        => specification is null
-            ? Query<TEntity>().ToList()
-            : Query<TEntity>().Where(specification.IsSatisfiedBy).ToList();
+        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindsWithSpecification(specification)).SelectMany(s => s).ToList();
 
     /// <summary>
     /// 异步查找带有规约的实体集合。
@@ -320,13 +297,15 @@ public abstract class AbstractAccessor : IAccessor
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="specification">给定的 <see cref="ISpecification{TEntity}"/>（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="IEnumerable{TEntity}"/> 的异步操作。</returns>
-    public virtual async Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(ISpecification<TEntity>? specification = null,
-        CancellationToken cancellationToken = default)
+    /// <returns>返回一个包含 <see cref="IList{TEntity}"/> 的异步操作。</returns>
+    public virtual async Task<IList<TEntity>> FindsWithSpecificationAsync<TEntity>(
+        ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
-        => specification is null
-            ? await Query<TEntity>().ToListAsync(cancellationToken)
-            : await cancellationToken.RunTask(() => Query<TEntity>().Where(specification.IsSatisfiedBy).ToList());
+    {
+        var result = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindsWithSpecificationAsync(specification, cancellationToken));
+
+        return result.SelectMany(s => s).ToList();
+    }
 
 
     /// <summary>
@@ -337,7 +316,11 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
     public virtual IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
         where TEntity : class
-        => Query<TEntity>().AsPaging(pageAction);
+    {
+        var pagings = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingList(pageAction));
+
+        return pagings.CompositePaging();
+    }
 
     /// <summary>
     /// 异步查找实体分页集合。
@@ -346,10 +329,14 @@ public abstract class AbstractAccessor : IAccessor
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{TEntity}"/> 的异步操作。</returns>
-    public virtual Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
+    public virtual async Task<IPagingList<TEntity>> FindPagingListAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
         CancellationToken cancellationToken = default)
         where TEntity : class
-        => Query<TEntity>().AsPagingAsync(pageAction, cancellationToken);
+    {
+        var pagings = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindPagingListAsync(pageAction, cancellationToken));
+
+        return await pagings.CompositePagingAsync(cancellationToken);
+    }
 
 
     /// <summary>
@@ -362,9 +349,11 @@ public abstract class AbstractAccessor : IAccessor
     public virtual IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
         ISpecification<TEntity>? specification = null)
         where TEntity : class
-        => specification is null
-            ? Query<TEntity>().AsPaging(pageAction)
-            : Query<TEntity>().Where(specification.IsSatisfiedBy).AsPaging(pageAction);
+    {
+        var pagings = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingListWithSpecification(pageAction, specification));
+
+        return pagings.CompositePaging();
+    }
 
     /// <summary>
     /// 异步查找带有规约的实体分页集合。
@@ -377,9 +366,12 @@ public abstract class AbstractAccessor : IAccessor
     public virtual async Task<IPagingList<TEntity>> FindPagingListWithSpecificationAsync<TEntity>(Action<IPagingList<TEntity>> pageAction,
         ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
-        => specification is null
-            ? await Query<TEntity>().AsPagingAsync(pageAction, cancellationToken)
-            : await Query<TEntity>().Where(specification.IsSatisfiedBy).AsPagingAsync(pageAction, cancellationToken);
+    {
+        var pagings = await ReadingDispatcher.InvokeFuncAsync(a
+            => a.CurrentSource.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
+
+        return await pagings.CompositePagingAsync(cancellationToken);
+    }
 
     #endregion
 
@@ -397,12 +389,7 @@ public abstract class AbstractAccessor : IAccessor
     public virtual TEntity AddIfNotExists<TEntity>(TEntity entity,
         Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
         where TEntity : class
-    {
-        if (!Exists(predicate, checkLocal))
-            OriginalContext.Add(entity);
-
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.AddIfNotExists(entity, predicate, checkLocal), isTraversal: false).First();
 
     /// <summary>
     /// 添加实体对象。
@@ -410,10 +397,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <param name="entity">给定要添加的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Add(object entity)
-    {
-        OriginalContext.Add(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Add(entity), isTraversal: false).First();
 
     /// <summary>
     /// 添加实体。
@@ -423,10 +407,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Add<TEntity>(TEntity entity)
         where TEntity : class
-    {
-        OriginalContext.Add(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Add(entity), isTraversal: false).First();
 
     #endregion
 
@@ -439,10 +420,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <param name="entity">给定要附加的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Attach(object entity)
-    {
-        OriginalContext.Attach(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Attach(entity), isTraversal: false).First();
 
     /// <summary>
     /// 附加实体。
@@ -452,10 +430,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Attach<TEntity>(TEntity entity)
         where TEntity : class
-    {
-        OriginalContext.Attach(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Attach(entity), isTraversal: false).First();
 
     #endregion
 
@@ -468,10 +443,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <param name="entity">给定要移除的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Remove(object entity)
-    {
-        OriginalContext.Remove(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
 
     /// <summary>
     /// 移除实体。
@@ -481,10 +453,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Remove<TEntity>(TEntity entity)
         where TEntity : class
-    {
-        OriginalContext.Remove(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
 
     #endregion
 
@@ -497,10 +466,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <param name="entity">给定要更新的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Update(object entity)
-    {
-        OriginalContext.Update(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Update(entity), isTraversal: false).First();
 
     /// <summary>
     /// 更新实体。
@@ -510,10 +476,7 @@ public abstract class AbstractAccessor : IAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Update<TEntity>(TEntity entity)
         where TEntity : class
-    {
-        OriginalContext.Update(entity);
-        return entity;
-    }
+        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
 
     #endregion
 

@@ -23,6 +23,11 @@ public interface IPagingList<T> : IEnumerable<T>
     /// </summary>
     PagingInfo Info { get; }
 
+    /// <summary>
+    /// 列表长度（需要先分页后才有效）。
+    /// </summary>
+    int Length { get; }
+
 
     /// <summary>
     /// 筛选列表（通常用于内存分页）。

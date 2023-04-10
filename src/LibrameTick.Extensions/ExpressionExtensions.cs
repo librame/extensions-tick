@@ -80,7 +80,7 @@ public static class ExpressionExtensions
     public static Expression<Func<T, bool>> CreateGreaterThanPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
         => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
-            (p, c) => Expression.GreaterThan(p, c));
+            Expression.GreaterThan);
 
     /// <summary>
     /// 创建用于比较大于或等于属性值的 Lambda 表达式（例：p => p.PropertyName >= compareValue）。
@@ -93,7 +93,7 @@ public static class ExpressionExtensions
     public static Expression<Func<T, bool>> CreateGreaterThanOrEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
         => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
-            (p, c) => Expression.GreaterThanOrEqual(p, c));
+            Expression.GreaterThanOrEqual);
 
     /// <summary>
     /// 创建用于比较小于属性值的 Lambda 表达式（例：p => p.PropertyName 〈 compareValue）。
@@ -106,7 +106,7 @@ public static class ExpressionExtensions
     public static Expression<Func<T, bool>> CreateLessThanPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
         => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
-            (p, c) => Expression.LessThan(p, c));
+            Expression.LessThan);
 
     /// <summary>
     /// 创建用于比较小于或等于属性值的 Lambda 表达式（例：p => p.PropertyName 〈= compareValue）。
@@ -119,7 +119,7 @@ public static class ExpressionExtensions
     public static Expression<Func<T, bool>> CreateLessThanOrEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
         => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
-            (p, c) => Expression.LessThanOrEqual(p, c));
+            Expression.LessThanOrEqual);
 
     /// <summary>
     /// 创建用于比较不等于属性值的 Lambda 表达式（例：p => p.PropertyName != compareValue）。
@@ -132,7 +132,7 @@ public static class ExpressionExtensions
     public static Expression<Func<T, bool>> CreateNotEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
         => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
-            (p, c) => Expression.NotEqual(p, c));
+            Expression.NotEqual);
 
     /// <summary>
     /// 创建用于比较等于属性值的 Lambda 表达式（例：p => p.PropertyName is compareValue）。
@@ -145,7 +145,7 @@ public static class ExpressionExtensions
     public static Expression<Func<T, bool>> CreateEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
         => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
-            (p, c) => Expression.Equal(p, c));
+            Expression.Equal);
 
     /// <summary>
     /// 创建用于比较属性值的 Lambda 表达式（例：p => p.PropertyName.CompareTo(value)）。

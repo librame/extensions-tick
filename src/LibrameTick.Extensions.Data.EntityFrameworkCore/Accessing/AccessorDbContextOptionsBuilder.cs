@@ -48,6 +48,14 @@ public class AccessorDbContextOptionsBuilder
 
 
     /// <summary>
+    /// 配置存取器名称。
+    /// </summary>
+    /// <param name="name">给定的所属群组。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+    public virtual AccessorDbContextOptionsBuilder WithName(string name)
+        => WithOption(e => e.WithName(name));
+
+    /// <summary>
     /// 配置存取器所属群组（默认为 0，表示多个存取器划分为一组，同组意味着具有相同的增、删、改等操作；如果不需要改变，可不调用此方法）。
     /// </summary>
     /// <param name="group">给定的所属群组。</param>

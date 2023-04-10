@@ -15,7 +15,7 @@ namespace Librame.Extensions.Data;
 /// <summary>
 /// 定义对象更新时间接口。
 /// </summary>
-public interface IObjectUpdationTime : IObjectCreationTime
+public interface IObjectUpdationTime
 {
     /// <summary>
     /// 更新时间类型。

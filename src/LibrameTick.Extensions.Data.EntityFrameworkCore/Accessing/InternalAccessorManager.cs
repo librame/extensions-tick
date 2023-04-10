@@ -49,43 +49,72 @@ class InternalAccessorManager : IAccessorManager
     public IReadOnlyDictionary<IAccessor, ShardedDescriptor?>? CurrentAccessors { get; private set; }
 
 
-    public IAccessor GetAccessor(AccessorSpec specification)
+    private ConcurrentDictionary<IAccessor, ShardedDescriptor?> AddAccessor(IAccessor accessor,
+        ConcurrentDictionary<IAccessor, ShardedDescriptor?> dictionary)
     {
+        // 尝试对存取器分库
+        ShardingManager.ShardDatabase(accessor, out var descriptor);
+
+        // 如果分库，则尝试迁移表
         if (Options.Access.AutoMigration)
-            Migrator.Migrate(ResolvedAccessors);
+            Migrator.Migrate(accessor);
+
+        dictionary.TryAdd(accessor, descriptor);
+
+        return dictionary;
+    }
+
+    public IDispatchableAccessors GetAccessor(ISpecification<IAccessor> specification)
+    {
+        // 尝试对过滤存取器分库
+        var currentAccessors = new ConcurrentDictionary<IAccessor, ShardedDescriptor?>();
+
+        // 如果使用命名规约，则取唯一名称存取器，非唯一抛出异常
+        if (specification is NamedAccessorSpecification namedAccessorSpecification)
+        {
+            var singleAccessor = ResolvedAccessors.Single(namedAccessorSpecification.IsSatisfiedBy);
+
+            CurrentAccessors = AddAccessor(singleAccessor, currentAccessors);
+
+            return new CompositingDispatchableAccessors(CurrentAccessors.Keys, ShardingManager.DispatcherFactory);
+        }
 
         var filterAccessors = ResolvedAccessors.Where(specification.IsSatisfiedBy);
         if (!filterAccessors.Any())
             throw new ArgumentNullException($"The filter accessors not found.");
 
-        // 尝试对过滤存取器分库
-        var currentAccessors = new ConcurrentDictionary<IAccessor, ShardedDescriptor?>();
         foreach (var filterAccessor in filterAccessors)
         {
-            ShardingManager.ShardDatabase(filterAccessor, out var descriptor);
-
-            currentAccessors.TryAdd(filterAccessor, descriptor);
+            AddAccessor(filterAccessor, currentAccessors);
         }
+
         CurrentAccessors = currentAccessors;
 
-        var mirroringAccessors = filterAccessors.Where(specification.IsMirroringRedundancyMode);
-        var stripingAccessors = filterAccessors.Where(specification.IsStripingRedundancyMode);
+        if (specification is AccessAccessorSpecification accessorSpecification)
+        {
+            var mirroringAccessors = filterAccessors.Where(accessorSpecification.IsMirroringRedundancyMode);
+            var stripingAccessors = filterAccessors.Where(accessorSpecification.IsStripingRedundancyMode);
 
-        var allAccessors = new List<IAccessor>();
+            var allAccessors = new List<IAccessor>();
 
-        if (mirroringAccessors.Any())
-            allAccessors.Add(new MirroringAccessors(mirroringAccessors, Options.Access.Dispatcher));
+            if (mirroringAccessors.Any())
+                allAccessors.Add(new CompositingDispatchableAccessors(mirroringAccessors, ShardingManager.DispatcherFactory));
 
-        if (stripingAccessors.Any())
-            allAccessors.Add(new StripingAccessors(stripingAccessors, Options.Access.Dispatcher));
+            if (stripingAccessors.Any())
+                allAccessors.Add(new CompositingDispatchableAccessors(stripingAccessors, ShardingManager.DispatcherFactory));
 
-        return new CompositingAccessors(allAccessors, Options.Access.Dispatcher);
+            return new CompositingDispatchableAccessors(allAccessors, ShardingManager.DispatcherFactory);
+        }
+        else
+        {
+            return new CompositingDispatchableAccessors(CurrentAccessors.Keys, ShardingManager.DispatcherFactory);
+        }
     }
 
-    public IAccessor GetReadAccessor(AccessorSpec? specification = null)
-        => GetAccessor(specification ?? new ReadAccessorSpec());
+    public IDispatchableAccessors GetReadAccessor(ISpecification<IAccessor>? specification = null)
+        => GetAccessor(specification ?? new ReadAccessAccessorSpecification());
 
-    public IAccessor GetWriteAccessor(AccessorSpec? specification = null)
-        => GetAccessor(specification ?? new WriteAccessorSpec());
+    public IDispatchableAccessors GetWriteAccessor(ISpecification<IAccessor>? specification = null)
+        => GetAccessor(specification ?? new WriteAccessAccessorSpecification());
 
 }

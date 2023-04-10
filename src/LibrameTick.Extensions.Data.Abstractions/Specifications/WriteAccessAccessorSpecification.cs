@@ -10,18 +10,21 @@
 
 #endregion
 
+using Librame.Extensions.Data.Accessing;
+
 namespace Librame.Extensions.Specifications;
 
 /// <summary>
-/// 定义一个规约接口。
+/// 定义一个实现 <see cref="AccessAccessorSpecification"/> 且支持写入与读写模式的数据访问存取器规约。
 /// </summary>
-/// <typeparam name="T">指定的类型。</typeparam>
-public interface ISpecification<T>
+public class WriteAccessAccessorSpecification : AccessAccessorSpecification
 {
     /// <summary>
-    /// 是否满足规约。
+    /// 构造一个 <see cref="WriteAccessAccessorSpecification"/>。
     /// </summary>
-    /// <param name="instance">给定的实例。</param>
-    /// <returns>返回布尔值。</returns>
-    bool IsSatisfiedBy(T instance);
+    public WriteAccessAccessorSpecification(int group = 0)
+        : base(group, AccessMode.Write | AccessMode.ReadWrite)
+    {
+    }
+
 }

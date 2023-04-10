@@ -25,8 +25,8 @@ public class BaseDispatcher<TSource> : IDispatcher<TSource>
     /// 抽象构造一个 <see cref="BaseDispatcher{TSource}"/>。
     /// </summary>
     /// <param name="sources">给定的 <see cref="IEnumerable{TSource}"/>。</param>
-    /// <param name="options">给定的 <see cref="DispatcherOptions"/>。</param>
-    public BaseDispatcher(IEnumerable<TSource> sources, DispatcherOptions options)
+    /// <param name="options">给定的 <see cref="DispatchingOptions"/>。</param>
+    public BaseDispatcher(IEnumerable<TSource> sources, DispatchingOptions options)
     {
         Options = options;
         Sources = sources;
@@ -41,7 +41,7 @@ public class BaseDispatcher<TSource> : IDispatcher<TSource>
     /// <summary>
     /// 调度器选项。
     /// </summary>
-    public DispatcherOptions Options { get; init; }
+    public DispatchingOptions Options { get; init; }
 
     /// <summary>
     /// 来源集合。
