@@ -14,7 +14,7 @@ namespace Librame.Extensions.Data
             if (_builder is null)
             {
                 var services = new ServiceCollection();
-                _builder = services.AddLibrameCore().AddData();
+                _builder = services.AddLibrame().AddData();
             }
 
             if (_services is null)

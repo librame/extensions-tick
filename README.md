@@ -34,114 +34,113 @@ LibrameTick.Extensions APIs 可以使用 NuGet 包管理器添加到项目中。
 
 	var services = new ServiceCollection();
 
-	services.AddDbContext<TestMySqlAccessor>(opts =>
+	services.AddDbContext<TestSqlServerDbContext>(opts =>
 	{
-		// 配置 MySQL 数据库
+		opts.UseSqlServer("Data Source=.;Initial Catalog=librame_extensions;Integrated Security=true;TrustServerCertificate=true;",
+			a => a.MigrationsAssembly(modelAssemblyName));
+
+		opts.UseAccessor(b => b.WithAccess(AccessMode.ReadWrite).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(3).WithLocalhostLoader());
+	});
+
+	services.AddDbContext<TestMySqlDbContext>(opts =>
+	{
 		opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
-			a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
-		
-		// 配置访问器为默认组写入模式
-		opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPriority(1));
-	});
-	
-	services.AddDbContextPool<TestSqlServerAccessor>(opts =>
-	{
-		// 配置 SQLServer 数据库
-		opts.UseSqlServer("server=.;database=librame_extensions;integrated security=true;",
-			a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
+			a => a.MigrationsAssembly(modelAssemblyName));
 
-		// 配置访问器为默认组写入模式
-		opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Write).WithPooling().WithPriority(2));
+		opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(2).WithLocalhostLoader());
 	});
 
-	services.AddDbContext<TestSqliteAccessor>(opts =>
+	// SQLite 不支持事务，不推荐用于集群中（至少不做为写入库），即使用在集群中，在使用事务时会捕获到异常而切换到下一个数据库上下文
+	services.AddDbContext<TestSqliteDbContext>(opts =>
 	{
-		// 配置 SQLite 数据库
 		opts.UseSqlite("Data Source=librame_extensions.db",
-			a => a.MigrationsAssembly(typeof(User).Assembly.FullName));
+			a => a.MigrationsAssembly(modelAssemblyName));
 
-		// 配置访问器为默认组读取模式
-		opts.UseAccessor(b => b.WithInteraction(AccessorInteraction.Read));
+		opts.UseAccessor(b => b.WithAccess(AccessMode.Read).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(1).WithLocalhostLoader());
 	});
 	
 ### 在 Startup.cs 配置 Librame.Extensions.Data.EntityFrameworkCore 服务
 
 	services.AddLibrame()
-		.AddData(opts =>
-		{
-			// 测试时每次运行需新建数据库
-			opts.Access.EnsureDatabaseDeleted = true;
-
-			// 每次修改选项时自动保存为 JSON 文件
-			opts.PropertyChangedAction = (o, e) => o.SaveOptionsAsJson();
-		})
-		.AddSeeder<InternalTestAccessorSeeder>()
-		.AddMigrator<InternalTestAccessorMigrator>()
-		.AddInitializer<InternalTestAccessorInitializer<TestMySqlAccessor>>()
-		.AddInitializer<InternalTestAccessorInitializer<TestSqlServerAccessor>>()
-		.AddInitializer<InternalTestAccessorInitializer<TestSqliteAccessor>>()
-		.SaveOptionsAsJson(); // 首次保存选项为 JSON 文件
+		.AddData()
+		.AddAccessor(typeof(BaseAccessor<>), autoReferenceDbContext: true)
+		.AddInitializer<InternalTestAccessorInitializer>()
+		.AddSeeder<InternalTestAccessorSeeder>();
+		//.SaveOptionsAsJson(); // 首次保存选项为 JSON 文件
 
 ### 在 Startup.cs 构建并启用 Librame.Extensions.Data.EntityFrameworkCore 服务
 
 	var provider = services.BuildServiceProvider();
-
-	// 使用访问器初始化器按数据库阵列初始化种子数据
-	provider.UseAccessorInitializer();
 	
 ### 在具体应用中使用数据功能
 
-	var store = provider.GetRequiredService<IStore<User>>();
-	Assert.NotNull(store);
-
-	var pagingUsers = store.FindPagingList(p => p.PageByIndex(index: 1, size: 5));
-	Assert.NotEmpty(pagingUsers);
-
-	// Update
-	foreach (var user in pagingUsers)
+	using (var scope = _rootProvider.CreateScope())
 	{
-		user.Name = $"Update {user.Name}";
-	}
+		var provider = scope.ServiceProvider;
 
-	// 仅针对写入访问器
-	store.Update(pagingUsers);
+		// 使用访问器初始化器按数据库集群初始化种子数据
+		provider.UseAccessorInitializer();
 
-	// Add
-	var addUsers = new User[10];
+		var userStore = provider.GetRequiredService<IStore<User>>();
+		Assert.NotNull(userStore);
 
-	for (var i = 0; i < 10; i++)
-	{
-		var user = new User
+		var pagingUsers = userStore.FindPagingList(p => p.PageByIndex(index: 1, size: 5));
+		Assert.NotNull(pagingUsers);
+
+		// sql=$"SELECT * FROM {userStore.GetTableName()}"
+		var sqlUsers = userStore.QueryBySql("SELECT * FROM ${Table}").ToList();
+		Assert.NotEmpty(sqlUsers);
+
+		// Update
+		foreach (var user in pagingUsers)
 		{
-			Name = $"Add Name {i + 1}",
-			Passwd = "123456"
-		};
+		    user.Name = $"Update {user.Name}";
+		}
 
-		user.Id = store.IdGeneratorFactory.GetNewId<long>();
-		user.PopulateCreation(0, DateTimeOffset.UtcNow);
+		// 仅针对写入访问器
+		userStore.Update(pagingUsers);
 
-		addUsers[i] = user;
+		// Add
+		var addUsers = new User[10];
+
+		for (var i = 0; i < 10; i++)
+		{
+		    var user = new User
+		    {
+		        Name = $"Add Name {i + 1}",
+		        Passwd = "123456"
+		    };
+
+		    user.Id = userStore.IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
+		    user.PopulateCreation(pagingUsers.First().Id, DateTimeOffset.UtcNow);
+
+		    addUsers[i] = user;
+		}
+
+		// 仅针对写入访问器
+		userStore.Add(addUsers);
+
+		userStore.SaveChanges();
+
+		// 读取访问器（SQLite/SQLServer）
+		var users = userStore.FindList(p => p.Name!.StartsWith("Update"));
+		Assert.NotNull(users); // 默认 SQLite 无更新数据且不支持事务，所以会捕获到异常并自动切换到 SQLServer 读取数据
+
+		// 强制从写入访问器（MySQL/SQLServer）
+		users = userStore.UseWriteAccessor().FindList(p => p.Name!.StartsWith("Update"));
+		Assert.NotNull(users); // 默认 MySQL 有更新数据
+
+		// 读取访问器（SQLite/SQLServer）
+		users = userStore.UseReadAccessor().FindList(p => p.Name!.StartsWith("Add"));
+		Assert.NotNull(users); // 默认 SQLite 无更新数据且不支持事务，所以会捕获到异常并自动切换到 SQLServer 读取数据
+
+		// 强制从写入访问器（MySQL/SQLServer）
+		users = userStore.UseWriteAccessor().FindList(p => p.Name!.StartsWith("Add"));
+		Assert.NotNull(users); // 默认 MySQL 有新增数据
+
+		// 使用名称获取指定访问器（默认名称为 TestSqlServerDbContext[-DbContext]）
+		pagingUsers = userStore.UseAccessor("TestSqlServer").FindPagingList(p => p.PageByIndex(index: 1, size: 10));
+		Assert.NotNull(pagingUsers);
 	}
-
-	// 仅针对写入访问器
-	store.Add(addUsers);
-
-	store.SaveChanges();
-
-	// 修改：读取访问器（Sqlite）数据无变化
-	var users = store.FindList(p => p.Name!.StartsWith("Update"));
-	Assert.Empty(users);
-
-	// 修改：强制从写入访问器查询（MySQL/SQL Server）
-	users = store.FindList(p => p.Name!.StartsWith("Update"), fromWriteAccessor: true);
-	Assert.NotEmpty(users);
-
-	// 新增：读取访问器（Sqlite）数据无变化
-	users = store.FindList(p => p.Name!.StartsWith("Add"));
-	Assert.Empty(users);
-
-	// 新增：强制从写入访问器查询（MySQL/SQL Server）
-	users = store.FindList(p => p.Name!.StartsWith("Add"), fromWriteAccessor: true);
-	Assert.NotEmpty(users);
 	
 以上功能在本库的测试项目中测试通过，详情请参见[访问器测试](https://github.com/librame/extensions-tick/blob/main/test/LibrameTick.Extensions.Data.EntityFrameworkCore.Tests/Accessing/TestAccessorTests.cs) 。

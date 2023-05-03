@@ -17,7 +17,7 @@ namespace Librame.Extensions.Core
                 var fileProvider = new PhysicalStorableFileProvider(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath);
 
                 var services = new ServiceCollection();
-                _builder = services.AddLibrameCore(opts =>
+                _builder = services.AddLibrame(opts =>
                 {
                     opts.WebFile.AccessToken = "Test access token.";
                     opts.WebFile.UserName = "Test user name.";

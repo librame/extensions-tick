@@ -72,7 +72,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
     /// <param name="setupOptions">给定可用于设置 <see cref="CoreExtensionOptions"/> 选项的动作（可选；为空则不设置）。</param>
     /// <param name="configuration">给定可用于 <see cref="CoreExtensionOptions"/> 选项的配置对象（可选；为空则不配置）。</param>
     /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
-    public static CoreExtensionBuilder AddLibrameCore(this IServiceCollection services,
+    public static CoreExtensionBuilder AddLibrame(this IServiceCollection services,
         Action<CoreExtensionOptions>? setupOptions = null, IConfiguration? configuration = null)
     {
         // 添加依赖服务

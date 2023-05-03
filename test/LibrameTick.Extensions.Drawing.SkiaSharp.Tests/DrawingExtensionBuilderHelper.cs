@@ -14,7 +14,7 @@ namespace Librame.Extensions.Drawing
             if (_builder is null)
             {
                 var services = new ServiceCollection();
-                _builder = services.AddLibrameCore().AddDrawing();
+                _builder = services.AddLibrame().AddDrawing();
             }
 
             if (_services is null)

@@ -21,7 +21,6 @@ namespace Librame.Extensions.Data.Accessing
 
             services.AddDbContext<TestSqlServerDbContext>(opts =>
             {
-                // server=.;database=librame_extensions;integrated security=true;trustservercertificate=true;
                 opts.UseSqlServer("Data Source=.;Initial Catalog=librame_extensions;Integrated Security=true;TrustServerCertificate=true;",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
@@ -36,7 +35,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(2).WithLocalhostLoader());
             });
 
-            // SQLite 不支持事务
+            // SQLite 不支持事务，不推荐用于集群中（至少不做为写入库），即使用在集群中，在使用事务时会捕获到异常而切换到下一个数据库上下文
             services.AddDbContext<TestSqliteDbContext>(opts =>
             {
                 opts.UseSqlite("Data Source=librame_extensions.db",
@@ -45,7 +44,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseAccessor(b => b.WithAccess(AccessMode.Read).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(1).WithLocalhostLoader());
             });
 
-            var builder = services.AddLibrameCore()
+            var builder = services.AddLibrame()
                 .AddData()
                 .AddAccessor(typeof(BaseAccessor<>), autoReferenceDbContext: true)
                 .AddInitializer<InternalTestAccessorInitializer>()
@@ -62,6 +61,7 @@ namespace Librame.Extensions.Data.Accessing
             {
                 var provider = scope.ServiceProvider;
 
+                //// 使用访问器初始化器按数据库集群初始化种子数据
                 //provider.UseAccessorInitializer();
 
                 var userStore = provider.GetRequiredService<IStore<User>>();
@@ -107,7 +107,7 @@ namespace Librame.Extensions.Data.Accessing
 
                 // 读取访问器（SQLite/SQLServer）
                 var users = userStore.FindList(p => p.Name!.StartsWith("Update"));
-                Assert.NotNull(users); // 默认 SQLite 无更新数据且不支持事务，所以会检测到异常并自动切换到 SQLServer 读取数据
+                Assert.NotNull(users); // 默认 SQLite 无更新数据且不支持事务，所以会捕获到异常并自动切换到 SQLServer 读取数据
 
                 // 强制从写入访问器（MySQL/SQLServer）
                 users = userStore.UseWriteAccessor().FindList(p => p.Name!.StartsWith("Update"));
@@ -115,7 +115,7 @@ namespace Librame.Extensions.Data.Accessing
 
                 // 读取访问器（SQLite/SQLServer）
                 users = userStore.UseReadAccessor().FindList(p => p.Name!.StartsWith("Add"));
-                Assert.NotNull(users); // 默认 SQLite 无更新数据且不支持事务，所以会检测到异常并自动切换到 SQLServer 读取数据
+                Assert.NotNull(users); // 默认 SQLite 无更新数据且不支持事务，所以会捕获到异常并自动切换到 SQLServer 读取数据
 
                 // 强制从写入访问器（MySQL/SQLServer）
                 users = userStore.UseWriteAccessor().FindList(p => p.Name!.StartsWith("Add"));
