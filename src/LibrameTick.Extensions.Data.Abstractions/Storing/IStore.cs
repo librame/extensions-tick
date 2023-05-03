@@ -170,7 +170,7 @@ public interface IStore<T>
     /// <param name="predicate">给定的断定条件（可选；为空表示查询所有）</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
-    IList<T> FindList(Expression<Func<T, bool>>? predicate = null,
+    IList<T>? FindList(Expression<Func<T, bool>>? predicate = null,
         ISpecification<IAccessor>? specification = null);
 
     /// <summary>
@@ -180,7 +180,7 @@ public interface IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
-    Task<IList<T>> FindListAsync(Expression<Func<T, bool>>? predicate = null,
+    Task<IList<T>?> FindListAsync(Expression<Func<T, bool>>? predicate = null,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null);
 
 
@@ -190,7 +190,7 @@ public interface IStore<T>
     /// <param name="entitySpecification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
-    IList<T> FindListWithSpecification(ISpecification<T>? entitySpecification = null,
+    IList<T>? FindListWithSpecification(ISpecification<T>? entitySpecification = null,
         ISpecification<IAccessor>? specification = null);
 
     /// <summary>
@@ -200,7 +200,7 @@ public interface IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
-    Task<IList<T>> FindListWithSpecificationAsync(ISpecification<T>? entitySpecification = null,
+    Task<IList<T>?> FindListWithSpecificationAsync(ISpecification<T>? entitySpecification = null,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null);
 
 
@@ -210,7 +210,7 @@ public interface IStore<T>
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
-    IPagingList<T> FindPagingList(Action<IPagingList<T>> pageAction,
+    IPagingList<T>? FindPagingList(Action<IPagingList<T>> pageAction,
         ISpecification<IAccessor>? specification = null);
 
     /// <summary>
@@ -220,7 +220,7 @@ public interface IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
-    Task<IPagingList<T>> FindPagingListAsync(Action<IPagingList<T>> pageAction,
+    Task<IPagingList<T>?> FindPagingListAsync(Action<IPagingList<T>> pageAction,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null);
 
 
@@ -231,7 +231,7 @@ public interface IStore<T>
     /// <param name="entitySpecification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
-    IPagingList<T> FindPagingListWithSpecification(Action<IPagingList<T>> pageAction,
+    IPagingList<T>? FindPagingListWithSpecification(Action<IPagingList<T>> pageAction,
         ISpecification<T>? entitySpecification = null, ISpecification<IAccessor>? specification = null);
 
     /// <summary>
@@ -242,7 +242,7 @@ public interface IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
-    Task<IPagingList<T>> FindPagingListWithSpecificationAsync(Action<IPagingList<T>> pageAction,
+    Task<IPagingList<T>?> FindPagingListWithSpecificationAsync(Action<IPagingList<T>> pageAction,
         ISpecification<T>? entitySpecification = null, CancellationToken cancellationToken = default,
         ISpecification<IAccessor>? specification = null);
 

@@ -13,8 +13,11 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义一个模仿 https://github.com/vkhorikov/CSharpFunctionalExtensions 函数式编程的公共接口。
+/// 定义一个模仿函数式编程的公共接口。
 /// </summary>
+/// <remarks>
+/// 参考：<see href="https://github.com/vkhorikov/CSharpFunctionalExtensions"/>
+/// </remarks>
 /// <typeparam name="T">指定的类型。</typeparam>
 public interface IMaybe<T>
 {
@@ -39,7 +42,7 @@ public interface IMaybe<T>
 /// 定义默认实现 <see cref="IMaybe{T}"/> 的结构体。
 /// </summary>
 /// <typeparam name="T">指定的类型。</typeparam>
-public struct Maybe<T> : IMaybe<T>
+public readonly struct Maybe<T> : IMaybe<T>
 {
     private readonly bool _isValueSet;
 
@@ -155,7 +158,7 @@ public struct Maybe<T> : IMaybe<T>
                 obj = new Maybe<T>(value);
         }
 
-        if (!(obj is Maybe<T> other))
+        if (obj is not Maybe<T> other)
             return false;
 
         return Equals(other);
@@ -191,7 +194,7 @@ public struct Maybe<T> : IMaybe<T>
     /// <summary>
     /// 空实例。
     /// </summary>
-    public static Maybe<T> None => new Maybe<T>();
+    public static Maybe<T> None => new();
 
 
     /// <summary>
@@ -200,7 +203,7 @@ public struct Maybe<T> : IMaybe<T>
     /// <param name="value">给定的 <typeparamref name="T"/>。</param>
     /// <returns></returns>
     public static Maybe<T> From(T value)
-        => new Maybe<T>(value);
+        => new(value);
 
 
     /// <summary>
@@ -215,13 +218,6 @@ public struct Maybe<T> : IMaybe<T>
 
         return new Maybe<T>(value);
     }
-
-    /// <summary>
-    /// 隐式转为 <see cref="Maybe{T}"/>。
-    /// </summary>
-    /// <param name="maybe">给定的 <see cref="Maybe"/>。</param>
-    public static implicit operator Maybe<T>(Maybe maybe) => None;
-
 
     /// <summary>
     /// 隐式转为 <typeparamref name="T"/>。注：须确保在含有值时使用，否则会抛出异常。

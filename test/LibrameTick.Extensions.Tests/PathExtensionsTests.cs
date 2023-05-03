@@ -47,27 +47,6 @@ namespace Librame.Extensions
         #endregion
 
 
-        #region IniFile
-
-        [Fact]
-        public void ReadIniFileTest()
-        {
-            var path = "read_ini.ini".SetBasePath();
-
-            var value = nameof(PathExtensionsTests);
-
-            path.WriteIniFile("Test", "Key", value);
-            Assert.True(path.FileExists());
-
-            var read = path.ReadIniFile("Test", "Key");
-            Assert.True(value == read);
-
-            path.FileDelete();
-        }
-
-        #endregion
-
-
         #region CombinePath
 
         [Fact]

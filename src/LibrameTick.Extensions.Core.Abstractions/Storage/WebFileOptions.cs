@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.JsonConverters;
+using Librame.Extensions.Microparts;
 
 namespace Librame.Extensions.Core.Storage;
 

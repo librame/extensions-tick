@@ -36,6 +36,15 @@ public static class TypeExtensions
         => currentType.AssemblyQualifiedName == compareType.AssemblyQualifiedName;
 
     /// <summary>
+    /// 是相同类型或可空类型。
+    /// </summary>
+    /// <param name="currentType">给定的当前类型。</param>
+    /// <param name="compareType">给定的比较类型。</param>
+    /// <returns>返回布尔值。</returns>
+    public static bool IsSameOrNullableType(this Type currentType, Type compareType)
+        => currentType.IsSameType(compareType) || (compareType.IsNullableType() && compareType.UnderlyingSystemType == currentType);
+
+    /// <summary>
     /// 是具实类型（即非抽象或接口、可实例化的类型）。
     /// </summary>
     /// <param name="type">给定的类型。</param>
@@ -95,9 +104,28 @@ public static class TypeExtensions
     /// 获取所有字段成员集合（私有字段包含属性实现）。
     /// </summary>
     /// <param name="type">给定的类型。</param>
+    /// <param name="name">给定的字段名称。</param>
+    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
+    public static FieldInfo? GetAllField(this Type type, string name)
+        => type.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+    /// <summary>
+    /// 获取所有字段成员集合（私有字段包含属性实现）。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
     /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
     public static FieldInfo[] GetAllFields(this Type type)
         => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+
+    /// <summary>
+    /// 获取包含静态在内的所有字段成员集合（私有字段包含属性实现）。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <param name="name">给定的字段名称。</param>
+    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
+    public static FieldInfo? GetAllFieldWithStatic(this Type type, string name)
+        => type.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
     /// <summary>
     /// 获取包含静态在内的所有字段成员集合（私有字段包含属性实现）。
@@ -107,6 +135,7 @@ public static class TypeExtensions
     public static FieldInfo[] GetAllFieldsWithStatic(this Type type)
         => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
+
     /// <summary>
     /// 获取枚举字段成员集合。
     /// </summary>
@@ -115,23 +144,6 @@ public static class TypeExtensions
     public static FieldInfo[] GetEnumFields(this Type type)
         => type.GetFields(BindingFlags.Public | BindingFlags.Static);
 
-
-    ///// <summary>
-    ///// 获取指定类型的私有构造函数。
-    ///// </summary>
-    ///// <param name="type">给定的类型。</param>
-    ///// <param name="isUnique">要求是唯一构造函数。</param>
-    ///// <returns>返回 <see cref="ConstructorInfo"/>。</returns>
-    ///// <exception cref="MissingMethodException">
-    ///// The type must have a private constructor.
-    ///// </exception>
-    //public static ConstructorInfo GetPrivateConstructor(this Type type, bool isUnique)
-    //{
-    //    if (!type.TryGetPrivateConstructor(isUnique, out var info))
-    //        throw new MissingMethodException($"The type '{type.FullName}' must have a private constructor.");
-
-    //    return info;
-    //}
 
     /// <summary>
     /// 尝试获取指定类型的私有构造函数。
@@ -146,7 +158,7 @@ public static class TypeExtensions
         info = type.GetConstructor(BindingFlags.CreateInstance
             | BindingFlags.Instance | BindingFlags.NonPublic, types: Type.EmptyTypes);
 
-        return info is not null && (isUnique ? type.GetConstructors().Length is 1 : true);
+        return info is not null && (!isUnique || type.GetConstructors().Length is 1);
     }
 
 
@@ -219,10 +231,9 @@ public static class TypeExtensions
     /// <returns>返回值对象。</returns>
     public static object GetValueByDelegate<TSource>(this PropertyInfo property, TSource source, bool nonPublic = false)
     {
-        var method = property.GetGetMethod(nonPublic);
-        if (method is null)
-            throw new ArgumentException($"There is no get getter for a property '{property.Name}' of the type '{typeof(TSource)}'.");
-
+        var method = property.GetGetMethod(nonPublic)
+            ?? throw new ArgumentException($"There is no get getter for a property '{property.Name}' of the type '{typeof(TSource)}'.");
+        
         var getMemberDelegate = (MemberGetDelegate<TSource>)Delegate
             .CreateDelegate(_memberGetDelegateTypeDefinition.MakeGenericType(typeof(TSource)), method);
             

@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Specifications;
 
@@ -49,31 +50,31 @@ public class AccessAccessorSpecification : AbstractSpecification<IAccessor>
     /// <returns>返回布尔值。</returns>
     public override bool IsSatisfiedBy(IAccessor instance)
         => Group == instance.AccessorDescriptor?.Group
-        && IsAccessMode(instance.AccessorDescriptor.Access);
+        && IsAccess(instance.AccessorDescriptor.Access);
 
     /// <summary>
     /// 是指定的访问模式。
     /// </summary>
     /// <param name="instanceAccess">给定的 <see cref="AccessMode"/>。</param>
     /// <returns>返回布尔值。</returns>
-    protected virtual bool IsAccessMode(AccessMode instanceAccess)
+    protected virtual bool IsAccess(AccessMode instanceAccess)
         => (Access & instanceAccess) == instanceAccess; // 使用位移计算
 
 
     /// <summary>
-    /// 是镜像冗余模式。
+    /// 是镜像调试模式。
     /// </summary>
     /// <param name="instance">给定的实例。</param>
     /// <returns>返回布尔值。</returns>
-    public virtual bool IsMirroringRedundancyMode(IAccessor instance)
-        => instance.AccessorDescriptor?.Redundancy == RedundancyMode.Mirroring;
+    public virtual bool IsMirroringDispatching(IAccessor instance)
+        => instance.AccessorDescriptor?.Dispatching == DispatchingMode.Mirroring;
 
     /// <summary>
-    /// 是分割冗余模式。
+    /// 是分割调试模式。
     /// </summary>
     /// <param name="instance">给定的实例。</param>
     /// <returns>返回布尔值。</returns>
-    public virtual bool IsStripingRedundancyMode(IAccessor instance)
-        => instance.AccessorDescriptor?.Redundancy == RedundancyMode.Striping;
+    public virtual bool IsStripingDispatching(IAccessor instance)
+        => instance.AccessorDescriptor?.Dispatching == DispatchingMode.Striping;
 
 }

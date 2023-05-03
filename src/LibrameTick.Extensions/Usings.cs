@@ -26,6 +26,8 @@ global using System.Linq;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Http;
+global using System.Net.NetworkInformation;
+global using System.Net.Sockets;
 global using System.Numerics;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;

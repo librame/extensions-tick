@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Microparts;
+
 namespace Librame.Extensions.Core.Plugins;
 
 /// <summary>
@@ -20,5 +22,5 @@ public class PluginOptions : IOptions
     /// <summary>
     /// 程序集加载选项。
     /// </summary>
-    public AssembliesOptions AssemblyLoading { get; set; } = new();
+    public AssemblyOptions AssemblyLoading { get; set; } = new();
 }

@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Microparts;
+
 namespace Librame.Extensions.Core.Network;
 
 /// <summary>

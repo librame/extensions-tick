@@ -22,14 +22,27 @@ namespace Librame.Extensions.Data.Accessing;
 public class StripingDispatchableAccessors : BaseDispatchableAccessors
 {
     /// <summary>
-    /// 构造一个 <see cref="MirroringDispatchableAccessors"/>。
+    /// 构造一个 <see cref="StripingDispatchableAccessors"/>。
     /// </summary>
     /// <param name="accessors">给定的 <see cref="IEnumerable{IAccessor}"/>。</param>
     /// <param name="factory">给定的 <see cref="IDispatcherFactory"/>。</param>
-    public StripingDispatchableAccessors(IEnumerable<IAccessor> accessors, IDispatcherFactory factory)
-        : base(factory.CreateTransaction(accessors))
+    public StripingDispatchableAccessors(IEnumerable<IAccessor> accessors,
+        IDispatcherFactory factory)
+        : this(accessors, factory, DispatchingMode.Striping)
     {
-        // 分割需要从多库聚合数据
+    }
+
+    /// <summary>
+    /// 构造一个 <see cref="StripingDispatchableAccessors"/>。
+    /// </summary>
+    /// <param name="accessors">给定的 <see cref="IEnumerable{IAccessor}"/>。</param>
+    /// <param name="factory">给定的 <see cref="IDispatcherFactory"/>。</param>
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
+    protected StripingDispatchableAccessors(IEnumerable<IAccessor> accessors,
+        IDispatcherFactory factory, DispatchingMode mode)
+        : base(factory.CreateTransaction(accessors, mode), mode)
+    {
+        // 分割模式表示需要从多库聚合读/写数据
     }
 
 
@@ -42,7 +55,7 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
     public override IQueryable<TEntity> Query<TEntity>()
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource!.Query<TEntity>()).First();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.Query<TEntity>()).First();
 
     /// <summary>
     /// 创建指定实体类型的可查询接口。
@@ -52,7 +65,7 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     /// <returns>返回 <see cref="IQueryable{TEntity}"/>。</returns>
     public override IQueryable<TEntity> Query<TEntity>(string name)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource!.Query<TEntity>(name)).First();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.Query<TEntity>(name)).First();
 
 
     /// <summary>
@@ -65,7 +78,7 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     public override IQueryable<TEntity> QueryBySql<TEntity>(string sql,
         params object[] parameters)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource!.QueryBySql<TEntity>(sql, parameters)).First();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.QueryBySql<TEntity>(sql, parameters)).First();
 
     /// <summary>
     /// 通过 SQL 语句创建指定实体类型的可查询接口。
@@ -78,7 +91,7 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     public override IQueryable<TEntity> QueryBySql<TEntity>(string name,
         string sql, params object[] parameters)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource!.QueryBySql<TEntity>(name, sql, parameters)).First();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.QueryBySql<TEntity>(name, sql, parameters)).First();
 
     #endregion
 
@@ -95,7 +108,7 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     public override bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
         bool checkLocal = true)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.Exists(predicate, checkLocal)).First();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.Exists(predicate, checkLocal)).First();
 
     /// <summary>
     /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
@@ -109,7 +122,8 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
         bool checkLocal = true, CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var results = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.ExistsAsync(predicate, checkLocal, cancellationToken));
+        var results = await ReadingDispatcher.DispatchFuncAsync(a =>
+            a.CurrentSource!.ExistsAsync(predicate, checkLocal, cancellationToken));
 
         return results.First();
     }
@@ -127,7 +141,7 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     /// <returns>返回 <see cref="IList{TEntity}"/>。</returns>
     public override IList<TEntity> FindsWithSpecification<TEntity>(ISpecification<TEntity>? specification = null)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindsWithSpecification(specification)).First();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.FindsWithSpecification(specification)).First();
 
     /// <summary>
     /// 异步查找带有规约的实体集合。
@@ -140,7 +154,8 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
         CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var pagings = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindsWithSpecificationAsync(specification, cancellationToken));
+        var pagings = await ReadingDispatcher.DispatchFuncAsync(a =>
+            a.CurrentSource!.FindsWithSpecificationAsync(specification, cancellationToken));
 
         return pagings.First();
     }
@@ -154,7 +169,7 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     /// <returns>返回 <see cref="IPagingList{TEntity}"/>。</returns>
     public override IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingList(pageAction)).CompositePaging();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.FindPagingList(pageAction)).CompositePaging();
 
     /// <summary>
     /// 异步查找实体分页集合。
@@ -167,7 +182,8 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
         CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var pagings = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindPagingListAsync(pageAction, cancellationToken));
+        var pagings = await ReadingDispatcher.DispatchFuncAsync(a =>
+            a.CurrentSource!.FindPagingListAsync(pageAction, cancellationToken));
 
         return await pagings.CompositePagingAsync(cancellationToken);
     }
@@ -183,7 +199,8 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
     public override IPagingList<TEntity> FindPagingListWithSpecification<TEntity>(Action<IPagingList<TEntity>> pageAction,
         ISpecification<TEntity>? specification = null)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingListWithSpecification(pageAction, specification)).CompositePaging();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!
+            .FindPagingListWithSpecification(pageAction, specification)).CompositePaging();
 
     /// <summary>
     /// 异步查找带有规约的实体分页集合。
@@ -197,7 +214,8 @@ public class StripingDispatchableAccessors : BaseDispatchableAccessors
         ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var pagings = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
+        var pagings = await ReadingDispatcher.DispatchFuncAsync(a
+            => a.CurrentSource!.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
 
         return await pagings.CompositePagingAsync(cancellationToken);
     }

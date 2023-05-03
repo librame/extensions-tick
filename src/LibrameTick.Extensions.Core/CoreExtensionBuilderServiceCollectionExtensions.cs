@@ -13,7 +13,8 @@
 using Librame.Extensions.Core;
 using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
-using Librame.Extensions.Cryptography;
+using Librame.Extensions.Crypto;
+using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -90,7 +91,8 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         // 注册扩展服务集合
         return builder
             .AddCommon()
-            .AddCryptography()
+            .AddCrypto()
+            .AddDevice()
             .AddNetwork()
             .AddPlugins()
             .AddStorage();
@@ -99,18 +101,23 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
 
     private static CoreExtensionBuilder AddCommon(this CoreExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService(typeof(ICloneable<>), implementationType: typeof(Cloneable<>));
-        builder.TryAddOrReplaceService(typeof(IDecoratable<>), implementationType: typeof(Decoratable<>));
         builder.TryAddOrReplaceService<IDispatcherFactory, InternalDispatcherFactory>();
 
         return builder;
     }
 
-    private static CoreExtensionBuilder AddCryptography(this CoreExtensionBuilder builder)
+    private static CoreExtensionBuilder AddCrypto(this CoreExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IAlgorithmParameterGenerator, InternalAlgorithmParameterGenerator>();
         builder.TryAddOrReplaceService<IAsymmetricAlgorithm, InternalAsymmetricAlgorithm>();
         builder.TryAddOrReplaceService<ISymmetricAlgorithm, InternalSymmetricAlgorithm>();
+
+        return builder;
+    }
+
+    private static CoreExtensionBuilder AddDevice(this CoreExtensionBuilder builder)
+    {
+        builder.TryAddOrReplaceService<IDeviceLoader, InternalDeviceLoader>();
 
         return builder;
     }

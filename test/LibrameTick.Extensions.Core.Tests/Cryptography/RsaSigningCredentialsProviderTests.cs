@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using Xunit;
 
-namespace Librame.Extensions.Cryptography
+namespace Librame.Extensions.Crypto
 {
     public class RsaSigningCredentialsProviderTests
     {

@@ -25,12 +25,7 @@ public static class EnumerableExtensions
     /// <param name="source">给定的源集合。</param>
     /// <returns>返回整数。</returns>
     public static int NonEnumeratedCount<T>(this IEnumerable<T> source)
-    {
-        if (!source.TryGetNonEnumeratedCount(out var count))
-            return source.Count();
-
-        return count;
-    }
+        => !source.TryGetNonEnumeratedCount(out var count) ? source.Count() : count;
 
 
     /// <summary>
@@ -45,12 +40,9 @@ public static class EnumerableExtensions
         [NotNullWhen(true)] IEnumerable<T>? right, bool bothNullReturn)
     {
         if (left is null)
-            return right is null ? bothNullReturn : false;
+            return right is null && bothNullReturn;
 
-        if (right is null)
-            return false;
-
-        return left.SequenceEqual(right);
+        return right is not null && left.SequenceEqual(right);
     }
 
     /// <summary>
@@ -65,12 +57,9 @@ public static class EnumerableExtensions
         [NotNullWhen(true)] ICollection<T>? right, bool bothNullReturn)
     {
         if (left is null || left.Count == 0)
-            return (right is null || right.Count == 0) ? bothNullReturn : false;
+            return (right is null || right.Count == 0) && bothNullReturn;
 
-        if (right is null || right.Count == 0)
-            return false;
-
-        return left.SequenceEqual(right);
+        return right is not null && right.Count != 0 && left.SequenceEqual(right);
     }
 
 
@@ -135,13 +124,12 @@ public static class EnumerableExtensions
     /// <returns>返回 <see cref="ReadOnlyCollection{T}"/>。</returns>
     public static ReadOnlyCollection<T> AsReadOnlyCollection<T>(this IEnumerable<T> enumerable)
     {
-        if (enumerable is ReadOnlyCollection<T> collection)
-            return collection;
-
-        if (enumerable is IList<T> list)
-            return list.AsReadOnlyCollection();
-
-        return enumerable.ToList().AsReadOnly();
+        return enumerable switch
+        {
+            ReadOnlyCollection<T> collection => collection,
+            IList<T> list => list.AsReadOnlyCollection(),
+            _ => enumerable.ToList().AsReadOnly()
+        };
     }
 
     /// <summary>
@@ -151,7 +139,7 @@ public static class EnumerableExtensions
     /// <param name="list">给定的 <see cref="IList{T}"/>。</param>
     /// <returns>返回 <see cref="ReadOnlyCollection{T}"/>。</returns>
     public static ReadOnlyCollection<T> AsReadOnlyCollection<T>(this IList<T> list)
-        => new ReadOnlyCollection<T>(list);
+        => new(list);
 
     #endregion
 

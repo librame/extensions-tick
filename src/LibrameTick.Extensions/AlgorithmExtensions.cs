@@ -18,16 +18,16 @@ namespace Librame.Extensions;
 public static class AlgorithmExtensions
 {
     // 使用自动密钥作为默认的通用密钥基础设施（CKI）
-    private static readonly Cryptography.CkiOptions DefaultCki
+    private static readonly Crypto.CkiOptions DefaultCki
         = Bootstraps.Bootstrapper.GetAutokey().Get().Cki;
 
 
     /// <summary>
     /// 使用自动密钥作为默认的通用密钥基础设施（CKI）选项填充当前实例。
     /// </summary>
-    /// <param name="options">给定的 <see cref="Cryptography.CkiOptions"/>。</param>
-    /// <returns>返回 <see cref="Cryptography.CkiOptions"/>。</returns>
-    public static Cryptography.CkiOptions PopulateDefaultCki(this Cryptography.CkiOptions options)
+    /// <param name="options">给定的 <see cref="Crypto.CkiOptions"/>。</param>
+    /// <returns>返回 <see cref="Crypto.CkiOptions"/>。</returns>
+    public static Crypto.CkiOptions PopulateDefaultCki(this Crypto.CkiOptions options)
     {
         options.PopulateAll(DefaultCki);
         return options;
@@ -36,20 +36,15 @@ public static class AlgorithmExtensions
 
     #region Hash
 
-    private static readonly Lazy<MD5> _md5 =
-        new Lazy<MD5>(MD5.Create());
+    private static readonly Lazy<MD5> _md5 = new(MD5.Create());
 
-    private static readonly Lazy<SHA1> _sha1 =
-        new Lazy<SHA1>(SHA1.Create());
+    private static readonly Lazy<SHA1> _sha1 = new(SHA1.Create());
 
-    private static readonly Lazy<SHA256> _sha256 =
-        new Lazy<SHA256>(SHA256.Create());
+    private static readonly Lazy<SHA256> _sha256 = new(SHA256.Create());
 
-    private static readonly Lazy<SHA384> _sha384 =
-        new Lazy<SHA384>(SHA384.Create());
+    private static readonly Lazy<SHA384> _sha384 = new(SHA384.Create());
 
-    private static readonly Lazy<SHA512> _sha512 =
-        new Lazy<SHA512>(SHA512.Create());
+    private static readonly Lazy<SHA512> _sha512 = new(SHA512.Create());
 
 
     /// <summary>
@@ -144,19 +139,19 @@ public static class AlgorithmExtensions
     #region HMAC Hash
 
     private static readonly Lazy<HMACMD5> _hmacMd5 =
-        new Lazy<HMACMD5>(() => new HMACMD5(DefaultCki.HmacHash.Md5.Key!));
+        new(() => new HMACMD5(DefaultCki.HmacHash.Md5.Key!));
 
     private static readonly Lazy<HMACSHA1> _hmacSha1 =
-        new Lazy<HMACSHA1>(() => new HMACSHA1(DefaultCki.HmacHash.Sha1.Key!));
+        new(() => new HMACSHA1(DefaultCki.HmacHash.Sha1.Key!));
 
     private static readonly Lazy<HMACSHA256> _hmacSha256 =
-        new Lazy<HMACSHA256>(() => new HMACSHA256(DefaultCki.HmacHash.Sha256.Key!));
+        new(() => new HMACSHA256(DefaultCki.HmacHash.Sha256.Key!));
 
     private static readonly Lazy<HMACSHA384> _hmacSha384 =
-        new Lazy<HMACSHA384>(() => new HMACSHA384(DefaultCki.HmacHash.Sha384.Key!));
+        new(() => new HMACSHA384(DefaultCki.HmacHash.Sha384.Key!));
 
     private static readonly Lazy<HMACSHA512> _hmacSha512 =
-        new Lazy<HMACSHA512>(() => new HMACSHA512(DefaultCki.HmacHash.Sha512.Key!));
+        new(() => new HMACSHA512(DefaultCki.HmacHash.Sha512.Key!));
 
 
     /// <summary>
@@ -256,7 +251,7 @@ public static class AlgorithmExtensions
     #region AES
 
     private static readonly Lazy<Aes> _aes =
-        new Lazy<Aes>(InitialAes);
+        new(InitialAes);
 
     private static Aes InitialAes()
     {
@@ -316,7 +311,7 @@ public static class AlgorithmExtensions
     #region AES-CCM
 
     private static readonly Lazy<AesCcm> _aesCcm =
-        new Lazy<AesCcm>(() => new AesCcm(DefaultCki.AesCcm.Key!));
+        new(() => new AesCcm(DefaultCki.AesCcm.Key!));
 
 
     /// <summary>
@@ -374,7 +369,7 @@ public static class AlgorithmExtensions
     #region AES-GCM
 
     private static readonly Lazy<AesGcm> _aesGcm =
-        new Lazy<AesGcm>(() => new AesGcm(DefaultCki.AesGcm.Key!));
+        new(() => new AesGcm(DefaultCki.AesGcm.Key!));
 
 
     /// <summary>

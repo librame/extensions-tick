@@ -32,8 +32,8 @@ public static class DataStoreSpecificationExtensions
         where TEntity : class
     {
         var accessor = specification is null
-            ? store.AccessorManager.GetReadAccessor()
-            : store.AccessorManager.GetAccessor(specification);
+            ? store.AccessorManager.GetReadAccessors()
+            : store.AccessorManager.GetAccessors(specification);
 
         return ((DbContext)accessor).Set<TEntity>();
     }
@@ -49,8 +49,8 @@ public static class DataStoreSpecificationExtensions
         AccessAccessorSpecification? specification = null)
     {
         var accessor = specification is null
-            ? store.AccessorManager.GetReadAccessor()
-            : store.AccessorManager.GetAccessor(specification);
+            ? store.AccessorManager.GetReadAccessors()
+            : store.AccessorManager.GetAccessors(specification);
 
         return ((DbContext)accessor).Model.FindEntityType(typeof(TEntity))?.GetSchema();
     }
@@ -66,8 +66,8 @@ public static class DataStoreSpecificationExtensions
         AccessAccessorSpecification? specification = null)
     {
         var accessor = specification is null
-            ? store.AccessorManager.GetReadAccessor()
-            : store.AccessorManager.GetAccessor(specification);
+            ? store.AccessorManager.GetReadAccessors()
+            : store.AccessorManager.GetAccessors(specification);
 
         return ((DbContext)accessor).Model.FindEntityType(typeof(TEntity))?.GetTableName();
     }

@@ -19,7 +19,7 @@ namespace Librame.Extensions.Data.Accessing
         }
 
 
-        protected override void CustomModelCreating(ModelBuilder modelBuilder)
+        protected override void ModelCreatingCore(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(b =>
             {

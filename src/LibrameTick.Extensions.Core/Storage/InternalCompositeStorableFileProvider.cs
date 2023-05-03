@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Core.Storage;
 
-sealed class InternalCompositeStorableFileProvider : IStorableFileProvider
+sealed class InternalCompositeStorableFileProvider : IStorableFileProvider, IComposable<IStorableFileProvider>
 {
     private readonly IStorableFileProvider[] _providers;
 
@@ -58,6 +58,9 @@ sealed class InternalCompositeStorableFileProvider : IStorableFileProvider
     #endregion
 
 
+    public int Count => _providers.Length;
+
+
     public IStorableFileInfo GetFileInfo(string subpath)
         => ChainingProvidersByException(p => p.GetFileInfo(subpath));
 
@@ -73,5 +76,12 @@ sealed class InternalCompositeStorableFileProvider : IStorableFileProvider
 
     IDirectoryContents IFileProvider.GetDirectoryContents(string subpath)
         => GetDirectoryContents(subpath);
+
+
+    public IEnumerator<IStorableFileProvider> GetEnumerator()
+        => _providers.AsEnumerable().GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
 
 }

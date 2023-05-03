@@ -13,7 +13,8 @@
 using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Plugins;
 using Librame.Extensions.Core.Storage;
-using Librame.Extensions.Cryptography;
+using Librame.Extensions.Crypto;
+using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Core;
@@ -33,14 +34,15 @@ public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionBuilde
     public CoreExtensionBuilder(IServiceCollection services)
         : base(services)
     {
-        ServiceCharacteristics.AddSingleton(typeof(ICloneable<>));
-        ServiceCharacteristics.AddSingleton(typeof(IDecoratable<>));
         ServiceCharacteristics.AddSingleton<IDispatcherFactory>();
 
-        // Cryptography
+        // Crypto
         ServiceCharacteristics.AddSingleton<IAlgorithmParameterGenerator>();
         ServiceCharacteristics.AddSingleton<IAsymmetricAlgorithm>();
         ServiceCharacteristics.AddSingleton<ISymmetricAlgorithm>();
+
+        // Device
+        ServiceCharacteristics.AddSingleton<IDeviceLoader>();
 
         // Network
         ServiceCharacteristics.AddSingleton<IHttpClientInvokerFactory>();

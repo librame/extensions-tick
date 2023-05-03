@@ -24,11 +24,11 @@ class InternalDirectoyStructureBootstrap : AbstsractBootstrap, IDirectoryStructu
 
 
     public string ConfigDirectory
-        => BaseDirectory.CombinePath("_configs");
+        => BaseDirectory.CombineDirectory("_configs");
 
     public string ReportDirectory
-        => BaseDirectory.CombinePath("_reports");
+        => BaseDirectory.CombineDirectory("_reports");
 
     public string ResourceDirectory
-        => BaseDirectory.CombinePath("_resources");
+        => BaseDirectory.CombineDirectory("_resources");
 }

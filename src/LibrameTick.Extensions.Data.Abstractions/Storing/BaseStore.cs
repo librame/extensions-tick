@@ -12,6 +12,7 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Dispatchers;
 using Librame.Extensions.IdGenerators;
 using Librame.Extensions.Specifications;
 
@@ -34,8 +35,8 @@ public class BaseStore<T> : IStore<T>
         AccessorManager = accessorManager;
         IdGeneratorFactory = idGeneratorFactory;
 
-        CurrentReadAccessor = accessorManager.GetReadAccessor();
-        CurrentWriteAccessor = accessorManager.GetWriteAccessor();
+        CurrentReadAccessor = accessorManager.GetReadAccessors();
+        CurrentWriteAccessor = accessorManager.GetWriteAccessors();
     }
 
 
@@ -68,7 +69,7 @@ public class BaseStore<T> : IStore<T>
     public virtual IStore<T> UseAccessor(string accessorName)
     {
         CurrentWriteAccessor = CurrentReadAccessor =
-            AccessorManager.GetAccessor(new NamedAccessorSpecification(accessorName));
+            AccessorManager.GetAccessors(new NamedAccessorSpecification(accessorName));
         return this;
     }
 
@@ -79,7 +80,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回 <see cref="IStore{T}"/>。</returns>
     public virtual IStore<T> UseReadAccessor(ISpecification<IAccessor>? specification = null)
     {
-        CurrentReadAccessor = AccessorManager.GetReadAccessor(specification);
+        CurrentReadAccessor = AccessorManager.GetReadAccessors(specification);
         return this;
     }
 
@@ -90,9 +91,26 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回 <see cref="IStore{T}"/>。</returns>
     public virtual IStore<T> UseWriteAccessor(ISpecification<IAccessor>? specification = null)
     {
-        CurrentWriteAccessor = AccessorManager.GetWriteAccessor(specification);
+        CurrentWriteAccessor = AccessorManager.GetWriteAccessors(specification);
         return this;
     }
+
+
+    /// <summary>
+    /// 获取读取的存取器调度器。
+    /// </summary>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选）。</param>
+    /// <returns>返回 <see cref="IDispatcher{IAccessor}"/>。</returns>
+    protected virtual IDispatcher<IAccessor> GetReadingDispatcher(ISpecification<IAccessor>? specification)
+        => (AccessorManager.GetReadAccessors(specification) ?? CurrentReadAccessor).ReadingDispatcher;
+
+    /// <summary>
+    /// 获取写入的存取器调度器。
+    /// </summary>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选）。</param>
+    /// <returns>返回 <see cref="IDispatcher{IAccessor}"/>。</returns>
+    protected virtual IDispatcher<IAccessor> GetWritingDispatcher(ISpecification<IAccessor>? specification)
+        => (AccessorManager.GetWriteAccessors(specification) ?? CurrentWriteAccessor).WritingDispatcher;
 
 
     #region Query
@@ -103,7 +121,16 @@ public class BaseStore<T> : IStore<T>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
     public virtual IQueryable<T> Query(ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor).Query<T>();
+    {
+        IQueryable<T>? query = null;
+
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            query = accessor.Query<T>();
+        }
+
+        return query!;
+    }
 
     /// <summary>
     /// 获取可查询接口。
@@ -112,7 +139,16 @@ public class BaseStore<T> : IStore<T>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
     public virtual IQueryable<T> Query(string name, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor).Query<T>(name);
+    {
+        IQueryable<T>? query = null;
+
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            query = accessor.Query<T>(name);
+        }
+
+        return query!;
+    }
 
 
     /// <summary>
@@ -122,7 +158,16 @@ public class BaseStore<T> : IStore<T>
     /// <param name="parameters">给定的参数数组。</param>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
     public virtual IQueryable<T> QueryBySql(string sql, params object[] parameters)
-        => CurrentReadAccessor.QueryBySql<T>(sql, parameters);
+    {
+        IQueryable<T>? query = null;
+
+        foreach (var accessor in CurrentReadAccessor.ReadingDispatcher)
+        {
+            query = accessor.QueryBySql<T>(sql, parameters);
+        }
+
+        return query!;
+    }
 
     /// <summary>
     /// 通过 SQL 语句获取可查询接口。
@@ -133,8 +178,16 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
     public virtual IQueryable<T> QueryBySql(string sql, object[] parameters,
         ISpecification<IAccessor> specification)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .QueryBySql<T>(sql, parameters);
+    {
+        IQueryable<T>? query = null;
+
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            query = accessor.QueryBySql<T>(sql, parameters);
+        }
+
+        return query!;
+    }
 
 
     /// <summary>
@@ -145,7 +198,16 @@ public class BaseStore<T> : IStore<T>
     /// <param name="parameters">给定的参数数组。</param>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
     public virtual IQueryable<T> QueryBySql(string name, string sql, params object[] parameters)
-        => CurrentReadAccessor.QueryBySql<T>(name, sql, parameters);
+    {
+        IQueryable<T>? query = null;
+
+        foreach (var accessor in CurrentReadAccessor.ReadingDispatcher)
+        {
+            query = accessor.QueryBySql<T>(name, sql, parameters);
+        }
+
+        return query!;
+    }
 
     /// <summary>
     /// 通过 SQL 语句获取可查询接口。
@@ -157,8 +219,16 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回 <see cref="IQueryable{T}"/>。</returns>
     public virtual IQueryable<T> QueryBySql(string name, string sql, object[] parameters,
         ISpecification<IAccessor> specification)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .QueryBySql<T>(name, sql, parameters);
+    {
+        IQueryable<T>? query = null;
+
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            query = accessor.QueryBySql<T>(name, sql, parameters);
+        }
+
+        return query!;
+    }
 
     #endregion
 
@@ -174,8 +244,15 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回布尔值。</returns>
     public virtual bool Exists(Expression<Func<T, bool>> predicate,
         bool checkLocal = true, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .Exists(predicate, checkLocal);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            if (accessor.Exists(predicate, checkLocal))
+                return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// 异步在本地缓存或数据库中是否存在指定断定方法的实体。
@@ -185,11 +262,18 @@ public class BaseStore<T> : IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含布尔值的异步操作。</returns>
-    public virtual Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate,
+    public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate,
         bool checkLocal = true, CancellationToken cancellationToken = default,
         ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .ExistsAsync(predicate, checkLocal, cancellationToken);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            if (await accessor.ExistsAsync(predicate, checkLocal, cancellationToken))
+                return true;
+        }
+
+        return false;
+    }
 
     #endregion
 
@@ -203,7 +287,16 @@ public class BaseStore<T> : IStore<T>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <typeparamref name="T"/>。</returns>
     public virtual T? FindById(object id, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor).CurrentContext.Find<T>(id);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var one = accessor.CurrentContext.Find<T>(id);
+            if (one is not null)
+                return one;
+        }
+
+        return null;
+    }
 
 
     /// <summary>
@@ -212,15 +305,22 @@ public class BaseStore<T> : IStore<T>
     /// <param name="predicate">给定的断定条件（可选；为空表示查询所有）</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
-    public virtual IList<T> FindList(Expression<Func<T, bool>>? predicate = null,
+    public virtual IList<T>? FindList(Expression<Func<T, bool>>? predicate = null,
         ISpecification<IAccessor>? specification = null)
     {
-        var query = Query(specification);
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var query = accessor.Query<T>();
 
-        if (predicate is not null)
-            query = query.Where(predicate);
+            if (predicate is not null)
+                query = query.Where(predicate);
 
-        return query.ToList();
+            var list = query.ToList();
+            if (list.Count > 0)
+                return list;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -230,7 +330,7 @@ public class BaseStore<T> : IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
-    public virtual Task<IList<T>> FindListAsync(Expression<Func<T, bool>>? predicate = null,
+    public virtual Task<IList<T>?> FindListAsync(Expression<Func<T, bool>>? predicate = null,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null)
         => cancellationToken.RunTask(() => FindList(predicate, specification));
 
@@ -241,10 +341,18 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entitySpecification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IList{T}"/>。</returns>
-    public virtual IList<T> FindListWithSpecification(ISpecification<T>? entitySpecification = null,
+    public virtual IList<T>? FindListWithSpecification(ISpecification<T>? entitySpecification = null,
         ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .FindsWithSpecification(entitySpecification);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var list = accessor.FindsWithSpecification(entitySpecification);
+            if (list.Count > 0)
+                return list;
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// 异步查找带有规约的类型实例集合。
@@ -253,10 +361,18 @@ public class BaseStore<T> : IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
-    public virtual Task<IList<T>> FindListWithSpecificationAsync(ISpecification<T>? entitySpecification = null,
+    public virtual async Task<IList<T>?> FindListWithSpecificationAsync(ISpecification<T>? entitySpecification = null,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .FindsWithSpecificationAsync(entitySpecification, cancellationToken);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var list = await accessor.FindsWithSpecificationAsync(entitySpecification, cancellationToken);
+            if (list.Count > 0)
+                return list;
+        }
+
+        return null;
+    }
 
 
     /// <summary>
@@ -265,10 +381,18 @@ public class BaseStore<T> : IStore<T>
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
-    public virtual IPagingList<T> FindPagingList(Action<IPagingList<T>> pageAction,
+    public virtual IPagingList<T>? FindPagingList(Action<IPagingList<T>> pageAction,
         ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .FindPagingList(pageAction);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var list = accessor.FindPagingList(pageAction);
+            if (list.Length > 0)
+                return list;
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// 异步查找类型实例分页集合。
@@ -277,10 +401,18 @@ public class BaseStore<T> : IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
-    public virtual Task<IPagingList<T>> FindPagingListAsync(Action<IPagingList<T>> pageAction,
+    public virtual async Task<IPagingList<T>?> FindPagingListAsync(Action<IPagingList<T>> pageAction,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .FindPagingListAsync(pageAction, cancellationToken);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var list = await accessor.FindPagingListAsync(pageAction, cancellationToken);
+            if (list.Length > 0)
+                return list;
+        }
+
+        return null;
+    }
 
 
     /// <summary>
@@ -290,10 +422,18 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entitySpecification">给定的 <see cref="ISpecification{T}"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IPagingList{T}"/>。</returns>
-    public virtual IPagingList<T> FindPagingListWithSpecification(Action<IPagingList<T>> pageAction,
+    public virtual IPagingList<T>? FindPagingListWithSpecification(Action<IPagingList<T>> pageAction,
         ISpecification<T>? entitySpecification = null, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .FindPagingListWithSpecification(pageAction, entitySpecification);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var list = accessor.FindPagingListWithSpecification(pageAction, entitySpecification);
+            if (list.Length > 0)
+                return list;
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// 异步查找带有规约的类型实例分页集合。
@@ -303,11 +443,19 @@ public class BaseStore<T> : IStore<T>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
-    public virtual Task<IPagingList<T>> FindPagingListWithSpecificationAsync(Action<IPagingList<T>> pageAction,
+    public virtual async Task<IPagingList<T>?> FindPagingListWithSpecificationAsync(Action<IPagingList<T>> pageAction,
         ISpecification<T>? entitySpecification = null, CancellationToken cancellationToken = default,
         ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetReadAccessor(specification) ?? CurrentReadAccessor)
-            .FindPagingListWithSpecificationAsync(pageAction, entitySpecification, cancellationToken);
+    {
+        foreach (var accessor in GetReadingDispatcher(specification))
+        {
+            var list = await accessor.FindPagingListWithSpecificationAsync(pageAction, entitySpecification, cancellationToken);
+            if (list.Length > 0)
+                return list;
+        }
+
+        return null;
+    }
 
     #endregion
 
@@ -322,15 +470,28 @@ public class BaseStore<T> : IStore<T>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     public virtual void AddIfNotExists(T item, Expression<Func<T, bool>> predicate,
         ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetWriteAccessor(specification) ?? CurrentWriteAccessor)
-            .AddIfNotExists(item, predicate); // 使用元素对象作为分库依据
+    {
+        foreach (var accessor in GetWritingDispatcher(specification))
+        {
+            var one = accessor.AddIfNotExists(item, predicate);
+            if (one is not null)
+                return;
+        }
+
+        return;
+    }
 
     /// <summary>
     /// 添加类型实例集合（仅支持写入存取器）。
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Add(params T[] entities)
-        => CurrentWriteAccessor.CurrentContext.AddRange(entities);
+    {
+        foreach (var accessor in CurrentWriteAccessor.WritingDispatcher)
+        {
+            accessor.CurrentContext.AddRange(entities);
+        }
+    }
 
     /// <summary>
     /// 添加类型实例集合（仅支持写入存取器）。
@@ -338,7 +499,12 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     public virtual void Add(IEnumerable<T> entities, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetWriteAccessor(specification) ?? CurrentWriteAccessor).CurrentContext.AddRange(entities);
+    {
+        foreach (var accessor in GetWritingDispatcher(specification))
+        {
+            accessor.CurrentContext.AddRange(entities);
+        }
+    }
 
     #endregion
 
@@ -350,7 +516,12 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Remove(params T[] entities)
-        => CurrentWriteAccessor.CurrentContext.RemoveRange(entities);
+    {
+        foreach (var accessor in CurrentWriteAccessor.WritingDispatcher)
+        {
+            accessor.CurrentContext.RemoveRange(entities);
+        }
+    }
 
     /// <summary>
     /// 移除类型实例集合（仅支持写入存取器）。
@@ -358,7 +529,12 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     public virtual void Remove(IEnumerable<T> entities, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetWriteAccessor(specification) ?? CurrentWriteAccessor).CurrentContext.RemoveRange(entities);
+    {
+        foreach (var accessor in GetWritingDispatcher(specification))
+        {
+            accessor.CurrentContext.RemoveRange(entities);
+        }
+    }
 
     #endregion
 
@@ -370,7 +546,12 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Update(params T[] entities)
-        => CurrentWriteAccessor.CurrentContext.UpdateRange(entities);
+    {
+        foreach (var accessor in CurrentWriteAccessor.WritingDispatcher)
+        {
+            accessor.CurrentContext.UpdateRange(entities);
+        }
+    }
 
     /// <summary>
     /// 更新类型实例集合（仅支持写入存取器）。
@@ -378,7 +559,12 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     public virtual void Update(IEnumerable<T> entities, ISpecification<IAccessor>? specification = null)
-        => (AccessorManager.GetWriteAccessor(specification) ?? CurrentWriteAccessor).CurrentContext.UpdateRange(entities);
+    {
+        foreach (var accessor in GetWritingDispatcher(specification))
+        {
+            accessor.CurrentContext.UpdateRange(entities);
+        }
+    }
 
     #endregion
 
@@ -392,8 +578,12 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回受影响的行数。</returns>
     public virtual int SaveChanges(ISpecification<IAccessor>? specification = null)
     {
-        var value = (AccessorManager.GetWriteAccessor(specification) ?? CurrentWriteAccessor)
-            .CurrentContext.SaveChanges();
+        var value = -1;
+
+        foreach (var accessor in GetWritingDispatcher(specification))
+        {
+            value = accessor.CurrentContext.SaveChanges();
+        }
 
         UseReadAccessor(specification);
 
@@ -409,8 +599,12 @@ public class BaseStore<T> : IStore<T>
     public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default,
         ISpecification<IAccessor>? specification = null)
     {
-        var value = await (AccessorManager.GetWriteAccessor(specification) ?? CurrentWriteAccessor)
-            .CurrentContext.SaveChangesAsync(cancellationToken);
+        var value = -1;
+
+        foreach (var accessor in GetWritingDispatcher(specification))
+        {
+            value = await accessor.CurrentContext.SaveChangesAsync(cancellationToken);
+        }
 
         UseReadAccessor(specification);
 

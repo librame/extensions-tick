@@ -20,13 +20,13 @@ namespace Librame.Extensions.Dispatchers;
 public class DispatchingOptions : IOptions
 {
     /// <summary>
-    /// 失败重试次数（默认不重试）。
+    /// 失败重试次数（默认 3 次）。
     /// </summary>
-    public int FailRetries { get; set; }
+    public int FailRetries { get; set; } = 3;
 
     /// <summary>
-    /// 失败单次重试间隔（默认 <see cref="TimeSpan.Zero"/>）。
+    /// 失败单次重试间隔（默认 3 秒）。
     /// </summary>
     public TimeSpan FailRetryInterval { get; set; }
-        = TimeSpan.Zero;
+        = TimeSpan.FromSeconds(3);
 }

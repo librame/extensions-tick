@@ -38,9 +38,7 @@ class InternalWatermarkDrawer : AbstractInternalDrawer, IWatermarkDrawer
     {
         _forePaint.Dispose();
         _alternPaint.Dispose();
-
-        if (_watermarkBitmap is not null)
-            _watermarkBitmap.Dispose();
+        _watermarkBitmap?.Dispose();
 
         return true;
     }

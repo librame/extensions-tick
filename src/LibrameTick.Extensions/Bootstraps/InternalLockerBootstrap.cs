@@ -117,7 +117,7 @@ class InternalLockerBootstrap : AbstsractBootstrap, ILockerBootstrap
             {
                 stopwatch.Stop();
 
-                _lockers.ForEach(obj => Monitor.Exit(obj));
+                _lockers.ForEach(Monitor.Exit);
                 _lockers.Clear();
 
                 throw new OverflowException(string.Format(CultureInfo.InvariantCulture,

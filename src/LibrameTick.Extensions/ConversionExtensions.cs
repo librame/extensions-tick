@@ -29,7 +29,7 @@ public static class ConversionExtensions
     /// The <paramref name="obj"/> is null or not value type.
     /// </exception>
     public static TValue As<TValue>(this object? obj,
-        [CallerArgumentExpression("obj")] string? paramName = null)
+        [CallerArgumentExpression(nameof(obj))] string? paramName = null)
     {
         if (obj is TValue value)
             return value;

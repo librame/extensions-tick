@@ -10,8 +10,9 @@
 
 #endregion
 
-using Librame.Extensions.Cryptography;
+using Librame.Extensions.Crypto;
 using Librame.Extensions.Data.Sharding;
+using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -28,31 +29,34 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <param name="name">给定的名称。</param>
     /// <param name="group">给定的所属群组。</param>
     /// <param name="access">给定的访问模式。</param>
-    /// <param name="redundancy">给定的冗余模式。</param>
+    /// <param name="dispatching">给定的调度模式。</param>
     /// <param name="priority">给定的优先级。</param>
     /// <param name="algorithm">给定的算法选项。</param>
     /// <param name="sharded">给定的分库特性。</param>
+    /// <param name="loaderHost">给定的负载器主机。</param>
     public AccessorDescriptor(IAccessor accessor,
         Type serviceType,
         string name,
         int group,
         AccessMode access,
-        RedundancyMode redundancy,
+        DispatchingMode dispatching,
         //bool pooling,
         float priority,
         AlgorithmOptions algorithm,
-        ShardedAttribute? sharded)
+        ShardedAttribute? sharded,
+        string? loaderHost)
     {
         Accessor = accessor;
         ServiceType = serviceType;
         Name = name;
         Group = group;
         Access = access;
-        Redundancy = redundancy;
+        Dispatching = dispatching;
         //Pooling = pooling;
         Priority = priority;
         Algorithm = algorithm;
         Sharded = sharded;
+        LoaderHost = loaderHost;
     }
 
 
@@ -82,9 +86,9 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     public AccessMode Access { get; init; }
 
     /// <summary>
-    /// 冗余模式。
+    /// 调度模式。
     /// </summary>
-    public RedundancyMode Redundancy { get; init; }
+    public DispatchingMode Dispatching { get; init; }
 
     ///// <summary>
     ///// 是否池化。
@@ -105,6 +109,11 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// 分库特性。
     /// </summary>
     public ShardedAttribute? Sharded { get; init; }
+
+    /// <summary>
+    /// 负载器主机。
+    /// </summary>
+    public string? LoaderHost { get; init; }
 
 
     /// <summary>

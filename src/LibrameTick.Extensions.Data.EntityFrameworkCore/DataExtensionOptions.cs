@@ -15,6 +15,7 @@ using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
+using Librame.Extensions.Device;
 using Librame.Extensions.IdGenerators;
 
 namespace Librame.Extensions.Data;
@@ -56,6 +57,30 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     /// 雪花标识选项。
     /// </summary>
     public SnowflakeIdOptions Snowflake { get; set; } = new();
+
+    /// <summary>
+    /// 设备负载选项。
+    /// </summary>
+    public DeviceLoadOptions DeviceLoad { get; set; } = new();
+
+    /// <summary>
+    /// 设备负载每次实时计算（如果不启用，当首次等待计算后，下次先返回上次计算值，利用率将在后台计算后更新，以提升响应速度；默认不启用）。
+    /// </summary>
+    public bool DeviceLoadRealtimeForEverytime { get; set; }
+
+    /// <summary>
+    /// 创建设备负载主机集合键方法，用于缓存单次 <see cref="IDeviceLoader"/> 实例。
+    /// </summary>
+    [JsonIgnore]
+    public Func<IEnumerable<string>, string> CreateDeviceLoadHostsKeyFunc { get; set; }
+        = hosts => string.Join(',', hosts.Order());
+
+    /// <summary>
+    /// 创建设备负载器方法（默认使用 <see cref="AccessorDeviceLoader"/>）。
+    /// </summary>
+    [JsonIgnore]
+    public Func<DataExtensionOptions, IEnumerable<string>, IDeviceLoader> CreateDeviceLoaderFunc { get; set; }
+        = (options, hosts) => new AccessorDeviceLoader(options, hosts);
 
 
     /// <summary>

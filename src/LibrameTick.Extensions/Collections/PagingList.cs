@@ -92,16 +92,16 @@ public class PagingList<T> : IPagingList<T>
 
 
     /// <summary>
-    /// 分页信息（需要先分页后才有效）。
+    /// 分页信息。
     /// </summary>
     public virtual PagingInfo Info
         => _info;
 
     /// <summary>
-    /// 列表长度（需要先分页后才有效）。
+    /// 列表长度（未分页返回总条数）。
     /// </summary>
     public virtual int Length
-        => _filter?.Count() ?? 0;
+        => _filter?.Count() ?? (int)_info.Total;
 
 
     /// <summary>

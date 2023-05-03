@@ -17,7 +17,6 @@ namespace Librame.Extensions;
 /// </summary>
 public static class ExpressionExtensions
 {
-
     /// <summary>
     /// 作为属性表达式的名称。
     /// </summary>
@@ -361,12 +360,10 @@ public static class ExpressionExtensions
         }
         else
         {
-            if (parameterTypes is null)
-                parameterTypes = parameters.Select(s => s.GetType()).ToArray();
+            parameterTypes ??= parameters.Select(s => s.GetType()).ToArray();
 
-            var constructor = type.GetConstructor(parameterTypes);
-            if (constructor is null)
-                throw new ArgumentException($"No ConstructorInfo matching the specified parameters was found in the type '{type}'.");
+            var constructor = type.GetConstructor(parameterTypes)
+                ?? throw new ArgumentException($"No ConstructorInfo matching the specified parameters was found in the type '{type}'.");
 
             var argsExpression = Expression.Parameter(typeof(object[]), "args");
 

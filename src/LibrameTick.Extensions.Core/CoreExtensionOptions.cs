@@ -13,7 +13,8 @@
 using Librame.Extensions.Bootstraps;
 using Librame.Extensions.Core.Network;
 using Librame.Extensions.Core.Storage;
-using Librame.Extensions.Cryptography;
+using Librame.Extensions.Crypto;
+using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Core;
@@ -42,6 +43,11 @@ public class CoreExtensionOptions : AbstractExtensionOptions<CoreExtensionOption
     /// Web 文件选项。
     /// </summary>
     public WebFileOptions WebFile { get; set; } = new();
+
+    /// <summary>
+    /// 设备负载选项。
+    /// </summary>
+    public DeviceLoadOptions DeviceLoad { get; set; } = new();
 
 
     /// <summary>

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using Xunit;
 
-namespace Librame.Extensions.Cryptography
+namespace Librame.Extensions.Crypto
 {
     public class InternalSymmetricAlgorithmTests
     {

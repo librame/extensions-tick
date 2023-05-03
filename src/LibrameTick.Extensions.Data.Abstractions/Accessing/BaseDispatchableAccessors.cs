@@ -27,8 +27,9 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// 构造一个 <see cref="BaseDispatchableAccessors"/>。
     /// </summary>
     /// <param name="dispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 读写存取器调度器。</param>
-    public BaseDispatchableAccessors(IDispatcher<IAccessor> dispatcher)
-        : this(dispatcher, dispatcher)
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
+    public BaseDispatchableAccessors(IDispatcher<IAccessor> dispatcher, DispatchingMode mode)
+        : this(dispatcher, dispatcher, mode)
     {
         IsWritingSeparation = false;
     }
@@ -38,11 +39,13 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// </summary>
     /// <param name="readingDispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 读存取器调度器。</param>
     /// <param name="writingDispatcher">给定的 <see cref="IDispatcher{IAccessor}"/> 写存取器调度器。</param>
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
     public BaseDispatchableAccessors(IDispatcher<IAccessor> readingDispatcher,
-        IDispatcher<IAccessor> writingDispatcher)
+        IDispatcher<IAccessor> writingDispatcher, DispatchingMode mode)
     {
         ReadingDispatcher = readingDispatcher;
         WritingDispatcher = writingDispatcher;
+        Mode = mode;
 
         IsWritingSeparation = true;
     }
@@ -70,6 +73,11 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// 写存取器调度器。
     /// </summary>
     public IDispatcher<IAccessor> WritingDispatcher { get; init; }
+
+    /// <summary>
+    /// 调度模式。
+    /// </summary>
+    public DispatchingMode Mode { get; init; }
 
     /// <summary>
     /// 是否读写分离。
@@ -130,11 +138,11 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <returns>返回布尔值。</returns>
     public virtual bool TryCreateDatabase()
     {
-        var results = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.TryCreateDatabase()).ToList();
+        var results = ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.TryCreateDatabase()).ToList();
 
         // 启用写入分离时需确保写入库已存在
         if (IsWritingSeparation)
-            results.AddRange(WritingDispatcher.InvokeFunc(a => a.CurrentSource.TryCreateDatabase()));
+            results.AddRange(WritingDispatcher.DispatchFunc(a => a.CurrentSource!.TryCreateDatabase()));
 
         // 只要有一个 FALSE 就返回 FALSE
         return !results.Any(result => false);
@@ -147,13 +155,15 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <returns>返回一个包含布尔值的异步操作。</returns>
     public virtual async Task<bool> TryCreateDatabaseAsync(CancellationToken cancellationToken = default)
     {
-        var results = (await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.TryCreateDatabaseAsync(cancellationToken),
+        var results = (await ReadingDispatcher.DispatchFuncAsync(a =>
+            a.CurrentSource!.TryCreateDatabaseAsync(cancellationToken),
             cancellationToken: cancellationToken)).ToList();
 
         // 启用写入分离时需确保写入库已存在
         if (IsWritingSeparation)
         {
-            results.AddRange(await WritingDispatcher.InvokeFuncAsync(a => a.CurrentSource.TryCreateDatabaseAsync(cancellationToken),
+            results.AddRange(await WritingDispatcher.DispatchFuncAsync(a =>
+                a.CurrentSource!.TryCreateDatabaseAsync(cancellationToken),
                 cancellationToken: cancellationToken));
         }
 
@@ -245,11 +255,10 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <param name="predicate">给定的断定方法表达式。</param>
     /// <param name="checkLocal">是否检查本地缓存（可选；默认启用检查）。</param>
     /// <returns>返回布尔值。</returns>
-    public virtual bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate,
-        bool checkLocal = true)
+    public virtual bool Exists<TEntity>(Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
         where TEntity : class
     {
-        var results = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.Exists(predicate, checkLocal),
+        var results = ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.Exists(predicate, checkLocal),
             (a, result) => result);
 
         // 只要有一个 TRUE 就返回 TRUE
@@ -268,7 +277,8 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
         bool checkLocal = true, CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var results = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.ExistsAsync(predicate, checkLocal, cancellationToken),
+        var results = await ReadingDispatcher.DispatchFuncAsync(a =>
+            a.CurrentSource!.ExistsAsync(predicate, checkLocal, cancellationToken),
             (a, result) => result, cancellationToken: cancellationToken);
         
         // 只要有一个 TRUE 就返回 TRUE
@@ -289,7 +299,8 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     public virtual IList<TEntity> FindsWithSpecification<TEntity>(
         ISpecification<TEntity>? specification = null)
         where TEntity : class
-        => ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindsWithSpecification(specification)).SelectMany(s => s).ToList();
+        => ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.FindsWithSpecification(specification))
+            .SelectMany(s => s).ToList();
 
     /// <summary>
     /// 异步查找带有规约的实体集合。
@@ -302,7 +313,8 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
         ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var result = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindsWithSpecificationAsync(specification, cancellationToken));
+        var result = await ReadingDispatcher.DispatchFuncAsync(a =>
+            a.CurrentSource!.FindsWithSpecificationAsync(specification, cancellationToken));
 
         return result.SelectMany(s => s).ToList();
     }
@@ -317,7 +329,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     public virtual IPagingList<TEntity> FindPagingList<TEntity>(Action<IPagingList<TEntity>> pageAction)
         where TEntity : class
     {
-        var pagings = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingList(pageAction));
+        var pagings = ReadingDispatcher.DispatchFunc(a => a.CurrentSource!.FindPagingList(pageAction));
 
         return pagings.CompositePaging();
     }
@@ -333,7 +345,8 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
         CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var pagings = await ReadingDispatcher.InvokeFuncAsync(a => a.CurrentSource.FindPagingListAsync(pageAction, cancellationToken));
+        var pagings = await ReadingDispatcher.DispatchFuncAsync(a =>
+            a.CurrentSource!.FindPagingListAsync(pageAction, cancellationToken));
 
         return await pagings.CompositePagingAsync(cancellationToken);
     }
@@ -350,7 +363,8 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
         ISpecification<TEntity>? specification = null)
         where TEntity : class
     {
-        var pagings = ReadingDispatcher.InvokeFunc(a => a.CurrentSource.FindPagingListWithSpecification(pageAction, specification));
+        var pagings = ReadingDispatcher.DispatchFunc(a => a.CurrentSource!
+            .FindPagingListWithSpecification(pageAction, specification));
 
         return pagings.CompositePaging();
     }
@@ -367,8 +381,8 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
         ISpecification<TEntity>? specification = null, CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var pagings = await ReadingDispatcher.InvokeFuncAsync(a
-            => a.CurrentSource.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
+        var pagings = await ReadingDispatcher.DispatchFuncAsync(a
+            => a.CurrentSource!.FindPagingListWithSpecificationAsync(pageAction, specification, cancellationToken));
 
         return await pagings.CompositePagingAsync(cancellationToken);
     }
@@ -389,7 +403,8 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     public virtual TEntity AddIfNotExists<TEntity>(TEntity entity,
         Expression<Func<TEntity, bool>> predicate, bool checkLocal = true)
         where TEntity : class
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.AddIfNotExists(entity, predicate, checkLocal), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.AddIfNotExists(entity, predicate, checkLocal),
+            isTraversal: false).First();
 
     /// <summary>
     /// 添加实体对象。
@@ -397,7 +412,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <param name="entity">给定要添加的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Add(object entity)
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Add(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Add(entity), isTraversal: false).First();
 
     /// <summary>
     /// 添加实体。
@@ -407,7 +422,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Add<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Add(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Add(entity), isTraversal: false).First();
 
     #endregion
 
@@ -420,7 +435,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <param name="entity">给定要附加的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Attach(object entity)
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Attach(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Attach(entity), isTraversal: false).First();
 
     /// <summary>
     /// 附加实体。
@@ -430,7 +445,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Attach<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Attach(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Attach(entity), isTraversal: false).First();
 
     #endregion
 
@@ -443,7 +458,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <param name="entity">给定要移除的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Remove(object entity)
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Remove(entity), isTraversal: false).First();
 
     /// <summary>
     /// 移除实体。
@@ -453,7 +468,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Remove<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Remove(entity), isTraversal: false).First();
 
     #endregion
 
@@ -466,7 +481,7 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <param name="entity">给定要更新的实体对象。</param>
     /// <returns>返回实体对象。</returns>
     public virtual object Update(object entity)
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Update(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Update(entity), isTraversal: false).First();
 
     /// <summary>
     /// 更新实体。
@@ -476,8 +491,83 @@ public class BaseDispatchableAccessors : AbstractSortable, IDispatchableAccessor
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     public virtual TEntity Update<TEntity>(TEntity entity)
         where TEntity : class
-        => WritingDispatcher.InvokeFunc(a => a.CurrentSource.Remove(entity), isTraversal: false).First();
+        => WritingDispatcher.DispatchFunc(a => a.CurrentSource!.Remove(entity), isTraversal: false).First();
 
     #endregion
+
+
+    /// <summary>
+    /// 因此为复合实现，故始终返回不相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="IAccessor"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    public virtual bool Equals(IAccessor? other)
+        => false;
+
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="IDispatchableAccessors"/>。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public virtual bool Equals(IDispatchableAccessors? other)
+        => other is not null && ToString() == other.ToString();
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="obj">给定的对象。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public override bool Equals(object? obj)
+        => obj is IDispatchableAccessors other && Equals(other);
+
+    /// <summary>
+    /// 获取哈希码。
+    /// </summary>
+    /// <returns>返回整数。</returns>
+    public override int GetHashCode()
+        => ToString().GetHashCode();
+
+    /// <summary>
+    /// 转为以英文逗号分隔的读/写调度器集合字符串。
+    /// </summary>
+    /// <returns>返回字符串。</returns>
+    public override string ToString()
+    {
+        var list = new List<string>();
+
+        // 读/写分开断定，不具体检测内部各存取器
+        if (Mode == DispatchingMode.Mirroring)
+            list.Add("Reading:" + ReadingDispatcher.First().ToString());
+        else
+            list.Add("Reading:" + ReadingDispatcher.ToString());
+
+        if (IsWritingSeparation)
+        {
+            if (Mode == DispatchingMode.Mirroring)
+                list.Add(";Writing:" + WritingDispatcher.First().ToString());
+            else
+                list.Add(";Writing:" + WritingDispatcher.ToString());
+        }
+
+        return list.ToString() ?? string.Empty;
+    }
+
+
+    /// <summary>
+    /// 获取枚举器。
+    /// </summary>
+    /// <returns>返回调度器枚举器。</returns>
+    public IEnumerator<IDispatcher<IAccessor>> GetEnumerator()
+    {
+        // 读/写分开断定，不具体检测内部各存取器
+        yield return ReadingDispatcher;
+
+        if (IsWritingSeparation)
+            yield return WritingDispatcher;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+        => GetEnumerator();
 
 }

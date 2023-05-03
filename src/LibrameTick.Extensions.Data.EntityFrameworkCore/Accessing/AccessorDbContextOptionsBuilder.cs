@@ -11,8 +11,10 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Cryptography;
+using Librame.Extensions.Crypto;
 using Librame.Extensions.Data.Sharding;
+using Librame.Extensions.Device;
+using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -56,7 +58,7 @@ public class AccessorDbContextOptionsBuilder
         => WithOption(e => e.WithName(name));
 
     /// <summary>
-    /// 配置存取器所属群组（默认为 0，表示多个存取器划分为一组，同组意味着具有相同的增、删、改等操作；如果不需要改变，可不调用此方法）。
+    /// 配置存取器所属群组（默认为 0，表示多个存取器划分为一组，同组意味着具有相同的增、删、改等操作）。
     /// </summary>
     /// <param name="group">给定的所属群组。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
@@ -64,7 +66,7 @@ public class AccessorDbContextOptionsBuilder
         => WithOption(e => e.WithGroup(group));
 
     /// <summary>
-    /// 配置存取器交互方式（默认为读/写；如果不需要改变，可不调用此方法）。
+    /// 配置存取器交互方式（默认为 <see cref="AccessMode.ReadWrite"/>）。
     /// </summary>
     /// <param name="access">给定的 <see cref="AccessMode"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
@@ -72,7 +74,15 @@ public class AccessorDbContextOptionsBuilder
         => WithOption(e => e.WithAccess(access));
 
     /// <summary>
-    /// 配置存取器优先级（默认使用 <see cref="IAccessor"/> 定义的优先级属性值；如果不需要改变，可不调用此方法）。
+    /// 配置调度模式（默认为 <see cref="DispatchingMode.Mirroring"/>）。
+    /// </summary>
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+    public virtual AccessorDbContextOptionsBuilder WithDispatching(DispatchingMode mode)
+        => WithOption(e => e.WithDispatching(mode));
+
+    /// <summary>
+    /// 配置存取器优先级（默认为 <see cref="float.Tau"/>，但会优先使用存取器实现的 <see cref="ISortable.Priority"/> 的属性值）。
     /// </summary>
     /// <param name="priority">给定的存取器优先级（数值越小越优先）。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
@@ -125,6 +135,22 @@ public class AccessorDbContextOptionsBuilder
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithSharding(ShardedAttribute sharded)
         => WithOption(e => e.WithSharding(sharded));
+
+
+    /// <summary>
+    /// 配置本机负载器。
+    /// </summary>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+    public virtual AccessorDbContextOptionsBuilder WithLocalhostLoader()
+        => WithLoader(nameof(DeviceLoadOptions.Localhost));
+
+    /// <summary>
+    /// 配置负载器（远程主机需返回 <see cref="DeviceUsageDescriptor"/> 的 JSON 形式）。
+    /// </summary>
+    /// <param name="host">给定的负载器主机。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+    public virtual AccessorDbContextOptionsBuilder WithLoader(string host)
+        => WithOption(e => e.WithLoader(host));
 
 
     /// <summary>

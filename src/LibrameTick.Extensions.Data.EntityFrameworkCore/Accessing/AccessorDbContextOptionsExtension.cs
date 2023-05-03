@@ -11,8 +11,10 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Cryptography;
+using Librame.Extensions.Crypto;
 using Librame.Extensions.Data.Sharding;
+using Librame.Extensions.Device;
+using Librame.Extensions.Dispatchers;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -28,11 +30,12 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
     private string? _name;
     private int _group;
-    private AccessMode _access = AccessMode.ReadWrite;
-    private RedundancyMode _redundancy = RedundancyMode.Mirroring;
-    private float _priority = -1;
+    private AccessMode _access;
+    private DispatchingMode _dispatching;
+    private float _priority;
     private AlgorithmOptions? _algorithm;
     private ShardedAttribute? _sharded;
+    private string? _loaderHost;
     private Type? _serviceType;
 
     private DbContextOptionsExtensionInfo? _info;
@@ -43,6 +46,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// </summary>
     public AccessorDbContextOptionsExtension()
     {
+        _access = AccessMode.ReadWrite;
+        _dispatching = DispatchingMode.Mirroring;
+        _priority = float.Tau;
     }
 
     /// <summary>
@@ -53,11 +59,12 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     {
         _group = copyFrom.Group;
         _access = copyFrom.Access;
-        _redundancy = copyFrom.Redundancy;
+        _dispatching = copyFrom.Dispatching;
         //_pooling = copyFrom.Pooling;
         _priority = copyFrom.Priority;
         _algorithm = copyFrom.Algorithm;
         _sharded = copyFrom.Sharded;
+        _loaderHost = copyFrom._loaderHost;
         _serviceType = copyFrom.ServiceType;
     }
 
@@ -78,9 +85,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     public AccessMode Access => _access;
 
     /// <summary>
-    /// 冗余模式（默认为 <see cref="RedundancyMode.Mirroring"/>，表示多库环境中可互为主备）。
+    /// 调度模式（默认为 <see cref="DispatchingMode.Mirroring"/>，表示多库环境中可互为主备）。
     /// </summary>
-    public RedundancyMode Redundancy => _redundancy;
+    public DispatchingMode Dispatching => _dispatching;
 
     ///// <summary>
     ///// 是否池化（默认为 FALSE）。
@@ -89,7 +96,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     //    => _pooling;
 
     /// <summary>
-    /// 存取器优先级（默认为 -1，表示优先使用存取器实现的 <see cref="ISortable.Priority"/> 的优先级属性值）。
+    /// 存取器优先级（默认为 <see cref="float.Tau"/>，但会优先使用存取器实现的 <see cref="ISortable.Priority"/> 的属性值）。
     /// </summary>
     public float Priority => _priority;
 
@@ -102,6 +109,11 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// 分库特性（默认为 NULL，表示不启用分库）。
     /// </summary>
     public ShardedAttribute? Sharded => _sharded;
+
+    /// <summary>
+    /// 负载器主机。
+    /// </summary>
+    public string? LoaderHost => _loaderHost;
 
     /// <summary>
     /// 服务类型。
@@ -167,15 +179,15 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     }
 
     /// <summary>
-    /// 使用指定的冗余模式创建一个选项扩展实例副本。
+    /// 使用指定的调度模式创建一个选项扩展实例副本。
     /// </summary>
-    /// <param name="redundancy">给定的 <see cref="RedundancyMode"/>。</param>
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-    public virtual AccessorDbContextOptionsExtension WithAccess(RedundancyMode redundancy)
+    public virtual AccessorDbContextOptionsExtension WithDispatching(DispatchingMode mode)
     {
         var clone = Clone();
 
-        clone._redundancy = redundancy;
+        clone._dispatching = mode;
 
         return clone;
     }
@@ -232,6 +244,20 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         var clone = Clone();
 
         clone._sharded = sharded;
+
+        return clone;
+    }
+
+    /// <summary>
+    /// 使用指定的负载器创建一个选项扩展实例副本。
+    /// </summary>
+    /// <param name="host">给定的负载器主机（本机用 <see cref="DeviceLoadOptions.Localhost"/> 表示）。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+    public virtual AccessorDbContextOptionsExtension WithLoader(string host)
+    {
+        var clone = Clone();
+
+        clone._loaderHost = host;
 
         return clone;
     }
@@ -305,9 +331,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                     builder.Append(": ");
                     builder.Append(Extension.Access).Append(' ');
 
-                    builder.Append(nameof(Extension.Redundancy));
+                    builder.Append(nameof(Extension.Dispatching));
                     builder.Append(": ");
-                    builder.Append(Extension.Redundancy).Append(' ');
+                    builder.Append(Extension.Dispatching).Append(' ');
 
                     //builder.Append(nameof(Extension.Pooling));
                     //builder.Append(": ");
@@ -327,6 +353,13 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                     if (Extension.Sharded is not null)
                     {
                         builder.Append("ShardingNaming: ").Append(Extension.Sharded).Append(' ');
+                    }
+
+                    if (Extension.LoaderHost is not null)
+                    {
+                        builder.Append(nameof(Extension.LoaderHost));
+                        builder.Append(": ");
+                        builder.Append(Extension.LoaderHost).Append(' ');
                     }
 
                     if (Extension.ServiceType is not null)
@@ -350,7 +383,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 hashCode.Add(Extension._name);
                 hashCode.Add(Extension._group);
                 hashCode.Add(Extension._access);
-                hashCode.Add(Extension._redundancy);
+                hashCode.Add(Extension._dispatching);
                 //hashCode.Add(Extension._pooling);
                 hashCode.Add(Extension._priority);
 
@@ -359,6 +392,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
                 if (Extension._sharded is not null)
                     hashCode.Add(Extension._sharded);
+
+                if (Extension._loaderHost is not null)
+                    hashCode.Add(Extension._loaderHost);
 
                 if (Extension._serviceType is not null)
                     hashCode.Add(Extension._serviceType);
@@ -374,11 +410,12 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 && Extension._name == otherInfo.Extension._name
                 && Extension._group == otherInfo.Extension._group
                 && Extension._access == otherInfo.Extension._access
-                && Extension._redundancy == otherInfo.Extension._redundancy
+                && Extension._dispatching == otherInfo.Extension._dispatching
                 //&& Extension._pooling == otherInfo.Extension._pooling
                 && Extension._priority == otherInfo.Extension._priority
                 && Extension._algorithm?.ToString() == otherInfo.Extension._algorithm?.ToString()
                 && Extension._sharded?.ToString() == otherInfo.Extension._sharded?.ToString()
+                && Extension._loaderHost == otherInfo.Extension._loaderHost
                 && Extension._serviceType == otherInfo.Extension._serviceType;
 
         public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
@@ -392,8 +429,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             debugInfo["Accessor:" + nameof(Extension.Access)] =
                 Extension.Access.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
-            debugInfo["Accessor:" + nameof(Extension.Redundancy)] =
-                Extension.Redundancy.GetHashCode().ToString(CultureInfo.InvariantCulture);
+            debugInfo["Accessor:" + nameof(Extension.Dispatching)] =
+                Extension.Dispatching.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
             //debugInfo["Accessor:" + nameof(Extension.Pooling)] =
                 //Extension.Pooling.GetHashCode().ToString(CultureInfo.InvariantCulture);
@@ -406,6 +443,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
             debugInfo["Accessor:" + nameof(Extension.Sharded)] =
                 (Extension.Sharded?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
+
+            debugInfo["Accessor:" + nameof(Extension.LoaderHost)] =
+                (Extension.LoaderHost?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
             debugInfo["Accessor:" + nameof(Extension.ServiceType)] =
                 (Extension.ServiceType?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);

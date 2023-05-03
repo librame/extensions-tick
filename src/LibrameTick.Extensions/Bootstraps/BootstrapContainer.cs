@@ -132,7 +132,7 @@ public class BootstrapContainer : IBootstrapContainer
             return true;
         }
 
-        bootstrap = default(TBootstrap);
+        bootstrap = default;
         return false;
     }
 

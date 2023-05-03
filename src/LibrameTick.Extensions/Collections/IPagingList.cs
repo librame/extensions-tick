@@ -19,12 +19,12 @@ namespace Librame.Extensions.Collections;
 public interface IPagingList<T> : IEnumerable<T>
 {
     /// <summary>
-    /// 分页信息（需要先分页后才有效）。
+    /// 分页信息。
     /// </summary>
     PagingInfo Info { get; }
 
     /// <summary>
-    /// 列表长度（需要先分页后才有效）。
+    /// 列表长度（未分页返回总条数）。
     /// </summary>
     int Length { get; }
 

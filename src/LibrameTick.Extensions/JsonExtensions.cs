@@ -46,8 +46,7 @@ public static class JsonExtensions
     /// <returns>返回 <typeparamref name="T"/>。</returns>
     public static T? AsByJson<T>(this object obj, JsonSerializerOptions? options = null)
     {
-        if (options is null)
-            options = DefaultSerializerOptions;
+        options ??= DefaultSerializerOptions;
 
         var json = JsonSerializer.Serialize(obj, options);
 
@@ -62,12 +61,7 @@ public static class JsonExtensions
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="DefaultSerializerOptions"/>）。</param>
     /// <returns>返回字符串。</returns>
     public static string AsJson(this object obj, JsonSerializerOptions? options = null)
-    {
-        if (options is null)
-            options = DefaultSerializerOptions;
-
-        return JsonSerializer.Serialize(obj, options);
-    }
+        => JsonSerializer.Serialize(obj, options ?? DefaultSerializerOptions);
 
     /// <summary>
     /// 还原 JSON。
@@ -77,12 +71,7 @@ public static class JsonExtensions
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="DefaultSerializerOptions"/>）。</param>
     /// <returns>返回对象。</returns>
     public static object? FromJson(this string json, Type returnType, JsonSerializerOptions? options = null)
-    {
-        if (options is null)
-            options = DefaultSerializerOptions;
-
-        return JsonSerializer.Deserialize(json, returnType, options);
-    }
+        => JsonSerializer.Deserialize(json, returnType, options ?? DefaultSerializerOptions);
 
     /// <summary>
     /// 还原 JSON。
@@ -92,11 +81,6 @@ public static class JsonExtensions
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="DefaultSerializerOptions"/>）。</param>
     /// <returns>返回 <typeparamref name="T"/>。</returns>
     public static T? FromJson<T>(this string json, JsonSerializerOptions? options = null)
-    {
-        if (options is null)
-            options = DefaultSerializerOptions;
-
-        return JsonSerializer.Deserialize<T>(json, options);
-    }
+        => JsonSerializer.Deserialize<T>(json, options ?? DefaultSerializerOptions);
 
 }

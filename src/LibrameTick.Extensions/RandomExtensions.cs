@@ -18,7 +18,7 @@ namespace Librame.Extensions;
 public static class RandomExtensions
 {
     private readonly static char[] _digitLetters
-        = (StringExtensions.Digits + StringExtensions.UppercaseLetters).ToCharArray();
+        = ($"{StringExtensions.Digits}{StringExtensions.UppercaseLetters}").ToCharArray();
 
 
     /// <summary>
@@ -49,11 +49,11 @@ public static class RandomExtensions
         {
             var offset = 0;
 
-            for (int j = 0; j < count + offset; j++)
+            for (var j = 0; j < count + offset; j++)
             {
                 var value = string.Empty;
 
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                 {
                     value += generatingChars[r.Next(generatingChars.Length)];
                 }

@@ -33,7 +33,7 @@ public static class PathExtensions
     /// <summary>
     /// 创建目录。
     /// </summary>
-    /// <param name="path">给定的路径。</param>
+    /// <param name="path">给定的目录路径。</param>
     /// <returns>返回 <see cref="DirectoryInfo"/>。</returns>
     public static DirectoryInfo CreateDirectory(this string path)
         => Directory.CreateDirectory(path);
@@ -43,7 +43,7 @@ public static class PathExtensions
     /// </summary>
     /// <param name="directory">给定的目录。</param>
     /// <returns>返回目录字符串。</returns>
-    public static string EnsureDirectory(string directory)
+    public static string EnsureDirectory(this string directory)
     {
         directory.CreateDirectory();
         return directory;
@@ -93,14 +93,11 @@ public static class PathExtensions
         if (string.IsNullOrEmpty(basePath))
             basePath = CurrentDirectoryWithoutDevelopmentRelativeSubpath;
 
-        if (relativePath.StartsWith("./")
+        return relativePath.StartsWith("./")
             || relativePath.StartsWith(".\\")
-            || !relativePath.StartsWith(basePath))
-        {
-            return Path.Combine(basePath, relativePath);
-        }
-
-        return relativePath;
+            || !relativePath.StartsWith(basePath)
+            ? Path.Combine(basePath, relativePath)
+            : relativePath;
     }
 
 
@@ -114,6 +111,15 @@ public static class PathExtensions
     /// <returns>返回路径字符串。</returns>
     public static string CombinePath(this string basePath, string relativePath)
         => Path.Combine(basePath, relativePath);
+
+    /// <summary>
+    /// 合并并创建此目录。
+    /// </summary>
+    /// <param name="baseDir">给定的基础目录。</param>
+    /// <param name="relativeDir">给定的相对目录。</param>
+    /// <returns>返回目录字符串。</returns>
+    public static string CombineDirectory(this string baseDir, string relativeDir)
+        => baseDir.CombinePath(relativeDir).CreateDirectory().FullName;
 
 
     /// <summary>
@@ -211,68 +217,6 @@ public static class PathExtensions
         {
             RandomAccess.Write(handle, buffer, fileOffset);
         }
-    }
-
-    #endregion
-
-
-    #region IniFile
-
-    [DllImport(Core.DllNames.Kernel32)]
-    private static extern int GetPrivateProfileString(string section, string key,
-        string defValue, StringBuilder retValue, int size, string filePath);
-
-    [DllImport(Core.DllNames.Kernel32)]
-    private static extern long WritePrivateProfileString(string section, string key,
-        string value, string filePath);
-
-
-    /// <summary>
-    /// 读取 INI 文件。
-    /// </summary>
-    /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="section">给定要读取的节点。</param>
-    /// <param name="key">给定要读取的键。</param>
-    /// <param name="lineLength">给定的行长度（可选）。</param>
-    /// <returns>返回值字符串。</returns>
-    public static string ReadIniFile(this string filePath, string section, string key,
-        int? lineLength = null)
-    {
-        if (lineLength is null)
-            lineLength = 500;
-
-        var sb = new StringBuilder(lineLength.Value);
-        GetPrivateProfileString(section, key, string.Empty, sb, lineLength.Value, filePath);
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// 移除 INI 文件节点所有键集合。
-    /// </summary>
-    /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="section">给定要读取的节点。</param>
-    public static void RemoveIniFileKeys(this string filePath, string section)
-        => filePath.WriteIniFile(section, key: string.Empty, value: string.Empty);
-
-    /// <summary>
-    /// 清空 INI 文件。
-    /// </summary>
-    /// <param name="filePath">给定的文件路径。</param>
-    public static void ClearIniFile(this string filePath)
-        => filePath.WriteIniFile(section: string.Empty, key: string.Empty, value: string.Empty);
-
-    /// <summary>
-    /// 写入 INI 文件。
-    /// </summary>
-    /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="section">给定要写入的节点。</param>
-    /// <param name="key">给定要写入的键。</param>
-    /// <param name="value">给定要写入的值。</param>
-    /// <returns>返回值字符串。</returns>
-    public static string WriteIniFile(this string filePath, string section, string key, string value)
-    {
-        WritePrivateProfileString(section, key, value, filePath);
-        return value;
     }
 
     #endregion

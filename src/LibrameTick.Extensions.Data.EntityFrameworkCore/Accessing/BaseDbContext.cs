@@ -15,6 +15,7 @@ using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Microsoft.EntityFrameworkCore;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -95,9 +96,14 @@ public class BaseDbContext : DbContext, IDbContext
 
 
     /// <summary>
-    /// 模型实体创建后动作。
+    /// 后置已创建模型属性动作。
     /// </summary>
-    public Action<IMutableEntityType, BaseDbContext>? ModelEntityCreatedAction { get; set; }
+    public Action<PropertyInfo, ModelBuilder, BaseDbContext>? PostModelCreatedPropertyAction { get; set; }
+
+    /// <summary>
+    /// 后置已创建模型动作。
+    /// </summary>
+    public Action<IMutableEntityType, ModelBuilder, BaseDbContext>? PostModelCreatedAction { get; set; }
 
 
     /// <summary>
@@ -107,53 +113,89 @@ public class BaseDbContext : DbContext, IDbContext
         => GetType();
 
 
+    ///// <summary>
+    ///// 配置上下文。
+    ///// </summary>
+    ///// <param name="optionsBuilder">给定的 <see cref="DbContextOptionsBuilder"/>。</param>
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //{
+    //}
+
+
+    ///// <summary>
+    ///// 配置自定义规范。
+    ///// </summary>
+    ///// <param name="configurationBuilder">给定的 <see cref="ModelConfigurationBuilder"/>。</param>
+    //protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    //{
+    //}
+
+
     /// <summary>
     /// 重写模型创建。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 默认尝试自动映射迁移程序集的模型
-        if (DataOptions.Access.AutoMapping && !string.IsNullOrEmpty(RelationalExtension?.MigrationsAssembly))
-            modelBuilder.CreateAssembliesModels(RelationalExtension.MigrationsAssembly);
+        PreModelCreating(modelBuilder);
 
-        if (DataOptions.Audit.Enabling)
-            modelBuilder.CreateAuditingModels(this);
+        ModelCreatingCore(modelBuilder);
 
-        CustomModelCreating(modelBuilder);
-
-        GeneralModelConfiguring(modelBuilder);
+        PostModelCreating(modelBuilder);
     }
 
     /// <summary>
-    /// 自定义模型创建。
+    /// 预模型创建。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    protected virtual void CustomModelCreating(ModelBuilder modelBuilder)
+    protected virtual void PreModelCreating(ModelBuilder modelBuilder)
+    {
+        // 支持迁移程序集模型
+        if (DataOptions.Access.AutoMapping && !string.IsNullOrEmpty(RelationalExtension?.MigrationsAssembly))
+            modelBuilder.CreateAssembliesModels(RelationalExtension.MigrationsAssembly);
+
+        // 支持数据审计
+        if (DataOptions.Audit.Enabling)
+            modelBuilder.CreateAuditingModels(this);
+    }
+
+    /// <summary>
+    /// 模型创建核心。
+    /// </summary>
+    /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
+    protected virtual void ModelCreatingCore(ModelBuilder modelBuilder)
     {
     }
 
     /// <summary>
-    /// 通用模型配置。
+    /// 后置模型配置。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    protected virtual void GeneralModelConfiguring(ModelBuilder modelBuilder)
+    protected virtual void PostModelCreating(ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entityType.ClrType.GetProperties())
             {
-                // 启用对实体加密属性功能的支持
-                entityType.UseEncryption(property, this);
-                
+                // 启用对实体加密属性的支持
+                if (property.IsEncrypted())
+                    entityType.UseEncryption(property, this);
+
+                // 启用对强类型属性的支持
+                if (property.IsStronglyTypedIdentifier(out var valueType))
+                    entityType.UseStronglyTypedIdentifier(property, valueType!);
+
                 // 支持将 GUID 类型统一处理为 Chars 类型（跨数据库支持 GUID）
-                entityType.UseGuidToChars(property, modelBuilder, this);
+                if (DataOptions.Access.GuidToChars)
+                    entityType.UseGuidToChars(property, modelBuilder);
+
+                PostModelCreatedPropertyAction?.Invoke(property, modelBuilder, this);
             }
 
             // 全局查询过滤器
             entityType.UseQueryFilters(DataOptions.QueryFilters, this);
 
-            ModelEntityCreatedAction?.Invoke(entityType, this);
+            PostModelCreatedAction?.Invoke(entityType, modelBuilder, this);
         }
     }
 

@@ -24,7 +24,7 @@ public static class TaskExtensions
     /// <param name="task">给定的 <see cref="Task"/>。</param>
     /// <returns>返回 <see cref="ValueTask"/>。</returns>
     public static ValueTask AsValueTask(this Task task)
-        => new ValueTask(task);
+        => new(task);
 
     /// <summary>
     /// 转换为 <see cref="ValueTask{TResult}"/>。
@@ -33,7 +33,7 @@ public static class TaskExtensions
     /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
     /// <returns>返回 <see cref="ValueTask{TResult}"/>。</returns>
     public static ValueTask<TResult> AsValueTask<TResult>(this Task<TResult> task)
-        => new ValueTask<TResult>(task);
+        => new(task);
 
 
     #region RunTask

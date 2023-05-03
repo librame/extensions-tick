@@ -25,7 +25,7 @@ public class DrawingExtensionOptions : AbstractExtensionOptions<DrawingExtension
     /// </summary>
     public DrawingExtensionOptions()
     {
-        ImageDirectory = Directories.ResourceDirectory.CombinePath("images");
+        ImageDirectory = Directories.ResourceDirectory.CombineDirectory("images");
     }
 
 

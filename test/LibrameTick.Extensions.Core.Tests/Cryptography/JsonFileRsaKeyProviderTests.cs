@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace Librame.Extensions.Cryptography
+namespace Librame.Extensions.Crypto
 {
     public class JsonFileRsaKeyProviderTests
     {

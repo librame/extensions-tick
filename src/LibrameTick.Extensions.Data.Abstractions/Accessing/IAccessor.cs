@@ -20,7 +20,7 @@ namespace Librame.Extensions.Data.Accessing;
 /// <summary>
 /// 定义一个表示数据访问的存取器接口。
 /// </summary>
-public interface IAccessor : ISortable, IShardable
+public interface IAccessor : ISortable, IShardable, IEquatable<IAccessor>
 {
     /// <summary>
     /// 当前数据库上下文。

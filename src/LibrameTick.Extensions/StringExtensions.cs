@@ -301,12 +301,9 @@ public static class StringExtensions
     /// <param name="separator">给定的分隔符（可选）。</param>
     /// <returns>返回字符串。</returns>
     public static string AsPascalCasing(this string word, string? separator = null)
-    {
-        if (!string.IsNullOrEmpty(separator) && word.Contains(separator))
-            return string.Join(separator, word.Split(separator).AsPascalCasing());
-
-        return char.ToUpperInvariant(word[0]) + word.Substring(1);
-    }
+        => !string.IsNullOrEmpty(separator) && word.Contains(separator)
+            ? string.Join(separator, word.Split(separator).AsPascalCasing())
+            : char.ToUpperInvariant(word[0]) + word[1..];
 
     /// <summary>
     /// 将数组的各单词转换为对应首字符大写的形式。如将 hello 转换为 Hello。
@@ -319,7 +316,7 @@ public static class StringExtensions
         words.ForEach((word, i) =>
         {
             // 首字符大写
-            array[i] = char.ToUpperInvariant(word[0]) + word.Substring(1);
+            array[i] = char.ToUpperInvariant(word[0]) + word[1..];
         });
 
         return array;
@@ -342,12 +339,9 @@ public static class StringExtensions
     /// <param name="separator">给定的分隔符（可选）。</param>
     /// <returns>返回字符串。</returns>
     public static string AsCamelCasing(this string word, string? separator = null)
-    {
-        if (!string.IsNullOrEmpty(separator) && word.Contains(separator))
-            return string.Join(separator, word.Split(separator).AsCamelCasing());
-
-        return char.ToLowerInvariant(word[0]) + word.Substring(1);
-    }
+        => !string.IsNullOrEmpty(separator) && word.Contains(separator)
+            ? string.Join(separator, word.Split(separator).AsCamelCasing())
+            : char.ToLowerInvariant(word[0]) + word[1..];
 
     /// <summary>
     /// 包含一到多个单词，第一个单词小写，其余单词中每一个单词第一个字母大写，其余字母均小写。例如：helloWorld 等。
@@ -360,7 +354,7 @@ public static class StringExtensions
 
         // 首单词首字符小写
         var first = words[0];
-        array[0] = char.ToLowerInvariant(first[0]) + first.Substring(1);
+        array[0] = char.ToLowerInvariant(first[0]) + first[1..];
 
         if (words.Length > 1)
         {
@@ -368,7 +362,7 @@ public static class StringExtensions
             {
                 // 首字符小写
                 var word = words[i];
-                array[i] = char.ToLowerInvariant(word[0]) + word.Substring(1);
+                array[i] = char.ToLowerInvariant(word[0]) + word[1..];
             }
         }
 
@@ -479,8 +473,7 @@ public static class StringExtensions
         // 分隔符不能位于起始或末尾
         if (separatorIndex > 0 && separatorIndex < value.Length - 1)
         {
-            pair = new(value.Substring(0, separatorIndex),
-                value.Substring(separatorIndex + 1));
+            pair = new(value[..separatorIndex], value[(separatorIndex + 1)..]);
 
             return true;
         }
@@ -504,8 +497,7 @@ public static class StringExtensions
         // 分隔符不能位于起始或末尾
         if (separatorIndex > 0 && separatorIndex < value.Length - separator.Length)
         {
-            pair = new(value.Substring(0, separatorIndex),
-                value.Substring(separatorIndex + separator.Length));
+            pair = new(value[..separatorIndex], value[(separatorIndex + separator.Length)..]);
 
             return true;
         }
@@ -530,8 +522,7 @@ public static class StringExtensions
         // 分隔符不能位于起始或末尾
         if (separatorIndex > 0 && separatorIndex < value.Length - 1)
         {
-            pair = new(value.Substring(0, separatorIndex),
-                value.Substring(separatorIndex + 1));
+            pair = new(value[..separatorIndex], value[(separatorIndex + 1)..]);
 
             return true;
         }
@@ -555,8 +546,7 @@ public static class StringExtensions
         // 分隔符不能位于起始或末尾
         if (separatorIndex > 0 && separatorIndex < value.Length - separator.Length)
         {
-            pair = new(value.Substring(0, separatorIndex),
-                value.Substring(separatorIndex + separator.Length));
+            pair = new(value[..separatorIndex], value[(separatorIndex + separator.Length)..]);
 
             return true;
         }
@@ -633,7 +623,7 @@ public static class StringExtensions
             system.Value.NotOutOfRange(2, mapCharset.Length, paramName: nameof(system));
 
             if (mapCharset.Length > system.Value)
-                mapCharset = mapCharset.Substring(0, system.Value);
+                mapCharset = mapCharset[..system.Value];
         }
         else
         {
@@ -669,7 +659,7 @@ public static class StringExtensions
     {
         if (current.Length > 0 && current.StartsWith(trim))
         {
-            current = current.Substring(trim.Length);
+            current = current[trim.Length..];
 
             if (isLoops)
                 current = current.TrimStart(trim, isLoops);
@@ -689,7 +679,7 @@ public static class StringExtensions
     {
         if (current.Length > 0 && current.EndsWith(trim))
         {
-            current = current.Substring(0, current.Length - trim.Length);
+            current = current[..^trim.Length];
 
             if (isLoops)
                 current = current.TrimEnd(trim, isLoops);

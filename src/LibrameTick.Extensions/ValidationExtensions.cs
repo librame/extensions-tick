@@ -218,12 +218,9 @@ public static class ValidationExtensions
     public static T NotGreater<T>(this T value, T compare, bool equals = false,
         [CallerArgumentExpression("value")] string? paramName = null)
         where T : IComparable<T>
-    {
-        if (value.IsGreater(compare, equals))
-            throw new ArgumentException($"The param name '{paramName}' value '{value}' is (equal or) greater than '{compare}'.");
-
-        return value;
-    }
+        => value.IsGreater(compare, equals)
+            ? throw new ArgumentException($"The param name '{paramName}' value '{value}' is (equal or) greater than '{compare}'.")
+            : value;
 
     /// <summary>
     /// 得到不小于（等于）的值。
@@ -240,12 +237,9 @@ public static class ValidationExtensions
     public static T NotLesser<T>(this T value, T compare, bool equals = false,
         [CallerArgumentExpression("value")] string? paramName = null)
         where T : IComparable<T>
-    {
-        if (value.IsLesser(compare, equals))
-            throw new ArgumentException($"The param name '{paramName}' value '{value}' is (equal or) lesser than '{compare}'.");
-
-        return value;
-    }
+        => value.IsLesser(compare, equals)
+            ? throw new ArgumentException($"The param name '{paramName}' value '{value}' is (equal or) lesser than '{compare}'.")
+            : value;
 
     /// <summary>
     /// 得到不超出范围的值。
@@ -265,12 +259,9 @@ public static class ValidationExtensions
         bool equalMinimum = false, bool equalMaximum = false,
         [CallerArgumentExpression("value")] string? paramName = null)
         where T : IComparable<T>
-    {
-        if (value.IsOutOfRange(compareMinimum, compareMaximum, equalMinimum, equalMaximum))
-            throw new ArgumentOutOfRangeException($"The param name '{paramName}' value '{value}' is out of range (min: '{compareMinimum}', max: '{compareMaximum}').");
-
-        return value;
-    }
+        => value.IsOutOfRange(compareMinimum, compareMaximum, equalMinimum, equalMaximum)
+            ? throw new ArgumentOutOfRangeException($"The param name '{paramName}' value '{value}' is out of range (min: '{compareMinimum}', max: '{compareMaximum}').")
+            : value;
 
     #endregion
 

@@ -32,6 +32,11 @@ public class AccessOptions : IOptions
     public bool EnsureDatabaseCreated { get; set; } = true;
 
     /// <summary>
+    /// 存取器集合自动负载（仅对镜像读取模式有效），即负载均衡（默认不启用此功能）。
+    /// </summary>
+    public bool AutoLoad { get; set; } = false;
+
+    /// <summary>
     /// 自动迁移数据库（默认启用此功能）。
     /// </summary>
     public bool AutoMigration { get; set; } = true;
@@ -47,9 +52,9 @@ public class AccessOptions : IOptions
     public bool GuidToChars { get; set; } = true;
 
     /// <summary>
-    /// 默认存取器优先级（默认为 5）。
+    /// 默认存取器优先级（默认为 7）。
     /// </summary>
-    public float DefaultPriority { get; set; } = 5;
+    public float DefaultPriority { get; set; } = 7;
 
     /// <summary>
     /// 连接改变时动作。

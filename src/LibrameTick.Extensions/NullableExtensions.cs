@@ -44,12 +44,7 @@ public static class NullableExtensions
     /// <returns>返回非空 <typeparamref name="T"/>。</returns>
     public static T NotNull<T>([NotNull] this T? value,
         [CallerArgumentExpression("value")] string? paramName = null)
-    {
-        if (value is null)
-            throw new ArgumentNullException(paramName);
-
-        return value;
-    }
+        => value is null ? throw new ArgumentNullException(paramName) : value;
 
 
     /// <summary>
@@ -64,12 +59,7 @@ public static class NullableExtensions
     /// <returns>返回非空 <see cref="IEnumerable{T}"/>。</returns>
     public static IEnumerable<T> NotEmpty<T>([NotNull] this IEnumerable<T>? value,
         [CallerArgumentExpression("value")] string? paramName = null)
-    {
-        if (value is null || !value.Any())
-            throw new ArgumentException($"'{paramName}' is null or empty.");
-
-        return value;
-    }
+        => value is null || !value.Any() ? throw new ArgumentException($"'{paramName}' is null or empty.") : value;
 
     /// <summary>
     /// 值为非空字符串。
@@ -82,12 +72,7 @@ public static class NullableExtensions
     /// <returns>返回字符串。</returns>
     public static string NotEmpty([NotNull] this string? value,
         [CallerArgumentExpression("value")] string? paramName = null)
-    {
-        if (string.IsNullOrEmpty(value))
-            throw new ArgumentException($"'{paramName}' is null or empty.");
-
-        return value;
-    }
+        => string.IsNullOrEmpty(value) ? throw new ArgumentException($"'{paramName}' is null or empty.") : value;
 
 
     /// <summary>
@@ -101,12 +86,9 @@ public static class NullableExtensions
     /// <returns>返回字符串。</returns>
     public static string NotWhiteSpace([NotNull] this string? value,
         [CallerArgumentExpression("value")] string? paramName = null)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"'{paramName}' is null or empty or white-space characters.");
-
-        return value;
-    }
+        => string.IsNullOrWhiteSpace(value)
+            ? throw new ArgumentException($"'{paramName}' is null or empty or white-space characters.")
+            : value;
 
     #endregion
 

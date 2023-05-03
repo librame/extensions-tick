@@ -17,7 +17,7 @@ namespace Librame.Extensions.Data.Accessing;
 /// <summary>
 /// 定义一个实现 <see cref="IAccessor"/> 的可调度存取器集合接口。
 /// </summary>
-public interface IDispatchableAccessors : IAccessor
+public interface IDispatchableAccessors : IAccessor, IEnumerable<IDispatcher<IAccessor>>, IEquatable<IDispatchableAccessors>
 {
     /// <summary>
     /// 读存取器调度器。
@@ -28,6 +28,11 @@ public interface IDispatchableAccessors : IAccessor
     /// 写存取器调度器。
     /// </summary>
     IDispatcher<IAccessor> WritingDispatcher { get; }
+
+    /// <summary>
+    /// 调度模式。
+    /// </summary>
+    DispatchingMode Mode { get; }
 
     /// <summary>
     /// 是否读写分离。

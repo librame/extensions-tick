@@ -16,18 +16,21 @@ namespace Librame.Extensions.Dispatchers;
 /// 继承自 <see cref="BaseDispatcher{TSource}"/> 的事务遍历调度器（依次执行多个来源）。
 /// </summary>
 /// <remarks>
-/// 说明：依次调用每个来源的指定成员处理动作或方法。当处理发生异常，将自行回滚之前的所有处理，并捕获 <see cref="TransactionAbortedException"/> 异常进行处理。
+/// 说明：依次调度每个来源的指定成员处理动作或方法。当处理发生异常，将自行回滚之前的所有处理，并捕获 <see cref="TransactionAbortedException"/> 异常进行处理。
 /// </remarks>
 /// <typeparam name="TSource">指定的来源类型。</typeparam>
 public class TransactionDispatcher<TSource> : BaseDispatcher<TSource>
+    where TSource : IEquatable<TSource>
 {
     /// <summary>
     /// 构造一个 <see cref="TransactionDispatcher{TSource}"/> 实例。
     /// </summary>
     /// <param name="sources">给定的 <typeparamref name="TSource"/> 集合。</param>
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
     /// <param name="options">给定的 <see cref="DispatchingOptions"/>。</param>
-    public TransactionDispatcher(IEnumerable<TSource> sources, DispatchingOptions options)
-        : base(sources, options)
+    public TransactionDispatcher(IEnumerable<TSource> sources,
+        DispatchingMode mode, DispatchingOptions options)
+        : base(sources, mode, options)
     {
     }
 
@@ -38,22 +41,22 @@ public class TransactionDispatcher<TSource> : BaseDispatcher<TSource>
     public Action<IDispatcher<TSource>, Exception>? TransactionAbortedErrorAction { get; set; }
 
 
-    #region Invoke
+    #region Action
 
     /// <summary>
-    /// 调用来源。
+    /// 调度动作。
     /// </summary>
-    /// <param name="action">给定的调用动作。</param>
+    /// <param name="action">给定的调度动作。</param>
     /// <param name="breakFunc">给定需要强制跳出循环的方法（可选；默认不强制跳出）。</param>
     /// <param name="isTraversal">是否遍历所有来源集合（可选；默认启用遍历）。</param>
-    public override void InvokeAction(Action<IDispatcher<TSource>> action,
+    public override void DispatchAction(Action<IDispatcher<TSource>> action,
         Func<IDispatcher<TSource>, bool>? breakFunc = null, bool isTraversal = true)
     {
         using (var transaction = new TransactionScope())
         {
             try
             {
-                base.InvokeAction(action, breakFunc, isTraversal);
+                base.DispatchAction(action, breakFunc, isTraversal);
 
                 transaction.Complete();
             }
@@ -65,23 +68,55 @@ public class TransactionDispatcher<TSource> : BaseDispatcher<TSource>
     }
 
     /// <summary>
-    /// 调用来源并返回结果集合。
+    /// 异步调度动作。
     /// </summary>
-    /// <typeparam name="TResult">指定的返回结果类型。</typeparam>
-    /// <param name="func">给定的调用方法。</param>
+    /// <param name="func">给定的调度方法。</param>
     /// <param name="breakFunc">给定需要强制跳出循环的方法（可选；默认不强制跳出）。</param>
     /// <param name="isTraversal">是否对来源集合进行遍历（可选；默认启用遍历）。</param>
-    /// <returns>返回 <see cref="IEnumerable{TResult}"/>。</returns>
-    public override IEnumerable<TResult> InvokeFunc<TResult>(Func<IDispatcher<TSource>, TResult> func,
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个异步操作。</returns>
+    public override async Task DispatchActionAsync(Func<IDispatcher<TSource>, Task> func,
+        Func<IDispatcher<TSource>, bool>? breakFunc = null, bool isTraversal = true,
+        CancellationToken cancellationToken = default)
+    {
+        using (var transaction = new TransactionScope())
+        {
+            try
+            {
+                await base.DispatchActionAsync(func, breakFunc, isTraversal, cancellationToken);
+
+                transaction.Complete();
+            }
+            catch (TransactionAbortedException ex)
+            {
+                TransactionAbortedErrorAction?.Invoke(this, ex);
+            }
+        }
+    }
+
+    #endregion
+
+
+    #region Func
+
+    /// <summary>
+    /// 调度方法并返回结果集合。
+    /// </summary>
+    /// <typeparam name="TResult">指定的返回结果类型。</typeparam>
+    /// <param name="func">给定的调度方法。</param>
+    /// <param name="breakFunc">给定需要强制跳出循环的方法（可选；默认不强制跳出）。</param>
+    /// <param name="isTraversal">是否对来源集合进行遍历（可选；默认启用遍历）。</param>
+    /// <returns>返回 <typeparamref name="TResult"/> 数组。</returns>
+    public override TResult[] DispatchFunc<TResult>(Func<IDispatcher<TSource>, TResult> func,
         Func<IDispatcher<TSource>, TResult, bool>? breakFunc = null, bool isTraversal = true)
     {
-        IEnumerable<TResult> result = Enumerable.Empty<TResult>();
+        var result = Array.Empty<TResult>();
 
         using (var transaction = new TransactionScope())
         {
             try
-            { 
-                result = base.InvokeFunc(func, breakFunc, isTraversal);
+            {
+                result = base.DispatchFunc(func, breakFunc, isTraversal);
 
                 transaction.Complete();
             }
@@ -94,59 +129,27 @@ public class TransactionDispatcher<TSource> : BaseDispatcher<TSource>
         return result;
     }
 
-    #endregion
-
-
-    #region InvokeAsync
-
     /// <summary>
-    /// 异步调用来源。
-    /// </summary>
-    /// <param name="func">给定的调用方法。</param>
-    /// <param name="breakFunc">给定需要强制跳出循环的方法（可选；默认不强制跳出）。</param>
-    /// <param name="isTraversal">是否对来源集合进行遍历（可选；默认启用遍历）。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个异步操作。</returns>
-    public override async Task InvokeActionAsync(Func<IDispatcher<TSource>, Task> func,
-        Func<IDispatcher<TSource>, bool>? breakFunc = null, bool isTraversal = true,
-        CancellationToken cancellationToken = default)
-    {
-        using (var transaction = new TransactionScope())
-        {
-            try
-            {
-                await base.InvokeActionAsync(func, breakFunc, isTraversal);
-
-                transaction.Complete();
-            }
-            catch (TransactionAbortedException ex)
-            {
-                TransactionAbortedErrorAction?.Invoke(this, ex);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 异步调用来源并返回结果集合。
+    /// 异步调度方法并返回结果集合。
     /// </summary>
     /// <typeparam name="TResult">指定的返回结果类型。</typeparam>
-    /// <param name="func">给定的调用方法。</param>
+    /// <param name="func">给定的调度方法。</param>
     /// <param name="breakFunc">给定需要强制跳出循环的方法（可选；默认不强制跳出）。</param>
     /// <param name="isTraversal">是否对来源集合进行遍历（可选；默认启用遍历）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="IEnumerable{TResult}"/> 的异步操作。</returns>
-    public override async Task<IEnumerable<TResult>> InvokeFuncAsync<TResult>(
+    /// <returns>返回一个包含 <typeparamref name="TResult"/> 数组的异步操作。</returns>
+    public override async Task<TResult[]> DispatchFuncAsync<TResult>(
         Func<IDispatcher<TSource>, Task<TResult>> func,
         Func<IDispatcher<TSource>, TResult, bool>? breakFunc = null, bool isTraversal = true,
         CancellationToken cancellationToken = default)
     {
-        IEnumerable<TResult> result = Enumerable.Empty<TResult>();
+        var result = Array.Empty<TResult>();
 
         using (var transaction = new TransactionScope())
         {
             try
             {
-                result = await base.InvokeFuncAsync(func, breakFunc, isTraversal);
+                result = await base.DispatchFuncAsync(func, breakFunc, isTraversal, cancellationToken);
 
                 transaction.Complete();
             }

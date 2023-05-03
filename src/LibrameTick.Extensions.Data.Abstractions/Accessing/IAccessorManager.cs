@@ -42,23 +42,23 @@ public interface IAccessorManager
 
 
     /// <summary>
-    /// 获取指定规约的可冗余存取器。
+    /// 获取指定规约的可调度存取器集合。
     /// </summary>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>。</param>
     /// <returns>返回 <see cref="IDispatchableAccessors"/>。</returns>
-    IDispatchableAccessors GetAccessor(ISpecification<IAccessor> specification);
+    IDispatchableAccessors GetAccessors(ISpecification<IAccessor> specification);
 
     /// <summary>
-    /// 获取指定规约的读取可冗余存取器。
+    /// 获取指定规约的读取可调度存取器集合。
     /// </summary>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IDispatchableAccessors"/>。</returns>
-    IDispatchableAccessors GetReadAccessor(ISpecification<IAccessor>? specification = null);
+    IDispatchableAccessors GetReadAccessors(ISpecification<IAccessor>? specification = null);
 
     /// <summary>
-    /// 获取指定规约的写入可冗余存取器。
+    /// 获取指定规约的写入可调度存取器集合。
     /// </summary>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IDispatchableAccessors"/>。</returns>
-    IDispatchableAccessors GetWriteAccessor(ISpecification<IAccessor>? specification = null);
+    IDispatchableAccessors GetWriteAccessors(ISpecification<IAccessor>? specification = null);
 }

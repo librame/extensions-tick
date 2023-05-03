@@ -60,8 +60,7 @@ public static class FileSerializationExtensions
         Type objType, object? obj = null, BindingFlags? flags = null,
         Dictionary<Type, Func<BinaryReader, object, object>>? customReadFuncs = null)
     {
-        if (obj is null)
-            obj = Activator.CreateInstance(objType);
+        obj ??= Activator.CreateInstance(objType);
 
         if (obj is null)
             throw new ArgumentNullException(nameof(obj));

@@ -36,7 +36,8 @@ public static class AccessorDescriptorDbContextOptionsExtensions
             : extension.Name;
 
         return new AccessorDescriptor(accessor, extension.ServiceType!, name, extension.Group,
-            extension.Access, extension.Redundancy, priority, algorithms, extension.Sharded);
+            extension.Access, extension.Dispatching, priority, algorithms, extension.Sharded,
+            extension.LoaderHost);
     }
 
 }

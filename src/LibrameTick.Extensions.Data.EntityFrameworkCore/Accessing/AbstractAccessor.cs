@@ -22,6 +22,9 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public abstract class AbstractAccessor : IAccessor
 {
+    private float? _priority;
+
+
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessor"/>。
     /// </summary>
@@ -188,7 +191,17 @@ public abstract class AbstractAccessor : IAccessor
     /// 排序优先级（数值越小越优先）。
     /// </summary>
     public virtual float Priority
-        => AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
+    {
+        get
+        {
+            _priority = AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
+            return _priority.Value;
+        }
+        set
+        {
+            _priority = value;
+        }
+    }
 
 
     /// <summary>
@@ -516,5 +529,36 @@ public abstract class AbstractAccessor : IAccessor
     }
 
     #endregion
+
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="IAccessor"/>。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public virtual bool Equals(IAccessor? other)
+        => other is not null && ToString() == other.ToString();
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="obj">给定的对象。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public override bool Equals(object? obj)
+        => obj is IAccessor other && Equals(other);
+
+    /// <summary>
+    /// 获取哈希码。
+    /// </summary>
+    /// <returns>返回整数。</returns>
+    public override int GetHashCode()
+        => ToString().GetHashCode();
+
+    /// <summary>
+    /// 转为以英文逗号分隔的所有来源字符串形式集合的字符串。
+    /// </summary>
+    /// <returns>返回字符串。</returns>
+    public override string ToString()
+        => AccessorId;
 
 }

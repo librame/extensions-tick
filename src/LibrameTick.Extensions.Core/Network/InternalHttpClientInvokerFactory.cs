@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Microparts;
+
 namespace Librame.Extensions.Core.Network;
 
 class InternalHttpClientInvokerFactory : IHttpClientInvokerFactory
@@ -26,7 +28,7 @@ class InternalHttpClientInvokerFactory : IHttpClientInvokerFactory
     public HttpClient CreateClient(HttpClientOptions options)
     {
         return string.IsNullOrEmpty(options.ClientName)
-            ? new HttpClientInstantiator(options).Create()
+            ? MicropartActivator.CreateHttpClient(options).Unwrap()
             : _clientFactory.CreateClient(options.ClientName);
     }
 

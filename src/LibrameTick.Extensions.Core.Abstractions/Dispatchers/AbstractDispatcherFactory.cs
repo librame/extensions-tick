@@ -38,21 +38,37 @@ public abstract class AbstractDispatcherFactory : IDispatcherFactory
     /// </summary>
     /// <typeparam name="TSource">指定的来源类型。</typeparam>
     /// <param name="sources">给定的 <see cref="IEnumerable{TSource}"/>。</param>
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
     /// <param name="options">给定的 <see cref="DispatchingOptions"/>（可选）。</param>
     /// <returns>返回 <see cref="IDispatcher{TSource}"/>。</returns>
     public virtual IDispatcher<TSource> CreateBase<TSource>(IEnumerable<TSource> sources,
-        DispatchingOptions? options = null)
-        => new BaseDispatcher<TSource>(sources, options ?? Options);
+        DispatchingMode mode, DispatchingOptions? options = null)
+        where TSource : IEquatable<TSource>
+        => new BaseDispatcher<TSource>(sources, mode, options ?? Options);
 
     /// <summary>
     /// 创建事务调度器。
     /// </summary>
     /// <typeparam name="TSource">指定的来源类型。</typeparam>
     /// <param name="sources">给定的 <see cref="IEnumerable{TSource}"/>。</param>
+    /// <param name="mode">给定的 <see cref="DispatchingMode"/>。</param>
     /// <param name="options">给定的 <see cref="DispatchingOptions"/>（可选）。</param>
     /// <returns>返回 <see cref="IDispatcher{TSource}"/>。</returns>
     public virtual IDispatcher<TSource> CreateTransaction<TSource>(IEnumerable<TSource> sources,
+        DispatchingMode mode, DispatchingOptions? options = null)
+        where TSource : IEquatable<TSource>
+        => new TransactionDispatcher<TSource>(sources, mode, options ?? Options);
+
+    /// <summary>
+    /// 创建复合调度器。
+    /// </summary>
+    /// <typeparam name="TSource">指定的来源类型。</typeparam>
+    /// <param name="dispatchers">给定的调度器集合。</param>
+    /// <param name="options">给定的 <see cref="DispatchingOptions"/>（可选）。</param>
+    /// <returns>返回 <see cref="IDispatcher{TSource}"/>。</returns>
+    public virtual IDispatcher<TSource> CreateCompositing<TSource>(IEnumerable<IDispatcher<TSource>> dispatchers,
         DispatchingOptions? options = null)
-        => new TransactionDispatcher<TSource>(sources, options ?? Options);
+        where TSource : IEquatable<TSource>
+        => new CompositeDispatcher<TSource>(dispatchers, options ?? Options);
 
 }

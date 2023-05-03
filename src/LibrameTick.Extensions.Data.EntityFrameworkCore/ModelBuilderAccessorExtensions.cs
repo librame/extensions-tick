@@ -10,8 +10,9 @@
 
 #endregion
 
-using Librame.Extensions.Cryptography;
+using Librame.Extensions.Crypto;
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Data.ValueConversion;
 
 namespace Librame.Extensions.Data;
 
@@ -20,8 +21,6 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public static class ModelBuilderAccessorExtensions
 {
-    private static readonly Type _encryptedAttributeType = typeof(EncryptedAttribute);
-
 
     /// <summary>
     /// 对使用 <see cref="EncryptedAttribute"/> 的属性应用加密功能。
@@ -33,11 +32,24 @@ public static class ModelBuilderAccessorExtensions
     public static IMutableEntityType UseEncryption(this IMutableEntityType entityType,
         PropertyInfo property, BaseDbContext dbContext)
     {
-        if (Attribute.IsDefined(property, _encryptedAttributeType))
-        {
-            var converter = dbContext.EncryptionConverterFactory.GetConverter(dbContext, property.PropertyType);
-            entityType.GetProperty(property.Name).SetValueConverter(converter);
-        }
+        var converter = dbContext.EncryptionConverterFactory.GetConverter(dbContext, property.PropertyType);
+        entityType.GetProperty(property.Name).SetValueConverter(converter);
+
+        return entityType;
+    }
+
+    /// <summary>
+    /// 对使用强类型的属性应用转换器。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+    /// <param name="valueType">给定的原始值类型。</param>
+    /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+    public static IMutableEntityType UseStronglyTypedIdentifier(this IMutableEntityType entityType,
+        PropertyInfo property, Type valueType)
+    {
+        var converter = typeof(StronglyTypedIdentifierConverter<>).MakeGenericType(valueType);
+        entityType.GetProperty(property.Name).SetValueConverter(converter);
 
         return entityType;
     }
@@ -48,32 +60,29 @@ public static class ModelBuilderAccessorExtensions
     /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
     /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
     /// <param name="builder">给定的 <see cref="ModelBuilder"/>。</param>
-    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
     /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
     public static IMutableEntityType UseGuidToChars(this IMutableEntityType entityType,
-        PropertyInfo property, ModelBuilder builder, BaseDbContext dbContext)
+        PropertyInfo property, ModelBuilder builder)
     {
         // 将 Guid 类型设置为 char(36)
-        if (dbContext.DataOptions.Access.GuidToChars)
+        if (property.PropertyType == typeof(Guid))
         {
-            if (property.PropertyType == typeof(Guid))
-            {
-                builder.Entity(entityType.ClrType)
-                    .Property(property.Name)
-                    .HasColumnType("char(36)");
-            }
+            builder.Entity(entityType.ClrType)
+                .Property(property.Name)
+                .HasColumnType("char(36)");
+        }
 
-            if (property.PropertyType == typeof(Guid?))
-            {
-                builder.Entity(entityType.ClrType)
-                    .Property(property.Name)
-                    .HasColumnType("char(36)")
-                    .IsRequired(false);
-            }
+        if (property.PropertyType == typeof(Guid?))
+        {
+            builder.Entity(entityType.ClrType)
+                .Property(property.Name)
+                .HasColumnType("char(36)")
+                .IsRequired(false);
         }
 
         return entityType;
     }
+
 
     /// <summary>
     /// 使用查询过滤器集合。

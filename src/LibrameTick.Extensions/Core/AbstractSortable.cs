@@ -18,18 +18,17 @@ namespace Librame.Extensions.Core;
 public abstract class AbstractSortable : ISortable
 {
     /// <summary>
-    /// 排序优先级（数值越小越优先）。
+    /// 排序优先级（数值越小越优先；默认为 <see cref="float.Tau"/>）。
     /// </summary>
-    public virtual float Priority
-        => 1;
+    public virtual float Priority { get; set; } = float.Tau;
 
 
     /// <summary>
-    /// 与指定的 <see cref="ISortable"/> 比较大小。
+    /// 与指定的 <see cref="ISortable"/> 比较大小（默认为 <see cref="float.Tau"/>）。
     /// </summary>
     /// <param name="other">给定的 <see cref="ISortable"/>。</param>
     /// <returns>返回整数。</returns>
     public virtual int CompareTo(ISortable? other)
-        => Priority.CompareTo(other?.Priority ?? float.NaN);
+        => Priority.CompareTo(other?.Priority ?? float.Tau);
 
 }

@@ -20,5 +20,5 @@ public interface ISortable : IComparable<ISortable>
     /// <summary>
     /// 排序优先级（数值越小越优先）。
     /// </summary>
-    float Priority { get; }
+    float Priority { get; set; }
 }

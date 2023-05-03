@@ -19,7 +19,7 @@ public static class StopwatchExtensions
 {
     // 支持多线程，各线程维持独立的计时器实例
     private static readonly ThreadLocal<Stopwatch> _stopwatch
-        = new ThreadLocal<Stopwatch>(() => Stopwatch.StartNew());
+        = new ThreadLocal<Stopwatch>(Stopwatch.StartNew);
 
 
     /// <summary>
