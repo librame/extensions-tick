@@ -6,9 +6,9 @@ LibrameTick.Extensions 系列
 
 简体中文
 
-LibrameTick.Extensions 是一个基于 .NET 6 的基础框架系列库，也是针对原 [Librame.Extensions](https://github.com/librame/extensions/blob/master/README.md) 系列库重构而成的下一代基础框架系列库。本系列库主要包括 LibrameTick.Extensions 基本扩展和基于基本扩展开发的包括 LibrameTick.Extensions.Core 核心、LibrameTick.Extensions.Data.EntityFrameworkCore 数据、LibrameTick.Extensions.Drawing.SkiaSharp 图画等四个基本扩展库。
+LibrameTick.Extensions 是一个基于 .NET 7 的基础框架系列库，也是针对原 [Librame.Extensions](https://github.com/librame/extensions/blob/master/README.md) 系列库重构而成的下一代基础框架系列库。本系列库主要包括 LibrameTick.Extensions 基础扩展和基于基础扩展开发的包括 LibrameTick.Extensions.Core 核心、LibrameTick.Extensions.Data.EntityFrameworkCore 数据、LibrameTick.Extensions.Drawing.SkiaSharp 图画等四个基本扩展库。
 
-本系列库在保留上一代功能的基础上，相对于上一代做了尽可能多的精简和优化，将上一代中的 Librame.Extensions.Encryption 加密、Librame.Extensions.Network 网络、Librame.Extensions.Storage 存储等基本扩展库的功能整合进了核心基本扩展库，将数据基本扩展库的大多数接口和抽象功能整合进了基本扩展库中，使得本代框架系列库在功能上的设计更为合理；同时利用 .NET 6 的新特性，在性能上做了尽可能多的优化，使得本代框架系列库在性能上得到了较大提升。
+本系列库在保留上一代功能的基础上，相对于上一代做了尽可能多的精简和优化，将上一代中的 Librame.Extensions.Encryption 加密、Librame.Extensions.Network 网络、Librame.Extensions.Storage 存储等基本扩展库的功能整合进了核心基本扩展库，将数据基本扩展库的大多数接口和抽象功能整合进了基本扩展库中，使得本代框架系列库在功能上的设计更为合理；同时利用 .NET 7 的新特性，在性能上做了尽可能多的优化，使得本代框架系列库在性能上得到了较大提升。
 
 ## 开始
 
@@ -20,7 +20,7 @@ LibrameTick.Extensions APIs 可以使用 NuGet 包管理器添加到项目中。
 
 ## 如何使用
 
-以 Librame.Extensions.Data.EntityFrameworkCore 数据基本扩展库为例：
+以 Librame.Extensions.Data.EntityFrameworkCore 数据扩展库为例（目前支持多库读写集群，暂不支持分库分表功能）：
 
 ### 安装
 
@@ -28,7 +28,7 @@ LibrameTick.Extensions APIs 可以使用 NuGet 包管理器添加到项目中。
 
 ### 示例
 
-将单个应用程序项目的 MySQL、SQLServer、SQLite 三种数据库配置为异构独立数据库冗余阵列（RAHID），其中将 MySQL、SQLServer 二种数据库配置为支持数据写入镜像同步，SQLite 数据库配置为支持数据读取，同时 MySQL、SQLServer 两种数据库支持冗余数据读取（在 SQLite 数据读取异常时）。具体配置如下：
+将单个应用程序项目的 MySQL、SQLServer、SQLite 三种数据库配置为实时异库集群，其中将 MySQL、SQLServer 二种数据库配置为冗余写入，SQLite、SQLServer 二种数据库配置为冗余读取，在 SQLite 读取异常时会自行切换到 SQLServer 库。具体配置如下：
 
 ### 在 Startup.cs 配置 EntityFrameworkCore 基础服务
 
