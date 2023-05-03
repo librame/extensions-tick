@@ -144,3 +144,5 @@ LibrameTick.Extensions APIs 可以使用 NuGet 包管理器添加到项目中。
 	}
 	
 以上功能在本库的测试项目中测试通过，详情请参见[TestAccessorTests](https://github.com/librame/extensions-tick/blob/main/test/LibrameTick.Extensions.Data.EntityFrameworkCore.Tests/Accessing/TestAccessorTests.cs) 。
+
+![1](./test/LibrameTick.Extensions.Data.EntityFrameworkCore.Tests/_resources/GA-7.0.5.898-230503.min.png)
