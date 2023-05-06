@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Plugins;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义实现 <see cref="IPluginInfo"/> 的泛型插件信息接口。

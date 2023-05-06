@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace Librame.Extensions.Core.Plugins
+namespace Librame.Extensions.Plugins
 {
     public class TestPluginResolverTests
     {

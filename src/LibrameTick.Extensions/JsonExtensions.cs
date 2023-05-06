@@ -29,6 +29,7 @@ public static class JsonExtensions
             WriteIndented = true
         };
 
+        options.Converters.Add(new JsonConverters.JsonStringDateTimeConverter());
         options.Converters.Add(new JsonConverters.JsonStringDateTimeOffsetConverter());
         options.Converters.Add(new JsonConverters.JsonStringEncodingConverter());
         options.Converters.Add(new JsonStringEnumConverter());

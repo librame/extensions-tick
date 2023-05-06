@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage;
+namespace Librame.Extensions.Storage;
 
 /// <summary>
 /// 定义实现 <see cref="IStorableFileProvider"/> 的物理可存储文件提供程序。

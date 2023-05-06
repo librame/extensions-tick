@@ -83,10 +83,10 @@ public static class PathExtensions
 
 
     /// <summary>
-    /// 设置基础路径。
+    /// 设置基础路径。如果为基础路径为空，则默认使用没有开发相对子路径的当前目录路径。
     /// </summary>
     /// <param name="relativePath">给定的相对路径。</param>
-    /// <param name="basePath">给定的基础路径（可选；默认使用没有开发相对子路径的当前目录）。</param>
+    /// <param name="basePath">给定的基础路径（可选；默认使用没有开发相对子路径的当前目录路径）。</param>
     /// <returns>返回路径字符串。</returns>
     public static string SetBasePath(this string relativePath, string? basePath = null)
     {

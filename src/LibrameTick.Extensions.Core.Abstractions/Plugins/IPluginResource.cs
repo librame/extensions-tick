@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Resources;
 
-namespace Librame.Extensions.Core.Plugins;
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义一个继承 <see cref="IResourceDictionary"/> 的插件资源接口。

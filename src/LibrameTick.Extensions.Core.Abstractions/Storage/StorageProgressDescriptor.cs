@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage;
+namespace Librame.Extensions.Storage;
 
 /// <summary>
 /// 定义存储进度描述符。

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage;
+namespace Librame.Extensions.Storage;
 
 /// <summary>
 /// 定义文件传输接口。

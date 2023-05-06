@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Resources;
 
-namespace Librame.Extensions.Core.Plugins;
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义实现 <see cref="IPluginResourceFactory"/> 的泛型插件资源工厂。

@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Microparts;
 
-namespace Librame.Extensions.Core.Plugins;
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义抽象实现 <see cref="IPluginResolver"/> 的插件解析器。

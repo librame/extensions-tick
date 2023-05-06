@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Microparts;
 
-namespace Librame.Extensions.Core.Network;
+namespace Librame.Extensions.Network;
 
 /// <summary>
 /// 定义实现 <see cref="IRequestOptions"/> 的 HTTP 客户端请求选项。

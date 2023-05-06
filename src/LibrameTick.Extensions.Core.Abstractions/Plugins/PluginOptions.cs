@@ -10,9 +10,10 @@
 
 #endregion
 
+using Librame.Extensions.Core;
 using Librame.Extensions.Microparts;
 
-namespace Librame.Extensions.Core.Plugins;
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的插件选项。

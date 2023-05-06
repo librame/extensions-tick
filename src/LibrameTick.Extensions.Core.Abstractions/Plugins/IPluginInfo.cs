@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Plugins;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义一个继承 <see cref="IEquatable{IPluginInfo}"/>、<see cref="ISortable"/> 的插件信息接口。

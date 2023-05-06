@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Network;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Network;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的 HTTP 端点选项。

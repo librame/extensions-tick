@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的模板选项。
@@ -21,7 +23,7 @@ public class TemplateOptions : IOptions
     /// 填充模板键集合的动作。
     /// </summary>
     [JsonIgnore]
-    public Action? PopulateKeysAction { get; set; }
+    public Action<IOptions>? PopulateKeysAction { get; set; }
 
     /// <summary>
     /// 模板键的正则表达式列表集合。
@@ -33,7 +35,7 @@ public class TemplateOptions : IOptions
     /// 模板键的字典集合。
     /// </summary>
     [JsonIgnore]
-    public Dictionary<string, TemplateKeyDescriptor> KeyDescriptors { get; set; } = new();
+    public Dictionary<string, TemplateKeyDescriptor> Keys { get; set; } = new();
 
 
     /// <summary>
@@ -112,8 +114,6 @@ public class TemplateOptions : IOptions
 
     private static List<TemplateKeyDescriptor> Parse(GroupCollection matchGroups)
     {
-        ArgumentNullException.ThrowIfNull(matchGroups, nameof(matchGroups));
-
         if (matchGroups.Count % 2 != 0)
             throw new InvalidOperationException($"Invalid {nameof(matchGroups)}.");
 

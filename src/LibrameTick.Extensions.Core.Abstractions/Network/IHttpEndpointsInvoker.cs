@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Network;
+namespace Librame.Extensions.Network;
 
 /// <summary>
 /// 定义 HTTP 端点集合调用器接口。

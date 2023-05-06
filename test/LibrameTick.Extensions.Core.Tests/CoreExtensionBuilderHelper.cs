@@ -1,4 +1,5 @@
-﻿using Librame.Extensions.Core.Storage;
+﻿using Librame.Extensions.Setting;
+using Librame.Extensions.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -17,6 +18,7 @@ namespace Librame.Extensions.Core
                 var fileProvider = new PhysicalStorableFileProvider(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath);
 
                 var services = new ServiceCollection();
+
                 _builder = services.AddLibrame(opts =>
                 {
                     opts.WebFile.AccessToken = "Test access token.";
@@ -26,7 +28,8 @@ namespace Librame.Extensions.Core
                     opts.WebFile.CookieName = "Test cookie name.";
 
                     opts.WebFile.FileProviders.Add(fileProvider);
-                });
+                })
+                .AddSettingProvider<TestJsonFileSettingProvider>();
             }
 
             if (_services is null)

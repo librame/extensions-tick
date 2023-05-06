@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Plugins;
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义实现 <see cref="IPluginInfo"/> 的 Librame 插件信息接口。

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义继承 <see cref="AbstractTemplateKeyFinder"/> 且用于配置对象的 <see cref="TemplateKeyDescriptor"/> 查找器。
@@ -42,6 +42,7 @@ public class ConfigurationTemplateKeyFinder : AbstractTemplateKeyFinder
         // 提取配置对象的所有模板键集合（支持键、值模板键）
         var keys = _templateOptions.Source.GetChildren()
             .SelectMany(s => Options.FindAll(s.Key).Concat(Options.FindAll(s.Value)))
+            .DistinctBy(ks => ks.Name)
             .ToList();
 
         foreach (var key in keys.DistinctBy(ks => ks.Name))

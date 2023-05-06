@@ -10,9 +10,10 @@
 
 #endregion
 
-using Librame.Extensions.Core.Network;
+using Librame.Extensions.Core;
+using Librame.Extensions.Network;
 
-namespace Librame.Extensions.Core.Storage;
+namespace Librame.Extensions.Storage;
 
 class InternalWebStorableFileTransfer : IWebStorableFileTransfer
 {

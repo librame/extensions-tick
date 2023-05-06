@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage;
+namespace Librame.Extensions.Storage;
 
 /// <summary>
 /// 定义继承 <see cref="IFileInfo"/> 的可存储文件信息。

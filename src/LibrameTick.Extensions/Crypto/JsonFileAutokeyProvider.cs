@@ -35,7 +35,7 @@ public class JsonFileAutokeyProvider : AbstractFileAutokeyProvider
     {
         var autokey = FilePath.DeserializeJsonFile<Autokey>();
         if (autokey is null)
-            throw new NotSupportedException("Unsupported autokey file format.");
+            throw new NotSupportedException($"Unsupported {nameof(Autokey)} file format.");
 
         return autokey;
     }

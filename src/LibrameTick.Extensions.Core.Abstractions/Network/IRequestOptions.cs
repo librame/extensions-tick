@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Network;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Network;
 
 /// <summary>
 /// 定义继承 <see cref="IOptions"/> 的请求选项接口。

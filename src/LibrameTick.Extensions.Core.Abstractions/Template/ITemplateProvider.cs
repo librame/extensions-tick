@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义一个模板提供程序接口。

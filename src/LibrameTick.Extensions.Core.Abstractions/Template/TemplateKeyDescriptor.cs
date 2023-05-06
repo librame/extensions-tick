@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义一个包含查找键名模式、键名与值信息且实现 <see cref="IEquatable{TemplateKeyDescriptor}"/> 的模板键描述符。

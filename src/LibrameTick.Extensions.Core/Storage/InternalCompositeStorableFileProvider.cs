@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Storage;
 
 sealed class InternalCompositeStorableFileProvider : IStorableFileProvider, IComposable<IStorableFileProvider>
 {

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Storage;
+namespace Librame.Extensions.Storage;
 
 /// <summary>
 /// 文件系统信息静态扩展。

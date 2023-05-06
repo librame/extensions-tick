@@ -10,10 +10,11 @@
 
 #endregion
 
+using Librame.Extensions.Core;
 using Librame.Extensions.JsonConverters;
 using Librame.Extensions.Microparts;
 
-namespace Librame.Extensions.Core.Storage;
+namespace Librame.Extensions.Storage;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的 Web 文件选项。

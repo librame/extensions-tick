@@ -1,8 +1,9 @@
+using Librame.Extensions.Core;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using Xunit;
 
-namespace Librame.Extensions.Core.Storage
+namespace Librame.Extensions.Storage
 {
     public class InternalWebStorableFileTransferTests
     {

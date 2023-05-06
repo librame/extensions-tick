@@ -11,8 +11,8 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
-using Librame.Extensions.Core.Network;
-using Librame.Extensions.Core.Storage;
+using Librame.Extensions.Network;
+using Librame.Extensions.Storage;
 using Librame.Extensions.Crypto;
 using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;

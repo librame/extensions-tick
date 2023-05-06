@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Librame.Extensions.Core.Plugins
+namespace Librame.Extensions.Plugins
 {
     class TestPluginResource : AbstractPluginResource
     {

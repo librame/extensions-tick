@@ -11,7 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Core.Template;
+using Librame.Extensions.Template;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -79,7 +79,7 @@ public class AccessOptions : IOptions
         if (schema is null)
             return sql;
 
-        if (Template.KeyDescriptors.TryGetValue("Schema", out var descriptor))
+        if (Template.Keys.TryGetValue("Schema", out var descriptor))
             return sql.Replace(descriptor.NamePattern, schema);
 
         return sql;
@@ -96,10 +96,10 @@ public class AccessOptions : IOptions
         if (tableName is null)
             return sql;
 
-        if (Template.KeyDescriptors.TryGetValue("Table", out var descriptor))
+        if (Template.Keys.TryGetValue("Table", out var descriptor))
             return sql.Replace(descriptor.NamePattern, tableName);
 
-        if (Template.KeyDescriptors.TryGetValue("TableName", out descriptor))
+        if (Template.Keys.TryGetValue("TableName", out descriptor))
             return sql.Replace(descriptor.NamePattern, tableName);
 
         return sql;
@@ -115,13 +115,13 @@ public class AccessOptions : IOptions
         var templates = new TemplateOptions();
 
         var schemaKey = new TemplateKeyDescriptor("${Schema}", "Schema");
-        templates.KeyDescriptors.Add(schemaKey.Name, schemaKey);
+        templates.Keys.Add(schemaKey.Name, schemaKey);
 
         var tableKey = new TemplateKeyDescriptor("${Table}", "Table");
-        templates.KeyDescriptors.Add(tableKey.Name, tableKey);
+        templates.Keys.Add(tableKey.Name, tableKey);
 
         var tableNameKey = new TemplateKeyDescriptor("${TableName}", "TableName");
-        templates.KeyDescriptors.Add(tableNameKey.Name, tableNameKey);
+        templates.Keys.Add(tableNameKey.Name, tableNameKey);
 
         return templates;
     }

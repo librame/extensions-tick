@@ -35,6 +35,6 @@ public class JsonStringDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
     /// <param name="value">给定的 <see cref="Encoding"/>。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
     public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
-        => writer.WriteStringValue(value.ToString());
+        => writer.WriteStringValue(value.AsDateTimeString());
 
 }

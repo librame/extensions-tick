@@ -13,6 +13,7 @@
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Auditing;
+using Librame.Extensions.Data.Setting;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Device;
@@ -26,6 +27,15 @@ namespace Librame.Extensions.Data;
 public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOptions>
 {
     private readonly Dictionary<TypeNamedKey, IObjectIdGenerator> _idGenerators = new();
+
+
+    /// <summary>
+    /// 构造一个 <see cref="DataExtensionOptions"/>。
+    /// </summary>
+    public DataExtensionOptions()
+    {
+        ShardingDirectory = Directories.ResourceDirectory.CombineDirectory("shardings");
+    }
 
 
     /// <summary>
@@ -57,6 +67,11 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     /// 雪花标识选项。
     /// </summary>
     public SnowflakeIdOptions Snowflake { get; set; } = new();
+
+    /// <summary>
+    /// 设置选项。
+    /// </summary>
+    public SettingOptions Setting { get; set; } = new();
 
     /// <summary>
     /// 设备负载选项。
@@ -101,6 +116,12 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     /// </summary>
     [JsonIgnore]
     public List<IQueryFilter> QueryFilters { get; init; } = new();
+
+
+    /// <summary>
+    /// 分片目录。
+    /// </summary>
+    public string ShardingDirectory { get; set; }
 
 
     /// <summary>

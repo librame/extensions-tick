@@ -1,18 +1,17 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Xunit;
 
-namespace Librame.Extensions.Core.Template
+namespace Librame.Extensions.Template
 {
     public class TemplaterTests
     {
         [Fact]
         public void AllTests()
         {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .SetBasePath(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath)
-                .Build()
-                .EnableTemplate();
+            var configuration = ConfigurationBuilderExtensions.GetConfiguration(builder =>
+            {
+                builder.AddAppSettingsJsonFile();
+            });
 
             var finder = Templater.GetConfigurationTemplateKeyFinder();
             Assert.NotEmpty(finder.AllNames);

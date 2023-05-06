@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Microparts;
 
-namespace Librame.Extensions.Core.Network;
+namespace Librame.Extensions.Network;
 
 /// <summary>
 /// 定义 HTTP 客户端调用器工厂接口。

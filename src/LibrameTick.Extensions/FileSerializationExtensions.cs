@@ -317,7 +317,7 @@ public static class FileSerializationExtensions
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="value">给定的对象值。</param>
     /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
-    /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
+    /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="JsonExtensions.DefaultSerializerOptions"/>）。</param>
     /// <param name="autoCreateDirectory">自动创建目录（可选；默认启用）。</param>
     /// <returns>返回 JSON 字符串。</returns>
     public static string SerializeJsonFile(this string filePath, object value, Encoding? encoding = null,

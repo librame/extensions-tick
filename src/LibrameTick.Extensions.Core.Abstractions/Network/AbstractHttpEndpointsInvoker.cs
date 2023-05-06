@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Crypto;
 
-namespace Librame.Extensions.Core.Network;
+namespace Librame.Extensions.Network;
 
 /// <summary>
 /// 抽象实现 <see cref="IHttpEndpointsInvoker"/> 的 HTTP 端点集合调用器。

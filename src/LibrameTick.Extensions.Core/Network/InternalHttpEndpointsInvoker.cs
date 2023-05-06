@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Network;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Network;
 
 class InternalHttpEndpointsInvoker : AbstractHttpEndpointsInvoker
 {

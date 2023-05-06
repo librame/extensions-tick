@@ -1,7 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Librame.Extensions.Core;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Librame.Extensions.Core.Storage
+namespace Librame.Extensions.Storage
 {
     public class InternalWebFilePermissionTests
     {

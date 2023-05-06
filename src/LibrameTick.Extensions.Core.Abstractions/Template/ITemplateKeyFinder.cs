@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义模板键查找器接口。
@@ -26,7 +28,8 @@ public interface ITemplateKeyFinder
     /// <summary>
     /// 填充所有引用键集合。
     /// </summary>
-    void Populate();
+    /// <param name="options">给定的选项。</param>
+    void Populate(IOptions options);
 
 
     /// <summary>

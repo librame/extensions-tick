@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义抽象实现 <see cref="ITemplateProvider"/> 的模板提供程序。

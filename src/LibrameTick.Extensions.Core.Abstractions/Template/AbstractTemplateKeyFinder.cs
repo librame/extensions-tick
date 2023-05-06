@@ -11,8 +11,9 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
+using Librame.Extensions.Core;
 
-namespace Librame.Extensions.Core.Template;
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义抽象实现 <see cref="ITemplateKeyFinder"/> 的查找器。
@@ -39,18 +40,19 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
     /// 所有名称集合。
     /// </summary>
     public ICollection<string> AllNames
-        => Options.KeyDescriptors.Keys;
+        => Options.Keys.Keys;
 
 
     /// <summary>
     /// 填充所有模板键集合。
     /// </summary>
-    public virtual void Populate()
+    /// <param name="options">给定的选项。</param>
+    public virtual void Populate(IOptions options)
     {
         Bootstrapper.GetLocker().Lock(i =>
         {
-            if (Options.KeyDescriptors.Count != 0)
-                Options.KeyDescriptors.Clear();
+            if (Options.Keys.Count != 0)
+                Options.Keys.Clear();
 
             PopulateCore();
         });
@@ -68,7 +70,7 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
     /// <param name="value">给定的 <see cref="TemplateKeyDescriptor"/>。</param>
     /// <returns>返回是否存在的布尔值。</returns>
     public virtual bool Contains(TemplateKeyDescriptor value)
-        => Options.KeyDescriptors.ContainsKey(value.Name);
+        => Options.Keys.ContainsKey(value.Name);
 
     /// <summary>
     /// 包含指定模板键。
@@ -76,7 +78,7 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
     /// <param name="name">给定的模板键名称。</param>
     /// <returns>返回是否存在的布尔值。</returns>
     public virtual bool Contains(string name)
-        => Options.KeyDescriptors.ContainsKey(name);
+        => Options.Keys.ContainsKey(name);
 
 
     /// <summary>
@@ -97,10 +99,10 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
     {
         Bootstrapper.GetLocker().Lock(i =>
         {
-            if (Options.KeyDescriptors.ContainsKey(name))
-                Options.KeyDescriptors[name] = value;
+            if (Options.Keys.ContainsKey(name))
+                Options.Keys[name] = value;
             else
-                Options.KeyDescriptors.Add(name, value);
+                Options.Keys.Add(name, value);
         });
 
         return value;
@@ -127,7 +129,7 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
 
         template = Options.Format(template, key =>
         {
-            if (Options.KeyDescriptors.TryGetValue(key.Name, out var result)
+            if (Options.Keys.TryGetValue(key.Name, out var result)
                 && result.Value is not null)
             {
                 if (!_replaced)
@@ -151,6 +153,6 @@ public abstract class AbstractTemplateKeyFinder : ITemplateKeyFinder
     /// <param name="value">输出 <see cref="TemplateKeyDescriptor"/>。</param>
     /// <returns>返回是否存在的布尔值。</returns>
     public virtual bool TryGetValue(string name, [MaybeNullWhen(false)] out TemplateKeyDescriptor value)
-        => Options.KeyDescriptors.TryGetValue(name, out value);
+        => Options.Keys.TryGetValue(name, out value);
 
 }

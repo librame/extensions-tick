@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Network;
+namespace Librame.Extensions.Network;
 
 /// <summary>
 /// 定义 HTTP 客户端方法支持的枚举列表。

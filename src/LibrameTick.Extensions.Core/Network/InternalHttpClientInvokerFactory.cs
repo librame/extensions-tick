@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Microparts;
 
-namespace Librame.Extensions.Core.Network;
+namespace Librame.Extensions.Network;
 
 class InternalHttpClientInvokerFactory : IHttpClientInvokerFactory
 {

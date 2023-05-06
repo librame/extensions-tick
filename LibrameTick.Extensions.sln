@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0A92F6D6-9B9C-4491-9801-79BC7EDDC74A}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BD2441C6-B6DC-47EE-AC79-7B1FA55F89F0}"
@@ -29,9 +30,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Draw
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Drawing.SkiaSharp", "src\LibrameTick.Extensions.Drawing.SkiaSharp\LibrameTick.Extensions.Drawing.SkiaSharp.csproj", "{62BF6B67-F9FC-4E95-A635-91CCF2A3A9FD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{691B25E2-DC1B-49B9-B0DF-527F4C869800}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sharing", "sharing", "{691B25E2-DC1B-49B9-B0DF-527F4C869800}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.Models", "shared\LibrameTick.Extensions.Data.Models\LibrameTick.Extensions.Data.Models.csproj", "{333EC14C-95CC-4DD0-9010-C1A1700BC296}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data.Models", "sharing\LibrameTick.Extensions.Data.Models\LibrameTick.Extensions.Data.Models.csproj", "{333EC14C-95CC-4DD0-9010-C1A1700BC296}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}"
 EndProject

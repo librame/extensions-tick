@@ -16,6 +16,7 @@ global using Microsoft.Extensions.DependencyInjection.Extensions;
 global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.Localization;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using System;
 global using System.Collections.Concurrent;

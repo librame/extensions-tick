@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义继承 <see cref="TemplateOptions"/> 的配置模板选项。

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+namespace Librame.Extensions.Template;
 
 internal class InternalTemplateProvider : AbstractTemplateProvider
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Localization;
 
-namespace Librame.Extensions.Core.Plugins
+namespace Librame.Extensions.Plugins
 {
     public class TestPluginInfo : AbstractLibramePluginInfo<TestPluginInfo>
     {

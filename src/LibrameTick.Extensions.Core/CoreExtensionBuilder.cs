@@ -10,9 +10,10 @@
 
 #endregion
 
-using Librame.Extensions.Core.Network;
-using Librame.Extensions.Core.Plugins;
-using Librame.Extensions.Core.Storage;
+using Librame.Extensions.Network;
+using Librame.Extensions.Plugins;
+using Librame.Extensions.Setting;
+using Librame.Extensions.Storage;
 using Librame.Extensions.Crypto;
 using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
@@ -50,6 +51,9 @@ public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionBuilde
 
         // Plugins
         ServiceCharacteristics.AddSingleton<IPluginResolver>();
+
+        // Settings
+        ServiceCharacteristics.AddSingleton(typeof(ISettingValues<>));
 
         // Storage
         ServiceCharacteristics.AddSingleton<IStorableFileManager>();

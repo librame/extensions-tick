@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Template;
+using Librame.Extensions.Core;
+
+namespace Librame.Extensions.Template;
 
 /// <summary>
 /// 定义模板程序。
@@ -41,10 +43,12 @@ public static class Templater
     /// <returns>返回 <see cref="ITemplateKeyFinder"/>。</returns>
     public static ITemplateKeyFinder GetConfigurationTemplateKeyFinder(ConfigurationTemplateOptions? options = null)
     {
-        var finder = new ConfigurationTemplateKeyFinder(options ?? DefaultConfigurationOptions);
+        options ??= DefaultConfigurationOptions;
+
+        var finder = new ConfigurationTemplateKeyFinder(options);
 
         // 初始填充模板键集合
-        finder.Populate();
+        finder.Populate(options);
 
         return finder;
     }

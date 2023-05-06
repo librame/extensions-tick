@@ -46,6 +46,39 @@ public static class DateTimeExtensions
         => new(dateTime, useLocalOffset ? UtcLocalOffset : UtcBaseTime.Offset);
 
 
+    /// <summary>
+    /// 转为标准字符串形式。
+    /// </summary>
+    /// <param name="dateTime">给定的 <see cref="DateTime"/>。</param>
+    /// <param name="withMilliseconds">是否包含毫秒（可选；默认不包含）。</param>
+    /// <returns>返回字符串。</returns>
+    public static string AsDateTimeString(this DateTime dateTime, bool withMilliseconds = false)
+    {
+        var format = "yyyy-MM-dd HH:mm:ss";
+
+        if (withMilliseconds)
+            format += ".fff";
+
+        return dateTime.ToString(format);
+    }
+
+    /// <summary>
+    /// 转为标准字符串形式。
+    /// </summary>
+    /// <param name="dateTimeOffset">给定的 <see cref="DateTimeOffset"/>。</param>
+    /// <param name="withMilliseconds">是否包含毫秒（可选；默认不包含）。</param>
+    /// <returns>返回字符串。</returns>
+    public static string AsDateTimeString(this DateTimeOffset dateTimeOffset, bool withMilliseconds = false)
+    {
+        var format = "yyyy-MM-dd HH:mm:ss.fff zzz";
+
+        if (!withMilliseconds)
+            format = format.Replace(".fff", string.Empty);
+        
+        return dateTimeOffset.ToString(format);
+    }
+
+
     #region DateOfYear
 
     /// <summary>

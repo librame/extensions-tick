@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Core.Plugins;
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义一个插件解析器接口。

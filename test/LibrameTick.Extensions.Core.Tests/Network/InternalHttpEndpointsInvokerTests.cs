@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Librame.Extensions.Core.Network
+namespace Librame.Extensions.Network
 {
     //public class InternalHttpEndpointsInvokerTests
     //{

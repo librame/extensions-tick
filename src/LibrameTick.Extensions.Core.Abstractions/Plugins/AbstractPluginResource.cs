@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Resources;
 
-namespace Librame.Extensions.Core.Plugins;
+namespace Librame.Extensions.Plugins;
 
 /// <summary>
 /// 定义抽象实现 <see cref="IPluginResource"/> 的插件资源。
