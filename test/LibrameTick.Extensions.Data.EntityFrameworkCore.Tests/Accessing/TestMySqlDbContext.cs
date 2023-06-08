@@ -8,12 +8,12 @@ namespace Librame.Extensions.Data.Accessing
 {
     public class TestMySqlDbContext : TestDbContext<TestMySqlDbContext>
     {
-        public TestMySqlDbContext(IEncryptionConverterFactory encryptionConverterFactory,
-            IShardingManager shardingManager,
-            IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
-            IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
+        public TestMySqlDbContext(IShardingContext shardingContext,
+            IEncryptionConverterFactory encryptionConverterFactory,
+            IOptionsMonitor<DataExtensionOptions> dataOptions,
+            IOptionsMonitor<CoreExtensionOptions> coreOptions,
             DbContextOptions<TestMySqlDbContext> options)
-            : base(encryptionConverterFactory, shardingManager, dataOptionsMonitor, coreOptionsMonitor, options)
+            : base(shardingContext, encryptionConverterFactory, dataOptions, coreOptions, options)
         {
         }
 

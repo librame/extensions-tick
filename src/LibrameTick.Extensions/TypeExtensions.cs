@@ -24,6 +24,18 @@ public static class TypeExtensions
 
 
     /// <summary>
+    /// 转为仅包含类型完整名与程序集简单名称的简单字符串。
+    /// </summary>
+    /// <remarks>
+    /// 如字符串类型：System.String, System.Runtime。
+    /// </remarks>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>返回字符串。</returns>
+    public static string AsSimpleString(this Type type)
+        => $"{type.FullName}, {type.GetAssemblySimpleName()}";
+
+
+    /// <summary>
     /// 是相同类型。
     /// </summary>
     /// <remarks>
@@ -163,11 +175,11 @@ public static class TypeExtensions
 
 
     /// <summary>
-    /// 获取指定类型的程序集名称。
+    /// 获取指定类型的程序集简单名称。
     /// </summary>
     /// <param name="type">给定的类型。</param>
     /// <returns>返回名称字符串。</returns>
-    public static string? GetAssemblyName(this Type type)
+    public static string? GetAssemblySimpleName(this Type type)
         => type.Assembly.GetName().Name;
 
 
@@ -394,7 +406,7 @@ public static class TypeExtensions
         // 如果已实现类型是泛型定义则比较类型定义
         if (implementedType.IsGenericTypeDefinition)
         {
-            resultType = allImplementedTypes.Where(type => type.IsGenericType)
+            resultType = allImplementedTypes.Where(static type => type.IsGenericType)
                 .FirstOrDefault(type => type.GetGenericTypeDefinition() == implementedType);
         }
         // 如果是接口类型则直接比较
@@ -466,8 +478,8 @@ public static class TypeExtensions
         if (assemblies is null || !assemblies.Any())
             return Array.Empty<Type>();
 
-        return assemblies.Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
-            .SelectMany(s => s.ExportedTypes)
+        return assemblies.Where(static p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(static s => s.ExportedTypes)
             .Where(p => p.IsDefined(attributeType) && p.IsConcreteType());
     }
 
@@ -492,8 +504,8 @@ public static class TypeExtensions
         if (assemblies is null || !assemblies.Any())
             return Array.Empty<Type>();
 
-        return assemblies.Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
-            .SelectMany(s => s.ExportedTypes)
+        return assemblies.Where(static p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(static s => s.ExportedTypes)
             .Where(p => p.IsAssignableToBaseType(baseType) && p.IsConcreteType());
     }
 

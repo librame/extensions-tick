@@ -139,19 +139,19 @@ public static class AlgorithmExtensions
     #region HMAC Hash
 
     private static readonly Lazy<HMACMD5> _hmacMd5 =
-        new(() => new HMACMD5(DefaultCki.HmacHash.Md5.Key!));
+        new(static () => new HMACMD5(DefaultCki.HmacHash.Md5.Key!));
 
     private static readonly Lazy<HMACSHA1> _hmacSha1 =
-        new(() => new HMACSHA1(DefaultCki.HmacHash.Sha1.Key!));
+        new(static () => new HMACSHA1(DefaultCki.HmacHash.Sha1.Key!));
 
     private static readonly Lazy<HMACSHA256> _hmacSha256 =
-        new(() => new HMACSHA256(DefaultCki.HmacHash.Sha256.Key!));
+        new(static () => new HMACSHA256(DefaultCki.HmacHash.Sha256.Key!));
 
     private static readonly Lazy<HMACSHA384> _hmacSha384 =
-        new(() => new HMACSHA384(DefaultCki.HmacHash.Sha384.Key!));
+        new(static () => new HMACSHA384(DefaultCki.HmacHash.Sha384.Key!));
 
     private static readonly Lazy<HMACSHA512> _hmacSha512 =
-        new(() => new HMACSHA512(DefaultCki.HmacHash.Sha512.Key!));
+        new(static () => new HMACSHA512(DefaultCki.HmacHash.Sha512.Key!));
 
 
     /// <summary>
@@ -311,7 +311,7 @@ public static class AlgorithmExtensions
     #region AES-CCM
 
     private static readonly Lazy<AesCcm> _aesCcm =
-        new(() => new AesCcm(DefaultCki.AesCcm.Key!));
+        new(static () => new AesCcm(DefaultCki.AesCcm.Key!));
 
 
     /// <summary>
@@ -369,7 +369,7 @@ public static class AlgorithmExtensions
     #region AES-GCM
 
     private static readonly Lazy<AesGcm> _aesGcm =
-        new(() => new AesGcm(DefaultCki.AesGcm.Key!));
+        new(static () => new AesGcm(DefaultCki.AesGcm.Key!));
 
 
     /// <summary>

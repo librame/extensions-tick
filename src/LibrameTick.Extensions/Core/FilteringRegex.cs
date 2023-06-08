@@ -70,7 +70,9 @@ public class FilteringRegex : Regex
         return Filtering switch
         {
             FilteringMode.Exclusive => inputs.Where(v => !IsMatch(v)),
+
             FilteringMode.Inclusive => inputs.Where(v => IsMatch(v)),
+
             _ => inputs
         };
     }
@@ -87,7 +89,9 @@ public class FilteringRegex : Regex
         return Filtering switch
         {
             FilteringMode.Exclusive => values.Where(v => !IsMatch(inputSelector(v))),
+
             FilteringMode.Inclusive => values.Where(v => IsMatch(inputSelector(v))),
+
             _ => values
         };
     }

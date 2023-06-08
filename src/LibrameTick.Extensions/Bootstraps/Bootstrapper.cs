@@ -41,12 +41,12 @@ public static class Bootstrapper
     /// </summary>
     /// <typeparam name="TInterface">指定实现 <see cref="IBootstrap"/> 的接口。</typeparam>
     /// <typeparam name="TImplementation">指定实现 <typeparamref name="TInterface"/> 的引导程序。</typeparam>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
+    /// <param name="named">给定的命名（可选）。</param>
     /// <returns>返回 <typeparamref name="TInterface"/>。</returns>
-    public static TInterface GetBootstrap<TInterface, TImplementation>(string? sourceAliase = null)
+    public static TInterface GetBootstrap<TInterface, TImplementation>(string? named = null)
         where TInterface : IBootstrap
         where TImplementation : TInterface, new()
-        => Container.Resolve(new TypeNamedKey<TInterface>(sourceAliase), key => new TImplementation());
+        => Container.Resolve(new TypeNamedKey<TInterface>(named), static key => new TImplementation());
 
     /// <summary>
     /// 获取指定类型的引导程序。
@@ -58,7 +58,7 @@ public static class Bootstrapper
     public static TInterface GetBootstrap<TInterface, TImplementation>(TypeNamedKey key)
         where TInterface : IBootstrap
         where TImplementation : TInterface, new()
-        => Container.Resolve(key, key => new TImplementation());
+        => Container.Resolve(key, static key => new TImplementation());
 
 
     /// <summary>

@@ -20,11 +20,8 @@ namespace Librame.Extensions.Data.Accessing;
 /// <summary>
 /// 定义一个抽象实现 <see cref="IAccessor"/> 的存取器。
 /// </summary>
-public abstract class AbstractAccessor : IAccessor
+public abstract class AbstractAccessor : AbstractPriorable, IAccessor
 {
-    private float? _priority;
-
-
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessor"/>。
     /// </summary>
@@ -174,43 +171,38 @@ public abstract class AbstractAccessor : IAccessor
     }
 
 
-    #region IShardable
+    #region IPriorable
 
     /// <summary>
-    /// 分片管理器。
+    /// 获取优先级。
     /// </summary>
-    public IShardingManager ShardingManager
-        => OriginalContext.GetService<IShardingManager>();
+    /// <returns>返回浮点数。</returns>
+    public override float GetPriority()
+        => AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
 
     #endregion
 
 
-    #region ISortable
+    #region IShardable
 
     /// <summary>
-    /// 排序优先级（数值越小越优先）。
+    /// 分片上下文。
     /// </summary>
-    public virtual float Priority
-    {
-        get
-        {
-            _priority = AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
-            return _priority.Value;
-        }
-        set
-        {
-            _priority = value;
-        }
-    }
+    public IShardingContext ShardingContext
+        => OriginalContext.GetService<IShardingContext>();
 
+    #endregion
+
+
+    #region IShardingValue<DateTimeOffset>
 
     /// <summary>
-    /// 与指定的 <see cref="ISortable"/> 比较大小。
+    /// 获取分片值。
     /// </summary>
-    /// <param name="other">给定的 <see cref="ISortable"/>。</param>
-    /// <returns>返回整数。</returns>
-    public virtual int CompareTo(ISortable? other)
-        => Priority.CompareTo(other?.Priority ?? 0);
+    /// <param name="defaultValue">给定的默认值。</param>
+    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
+    public virtual DateTimeOffset GetShardedValue(DateTimeOffset defaultValue)
+        => DateTimeOffset.UtcNow;
 
     #endregion
 
@@ -339,7 +331,7 @@ public abstract class AbstractAccessor : IAccessor
         where TEntity : class
         => specification is null
             ? await Query<TEntity>().ToListAsync(cancellationToken)
-            : await cancellationToken.RunTask(() => Query<TEntity>().Where(specification.IsSatisfiedBy).ToList());
+            : await cancellationToken.SimpleTask(() => Query<TEntity>().Where(specification.IsSatisfiedBy).ToList());
 
 
     /// <summary>
@@ -526,6 +518,80 @@ public abstract class AbstractAccessor : IAccessor
     {
         OriginalContext.Update(entity);
         return entity;
+    }
+
+    #endregion
+
+
+    #region DirectExecute
+
+    /// <summary>
+    /// 直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <returns>返回受影响的行数。</returns>
+    public virtual int DirectDelete<TEntity>(Expression<Func<TEntity, bool>>? predicate = null)
+        where TEntity : class
+    {
+        if (predicate is null)
+            return Query<TEntity>().ExecuteDelete(); // Delete All
+
+        return Query<TEntity>().Where(predicate).ExecuteDelete();
+    }
+
+    /// <summary>
+    /// 异步直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含受影响行数的异步操作。</returns>
+    public virtual async Task<int> DirectDeleteAsync<TEntity>(Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default)
+        where TEntity : class
+    {
+        if (predicate is null)
+            return await Query<TEntity>().ExecuteDeleteAsync(cancellationToken); // Delete All
+
+        return await Query<TEntity>().Where(predicate).ExecuteDeleteAsync(cancellationToken);
+    }
+
+
+    /// <summary>
+    /// 直接更新，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="setPropertyCalls">给定要更新的属性调用。</param>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示更新所有）。</param>
+    /// <returns>返回受影响的行数。</returns>
+    public virtual int DirectUpdate<TEntity>(Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setPropertyCalls,
+        Expression<Func<TEntity, bool>>? predicate = null)
+        where TEntity : class
+    {
+        if (predicate is null)
+            return Query<TEntity>().ExecuteUpdate(setPropertyCalls); // Update All
+
+        return Query<TEntity>().Where(predicate).ExecuteUpdate(setPropertyCalls);
+    }
+
+    /// <summary>
+    /// 异步直接更新，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="setPropertyCalls">给定要更新的属性调用。</param>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含受影响行数的异步操作。</returns>
+    public virtual async Task<int> DirectUpdateAsync<TEntity>(Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setPropertyCalls, 
+        Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default)
+        where TEntity : class
+    {
+        if (predicate is null)
+            return await Query<TEntity>().ExecuteUpdateAsync(setPropertyCalls, cancellationToken); // Delete All
+
+        return await Query<TEntity>().Where(predicate).ExecuteUpdateAsync(setPropertyCalls, cancellationToken);
     }
 
     #endregion

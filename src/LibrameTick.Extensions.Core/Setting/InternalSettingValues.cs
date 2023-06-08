@@ -12,15 +12,15 @@
 
 namespace Librame.Extensions.Setting;
 
-internal class InternalSettingValues<TSetting> : ISettingValues<TSetting>
-    where TSetting : ISetting
+sealed internal class InternalSettingValues<TSettingRoot> : ISettingValues<TSettingRoot>
+    where TSettingRoot : ISettingRoot
 {
-    private readonly ISettingProvider<TSetting> _provider;
+    private readonly ISettingProvider<TSettingRoot> _provider;
 
-    private Lazy<TSetting> _lazySetting;
+    private Lazy<TSettingRoot> _lazySetting;
 
 
-    public InternalSettingValues(ISettingProvider<TSetting> provider)
+    public InternalSettingValues(ISettingProvider<TSettingRoot> provider)
     {
         _provider = provider;
 
@@ -28,7 +28,7 @@ internal class InternalSettingValues<TSetting> : ISettingValues<TSetting>
     }
 
 
-    public TSetting GetSingletonValue()
+    public TSettingRoot GetSingletonValue()
         => _lazySetting.Value;
 
 }

@@ -10,14 +10,14 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Data;
 
 namespace Librame.Extensions.Plugins;
 
 /// <summary>
-/// 定义一个继承 <see cref="IEquatable{IPluginInfo}"/>、<see cref="ISortable"/> 的插件信息接口。
+/// 定义一个继承 <see cref="IEquatable{IPluginInfo}"/>、<see cref="IPrioritization{Single}"/> 的插件信息接口。
 /// </summary>
-public interface IPluginInfo : IEquatable<IPluginInfo>, ISortable
+public interface IPluginInfo : IEquatable<IPluginInfo>, IPrioritization<float>
 {
     /// <summary>
     /// 信息程序集。

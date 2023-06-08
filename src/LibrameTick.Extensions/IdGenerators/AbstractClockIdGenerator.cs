@@ -94,9 +94,9 @@ public abstract class AbstractClockIdGenerator<TId> : AbstractIdGenerator<TId>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含长整数的异步操作。</returns>
-    protected virtual async Task<long> GetNowTicksAsync(CancellationToken cancellationToken = default)
+    protected virtual async ValueTask<long> GetNowTicksAsync(CancellationToken cancellationToken = default)
     {
-        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).DisableAwaitContext();
+        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).DiscontinueCapturedContext();
         var ticks = ConvertTicksAccuracy(now.Ticks);
 
         Options.UpdateNowTicksAction?.Invoke(ticks);
@@ -110,13 +110,13 @@ public abstract class AbstractClockIdGenerator<TId> : AbstractIdGenerator<TId>
     /// <param name="lastTicks">给定的上次时钟周期数。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含长整数的异步操作。</returns>
-    protected virtual async Task<long> GetNowTicksAsync(long lastTicks,
+    protected virtual async ValueTask<long> GetNowTicksAsync(long lastTicks,
         CancellationToken cancellationToken = default)
     {
-        var nowTicks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+        var nowTicks = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
 
         while (nowTicks <= lastTicks)
-            nowTicks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+            nowTicks = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
 
         return nowTicks;
     }

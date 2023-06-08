@@ -48,6 +48,16 @@ public class DataResource : AbstractResource<DataResource>
     public string DataGroup { get; set; }
 
     /// <summary>
+    /// 分区。
+    /// </summary>
+    public string Partition { get; set; }
+
+    /// <summary>
+    /// 优先级。
+    /// </summary>
+    public string Priority { get; set; }
+
+    /// <summary>
     /// 排序。
     /// </summary>
     public string Rank { get; set; }
@@ -126,6 +136,11 @@ public class DataResource : AbstractResource<DataResource>
     /// 启用锁定。
     /// </summary>
     public string LockoutEnabled { get; set; }
+
+    /// <summary>
+    /// 锁定期开始。
+    /// </summary>
+    public string LockoutStart { get; set; }
 
     /// <summary>
     /// 锁定期结束。

@@ -10,13 +10,14 @@
 
 #endregion
 
-using Librame.Extensions.Network;
-using Librame.Extensions.Plugins;
-using Librame.Extensions.Setting;
-using Librame.Extensions.Storage;
 using Librame.Extensions.Crypto;
 using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Network;
+using Librame.Extensions.Plugins;
+using Librame.Extensions.Proxy;
+using Librame.Extensions.Setting;
+using Librame.Extensions.Storage;
 
 namespace Librame.Extensions.Core;
 
@@ -35,7 +36,11 @@ public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionBuilde
     public CoreExtensionBuilder(IServiceCollection services)
         : base(services)
     {
+        // Base
         ServiceCharacteristics.AddSingleton<IDispatcherFactory>();
+        ServiceCharacteristics.AddSingleton<IProxyGenerator>();
+        ServiceCharacteristics.AddSingleton<IInterceptor>();
+        ServiceCharacteristics.AddSingleton(typeof(IProxyDecorator<>));
 
         // Crypto
         ServiceCharacteristics.AddSingleton<IAlgorithmParameterGenerator>();

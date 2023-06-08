@@ -207,4 +207,13 @@
   <data name="VisitorCount" xml:space="preserve">
     <value>Visitor count</value>
   </data>
+  <data name="Partition" xml:space="preserve">
+    <value>Partition</value>
+  </data>
+  <data name="Priority" xml:space="preserve">
+    <value>Priority</value>
+  </data>
+  <data name="LockoutStart" xml:space="preserve">
+    <value>Lockout start</value>
+  </data>
 </root>

@@ -29,37 +29,57 @@ public static class EnumerableExtensions
 
 
     /// <summary>
-    /// 比较两个集合序列相等。
+    /// 比较两个数组序列是否相等。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="left">给定的左边集合。</param>
-    /// <param name="right">给定的右边集合。</param>
-    /// <param name="bothNullReturn">如果两个集合为空时返回的布尔值。</param>
-    /// <returns>返回是否相等的布尔值。</returns>
-    public static bool SequenceEqual<T>([NotNullWhen(true)] this IEnumerable<T>? left,
-        [NotNullWhen(true)] IEnumerable<T>? right, bool bothNullReturn)
+    /// <param name="left">给定的左边数组。</param>
+    /// <param name="right">给定的右边数组。</param>
+    /// <returns>返回布尔值。</returns>
+    public static bool SequenceEqualByReadOnlySpan<T>(this T[]? left, T[]? right)
+        where T : IEquatable<T>
     {
-        if (left is null)
-            return right is null && bothNullReturn;
+        if (left == null || right == null)
+            return false;
 
-        return right is not null && left.SequenceEqual(right);
+        return new ReadOnlySpan<T>(left).SequenceEqual(right);
     }
 
     /// <summary>
-    /// 比较两个集合序列相等。
+    /// 比较两个数组序列是否相等。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="left">给定的左边集合。</param>
-    /// <param name="right">给定的右边集合。</param>
-    /// <param name="bothNullReturn">如果两个集合为空或空集合时返回的布尔值。</param>
-    /// <returns>返回是否相等的布尔值。</returns>
-    public static bool SequenceEqual<T>([NotNullWhen(true)] this ICollection<T>? left,
-        [NotNullWhen(true)] ICollection<T>? right, bool bothNullReturn)
+    /// <param name="left">给定的左边数组。</param>
+    /// <param name="right">给定的右边数组。</param>
+    /// <param name="comparer">给定的相等比较器（可选）。</param>
+    /// <returns>返回布尔值。</returns>
+    public static bool SequenceEqualByReadOnlySpan<T>(this T[]? left, T[]? right,
+        IEqualityComparer<T>? comparer = null)
     {
-        if (left is null || left.Count == 0)
-            return (right is null || right.Count == 0) && bothNullReturn;
+        if (left == null || right == null)
+            return false;
 
-        return right is not null && right.Count != 0 && left.SequenceEqual(right);
+        return new ReadOnlySpan<T>(left).SequenceEqual(right, comparer);
+    }
+
+
+    /// <summary>
+    /// 基于谓词筛选值序列。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
+    /// <param name="predicate">给定的谓词筛选条件。</param>
+    /// <returns>返回包含索引与元素的键值对集合。</returns>
+    public static IEnumerable<Core.Pair<int, T>> WhereAt<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate)
+    {
+        var i = 0;
+        foreach (var item in enumerable)
+        {
+            if (predicate(item))
+            {
+                yield return Core.Pair.Create(i, item);
+            }
+            i++;
+        }
     }
 
 
@@ -114,7 +134,7 @@ public static class EnumerableExtensions
     #endregion
 
 
-    #region AsReadOnlyList
+    #region AsReadOnly
 
     /// <summary>
     /// 转换为只读集合。
@@ -127,7 +147,9 @@ public static class EnumerableExtensions
         return enumerable switch
         {
             ReadOnlyCollection<T> collection => collection,
+
             IList<T> list => list.AsReadOnlyCollection(),
+
             _ => enumerable.ToList().AsReadOnly()
         };
     }
@@ -140,6 +162,31 @@ public static class EnumerableExtensions
     /// <returns>返回 <see cref="ReadOnlyCollection{T}"/>。</returns>
     public static ReadOnlyCollection<T> AsReadOnlyCollection<T>(this IList<T> list)
         => new(list);
+
+
+    /// <summary>
+    /// 转为字典集合。
+    /// </summary>
+    /// <typeparam name="TKey">指定的键类型。</typeparam>
+    /// <typeparam name="TValue">指定的值类型。</typeparam>
+    /// <param name="collection">给定的键值对集合。</param>
+    /// <param name="comparer">给定的键比较器（可选）。</param>
+    /// <returns>返回 <see cref="Dictionary{TKey, TValue}"/>。</returns>
+    public static Dictionary<TKey, TValue> AsDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> collection,
+        IEqualityComparer<TKey>? comparer = null)
+        where TKey : notnull
+        => comparer is null ? new(collection) : new(collection, comparer);
+
+    /// <summary>
+    /// 转为只读字典集合。
+    /// </summary>
+    /// <typeparam name="TKey">指定的键类型。</typeparam>
+    /// <typeparam name="TValue">指定的值类型。</typeparam>
+    /// <param name="dictionary">给定的 <see cref="IDictionary{TKey, TValue}"/>。</param>
+    /// <returns>返回 <see cref="ReadOnlyDictionary{TKey, TValue}"/>。</returns>
+    public static ReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+        where TKey : notnull
+        => new(dictionary);
 
     #endregion
 

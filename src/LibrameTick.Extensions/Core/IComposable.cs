@@ -13,8 +13,9 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义一个可复合接口。
+/// 定义一个实现 <see cref="IEnumerable{T}"/> 的可复合接口。
 /// </summary>
+/// <typeparam name="T">指定的复合类型。</typeparam>
 public interface IComposable<T> : IEnumerable<T>
 {
     /// <summary>

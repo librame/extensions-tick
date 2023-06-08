@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Storage;
 
-class InternalWebFilePermission : AbstractWebFilePermission
+sealed internal class InternalWebFilePermission : AbstractWebFilePermission
 {
     public InternalWebFilePermission(IOptionsMonitor<CoreExtensionOptions> options)
         : base(options.CurrentValue.WebFile)

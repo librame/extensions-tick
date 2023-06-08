@@ -19,8 +19,8 @@ namespace Librame.Extensions.Data.Storing;
 /// 定义实现 <see cref="IIdentifier{Int64}"/> 的数据审计属性。
 /// </summary>
 [NotAudited]
-[Sharded<DateTimeOffsetShardingStrategy>("%MM")]
-public class AuditProperty : AbstractIdentifier<long>
+[Sharding("%std", typeof(DateTimeOffsetShardingStrategy))]
+public class AuditProperty : AbstractIdentifier<long>, IShardingValue<DateTimeOffset>
 {
     /// <summary>
     /// 审计标识。
@@ -55,6 +55,15 @@ public class AuditProperty : AbstractIdentifier<long>
     /// </summary>
     [JsonIgnore]
     public virtual Audit? Audit { get; set; }
+
+
+    /// <summary>
+    /// 获取分片值。
+    /// </summary>
+    /// <param name="defaultValue">给定的默认值。</param>
+    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
+    public virtual DateTimeOffset GetShardedValue(DateTimeOffset defaultValue)
+        => Audit?.GetShardedValue(defaultValue) ?? defaultValue; // 默认使用审计时间分片
 
 
     /// <summary>

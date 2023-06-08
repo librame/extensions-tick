@@ -22,7 +22,7 @@ public class StronglyTypedIdentifierConverter<TValue> : ValueConverter<StronglyT
     /// 构造一个 <see cref="StronglyTypedIdentifier{TValue}"/>。
     /// </summary>
     public StronglyTypedIdentifierConverter()
-        : base(s => s.Value, v => new(v))
+        : base(static s => s.Value, static v => new(v))
     {
     }
 

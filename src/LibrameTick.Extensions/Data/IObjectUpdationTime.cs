@@ -51,4 +51,33 @@ public interface IObjectUpdationTime
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
     ValueTask<object> SetObjectUpdatedTimeAsync(object newUpdatedTime, CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// 设置对象更新时间。
+    /// </summary>
+    /// <param name="newUpdatedTimeFactory">给定的新更新时间对象工厂方法。</param>
+    /// <returns>返回日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）。</returns>
+    object SetObjectUpdatedTime(Func<object, object> newUpdatedTimeFactory)
+    {
+        var currentUpdatedTime = GetObjectUpdatedTime();
+
+        return SetObjectUpdatedTime(newUpdatedTimeFactory(currentUpdatedTime));
+    }
+
+    /// <summary>
+    /// 异步设置对象更新时间。
+    /// </summary>
+    /// <param name="newUpdatedTimeFactory">给定的新更新时间对象工厂方法。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
+    async ValueTask<object> SetObjectUpdatedTimeAsync(Func<object, object> newUpdatedTimeFactory,
+        CancellationToken cancellationToken = default)
+    {
+        var currentUpdatedTime = await GetObjectUpdatedTimeAsync(cancellationToken).DiscontinueCapturedContext();
+
+        return await SetObjectUpdatedTimeAsync(newUpdatedTimeFactory(currentUpdatedTime), cancellationToken)
+            .DiscontinueCapturedContext();
+    }
+
 }

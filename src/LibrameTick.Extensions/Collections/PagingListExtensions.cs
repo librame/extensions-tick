@@ -10,8 +10,6 @@
 
 #endregion
 
-using System.Linq;
-
 namespace Librame.Extensions.Collections;
 
 /// <summary>
@@ -70,7 +68,7 @@ public static class PagingListExtensions
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
     public static Task<IPagingList<T>> AsPagingAsync<T>(this IEnumerable<T> collection, Action<IPagingList<T>> pageAction,
         CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => collection.AsPaging(pageAction));
+        => cancellationToken.SimpleTask(() => collection.AsPaging(pageAction));
 
     /// <summary>
     /// 异步可查询分页。
@@ -85,7 +83,7 @@ public static class PagingListExtensions
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
     public static Task<IPagingList<T>> AsPagingAsync<T>(this IQueryable<T> queryable, Action<IPagingList<T>> pageAction,
         CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => queryable.AsPaging(pageAction));
+        => cancellationToken.SimpleTask(() => queryable.AsPaging(pageAction));
 
 
     /// <summary>
@@ -106,6 +104,6 @@ public static class PagingListExtensions
     /// <returns>返回复合的 <see cref="IPagingList{T}"/> 异步操作。</returns>
     public static Task<IPagingList<T>> CompositePagingAsync<T>(this IEnumerable<IPagingList<T>> queryables,
         CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => queryables.CompositePaging());
+        => cancellationToken.SimpleTask(() => queryables.CompositePaging());
 
 }

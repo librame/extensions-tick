@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Crypto;
 
-class InternalSymmetricAlgorithm : AbstractSymmetricAlgorithm
+sealed internal class InternalSymmetricAlgorithm : AbstractSymmetricAlgorithm
 {
     public InternalSymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
         IOptionsMonitor<CoreExtensionOptions> options)

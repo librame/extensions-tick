@@ -10,8 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Core;
-
 namespace Librame.Extensions.Plugins;
 
 /// <summary>
@@ -32,7 +30,7 @@ public abstract class AbstractPluginInfo<TInfo> : AbstractPluginInfo
 /// <summary>
 /// 定义实现 <see cref="IPluginInfo"/> 的插件信息接口。
 /// </summary>
-public abstract class AbstractPluginInfo : AbstractSortable, IPluginInfo
+public abstract class AbstractPluginInfo : IPluginInfo
 {
     /// <summary>
     /// 信息程序集。
@@ -52,6 +50,11 @@ public abstract class AbstractPluginInfo : AbstractSortable, IPluginInfo
     /// </summary>
     public virtual Guid Id
         => Guid.NewGuid();
+
+    /// <summary>
+    /// 优先级。
+    /// </summary>
+    public float Priority { get; set; } = 9;
 
     /// <summary>
     /// 名称。
@@ -146,6 +149,6 @@ public abstract class AbstractPluginInfo : AbstractSortable, IPluginInfo
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{Id.ToString("N")}:{Name}";
+        => $"{Id:N}:{Name}";
 
 }

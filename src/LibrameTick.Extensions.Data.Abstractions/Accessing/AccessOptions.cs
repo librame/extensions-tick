@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core;
+using Librame.Extensions.Crypto;
 using Librame.Extensions.Template;
 
 namespace Librame.Extensions.Data.Accessing;
@@ -32,14 +33,19 @@ public class AccessOptions : IOptions
     public bool EnsureDatabaseCreated { get; set; } = true;
 
     /// <summary>
+    /// 自动属性值加解密，另还需在属性上标注 <see cref="EncryptedAttribute"/> 特性（默认启用此功能）。
+    /// </summary>
+    public bool AutoEncryption { get; set; } = true;
+
+    /// <summary>
+    /// 针对各数据库特殊的 Guid 存储排序方式，是否自动将 Guid 转换为字符串处理（默认启用以支持跨库）。
+    /// </summary>
+    public bool AutoGuidToChars { get; set; } = true;
+
+    /// <summary>
     /// 存取器集合自动负载（仅对镜像读取模式有效），即负载均衡（默认不启用此功能）。
     /// </summary>
     public bool AutoLoad { get; set; } = false;
-
-    /// <summary>
-    /// 自动迁移数据库（默认启用此功能）。
-    /// </summary>
-    public bool AutoMigration { get; set; } = true;
 
     /// <summary>
     /// 自动映射程序集模型（默认不启用此功能）。
@@ -47,9 +53,19 @@ public class AccessOptions : IOptions
     public bool AutoMapping { get; set; }
 
     /// <summary>
-    /// 针对 SQLServer 特殊的 Guid 排序方式，是否将 Guid 转换为字符串处理（默认启用）。
+    /// 自动迁移数据库（默认启用此功能）。
     /// </summary>
-    public bool GuidToChars { get; set; } = true;
+    public bool AutoMigration { get; set; } = true;
+
+    /// <summary>
+    /// 自动支持数据版本标识，以更好支持并发功能，另还需实体实现 <see cref="IRowVersion"/> 接口（默认启用此功能）。
+    /// </summary>
+    public bool AutoRowVersion { get; set; } = true;
+
+    /// <summary>
+    /// 自动强类型映射，另还需属性类型实现 <see cref="StronglyTypedIdentifier{TValue}"/> 特性（默认启用此功能）。
+    /// </summary>
+    public bool AutoStronglyTyped { get; set; } = true;
 
     /// <summary>
     /// 默认存取器优先级（默认为 7）。
@@ -65,7 +81,7 @@ public class AccessOptions : IOptions
     /// 连接改变后动作（默认连接改变后会尝试创建数据库）。
     /// </summary>
     public Action<IAccessor>? ConnectionChangedAction { get; set; }
-        = accessor => accessor.TryCreateDatabase();
+        = static accessor => accessor.TryCreateDatabase();
 
 
     /// <summary>

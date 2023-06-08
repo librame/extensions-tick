@@ -64,11 +64,11 @@ public class AssemblyMicropart : AbstractMicropart<AssemblyOptions, Assembly[]>
                 foreach (var filter in descriptor.Filters)
                 {
                     // 交集处理
-                    currentAssemblies = filter.FilterBy(currentAssemblies, s => s.FullName!);
+                    currentAssemblies = filter.FilterBy(currentAssemblies, static s => s.FullName!);
                 }
 
                 if (descriptor.Additions is not null && descriptor.Additions.Count > 0)
-                    currentAssemblies = currentAssemblies.Concat(descriptor.Additions).DistinctBy(s => s.FullName);
+                    currentAssemblies = currentAssemblies.Concat(descriptor.Additions).DistinctBy(static s => s.FullName);
 
                 filterAssemblies.AddRange(currentAssemblies);
             }

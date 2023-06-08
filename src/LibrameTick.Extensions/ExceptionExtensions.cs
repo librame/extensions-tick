@@ -19,16 +19,16 @@ public static class ExceptionExtensions
 {
 
     /// <summary>
-    /// 获取内部异常消息。
+    /// 获取最内层的异常消息。
     /// </summary>
     /// <param name="exception">给定的 <see cref="Exception"/>。</param>
     /// <returns>返回异常消息字符串。</returns>
-    public static string GetInnerMessage(this Exception exception)
+    public static string GetInnermostMessage(this Exception exception)
     {
         if (exception.InnerException == null)
             return exception.Message;
 
-        return exception.InnerException.GetInnerMessage();
+        return exception.InnerException.GetInnermostMessage();
     }
 
 
@@ -39,7 +39,7 @@ public static class ExceptionExtensions
     public static void WriteDebug(this Exception exception)
     {
         Debug.WriteLine(exception.ToString());
-        Debug.Assert(false, exception.GetInnerMessage());
+        Debug.Assert(false, exception.GetInnermostMessage());
     }
 
     /// <summary>
@@ -67,7 +67,7 @@ public static class ExceptionExtensions
     /// <returns>返回错误消息字符串。</returns>
     public static string GetLastSystemErrorMessage()
     {
-        string error = string.Empty;
+        var error = string.Empty;
 
 #if NET7_0_OR_GREATER
         error = Marshal.GetLastPInvokeErrorMessage();
@@ -90,7 +90,7 @@ public static class ExceptionExtensions
         if (errorCode > 0)
         {
             var tempPtr = IntPtr.Zero;
-            string msg = string.Empty;
+            var msg = string.Empty;
 
             Core.DllInterop.FormatMessage(0x1300, ref tempPtr, errorCode, 0, ref msg, 255, ref tempPtr);
 

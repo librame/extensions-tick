@@ -72,9 +72,9 @@ public class CombIdGenerator : AbstractClockIdGenerator<Guid>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
-    public override async Task<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
+    public override async ValueTask<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicks = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+        var nowTicks = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
 
         Options.GeneratingAction?.Invoke(new(nowTicks, 0, TemporalAccuracy.Millisecond,
             _accuracyDescription));

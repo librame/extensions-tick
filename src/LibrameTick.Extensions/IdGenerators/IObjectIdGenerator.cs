@@ -34,5 +34,5 @@ public interface IObjectIdGenerator
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含标识对象的异步操作。</returns>
-    Task<object> GenerateObjectIdAsync(CancellationToken cancellationToken = default);
+    ValueTask<object> GenerateObjectIdAsync(CancellationToken cancellationToken = default);
 }

@@ -12,21 +12,22 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Dispatchers;
 using Librame.Extensions.IdGenerators;
 using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Storing;
 
 /// <summary>
-/// 定义泛型商店接口。
+/// 定义泛型存储接口。
 /// </summary>
 /// <typeparam name="T">指定的类型。</typeparam>
 public interface IStore<T>
 {
     /// <summary>
-    /// <see cref="IAccessor"/> 管理器。
+    /// <see cref="IAccessor"/> 上下文。
     /// </summary>
-    IAccessorManager AccessorManager { get; }
+    IAccessorContext AccessorContext { get; }
 
     /// <summary>
     /// <see cref="IIdGenerator{TId}"/> 工厂。
@@ -34,14 +35,14 @@ public interface IStore<T>
     IIdGeneratorFactory IdGeneratorFactory { get; }
 
     /// <summary>
-    /// 当前读取可调度存取器。
+    /// 当前读取调度器存取器。
     /// </summary>
-    IDispatchableAccessors CurrentReadAccessor { get; set; }
+    IDispatcherAccessors CurrentReadAccessor { get; set; }
 
     /// <summary>
-    /// 当前写入可调度存取器。
+    /// 当前写入调度器存取器。
     /// </summary>
-    IDispatchableAccessors CurrentWriteAccessor { get; set; }
+    IDispatcherAccessors CurrentWriteAccessor { get; set; }
 
 
     /// <summary>
@@ -308,6 +309,34 @@ public interface IStore<T>
     /// <param name="items">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     void Update(IEnumerable<T> items, ISpecification<IAccessor>? specification = null);
+
+    #endregion
+
+
+    #region DirectExecute
+
+    /// <summary>
+    /// 直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回受影响的行数。</returns>
+    int DirectDelete<TEntity>(Expression<Func<TEntity, bool>>? predicate = null,
+        ISpecification<IAccessor>? specification = null)
+        where TEntity : class;
+
+    /// <summary>
+    /// 异步直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回一个包含受影响行数的异步操作。</returns>
+    Task<int> DirectDeleteAsync<TEntity>(Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null)
+        where TEntity : class;
 
     #endregion
 

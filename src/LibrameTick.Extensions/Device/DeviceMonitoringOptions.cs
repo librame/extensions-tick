@@ -46,7 +46,7 @@ public class DeviceMonitoringOptions : IOptions
     /// </summary>
     [JsonIgnore]
     public Func<NetworkInterface, bool>? HasInterfaceFunc { get; set; }
-        = face => face.NetworkInterfaceType == NetworkInterfaceType.Ethernet
+        = static face => face.NetworkInterfaceType == NetworkInterfaceType.Ethernet
             && !face.Name.StartsWith("VMware");
 
 

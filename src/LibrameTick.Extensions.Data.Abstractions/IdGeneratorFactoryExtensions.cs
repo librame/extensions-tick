@@ -83,11 +83,11 @@ public static class IdGeneratorFactoryExtensions
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <param name="factory">给定的 <see cref="IIdGeneratorFactory"/>。</param>
     /// <param name="generatorType">给定的标识生成器类型。</param>
-    /// <param name="aliase">给定的别名（可选）。</param>
+    /// <param name="named">给定的命名（可选）。</param>
     /// <returns>返回 <see cref="IIdGenerator{TId}"/>。</returns>
     public static IIdGenerator<TId> GetIdGenerator<TId>(this IIdGeneratorFactory factory,
-        Type generatorType, string? aliase = null)
+        Type generatorType, string? named = null)
         where TId : IEquatable<TId>
-        => factory.GetIdGenerator<TId>(new TypeNamedKey(generatorType, aliase));
+        => factory.GetIdGenerator<TId>(new TypeNamedKey(generatorType, named));
 
 }

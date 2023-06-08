@@ -12,7 +12,6 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Microparts;
-using System.Diagnostics;
 
 namespace Librame.Extensions.Device;
 

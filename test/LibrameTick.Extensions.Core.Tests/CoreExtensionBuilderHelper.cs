@@ -29,7 +29,7 @@ namespace Librame.Extensions.Core
 
                     opts.WebFile.FileProviders.Add(fileProvider);
                 })
-                .AddSettingProvider<TestJsonFileSettingProvider>();
+                .AddSettingProvider<CoreExtensionBuilder, TestJsonFileSettingProvider>();
             }
 
             if (_services is null)

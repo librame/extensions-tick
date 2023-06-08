@@ -112,21 +112,21 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含长整数的异步操作。</returns>
-    public override async Task<long> GenerateIdAsync(CancellationToken cancellationToken = default)
+    public override async ValueTask<long> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
 
         if (nowTicksAsync < _lastTicksAsync)
         {
             // 时钟回拨
-            nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+            nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
         }
         else if (nowTicksAsync == _lastTicksAsync)
         {
             // 对序列+1并计算该周期内产生的序列号是否已经到达上限
             _sequenceAsync = (_sequenceAsync + 1) & Snowflakes.SequenceMask;
             if (_sequenceAsync is 0)
-                nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+                nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
         }
         else
         {
@@ -172,8 +172,8 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含长整数的异步操作。</returns>
-    public virtual Task<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => _lastTicksAsync);
+    public virtual ValueTask<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.SimpleValueTask(() => _lastTicksAsync);
 
 
     /// <summary>

@@ -13,11 +13,11 @@
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Auditing;
-using Librame.Extensions.Data.Setting;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Device;
 using Librame.Extensions.IdGenerators;
+using Librame.Extensions.Setting;
 
 namespace Librame.Extensions.Data;
 
@@ -117,6 +117,13 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     [JsonIgnore]
     public List<IQueryFilter> QueryFilters { get; init; } = new();
 
+    /// <summary>
+    /// 保存审计集合动作（默认保存到当前数据库）。
+    /// </summary>
+    [JsonIgnore]
+    public Action<BaseDbContext, IEnumerable<Audit>> SavingAuditsAction { get; set; }
+        = (context, audits) => context.Set<Audit>().AddRange(audits);
+
 
     /// <summary>
     /// 分片目录。
@@ -129,10 +136,10 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <param name="idGenerator">给定的 <see cref="IIdGenerator{TId}"/>。</param>
-    /// <param name="aliase">给定的别名（可选）。</param>
-    public void AddIdGenerator<TId>(IIdGenerator<TId> idGenerator, string? aliase = null)
+    /// <param name="named">给定的命名（可选）。</param>
+    public void AddIdGenerator<TId>(IIdGenerator<TId> idGenerator, string? named = null)
         where TId : IEquatable<TId>
-        => _idGenerators.Add(new TypeNamedKey(idGenerator.GetType(), aliase), idGenerator);
+        => _idGenerators.Add(new TypeNamedKey(idGenerator.GetType(), named), idGenerator);
 
     /// <summary>
     /// 添加实现 <see cref="IIdGenerator{TId}"/> 的标识生成器（推荐从 <see cref="AbstractIdGenerator{TId}"/> 派生）。

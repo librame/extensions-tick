@@ -12,14 +12,17 @@
 
 using Librame.Extensions.Crypto;
 using Librame.Extensions.Data.Sharding;
+using System;
+using System.Globalization;
 
 namespace Librame.Extensions.Data
 {
     /// <summary>
     /// 用户模型。
     /// </summary>
-    [Sharded<CultureInfoShardingStrategy>("%c")]
-    public class User : AbstractCreationIdentifier<string, string>
+    [Sharding("%c_%std", typeof(CultureInfoShardingStrategy), typeof(DateTimeOffsetShardingStrategy))]
+    public class User : AbstractCreationIdentifier<string, string>, IPartitioning<int>
+        , IShardingValue<CultureInfo>, IShardingValue<DateTimeOffset>
     {
         /// <summary>
         /// 名称。
@@ -31,5 +34,26 @@ namespace Librame.Extensions.Data
         /// </summary>
         [Encrypted]
         public virtual string? Passwd { get; set; }
+
+        /// <summary>
+        /// 分区。
+        /// </summary>
+        public virtual int Partition { get; set; }
+
+
+        /// <summary>
+        /// 获取分片值。
+        /// </summary>
+        /// <returns>返回 <see cref="CultureInfo"/>。</returns>
+        public virtual CultureInfo GetShardedValue(CultureInfo? defaultValue)
+            => CultureInfo.CurrentCulture;
+
+        /// <summary>
+        /// 获取分片值。
+        /// </summary>
+        /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
+        public virtual DateTimeOffset GetShardedValue(DateTimeOffset defaultValue)
+            => CreatedTime; // 默认使用创建时间分片
+
     }
 }

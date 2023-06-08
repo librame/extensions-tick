@@ -12,12 +12,13 @@
 
 using Librame.Extensions;
 using Librame.Extensions.Core;
-using Librame.Extensions.Network;
-using Librame.Extensions.Setting;
-using Librame.Extensions.Storage;
 using Librame.Extensions.Crypto;
 using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Network;
+using Librame.Extensions.Proxy;
+using Librame.Extensions.Setting;
+using Librame.Extensions.Storage;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -80,7 +81,6 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         bool enableTemplate = true)
     {
         var configuration = ConfigurationBuilderExtensions.GetConfiguration(setupConfigurationBuilder, enableTemplate);
-
         return services.AddLibrame(setupOptions, configuration);
     }
 
@@ -109,7 +109,7 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
 
         // 注册扩展服务集合
         return builder
-            .AddCommon()
+            .AddBase()
             .AddCrypto()
             .AddDevice()
             .AddNetwork()
@@ -119,11 +119,12 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
     }
 
 
-    private static CoreExtensionBuilder AddCommon(this CoreExtensionBuilder builder)
+    private static CoreExtensionBuilder AddBase(this CoreExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService(typeof(IOptionsValues<>), implementationType: typeof(InternalOptionsValues<>));
-
         builder.TryAddOrReplaceService<IDispatcherFactory, InternalDispatcherFactory>();
+        builder.TryAddOrReplaceService<IProxyGenerator, ProxyGenerator>();
+        builder.TryAddOrReplaceService<IInterceptor, MethodInterceptor>();
+        builder.TryAddOrReplaceService(typeof(IProxyDecorator<>), implementationType: typeof(ProxyDecoratorInjection<>));
 
         return builder;
     }
@@ -177,20 +178,24 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
     /// <summary>
     /// 添加设置提供程序。
     /// </summary>
-    /// <typeparam name="TProvider">指定的设置提供程序类型（推荐从诸如 <see cref="JsonFileSettingProvider{TSetting}"/> 等类型继承实现）。</typeparam>
-    /// <param name="builder">给定的 ?<see cref="CoreExtensionBuilder"/>。</param>
-    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
-    public static CoreExtensionBuilder AddSettingProvider<TProvider>(this CoreExtensionBuilder builder)
+    /// <typeparam name="TBuidler">指定的扩展构建器类型。</typeparam>
+    /// <typeparam name="TProvider">指定的设置提供程序类型（推荐从诸如 <see cref="AbstractJsonFileSettingProvider{TSetting}"/> 等类型继承实现）。</typeparam>
+    /// <param name="builder">给定的 <typeparamref name="TBuidler"/>。</param>
+    /// <returns>返回 <typeparamref name="TBuidler"/>。</returns>
+    public static TBuidler AddSettingProvider<TBuidler, TProvider>(this TBuidler builder)
+        where TBuidler : IExtensionBuilder
         => builder.AddSettingProvider(typeof(TProvider));
 
     private static readonly Type _iSettingProviderType = typeof(ISettingProvider<>);
     /// <summary>
     /// 添加设置提供程序。
     /// </summary>
-    /// <param name="builder">给定的 ?<see cref="CoreExtensionBuilder"/>。</param>
-    /// <param name="providerType">给定的设置提供程序类型（推荐从诸如 <see cref="JsonFileSettingProvider{TSetting}"/> 等类型继承实现）。</param>
-    /// <returns>返回 <see cref="CoreExtensionBuilder"/>。</returns>
-    public static CoreExtensionBuilder AddSettingProvider(this CoreExtensionBuilder builder, Type providerType)
+    /// <typeparam name="TBuidler">指定的扩展构建器类型。</typeparam>
+    /// <param name="builder">给定的 <typeparamref name="TBuidler"/>。</param>
+    /// <param name="providerType">给定的设置提供程序类型（推荐从诸如 <see cref="AbstractJsonFileSettingProvider{TSetting}"/> 等类型继承实现）。</param>
+    /// <returns>返回 <typeparamref name="TBuidler"/>。</returns>
+    public static TBuidler AddSettingProvider<TBuidler>(this TBuidler builder, Type providerType)
+        where TBuidler : IExtensionBuilder
     {
         if (!providerType.IsImplementedType(_iSettingProviderType, out var resultType))
             throw new ArgumentException($"Invalid setting provider type, the required interface '{_iSettingProviderType}' was not implemented.");

@@ -10,11 +10,14 @@
 
 #endregion
 
-using Librame.Extensions.Setting;
+using Librame.Extensions.Data;
 
-namespace Librame.Extensions.Data.Setting;
+namespace Librame.Extensions.Setting;
 
-internal class DatabaseJsonFileSettingProvider : AbstractFileSettingProvider<ShardingDatabaseSetting>
+/// <summary>
+/// 定义实现 <see cref="ISettingProvider{ShardingDatabaseSetting}"/> 的分库 JSON 文件型选项提供程序。
+/// </summary>
+public class DatabaseJsonFileSettingProvider : AbstractFileSettingProvider<ShardingDatabaseSettingRoot>
 {
     /// <summary>
     /// 构造一个 <see cref="DatabaseJsonFileSettingProvider"/>。
@@ -34,12 +37,12 @@ internal class DatabaseJsonFileSettingProvider : AbstractFileSettingProvider<Sha
     /// <summary>
     /// 加载设置。
     /// </summary>
-    /// <returns>返回 <see cref="ShardingDatabaseSetting"/>。</returns>
-    public override ShardingDatabaseSetting Load()
+    /// <returns>返回 <see cref="ShardingDatabaseSettingRoot"/>。</returns>
+    public override ShardingDatabaseSettingRoot Load()
     {
-        var setting = FilePath.DeserializeJsonFile<ShardingDatabaseSetting>();
+        var setting = FilePath.DeserializeJsonFile<ShardingDatabaseSettingRoot>();
         if (setting is null)
-            throw new NotSupportedException($"Unsupported {nameof(ShardingDatabaseSetting)} file format.");
+            throw new NotSupportedException($"Unsupported {nameof(ShardingDatabaseSettingRoot)} file format.");
 
         return setting;
     }
@@ -47,13 +50,21 @@ internal class DatabaseJsonFileSettingProvider : AbstractFileSettingProvider<Sha
     /// <summary>
     /// 保存设置。
     /// </summary>
-    /// <param name="setting">给定的 <see cref="ShardingDatabaseSetting"/>。</param>
-    /// <returns>返回 <see cref="ShardingDatabaseSetting"/>。</returns>
-    public override ShardingDatabaseSetting Save(ShardingDatabaseSetting setting)
+    /// <param name="setting">给定的 <see cref="ShardingDatabaseSettingRoot"/>。</param>
+    /// <returns>返回 <see cref="ShardingDatabaseSettingRoot"/>。</returns>
+    public override ShardingDatabaseSettingRoot Save(ShardingDatabaseSettingRoot setting)
     {
         FilePath.SerializeJsonFile(setting);
 
         return setting;
     }
+
+
+    /// <summary>
+    /// 生成设置。
+    /// </summary>
+    /// <returns>返回 <see cref="ShardingDatabaseSettingRoot"/>。</returns>
+    public override ShardingDatabaseSettingRoot Generate()
+        => new();
 
 }

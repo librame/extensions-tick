@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Drawing.Drawers;
 
-class InternalWatermarkDrawer : AbstractInternalDrawer, IWatermarkDrawer
+sealed internal class InternalWatermarkDrawer : AbstractInternalDrawer, IWatermarkDrawer
 {
     private SKPaint _forePaint;
     private SKPaint _alternPaint;

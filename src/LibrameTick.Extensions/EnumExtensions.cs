@@ -19,103 +19,103 @@ public static class EnumExtensions
 {
 
     /// <summary>
-    /// 获取枚举项集合（键为枚举项名称）。
+    /// 将枚举常量值转为枚举项。
     /// </summary>
-    /// <typeparam name="TValue">指定的常量值类型。</typeparam>
-    /// <param name="enumType">给定的枚举类型。</param>
-    /// <returns>返回 <see cref="Dictionary{String, TValue}"/>。</returns>
-    public static Dictionary<string, TValue> GetEnumItems<TValue>(this Type enumType)
+    /// <typeparam name="TEnum">指定的枚举类型。</typeparam>
+    /// <typeparam name="TNumber">指定的数字类型。</typeparam>
+    /// <param name="value">给定的常量值。</param>
+    /// <param name="defaultEnum">给定转换失败的默认枚举项（可选；默认为空将抛出常量值无效的异常）。</param>
+    /// <returns>返回 <typeparamref name="TEnum"/>。</returns>
+    /// <exception cref="ArgumentException">
+    /// The value is not a valid enum constant value.
+    /// </exception>
+    public static TEnum AsEnum<TEnum, TNumber>(this TNumber value, TEnum? defaultEnum = null)
+        where TEnum : struct, Enum
+        where TNumber : INumber<TNumber>
     {
-        var dict = new Dictionary<string, TValue>();
-
-        var fields = enumType.GetEnumFields();
-        foreach (var field in fields)
-        {
-            dict.Add(field.Name, (TValue)field.GetValue(null)!);
-        }
-
-        return dict;
+        if (Enum.TryParse<TEnum>(value.ToString(), true, out var result) && Enum.IsDefined(result))
+            return result;
+        
+        return defaultEnum ?? throw new ArgumentException($"The value '{value}' is not a valid enum '{nameof(TEnum)}' constant value.");
     }
 
+
     /// <summary>
-    /// 获取枚举项集合（键为枚举对象）。
+    /// 获取枚举项字典集合（键为枚举项名称）。
+    /// </summary>
+    /// <typeparam name="TEnum">指定的枚举类型。</typeparam>
+    /// <returns>返回 <see cref="Dictionary{String, Int32}"/>。</returns>
+    public static Dictionary<string, int> GetEnumItems<TEnum>()
+        where TEnum : Enum
+        => GetEnumItems<TEnum, string, int>(static descr => descr.Name, static descr => descr.Value);
+
+    /// <summary>
+    /// 获取枚举项字典集合（键为枚举项）。
     /// </summary>
     /// <typeparam name="TEnum">指定的枚举类型。</typeparam>
     /// <typeparam name="TValue">指定的常量值类型。</typeparam>
+    /// <param name="valueConverter">给定的值转换器。</param>
     /// <returns>返回 <see cref="Dictionary{TEnum, TValue}"/>。</returns>
-    public static Dictionary<TEnum, TValue> GetEnumItems<TEnum, TValue>()
-        where TEnum : notnull
-    {
-        var dict = new Dictionary<TEnum, TValue>();
-
-        var fields = typeof(TEnum).GetEnumFields();
-        foreach (var field in fields)
-        {
-            var value = field.GetValue(null)!;
-            dict.Add((TEnum)value, (TValue)value);
-        }
-
-        return dict;
-    }
-
+    public static Dictionary<TEnum, TValue> GetEnumItems<TEnum, TValue>(Func<Core.EnumDescriptor<TEnum>, TValue> valueConverter)
+        where TEnum : Enum
+        => GetEnumItems<TEnum, TEnum, TValue>(static descr => descr.EnumItem, valueConverter);
 
     /// <summary>
-    /// 获取枚举项集合（键为枚举项名称）。
-    /// </summary>
-    /// <typeparam name="TValue">指定的常量值类型。</typeparam>
-    /// <typeparam name="TAttribute">指定的枚举项特性类型。</typeparam>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="enumType">给定的枚举类型。</param>
-    /// <param name="resultSelector">给定的结果选择器。</param>
-    /// <returns>返回 <see cref="Dictionary{String, IEnumerable}"/>。</returns>
-    public static Dictionary<string, IEnumerable<TResult>> GetEnumItemsWithAttributes<TValue, TAttribute, TResult>(
-        this Type enumType, Func<TValue, TAttribute, TResult> resultSelector)
-        where TAttribute : Attribute
-    {
-        var dict = new Dictionary<string, IEnumerable<TResult>>();
-
-        var fields = enumType.GetEnumFields();
-        foreach (var field in fields)
-        {
-            var value = (TValue)field.GetValue(null)!;
-
-            var results = field.GetCustomAttributes<TAttribute>()
-                .Select(attrib => resultSelector(value, attrib));
-
-            dict.Add(field.Name, results);
-        }
-
-        return dict;
-    }
-
-    /// <summary>
-    /// 获取枚举项集合（键为枚举对象）。
+    /// 获取枚举项字典集合。
     /// </summary>
     /// <typeparam name="TEnum">指定的枚举类型。</typeparam>
+    /// <typeparam name="TKey">指定的键类型。</typeparam>
     /// <typeparam name="TValue">指定的常量值类型。</typeparam>
-    /// <typeparam name="TAttribute">指定的枚举项特性类型。</typeparam>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="resultSelector">给定的结果选择器。</param>
-    /// <returns>返回 <see cref="Dictionary{String, IEnumerable}"/>。</returns>
-    public static Dictionary<TEnum, IEnumerable<TResult>> GetEnumItemsWithAttributes<TEnum, TValue, TAttribute, TResult>(
-        Func<TValue, TAttribute, TResult> resultSelector)
-        where TEnum : notnull
+    /// <param name="keyConverter">给定的键转换器。</param>
+    /// <param name="valueConverter">给定的值转换器。</param>
+    /// <param name="comparer">给定的键比较器（可选）。</param>
+    /// <returns>返回 <see cref="Dictionary{TKey, TValue}"/>。</returns>
+    public static Dictionary<TKey, TValue> GetEnumItems<TEnum, TKey, TValue>(
+        Func<Core.EnumDescriptor<TEnum>, TKey> keyConverter,
+        Func<Core.EnumDescriptor<TEnum>, TValue> valueConverter,
+        IEqualityComparer<TKey>? comparer = null)
+        where TEnum : Enum
+        where TKey : notnull
+        => Core.EnumMapper<TEnum>.Map()
+            .Select(descr => new KeyValuePair<TKey, TValue>(keyConverter.Invoke(descr), valueConverter.Invoke(descr)))
+            .AsDictionary(comparer);
+
+
+    /// <summary>
+    /// 获取带标注特性集合的枚举项字典集合（键为枚举项）。
+    /// </summary>
+    /// <typeparam name="TEnum">指定的枚举类型。</typeparam>
+    /// <typeparam name="TAttribute">指定的枚举项标注特性类型。</typeparam>
+    /// <typeparam name="TValue">指定的值类型。</typeparam>
+    /// <param name="valueConverter">给定的值转换器。</param>
+    /// <returns>返回 <see cref="Dictionary{TEnum, IEnumerable}"/>。</returns>
+    public static Dictionary<TEnum, IEnumerable<TValue>> GetEnumItemsWithAttributes<TEnum, TAttribute, TValue>(
+        Func<Core.EnumDescriptor<TEnum>, TAttribute, TValue> valueConverter)
+        where TEnum : Enum
         where TAttribute : Attribute
-    {
-        var dict = new Dictionary<TEnum, IEnumerable<TResult>>();
+        => GetEnumItemsWithAttributes<TEnum, TEnum, TAttribute, TValue>(static key => key.EnumItem, valueConverter);
 
-        var fields = typeof(TEnum).GetEnumFields();
-        foreach (var field in fields)
-        {
-            var value = field.GetValue(null)!;
-
-            var results = field.GetCustomAttributes<TAttribute>()
-                .Select(attrib => resultSelector((TValue)value, attrib));
-
-            dict.Add((TEnum)value, results);
-        }
-
-        return dict;
-    }
+    /// <summary>
+    /// 获取带标注特性集合的枚举项字典集合。
+    /// </summary>
+    /// <typeparam name="TEnum">指定的枚举类型。</typeparam>
+    /// <typeparam name="TKey">指定的键类型。</typeparam>
+    /// <typeparam name="TAttribute">指定的枚举项标注特性类型。</typeparam>
+    /// <typeparam name="TValue">指定的值类型。</typeparam>
+    /// <param name="keyConverter">给定的键转换器。</param>
+    /// <param name="valueConverter">给定的值转换器。</param>
+    /// <param name="comparer">给定的键比较器（可选）。</param>
+    /// <returns>返回 <see cref="Dictionary{TKey, IEnumerable}"/>。</returns>
+    public static Dictionary<TKey, IEnumerable<TValue>> GetEnumItemsWithAttributes<TEnum, TKey, TAttribute, TValue>(
+        Func<Core.EnumDescriptor<TEnum>, TKey> keyConverter,
+        Func<Core.EnumDescriptor<TEnum>, TAttribute, TValue> valueConverter,
+        IEqualityComparer<TKey>? comparer = null)
+        where TEnum : Enum
+        where TKey : notnull
+        where TAttribute : Attribute
+        => Core.EnumMapper<TEnum>.Map()
+            .Select(descr => new KeyValuePair<TKey, IEnumerable<TValue>>(keyConverter.Invoke(descr),
+                descr.GetAttributes<TAttribute>().Select(attrib => valueConverter.Invoke(descr, attrib))))
+            .AsDictionary(comparer);
 
 }

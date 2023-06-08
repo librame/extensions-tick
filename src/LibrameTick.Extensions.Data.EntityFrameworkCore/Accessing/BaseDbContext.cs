@@ -24,33 +24,33 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public class BaseDbContext : DbContext, IDbContext
 {
-    private IReadOnlyList<Audit>? _savingAudits;
+    private IEnumerable<Audit>? _savingAudits;
 
-    private readonly IOptionsMonitor<DataExtensionOptions> _dataOptionsMonitor;
-    private readonly IOptionsMonitor<CoreExtensionOptions> _coreOptionsMonitor;
+    private readonly IOptionsMonitor<DataExtensionOptions> _dataOptions;
+    private readonly IOptionsMonitor<CoreExtensionOptions> _coreOptions;
     private readonly DbContextOptions _dbContextOptions;
 
 
     /// <summary>
     /// 构造一个 <see cref="BaseDbContext"/>。
     /// </summary>
+    /// <param name="shardingContext">给定的 <see cref="IShardingContext"/>。</param>
     /// <param name="encryptionConverterFactory">给定的 <see cref="IEncryptionConverterFactory"/>。</param>
-    /// <param name="shardingManager">给定的 <see cref="IShardingManager"/>。</param>
-    /// <param name="dataOptionsMonitor">给定的 <see cref="IOptionsMonitor{DataExtensionOptions}"/>。</param>
-    /// <param name="coreOptionsMonitor">给定的 <see cref="IOptionsMonitor{CoreExtensionOptions}"/>。</param>
+    /// <param name="dataOptions">给定的 <see cref="IOptionsMonitor{DataExtensionOptions}"/>。</param>
+    /// <param name="coreOptions">给定的 <see cref="IOptionsMonitor{CoreExtensionOptions}"/>。</param>
     /// <param name="options">给定的 <see cref="DbContextOptions"/>。</param>
-    public BaseDbContext(IEncryptionConverterFactory encryptionConverterFactory,
-        IShardingManager shardingManager,
-        IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
-        IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
+    public BaseDbContext(IShardingContext shardingContext,
+        IEncryptionConverterFactory encryptionConverterFactory,
+        IOptionsMonitor<DataExtensionOptions> dataOptions,
+        IOptionsMonitor<CoreExtensionOptions> coreOptions,
         DbContextOptions options)
         : base(options)
     {
-        _dataOptionsMonitor = dataOptionsMonitor;
-        _coreOptionsMonitor = coreOptionsMonitor;
+        _dataOptions = dataOptions;
+        _coreOptions = coreOptions;
         _dbContextOptions = options;
         EncryptionConverterFactory = encryptionConverterFactory;
-        ShardingManager = shardingManager;
+        ShardingContext = shardingContext;
 
         if (DataOptions.Audit.Enabling)
         {
@@ -64,23 +64,18 @@ public class BaseDbContext : DbContext, IDbContext
     /// 数据扩展选项。
     /// </summary>
     public DataExtensionOptions DataOptions
-        => _dataOptionsMonitor.CurrentValue;
+        => _dataOptions.CurrentValue;
 
     /// <summary>
     /// 核心扩展选项。
     /// </summary>
     public CoreExtensionOptions CoreOptions
-        => _coreOptionsMonitor.CurrentValue;
+        => _coreOptions.CurrentValue;
 
     /// <summary>
     /// 加密转换器工厂。
     /// </summary>
     public IEncryptionConverterFactory EncryptionConverterFactory { get; init; }
-
-    /// <summary>
-    /// 分片管理器工厂。
-    /// </summary>
-    public IShardingManager ShardingManager { get; init; }
 
     /// <summary>
     /// 存取器选项扩展。
@@ -109,8 +104,13 @@ public class BaseDbContext : DbContext, IDbContext
     /// <summary>
     /// 上下文类型。
     /// </summary>
-    public Type ContextType
+    public virtual Type ContextType
         => GetType();
+
+    /// <summary>
+    /// 分片上下文。
+    /// </summary>
+    public IShardingContext ShardingContext { get; init; }
 
 
     ///// <summary>
@@ -137,18 +137,18 @@ public class BaseDbContext : DbContext, IDbContext
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        PreModelCreating(modelBuilder);
+        PreOnModelCreating(modelBuilder);
 
-        ModelCreatingCore(modelBuilder);
+        OnModelCreatingCore(modelBuilder);
 
-        PostModelCreating(modelBuilder);
+        PostOnModelCreating(modelBuilder);
     }
 
     /// <summary>
     /// 预模型创建。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    protected virtual void PreModelCreating(ModelBuilder modelBuilder)
+    protected virtual void PreOnModelCreating(ModelBuilder modelBuilder)
     {
         // 支持迁移程序集模型
         if (DataOptions.Access.AutoMapping && !string.IsNullOrEmpty(RelationalExtension?.MigrationsAssembly))
@@ -163,7 +163,7 @@ public class BaseDbContext : DbContext, IDbContext
     /// 模型创建核心。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    protected virtual void ModelCreatingCore(ModelBuilder modelBuilder)
+    protected virtual void OnModelCreatingCore(ModelBuilder modelBuilder)
     {
     }
 
@@ -171,23 +171,27 @@ public class BaseDbContext : DbContext, IDbContext
     /// 后置模型配置。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    protected virtual void PostModelCreating(ModelBuilder modelBuilder)
+    protected virtual void PostOnModelCreating(ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             foreach (var property in entityType.ClrType.GetProperties())
             {
                 // 启用对实体加密属性的支持
-                if (property.IsEncrypted())
+                if (DataOptions.Access.AutoEncryption && property.IsEncrypted())
                     entityType.UseEncryption(property, this);
 
                 // 启用对强类型属性的支持
-                if (property.IsStronglyTypedIdentifier(out var valueType))
+                if (DataOptions.Access.AutoStronglyTyped && property.IsStronglyTypedIdentifier(out var valueType))
                     entityType.UseStronglyTypedIdentifier(property, valueType!);
 
                 // 支持将 GUID 类型统一处理为 Chars 类型（跨数据库支持 GUID）
-                if (DataOptions.Access.GuidToChars)
-                    entityType.UseGuidToChars(property, modelBuilder);
+                if (DataOptions.Access.AutoGuidToChars && property.IsGuidOrNullable(out var isNullable))
+                    entityType.UseGuidToChars(property, modelBuilder, isNullable);
+
+                // 支持数据版本标识以支持并发功能
+                if (DataOptions.Access.AutoRowVersion && entityType.IsRowVersionType())
+                    entityType.UseRowVersion(property, modelBuilder);
 
                 PostModelCreatedPropertyAction?.Invoke(property, modelBuilder, this);
             }
@@ -212,21 +216,12 @@ public class BaseDbContext : DbContext, IDbContext
         var dbContext = (sender as BaseDbContext)!;
         var auditOptions = dbContext.DataOptions.Audit;
 
-        var auditingManager = dbContext.GetService<IAuditingManager>();
-
-#pragma warning disable EF1001 // Internal EF Core API usage.
-
-        var entityEntries = ((IDbContextDependencies)dbContext).StateManager
-            .GetEntriesForState(auditOptions.AddedState, auditOptions.ModifiedState,
-                auditOptions.DeletedState, auditOptions.UnchangedState);
-
-        dbContext._savingAudits = auditingManager.GetAudits(entityEntries.Select(s => new EntityEntry(s)));
-
-#pragma warning restore EF1001 // Internal EF Core API usage.
+        var auditingContext = dbContext.GetService<IAuditingContext<EntityEntry, Audit>>();
+        dbContext._savingAudits = auditingContext.GetAudits(dbContext);
 
         // 保存审计数据
-        if (dbContext._savingAudits.Count > 0 && auditOptions.SaveAudits)
-            dbContext.Set<Audit>().AddRange(dbContext._savingAudits);
+        if (auditOptions.SaveAudits && dbContext._savingAudits?.Count() > 0)
+            dbContext.DataOptions.SavingAuditsAction(dbContext, dbContext._savingAudits);
     }
 
 }

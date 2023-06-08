@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Template;
 
-internal class InternalTemplateProvider : AbstractTemplateProvider
+sealed internal class InternalTemplateProvider : AbstractTemplateProvider
 {
     private InternalTemplateProvider()
     {

@@ -55,5 +55,5 @@ public class AuditOptions : IOptions
     /// 通知动作。
     /// </summary>
     [JsonIgnore]
-    public Action<IReadOnlyList<Audit>>? NotificationAction { get; set; }
+    public Action<IEnumerable<Audit>>? NotificationAction { get; set; }
 }

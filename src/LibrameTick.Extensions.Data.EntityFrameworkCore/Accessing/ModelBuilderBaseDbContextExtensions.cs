@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 
 namespace Librame.Extensions.Data.Accessing;
@@ -49,15 +48,14 @@ public static class ModelBuilderBaseDbContextExtensions
 
         var modelTypes = modelAssemblies
             .Select(Assembly.Load)
-            .Where(p => !p.IsDynamic) // 动态程序集不支持导出类型集合
-            .SelectMany(s => s.ExportedTypes)
+            .Where(static p => !p.IsDynamic) // 动态程序集不支持导出类型集合
+            .SelectMany(static s => s.ExportedTypes)
             .Where(p => p.IsConcreteType() && !p.IsNested && !p.IsDefined(notMappedType, inherit: false))
             .ToList();
 
         foreach (var modelType in modelTypes)
         {
-            createMethod.MakeGenericMethod(modelType)
-                .Invoke(modelBuilder, new object[] { });
+            createMethod.MakeGenericMethod(modelType).Invoke(modelBuilder, new object[] { });
         }
 
         return modelBuilder;
@@ -78,49 +76,47 @@ public static class ModelBuilderBaseDbContextExtensions
 
         modelBuilder.Entity<Audit>(b =>
         {
-            b.ToTableWithSharding(dbContext.ShardingManager);
+            b.ToTableWithSharding(dbContext.ShardingContext);
 
-            b.HasIndex(i => new { i.TableName, i.EntityId }).HasDatabaseName();
+            b.HasIndex(static i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
-            b.HasKey(k => k.Id);
+            b.HasKey(static k => k.Id);
 
-            b.Property(p => p.Id).ValueGeneratedNever()
-                .Sharding<ModShardingStrategy>(dbContext.ShardingManager);
+            b.Property(static p => p.Id).ValueGeneratedNever();
 
             if (limitableMaxLength > 0)
             {
-                b.Property(p => p.TableName).HasMaxLength(limitableMaxLength).IsRequired();
-                b.Property(p => p.EntityId).HasMaxLength(limitableMaxLength).IsRequired();
-                b.Property(p => p.StateName).HasMaxLength(limitableMaxLength);
-                b.Property(p => p.EntityTypeName).HasMaxLength(limitableMaxLength);
+                b.Property(static p => p.TableName).HasMaxLength(limitableMaxLength).IsRequired();
+                b.Property(static p => p.EntityId).HasMaxLength(limitableMaxLength).IsRequired();
+                b.Property(static p => p.StateName).HasMaxLength(limitableMaxLength);
+                b.Property(static p => p.EntityTypeName).HasMaxLength(limitableMaxLength);
             }
         });
 
         modelBuilder.Entity<AuditProperty>(b =>
         {
-            b.ToTableWithSharding(dbContext.ShardingManager);
+            b.ToTableWithSharding(dbContext.ShardingContext);
 
-            b.HasIndex(i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
+            b.HasIndex(static i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
 
-            b.HasKey(k => k.Id);
+            b.HasKey(static k => k.Id);
 
-            b.Property(x => x.Id).ValueGeneratedNever()
-                .Sharding<ModShardingStrategy>(dbContext.ShardingManager);
+            b.Property(static x => x.Id).ValueGeneratedNever();
 
             if (limitableMaxLength > 0)
             {
-                b.Property(p => p.AuditId).HasMaxLength(limitableMaxLength).IsRequired();
-                b.Property(p => p.PropertyName).HasMaxLength(limitableMaxLength);
-                b.Property(p => p.PropertyTypeName).HasMaxLength(limitableMaxLength);
+                b.Property(static p => p.AuditId).HasMaxLength(limitableMaxLength).IsRequired();
+                b.Property(static p => p.PropertyName).HasMaxLength(limitableMaxLength);
+                b.Property(static p => p.PropertyTypeName).HasMaxLength(limitableMaxLength);
             }
 
             // MaxLength
-            b.Property(p => p.OldValue);
-            b.Property(p => p.NewValue);
+            b.Property(static p => p.OldValue);
+            b.Property(static p => p.NewValue);
 
             if (mapRelationship)
             {
-                b.HasOne(f => f.Audit).WithMany(p => p.Properties).HasForeignKey(fk => fk.AuditId);
+                b.HasOne(static f => f.Audit).WithMany(static p => p.Properties).HasForeignKey(static fk => fk.AuditId);
             }
         });
 

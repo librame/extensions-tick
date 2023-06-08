@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义对象更新标识符接口。
+/// 定义联合 <see cref="IObjectUpdation"/> 与 <see cref="IObjectIdentifier"/> 的对象更新标识符接口。
 /// </summary>
 public interface IObjectUpdationIdentifier : IObjectUpdation, IObjectIdentifier
 {

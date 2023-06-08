@@ -66,7 +66,7 @@ public static class ConnectionStringExtensions
                 var pairPart = part.Split(keyValueSeparator);
                 return new KeyValuePair<string, string>(pairPart[0], pairPart[pairPart.Length - 1]);
             })
-            .ToDictionary(ks => ks.Key, ele => ele.Value, StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(static ks => ks.Key, static ele => ele.Value, StringComparer.OrdinalIgnoreCase);
 
         var database = string.Empty;
 

@@ -24,16 +24,9 @@ public class CultureInfoShardingStrategy : AbstractShardingStrategy<CultureInfo>
     /// 构造一个 <see cref="CultureInfoShardingStrategy"/>。
     /// </summary>
     public CultureInfoShardingStrategy()
-        : base()
+        : base(() => CultureInfo.CurrentUICulture)
     {
-        AddParameter("c", uic => uic.Name.Replace('-', '_'));
+        AddParameter("c", static uic => uic.Name.Replace('-', '_'));
     }
-
-
-    /// <summary>
-    /// 重写默认值为当前文化信息 <see cref="CultureInfo.CurrentCulture"/>。
-    /// </summary>
-    public override Lazy<CultureInfo> DefaultValue
-        => new Lazy<CultureInfo>(CultureInfo.CurrentCulture);
 
 }

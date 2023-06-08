@@ -18,6 +18,11 @@ namespace Librame.Extensions;
 public static class PathExtensions
 {
     /// <summary>
+    /// 文件缓冲区大小。
+    /// </summary>
+    public static int FileBufferSize = 1024 * 10;
+
+    /// <summary>
     /// <see cref="Directory.GetCurrentDirectory()"/> 当前目录。
     /// </summary>
     public static readonly string CurrentDirectory
@@ -172,6 +177,68 @@ public static class PathExtensions
     #region BinaryFile
 
     /// <summary>
+    /// 比较两个文件是否相等（支持比较文件路径、大小、内容等）。
+    /// </summary>
+    /// <param name="path1">给定的文件路径1。</param>
+    /// <param name="path2">给定的文件路径2。</param>
+    /// <param name="pathIgnoreCase">比较文件路径时，是否区分路径字符大小写（可选；默认自动根据系统平台判定，如 Linux 平台区分，其他不分区，可手动指定）。</param>
+    /// <param name="compareFileSize">是否比较文件大小（可选；默认不启用，也不推荐启用，除非你能确定文件大小相等就表示是同一个文件）。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public static bool FileEquals(this string path1, string path2, bool? pathIgnoreCase = null, bool compareFileSize = false)
+    {
+        var pathComparison = pathIgnoreCase is null
+            ? RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase
+            : !pathIgnoreCase.Value ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+        // 文件路径相等直接返回相等
+        if (path1.Equals(path2, pathComparison))
+            return true;
+
+        using (var handle1 = File.OpenHandle(path1))
+        using (var handle2 = File.OpenHandle(path2))
+        {
+            var length1 = RandomAccess.GetLength(handle1);
+            var length2 = RandomAccess.GetLength(handle2);
+
+            if (compareFileSize && length1 == length2)
+                return true; // 如果启用比较文件大小，则大小相等表示文件相等
+
+            var buffer1 = FileBufferSize.RentByteArray();
+            var buffer2 = FileBufferSize.RentByteArray();
+
+            var offset1 = 0L;
+            var offset2 = 0L;
+
+            while (true)
+            {
+                var curLength1 = RandomAccess.Read(handle1, buffer1, offset1);
+                var curLength2 = RandomAccess.Read(handle2, buffer2, offset2);
+
+                // 如果同顺序读取指定长度内容不相同，则直接返回不相等
+                if (!buffer1.SequenceEqualByReadOnlySpan(buffer2))
+                {
+                    buffer1.ReturnArray();
+                    buffer2.ReturnArray();
+
+                    return false;
+                }
+
+                if (curLength1 == 0 || curLength2 == 0)
+                    break;
+
+                offset1 += curLength1;
+                offset2 += curLength2;
+            }
+
+            buffer1.ReturnArray();
+            buffer2.ReturnArray();
+
+            return true;
+        }
+    }
+
+
+    /// <summary>
     /// 读取二进制文件。
     /// </summary>
     /// <param name="path">给定的文件路径。</param>
@@ -183,19 +250,20 @@ public static class PathExtensions
     /// 读取二进制文件。
     /// </summary>
     /// <param name="path">给定的文件路径。</param>
-    /// <param name="fileOffset">给定的读取偏移量。</param>
+    /// <param name="offset">给定的读取偏移量。</param>
     /// <returns>返回字节数组。</returns>
-    public static byte[] ReadBinaryFile(this string path, long fileOffset)
+    public static byte[] ReadBinaryFile(this string path, long offset)
     {
         using (var handle = File.OpenHandle(path))
         {
             var length = RandomAccess.GetLength(handle);
-            var buffer = new byte[length - fileOffset];
+            var buffer = new byte[length - offset];
 
-            var readLength = RandomAccess.Read(handle, buffer, fileOffset);
+            var readLength = RandomAccess.Read(handle, buffer, offset);
             return buffer;
         }
     }
+
 
     /// <summary>
     /// 写入二进制文件。
@@ -210,12 +278,12 @@ public static class PathExtensions
     /// </summary>
     /// <param name="path">给定的文件路径。</param>
     /// <param name="buffer">给定的字节数组。</param>
-    /// <param name="fileOffset">给定的读取偏移量。</param>
-    public static void WriteBinaryFile(this string path, byte[] buffer, long fileOffset)
+    /// <param name="offset">给定的写入偏移量。</param>
+    public static void WriteBinaryFile(this string path, byte[] buffer, long offset)
     {
         using (var handle = File.OpenHandle(path, FileMode.Create, FileAccess.Write, FileShare.Read))
         {
-            RandomAccess.Write(handle, buffer, fileOffset);
+            RandomAccess.Write(handle, buffer, offset);
         }
     }
 

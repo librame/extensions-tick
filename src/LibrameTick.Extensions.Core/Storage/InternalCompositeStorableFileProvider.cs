@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Storage;
 
-sealed class InternalCompositeStorableFileProvider : IStorableFileProvider, IComposable<IStorableFileProvider>
+sealed internal class InternalCompositeStorableFileProvider : IStorableFileProvider, IComposable<IStorableFileProvider>
 {
     private readonly IStorableFileProvider[] _providers;
 

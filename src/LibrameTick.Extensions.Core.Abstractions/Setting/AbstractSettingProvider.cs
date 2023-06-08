@@ -13,15 +13,15 @@
 namespace Librame.Extensions.Setting;
 
 /// <summary>
-/// 定义抽象实现 <see cref="ISettingProvider{TSetting}"/> 的设置提供程序。
+/// 定义抽象实现 <see cref="ISettingProvider{TSettingRoot}"/> 的设置提供程序。
 /// </summary>
-public abstract class AbstractSettingProvider<TSetting> : ISettingProvider<TSetting>
-    where TSetting : ISetting
+public abstract class AbstractSettingProvider<TSettingRoot> : ISettingProvider<TSettingRoot>
+    where TSettingRoot : ISettingRoot
 {
     /// <summary>
     /// 设置类型。
     /// </summary>
-    public Type SettingType => typeof(TSetting);
+    public Type SettingRootType => typeof(TSettingRoot);
 
 
     /// <summary>
@@ -34,23 +34,21 @@ public abstract class AbstractSettingProvider<TSetting> : ISettingProvider<TSett
     /// <summary>
     /// 生成设置。
     /// </summary>
-    /// <returns>返回 <typeparamref name="TSetting"/>。</returns>
-    public virtual TSetting? Generate()
-        => default;
+    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
+    public abstract TSettingRoot Generate();
 
 
     /// <summary>
     /// 加载或保存新生成的设置。
     /// </summary>
-    /// <returns>返回 <typeparamref name="TSetting"/>。</returns>
-    public virtual TSetting LoadOrSave()
+    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
+    public virtual TSettingRoot LoadOrSave()
     {
         if (!Exist())
         {
             var setting = Generate();
 
-            if (setting is not null)
-                return Save(setting);
+            return Save(setting);
         }
 
         return Load();
@@ -59,13 +57,13 @@ public abstract class AbstractSettingProvider<TSetting> : ISettingProvider<TSett
     /// <summary>
     /// 加载设置。
     /// </summary>
-    /// <returns>返回 <typeparamref name="TSetting"/>。</returns>
-    public abstract TSetting Load();
+    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
+    public abstract TSettingRoot Load();
 
     /// <summary>
     /// 保存设置。
     /// </summary>
-    /// <param name="setting">给定的 <typeparamref name="TSetting"/>。</param>
-    /// <returns>返回 <typeparamref name="TSetting"/>。</returns>
-    public abstract TSetting Save(TSetting setting);
+    /// <param name="settingRoot">给定的 <typeparamref name="TSettingRoot"/>。</param>
+    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
+    public abstract TSettingRoot Save(TSettingRoot settingRoot);
 }

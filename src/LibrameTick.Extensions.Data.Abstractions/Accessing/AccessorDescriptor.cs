@@ -28,6 +28,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <param name="serviceType">给定的服务类型。</param>
     /// <param name="name">给定的名称。</param>
     /// <param name="group">给定的所属群组。</param>
+    /// <param name="partition">给定的所属分区。</param>
     /// <param name="access">给定的访问模式。</param>
     /// <param name="dispatching">给定的调度模式。</param>
     /// <param name="priority">给定的优先级。</param>
@@ -38,18 +39,20 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
         Type serviceType,
         string name,
         int group,
+        int partition,
         AccessMode access,
         DispatchingMode dispatching,
         //bool pooling,
         float priority,
         AlgorithmOptions algorithm,
-        ShardedAttribute? sharded,
+        ShardingAttribute? sharded,
         string? loaderHost)
     {
         Accessor = accessor;
         ServiceType = serviceType;
         Name = name;
         Group = group;
+        Partition = partition;
         Access = access;
         Dispatching = dispatching;
         //Pooling = pooling;
@@ -81,6 +84,11 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     public int Group { get; init; }
 
     /// <summary>
+    /// 所属分区。
+    /// </summary>
+    public int Partition { get; init; }
+
+    /// <summary>
     /// 访问模式。
     /// </summary>
     public AccessMode Access { get; init; }
@@ -108,7 +116,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <summary>
     /// 分库特性。
     /// </summary>
-    public ShardedAttribute? Sharded { get; init; }
+    public ShardingAttribute? Sharded { get; init; }
 
     /// <summary>
     /// 负载器主机。

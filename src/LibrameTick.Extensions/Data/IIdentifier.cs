@@ -29,7 +29,66 @@ public interface IIdentifier<TId> : IEquatable<IIdentifier<TId>>, IObjectIdentif
     /// 转换为标识。
     /// </summary>
     /// <param name="id">给定的标识对象。</param>
-    /// <param name="paramName">给定的参数名称。</param>
+    /// <param name="paramName">给定的参数名（可选；默认为 <paramref name="id"/> 调用参数名）。</param>
     /// <returns>返回 <typeparamref name="TId"/>。</returns>
-    TId ToId(object? id, string? paramName);
+    TId ToId(object? id, [CallerArgumentExpression(nameof(id))] string? paramName = null)
+        => id.As<TId>(paramName);
+
+
+    #region IObjectIdentifier
+
+    /// <summary>
+    /// 标识类型。
+    /// </summary>
+    [NotMapped]
+    Type IObjectIdentifier.IdType
+        => typeof(TId);
+
+
+    /// <summary>
+    /// 获取对象标识。
+    /// </summary>
+    /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
+    object IObjectIdentifier.GetObjectId()
+        => Id;
+
+    /// <summary>
+    /// 异步获取对象标识。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+    /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
+    ValueTask<object> IObjectIdentifier.GetObjectIdAsync(CancellationToken cancellationToken)
+        => cancellationToken.SimpleValueTask(GetObjectId);
+
+
+    /// <summary>
+    /// 设置对象标识。
+    /// </summary>
+    /// <param name="newId">给定的新标识对象。</param>
+    /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
+    object IObjectIdentifier.SetObjectId(object newId)
+    {
+        Id = ToId(newId, nameof(newId));
+        return newId;
+    }
+
+    /// <summary>
+    /// 异步设置对象标识。
+    /// </summary>
+    /// <param name="newId">给定的新对象标识。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+    /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
+    ValueTask<object> IObjectIdentifier.SetObjectIdAsync(object newId, CancellationToken cancellationToken)
+    {
+        var id = ToId(newId, nameof(newId));
+
+        return cancellationToken.SimpleValueTask(() =>
+        {
+            Id = id;
+            return newId;
+        });
+    }
+
+    #endregion
+
 }

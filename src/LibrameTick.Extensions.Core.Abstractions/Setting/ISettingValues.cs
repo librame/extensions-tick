@@ -15,13 +15,13 @@ namespace Librame.Extensions.Setting;
 /// <summary>
 /// 定义一个设置值集合接口。
 /// </summary>
-/// <typeparam name="TSetting">指定实现 <see cref="ISetting"/> 的设置类型。</typeparam>
-public interface ISettingValues<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] out TSetting>
-    where TSetting : ISetting
+/// <typeparam name="TSettingRoot">指定实现 <see cref="ISettingRoot"/> 的设置根类型。</typeparam>
+public interface ISettingValues<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] out TSettingRoot>
+    where TSettingRoot : ISettingRoot
 {
     /// <summary>
     /// 获取单例值。
     /// </summary>
-    /// <returns>返回 <typeparamref name="TSetting"/>。</returns>
-    TSetting GetSingletonValue();
+    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
+    TSettingRoot GetSingletonValue();
 }

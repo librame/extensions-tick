@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Crypto;
 
-class InternalAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
+sealed internal class InternalAsymmetricAlgorithm : AbstractAsymmetricAlgorithm
 {
     public InternalAsymmetricAlgorithm(IAlgorithmParameterGenerator parameterGenerator,
         IOptionsMonitor<CoreExtensionOptions> options)

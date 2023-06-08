@@ -56,12 +56,12 @@ namespace Librame.Extensions.Core.Tests
             info.Version = typeof(CloneInfo).Assembly.GetName().Version;
             info.Parent = new CloneInfo();
 
-            var mapPropsInfo = PropertyExpressionMapper<CloneInfo, CloneInfo>.Map(info);
+            var mapPropsInfo = ExpressionMapper<CloneInfo, CloneInfo>.Map(info);
             Assert.Equal(info.Size, mapPropsInfo.Size);
             Assert.Equal(info.Version, mapPropsInfo.Version);
             Assert.NotEqual(info.Field2, mapPropsInfo.Field2);
 
-            var mapAllFieldsInfo = AllFieldExpressionMapper<CloneInfo, CloneInfo>.Map(info);
+            var mapAllFieldsInfo = AllExpressionMapper<CloneInfo, CloneInfo>.Map(info);
             Assert.Equal(info.Size, mapAllFieldsInfo.Size);
             Assert.Equal(info.Version, mapAllFieldsInfo.Version);
             Assert.Equal(info.Field2, mapAllFieldsInfo.Field2);
@@ -81,7 +81,7 @@ namespace Librame.Extensions.Core.Tests
             {
                 for (int i = 0; i < 1000_000; i++)
                 {
-                    var _ = PropertyExpressionMapper<CloneInfo, CloneInfo>.Map(info);
+                    var _ = ExpressionMapper<CloneInfo, CloneInfo>.Map(info);
                 }
 
                 return s.ElapsedMilliseconds;
@@ -92,7 +92,7 @@ namespace Librame.Extensions.Core.Tests
             {
                 for (int i = 0; i < 1000_000; i++)
                 {
-                    var _ = AllFieldExpressionMapper<CloneInfo, CloneInfo>.Map(info);
+                    var _ = AllExpressionMapper<CloneInfo, CloneInfo>.Map(info);
                 }
 
                 return s.ElapsedMilliseconds;

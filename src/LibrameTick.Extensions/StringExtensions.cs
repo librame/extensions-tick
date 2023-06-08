@@ -75,6 +75,67 @@ public static class StringExtensions
     }
 
 
+    #region IfNull
+
+    /// <summary>
+    /// 取得不为 NULL 字符串。
+    /// </summary>
+    /// <param name="current">给定用于判定的当前字符串。</param>
+    /// <param name="defaultFunc">给定当 <paramref name="current"/> 为 NULL 时要返回的默认字符串方法。</param>
+    /// <returns>返回 <paramref name="current"/> 或 <paramref name="defaultFunc"/> 字符串。</returns>
+    public static string IfNull(this string? current, Func<string> defaultFunc)
+        => current ?? defaultFunc();
+
+    /// <summary>
+    /// 取得不为 NULL 字符串。
+    /// </summary>
+    /// <param name="current">给定用于判定的当前字符串。</param>
+    /// <param name="default">给定当 <paramref name="current"/> 为 NULL 时要返回的默认字符串。</param>
+    /// <returns>返回 <paramref name="current"/> 或 <paramref name="default"/> 字符串。</returns>
+    public static string IfNull(this string? current, string @default)
+        => current ?? @default;
+
+
+    /// <summary>
+    /// 取得不为 NULL 或 Empty 的字符串。
+    /// </summary>
+    /// <param name="current">给定用于判定的当前字符串。</param>
+    /// <param name="defaultFunc">给定当 <paramref name="current"/> 为 NULL 或 Empty 时要返回的默认字符串方法。</param>
+    /// <returns>返回 <paramref name="current"/> 或 <paramref name="defaultFunc"/> 字符串。</returns>
+    public static string IfNullOrEmpty(this string? current, Func<string> defaultFunc)
+        => string.IsNullOrEmpty(current) ? defaultFunc() : current;
+
+    /// <summary>
+    /// 取得不为 NULL 或 Empty 的字符串。
+    /// </summary>
+    /// <param name="current">给定用于判定的当前字符串。</param>
+    /// <param name="default">给定当 <paramref name="current"/> 为 NULL 或 Empty 时要返回的默认字符串。</param>
+    /// <returns>返回 <paramref name="current"/> 或 <paramref name="default"/> 字符串。</returns>
+    public static string IfNullOrEmpty(this string? current, string @default)
+        => string.IsNullOrEmpty(current) ? @default : current;
+
+
+    /// <summary>
+    /// 取得不为 NULL、Empty 或空格的字符串。
+    /// </summary>
+    /// <param name="current">给定用于判定的当前字符串。</param>
+    /// <param name="defaultFunc">给定当 <paramref name="current"/> 为 NULL、Empty 或空格时要返回的默认字符串方法。</param>
+    /// <returns>返回 <paramref name="current"/> 或 <paramref name="defaultFunc"/> 字符串。</returns>
+    public static string IfNullOrWhiteSpace(this string? current, Func<string> defaultFunc)
+        => string.IsNullOrWhiteSpace(current) ? defaultFunc() : current;
+
+    /// <summary>
+    /// 取得不为 NULL、Empty 或空格的字符串。
+    /// </summary>
+    /// <param name="current">给定用于判定的当前字符串。</param>
+    /// <param name="default">给定当 <paramref name="current"/> 为 NULL、Empty 或空格时要返回的默认字符串。</param>
+    /// <returns>返回 <paramref name="current"/> 或 <paramref name="default"/> 字符串。</returns>
+    public static string IfNullOrWhiteSpace(this string? current, string @default)
+        => string.IsNullOrWhiteSpace(current) ? @default : current;
+
+    #endregion
+
+
     #region Append and Insert
 
     /// <summary>
@@ -120,7 +181,7 @@ public static class StringExtensions
 
 
     /// <summary>
-    /// 格式化为字符串。
+    /// 将字节数组使用指定的时间刻度格式化为短字符串（如：8db56dc7163edf5）。
     /// </summary>
     /// <param name="buffer">给定的字节数组。</param>
     /// <param name="timeTicks">给定的时间周期数。</param>
@@ -130,7 +191,9 @@ public static class StringExtensions
         var i = 1L;
 
         foreach (var b in buffer)
+        {
             i *= b + 1;
+        }
 
         return "{0:x}".Format(_ = timeTicks);
     }
@@ -188,13 +251,10 @@ public static class StringExtensions
             return valueString;
 
         var format = "0:";
-
         for (var i = 0; i < length; i++)
             format += "0";
 
-        format = "{" + format + "}";
-
-        return formatFactory(format, value);
+        return formatFactory($"{{{format}}}", value);
     }
 
     #endregion

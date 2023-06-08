@@ -30,7 +30,7 @@ public interface IClockBootstrap : IBootstrap
     /// <param name="timestamp">给定的时间戳（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="DateTime"/> 的异步操作。</returns>
-    Task<DateTime> GetNowAsync(DateTime? timestamp = null,
+    ValueTask<DateTime> GetNowAsync(DateTime? timestamp = null,
         CancellationToken cancellationToken = default);
 
 
@@ -47,6 +47,6 @@ public interface IClockBootstrap : IBootstrap
     /// <param name="timestamp">给定的时间戳（可选）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="DateTimeOffset"/> 的异步操作。</returns>
-    Task<DateTimeOffset> GetUtcNowAsync(DateTimeOffset? timestamp = null,
+    ValueTask<DateTimeOffset> GetUtcNowAsync(DateTimeOffset? timestamp = null,
         CancellationToken cancellationToken = default);
 }

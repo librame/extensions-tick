@@ -12,6 +12,6 @@
 
 namespace Librame.Extensions.Crypto;
 
-class InternalAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
+sealed internal class InternalAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
 {
 }

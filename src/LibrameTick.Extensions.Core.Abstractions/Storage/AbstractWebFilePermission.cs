@@ -35,17 +35,17 @@ public abstract class AbstractWebFilePermission : IWebFilePermission
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含字符串的异步操作。</returns>
-    public virtual Task<string?> GetAccessTokenAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => _options.AccessToken);
+    public virtual ValueTask<string?> GetAccessTokenAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.SimpleValueTask(() => _options.AccessToken);
 
     /// <summary>
     /// 异步获取基础认证码（通常由用户名和密码组成）。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含字符串的异步操作。</returns>
-    public virtual Task<string?> GetBasicCodeAsync(CancellationToken cancellationToken = default)
+    public virtual ValueTask<string?> GetBasicCodeAsync(CancellationToken cancellationToken = default)
     {
-        return cancellationToken.RunTask(() =>
+        return cancellationToken.SimpleValueTask(() =>
         {
             if (string.IsNullOrEmpty(_options.UserName))
                 return null;
@@ -61,15 +61,15 @@ public abstract class AbstractWebFilePermission : IWebFilePermission
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含字符串的异步操作。</returns>
-    public virtual Task<string?> GetBearerTokenAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => _options.JwtToken);
+    public virtual ValueTask<string?> GetBearerTokenAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.SimpleValueTask(() => _options.JwtToken);
 
     /// <summary>
     /// 异步获取 Cookie 值。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含字符串的异步操作。</returns>
-    public virtual Task<string?> GetCookieValueAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => _options.CookieName);
+    public virtual ValueTask<string?> GetCookieValueAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.SimpleValueTask(() => _options.CookieName);
 
 }

@@ -16,6 +16,7 @@ using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Librame.Extensions.Setting;
 
 namespace Librame.Extensions.Data;
 
@@ -35,10 +36,14 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         : base(parentBuilder)
     {
         ServiceCharacteristics.AddSingleton<IIdGeneratorFactory>();
-        ServiceCharacteristics.AddSingleton<IAuditingManager>();
+
+        // Auditing
+        ServiceCharacteristics.AddSingleton<IAuditingParser<EntityEntry, Audit>>();
+        ServiceCharacteristics.AddSingleton<IAuditingTracker<EntityEntry>>();
+        ServiceCharacteristics.AddSingleton<IAuditingContext<EntityEntry, Audit>>();
 
         // Accessing
-        ServiceCharacteristics.AddScope<IAccessorManager>();
+        ServiceCharacteristics.AddScope<IAccessorContext>();
         ServiceCharacteristics.AddScope<IAccessorMigrator>();
         ServiceCharacteristics.AddScope<IAccessorResolver>();
 
@@ -46,8 +51,13 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         ServiceCharacteristics.AddScope<IAccessorSeeder>();
         ServiceCharacteristics.AddScope<IAccessorInitializer>();
 
+        // Setting
+        ServiceCharacteristics.AddSingleton<IShardingSettingProvider>();
+
         // Sharding
-        ServiceCharacteristics.AddSingleton<IShardingManager>();
+        ServiceCharacteristics.AddSingleton<IShardingContext>();
+        ServiceCharacteristics.AddSingleton<IShardingStrategyProvider>();
+        ServiceCharacteristics.AddSingleton<IShardingTracker>();
 
         // Storing
         ServiceCharacteristics.AddScope(typeof(IStore<>));

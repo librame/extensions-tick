@@ -22,9 +22,9 @@ public class PropertyNoticeNamedKey<TSource> : PropertyNoticeNamedKey
     /// 构造一个 <see cref="PropertyNoticeNamedKey{TSource}"/>。
     /// </summary>
     /// <param name="propertyName">给定的属性名称。</param>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
-    public PropertyNoticeNamedKey(string propertyName, string? sourceAliase = null)
-        : base(propertyName, new TypeNamedKey<TSource>(sourceAliase))
+    /// <param name="named">给定的命名（可选）。</param>
+    public PropertyNoticeNamedKey(string propertyName, string? named = null)
+        : base(propertyName, new TypeNamedKey<TSource>(named))
     {
         BaseKey = (TypeNamedKey<TSource>)base.BaseKey;
     }
@@ -67,10 +67,10 @@ public class PropertyNoticeNamedKey : IEquatable<PropertyNoticeNamedKey>
     /// 构造一个 <see cref="TypeNamedKey"/>。
     /// </summary>
     /// <param name="propertyName">给定的属性名称。</param>
-    /// <param name="sourceType">给定的源类型。</param>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
-    public PropertyNoticeNamedKey(string propertyName, Type sourceType, string? sourceAliase = null)
-        : this(propertyName, new TypeNamedKey(sourceType, sourceAliase))
+    /// <param name="sourceType">给定的来源类型。</param>
+    /// <param name="named">给定的命名（可选）。</param>
+    public PropertyNoticeNamedKey(string propertyName, Type sourceType, string? named = null)
+        : this(propertyName, new TypeNamedKey(sourceType, named))
     {
     }
 
@@ -127,6 +127,6 @@ public class PropertyNoticeNamedKey : IEquatable<PropertyNoticeNamedKey>
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{BaseKey}_{PropertyName}";
+        => $"{BaseKey}{BaseKey.Connector}{PropertyName}";
 
 }

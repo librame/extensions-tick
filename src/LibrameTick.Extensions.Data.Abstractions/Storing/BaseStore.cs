@@ -19,7 +19,7 @@ using Librame.Extensions.Specifications;
 namespace Librame.Extensions.Data.Storing;
 
 /// <summary>
-/// 定义实现 <see cref="IStore{T}"/> 的泛型基础商店。
+/// 定义实现 <see cref="IStore{T}"/> 的泛型基础存储。
 /// </summary>
 /// <typeparam name="T">指定的类型。</typeparam>
 public class BaseStore<T> : IStore<T>
@@ -28,22 +28,22 @@ public class BaseStore<T> : IStore<T>
     /// <summary>
     /// 构造一个 <see cref="BaseStore{T}"/>。 
     /// </summary>
-    /// <param name="accessorManager">给定的 <see cref="IAccessorManager"/>。</param>
+    /// <param name="accessorContext">给定的 <see cref="IAccessorContext"/>。</param>
     /// <param name="idGeneratorFactory">给定的 <see cref="IIdGeneratorFactory"/>。</param>
-    public BaseStore(IAccessorManager accessorManager, IIdGeneratorFactory idGeneratorFactory)
+    public BaseStore(IAccessorContext accessorContext, IIdGeneratorFactory idGeneratorFactory)
     {
-        AccessorManager = accessorManager;
+        AccessorContext = accessorContext;
         IdGeneratorFactory = idGeneratorFactory;
 
-        CurrentReadAccessor = accessorManager.GetReadAccessors();
-        CurrentWriteAccessor = accessorManager.GetWriteAccessors();
+        CurrentReadAccessor = accessorContext.GetReadAccessors();
+        CurrentWriteAccessor = accessorContext.GetWriteAccessors();
     }
 
 
     /// <summary>
-    /// <see cref="IAccessor"/> 管理器。
+    /// <see cref="IAccessor"/> 上下文。
     /// </summary>
-    public IAccessorManager AccessorManager { get; init; }
+    public IAccessorContext AccessorContext { get; init; }
 
     /// <summary>
     /// <see cref="IIdGenerator{TId}"/> 工厂。
@@ -51,14 +51,14 @@ public class BaseStore<T> : IStore<T>
     public IIdGeneratorFactory IdGeneratorFactory { get; init; }
 
     /// <summary>
-    /// 当前读取可调度存取器。
+    /// 当前读取调度器存取器。
     /// </summary>
-    public IDispatchableAccessors CurrentReadAccessor { get; set; }
+    public IDispatcherAccessors CurrentReadAccessor { get; set; }
 
     /// <summary>
-    /// 当前写入可调度存取器。
+    /// 当前写入调度器存取器。
     /// </summary>
-    public IDispatchableAccessors CurrentWriteAccessor { get; set; }
+    public IDispatcherAccessors CurrentWriteAccessor { get; set; }
 
 
     /// <summary>
@@ -69,7 +69,7 @@ public class BaseStore<T> : IStore<T>
     public virtual IStore<T> UseAccessor(string accessorName)
     {
         CurrentWriteAccessor = CurrentReadAccessor =
-            AccessorManager.GetAccessors(new NamedAccessorSpecification(accessorName));
+            AccessorContext.GetAccessors(new NamedAccessorSpecification(accessorName));
         return this;
     }
 
@@ -80,7 +80,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回 <see cref="IStore{T}"/>。</returns>
     public virtual IStore<T> UseReadAccessor(ISpecification<IAccessor>? specification = null)
     {
-        CurrentReadAccessor = AccessorManager.GetReadAccessors(specification);
+        CurrentReadAccessor = AccessorContext.GetReadAccessors(specification);
         return this;
     }
 
@@ -91,7 +91,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回 <see cref="IStore{T}"/>。</returns>
     public virtual IStore<T> UseWriteAccessor(ISpecification<IAccessor>? specification = null)
     {
-        CurrentWriteAccessor = AccessorManager.GetWriteAccessors(specification);
+        CurrentWriteAccessor = AccessorContext.GetWriteAccessors(specification);
         return this;
     }
 
@@ -102,7 +102,7 @@ public class BaseStore<T> : IStore<T>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选）。</param>
     /// <returns>返回 <see cref="IDispatcher{IAccessor}"/>。</returns>
     protected virtual IDispatcher<IAccessor> GetReadingDispatcher(ISpecification<IAccessor>? specification)
-        => (AccessorManager.GetReadAccessors(specification) ?? CurrentReadAccessor).ReadingDispatcher;
+        => (AccessorContext.GetReadAccessors(specification) ?? CurrentReadAccessor).ReadingDispatcher;
 
     /// <summary>
     /// 获取写入的存取器调度器。
@@ -110,7 +110,71 @@ public class BaseStore<T> : IStore<T>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选）。</param>
     /// <returns>返回 <see cref="IDispatcher{IAccessor}"/>。</returns>
     protected virtual IDispatcher<IAccessor> GetWritingDispatcher(ISpecification<IAccessor>? specification)
-        => (AccessorManager.GetWriteAccessors(specification) ?? CurrentWriteAccessor).WritingDispatcher;
+        => (AccessorContext.GetWriteAccessors(specification) ?? CurrentWriteAccessor).WritingDispatcher;
+
+
+    /// <summary>
+    /// 创建存储分区器。
+    /// </summary>
+    /// <param name="dispatcher">给定的 <see cref="IDispatcher{IAccessor}"/>。</param>
+    /// <returns>返回 <see cref="IStorePartitioner{T}"/>。</returns>
+    protected virtual IStorePartitioner<T> CreateParatitioner(IDispatcher<IAccessor> dispatcher)
+        => new BaseStorePartitioner<T>(dispatcher);
+
+
+    /// <summary>
+    /// 写入存取器上下文。
+    /// </summary>
+    /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
+    /// <param name="action">要执行的动作。</param>
+    protected virtual void WriteAccessorContext(IEnumerable<T> entities, Action<IDbContext, IEnumerable<T>> action)
+    {
+        if (CurrentWriteAccessor.WritingDispatcher.Mode == DispatchingMode.Striping)
+        {
+            var partitioner = CreateParatitioner(CurrentWriteAccessor.WritingDispatcher);
+
+            foreach (var pair in partitioner.CalcPartitions(entities))
+            {
+                action(pair.Key.CurrentContext, pair.Value);
+            }
+        }
+        else
+        {
+            foreach (var accessor in CurrentWriteAccessor.WritingDispatcher)
+            {
+                action(accessor.CurrentContext, entities);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 写入存取器上下文。
+    /// </summary>
+    /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
+    /// <param name="action">要执行的动作。</param>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>。</param>
+    protected virtual void WriteAccessorContext(IEnumerable<T> entities, Action<IDbContext, IEnumerable<T>> action,
+        ISpecification<IAccessor>? specification)
+    {
+        var dispatcher = GetWritingDispatcher(specification);
+
+        if (dispatcher.Mode == DispatchingMode.Striping)
+        {
+            var partitioner = CreateParatitioner(dispatcher);
+
+            foreach (var pair in partitioner.CalcPartitions(entities))
+            {
+                action(pair.Key.CurrentContext, pair.Value);
+            }
+        }
+        else
+        {
+            foreach (var accessor in dispatcher)
+            {
+                action(accessor.CurrentContext, entities);
+            }
+        }
+    }
 
 
     #region Query
@@ -332,7 +396,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
     public virtual Task<IList<T>?> FindListAsync(Expression<Func<T, bool>>? predicate = null,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null)
-        => cancellationToken.RunTask(() => FindList(predicate, specification));
+        => cancellationToken.SimpleTask(() => FindList(predicate, specification));
 
 
     /// <summary>
@@ -471,11 +535,23 @@ public class BaseStore<T> : IStore<T>
     public virtual void AddIfNotExists(T item, Expression<Func<T, bool>> predicate,
         ISpecification<IAccessor>? specification = null)
     {
-        foreach (var accessor in GetWritingDispatcher(specification))
+        var dispatcher = GetWritingDispatcher(specification);
+
+        if (dispatcher.Mode == DispatchingMode.Striping)
         {
-            var one = accessor.AddIfNotExists(item, predicate);
-            if (one is not null)
-                return;
+            var partitioner = CreateParatitioner(dispatcher);
+            var partition = partitioner.GetOrCalcPartition(item);
+            
+            dispatcher.GetRequiredPartitionAccessor(partition).AddIfNotExists(item, predicate);
+        }
+        else
+        {
+            foreach (var accessor in dispatcher)
+            {
+                var value = accessor.AddIfNotExists(item, predicate);
+                if (value is not null)
+                    return;
+            }
         }
 
         return;
@@ -486,12 +562,7 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Add(params T[] entities)
-    {
-        foreach (var accessor in CurrentWriteAccessor.WritingDispatcher)
-        {
-            accessor.CurrentContext.AddRange(entities);
-        }
-    }
+        => WriteAccessorContext(entities, static (context, values) => context.AddRange(values));
 
     /// <summary>
     /// 添加类型实例集合（仅支持写入存取器）。
@@ -499,12 +570,7 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     public virtual void Add(IEnumerable<T> entities, ISpecification<IAccessor>? specification = null)
-    {
-        foreach (var accessor in GetWritingDispatcher(specification))
-        {
-            accessor.CurrentContext.AddRange(entities);
-        }
-    }
+        => WriteAccessorContext(entities, static (context, values) => context.AddRange(values), specification);
 
     #endregion
 
@@ -516,12 +582,7 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Remove(params T[] entities)
-    {
-        foreach (var accessor in CurrentWriteAccessor.WritingDispatcher)
-        {
-            accessor.CurrentContext.RemoveRange(entities);
-        }
-    }
+        => WriteAccessorContext(entities, static (context, values) => context.RemoveRange(values));
 
     /// <summary>
     /// 移除类型实例集合（仅支持写入存取器）。
@@ -529,12 +590,7 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     public virtual void Remove(IEnumerable<T> entities, ISpecification<IAccessor>? specification = null)
-    {
-        foreach (var accessor in GetWritingDispatcher(specification))
-        {
-            accessor.CurrentContext.RemoveRange(entities);
-        }
-    }
+        => WriteAccessorContext(entities, static (context, values) => context.RemoveRange(values), specification);
 
     #endregion
 
@@ -546,12 +602,7 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的类型实例数组集合。</param>
     public virtual void Update(params T[] entities)
-    {
-        foreach (var accessor in CurrentWriteAccessor.WritingDispatcher)
-        {
-            accessor.CurrentContext.UpdateRange(entities);
-        }
-    }
+        => WriteAccessorContext(entities, static (context, values) => context.UpdateRange(values));
 
     /// <summary>
     /// 更新类型实例集合（仅支持写入存取器）。
@@ -559,11 +610,54 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     public virtual void Update(IEnumerable<T> entities, ISpecification<IAccessor>? specification = null)
+        => WriteAccessorContext(entities, static (context, values) => context.UpdateRange(values), specification);
+
+    #endregion
+
+
+    #region DirectExecute
+
+    /// <summary>
+    /// 直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回受影响的行数。</returns>
+    public virtual int DirectDelete<TEntity>(Expression<Func<TEntity, bool>>? predicate = null,
+        ISpecification<IAccessor>? specification = null)
+        where TEntity : class
     {
+        int rows = 0;
+
         foreach (var accessor in GetWritingDispatcher(specification))
         {
-            accessor.CurrentContext.UpdateRange(entities);
+            rows += accessor.DirectDelete(predicate);
         }
+
+        return rows;
+    }
+
+    /// <summary>
+    /// 异步直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
+    /// <returns>返回一个包含受影响行数的异步操作。</returns>
+    public virtual async Task<int> DirectDeleteAsync<TEntity>(Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null)
+        where TEntity : class
+    {
+        int rows = 0;
+
+        foreach (var accessor in GetWritingDispatcher(specification))
+        {
+            rows += await accessor.DirectDeleteAsync(predicate, cancellationToken);
+        }
+
+        return rows;
     }
 
     #endregion

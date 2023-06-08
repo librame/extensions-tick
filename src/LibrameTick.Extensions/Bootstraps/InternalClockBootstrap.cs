@@ -39,9 +39,9 @@ class InternalClockBootstrap : AbstsractBootstrap, IClockBootstrap
         return localNow;
     }
 
-    public Task<DateTime> GetNowAsync(DateTime? timestamp = null,
+    public ValueTask<DateTime> GetNowAsync(DateTime? timestamp = null,
         CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => GetNow(timestamp));
+        => cancellationToken.SimpleValueTask(() => GetNow(timestamp));
 
 
     public DateTimeOffset GetUtcNow(DateTimeOffset? timestamp = null)
@@ -58,8 +58,8 @@ class InternalClockBootstrap : AbstsractBootstrap, IClockBootstrap
         return localNow;
     }
 
-    public Task<DateTimeOffset> GetUtcNowAsync(DateTimeOffset? timestamp = null,
+    public ValueTask<DateTimeOffset> GetUtcNowAsync(DateTimeOffset? timestamp = null,
         CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => GetUtcNow(timestamp));
+        => cancellationToken.SimpleValueTask(() => GetUtcNow(timestamp));
 
 }

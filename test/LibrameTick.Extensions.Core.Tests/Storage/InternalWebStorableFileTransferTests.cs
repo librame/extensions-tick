@@ -23,7 +23,7 @@ namespace Librame.Extensions.Storage
             var filePath = @"d:\baidu_jgylogo3.gif";
             filePath.FileDelete();
 
-            var savePath = await _transmission.DownloadFileAsync(url, filePath).DisableAwaitContext();
+            var savePath = await _transmission.DownloadFileAsync(url, filePath).DiscontinueCapturedContext();
             Assert.True(savePath.FileExists());
         }
 

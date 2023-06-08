@@ -22,7 +22,7 @@ namespace Librame.Extensions.Core.Storage
             var text = $"Now: {now}";
             File.WriteAllText(file, text);
 
-            var contents = await manager.GetDirectoryContentsAsync(subdir.Name).DisableAwaitContext();
+            var contents = await manager.GetDirectoryContentsAsync(subdir.Name).DiscontinueCapturedContext();
             Assert.NotEmpty(contents);
 
             var fileInfo = (IStorableFileInfo)contents.First();
@@ -33,7 +33,7 @@ namespace Librame.Extensions.Core.Storage
 
             using (var writeStream = new FileStream(copyFile, FileMode.Create))
             {
-                await manager.ReadAsync(fileInfo, writeStream).DisableAwaitContext();
+                await manager.ReadAsync(fileInfo, writeStream).DiscontinueCapturedContext();
             }
             Assert.Equal(text, File.ReadAllText(copyFile));
 
@@ -42,7 +42,7 @@ namespace Librame.Extensions.Core.Storage
             // copyFile to file
             using (var readStream = new FileStream(copyFile, FileMode.Open))
             {
-                await manager.WriteAsync(fileInfo, readStream).DisableAwaitContext();
+                await manager.WriteAsync(fileInfo, readStream).DiscontinueCapturedContext();
             }
             Assert.Equal(text, File.ReadAllText(fileInfo.PhysicalPath!));
 

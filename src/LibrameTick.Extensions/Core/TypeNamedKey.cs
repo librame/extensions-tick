@@ -21,20 +21,20 @@ public class TypeNamedKey<TSource> : TypeNamedKey
     /// <summary>
     /// 构造一个 <see cref="TypeNamedKey{TSource}"/>。
     /// </summary>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
-    public TypeNamedKey(string? sourceAliase = null)
-        : base(typeof(TSource), sourceAliase)
+    /// <param name="named">给定的命名（可选）。</param>
+    public TypeNamedKey(string? named = null)
+        : base(typeof(TSource), named)
     {
     }
 
 
     /// <summary>
-    /// 使用源别名创建类型命名键。
+    /// 使用新命名创建一个 <see cref="TypeNamedKey"/> 副本。
     /// </summary>
-    /// <param name="sourceAliase">给定的新源别名。</param>
+    /// <param name="newNamed">给定的新命名。</param>
     /// <returns>返回 <see cref="TypeNamedKey{TSource}"/>。</returns>
-    public new TypeNamedKey<TSource> WithSourceAliase(string sourceAliase)
-        => new TypeNamedKey<TSource>(sourceAliase);
+    public new TypeNamedKey<TSource> WithNamed(string newNamed)
+        => new(newNamed);
 
 }
 
@@ -47,24 +47,38 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// <summary>
     /// 构造一个 <see cref="TypeNamedKey"/>。
     /// </summary>
-    /// <param name="sourceType">给定的源类型。</param>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
-    public TypeNamedKey(Type sourceType, string? sourceAliase = null)
+    /// <param name="typed">给定的类型。</param>
+    /// <param name="named">给定的命名（可选）。</param>
+    public TypeNamedKey(Type typed, string? named = null)
     {
-        SourceType = sourceType;
-        SourceAliase = sourceAliase;
+        Typed = typed;
+        Named = named;
     }
 
 
     /// <summary>
-    /// 源类型。
+    /// 类型。
     /// </summary>
-    public Type SourceType { get; init; }
+    public Type Typed { get; init; }
 
     /// <summary>
-    /// 源别名。
+    /// 命名。
     /// </summary>
-    public string? SourceAliase { get; init; }
+    public string? Named { get; init; }
+
+    /// <summary>
+    /// 字符串连接符。
+    /// </summary>
+    public string Connector { get; set; } = "_";
+
+
+    /// <summary>
+    /// 使用新命名创建一个 <see cref="TypeNamedKey"/> 副本。
+    /// </summary>
+    /// <param name="newNamed">给定的新命名。</param>
+    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
+    public virtual TypeNamedKey WithNamed(string newNamed)
+        => new(Typed, newNamed);
 
 
     /// <summary>
@@ -73,17 +87,8 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// <param name="other">给定的 <see cref="TypeNamedKey"/>。</param>
     /// <returns>返回布尔值。</returns>
     public virtual bool Equals(TypeNamedKey? other)
-        => other is not null && SourceType.IsSameType(other.SourceType)
-            && SourceAliase == other.SourceAliase;
-
-
-    /// <summary>
-    /// 使用源别名创建类型命名键。
-    /// </summary>
-    /// <param name="sourceAliase">给定的新源别名。</param>
-    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
-    public TypeNamedKey WithSourceAliase(string sourceAliase)
-        => new TypeNamedKey(SourceType, sourceAliase);
+        => other is not null && Typed.IsSameType(other.Typed)
+            && Named == other.Named;
 
 
     /// <summary>
@@ -91,7 +96,8 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => SourceType.GetHashCode() ^ SourceAliase?.GetHashCode() ?? 0;
+        => Typed.GetHashCode() ^ Named?.GetHashCode() ?? 0;
+
 
     /// <summary>
     /// 转换为字符串。
@@ -99,12 +105,17 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// <returns>返回字符串。</returns>
     public override string ToString()
     {
-        var sb = new StringBuilder(SourceType.Name);
+        if (string.IsNullOrEmpty(Named))
+            return GetTypedString();
 
-        if (!string.IsNullOrEmpty(SourceAliase))
-            sb.AppendFormat("_{0}", SourceAliase);
-
-        return sb.ToString();
+        return $"{GetTypedString()}{Connector}{Named}";
     }
+
+    /// <summary>
+    /// 获取类型字符串。
+    /// </summary>
+    /// <returns>返回简单字符串。</returns>
+    protected virtual string GetTypedString()
+        => Typed.AsSimpleString();
 
 }

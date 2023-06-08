@@ -13,8 +13,8 @@
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义对象更新接口。
+/// 定义联合 <see cref="IObjectUpdationTime"/> 与 <see cref="IObjectUpdator"/> 的更新接口。
 /// </summary>
-public interface IObjectUpdation : IObjectUpdator, IObjectUpdationTime
+public interface IObjectUpdation : IObjectUpdationTime, IObjectUpdator
 {
 }

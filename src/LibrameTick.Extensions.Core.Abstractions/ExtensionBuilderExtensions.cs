@@ -19,18 +19,18 @@ public static class ExtensionBuilderExtensions
 {
 
     /// <summary>
-    /// 查找指定目标扩展构建器（支持链式查找父级扩展构建器）。
+    /// 查找父级指定目标扩展构建器（支持链式查找父级扩展构建器）。
     /// </summary>
     /// <typeparam name="TTargetBuilder">指定的目标扩展构建器类型。</typeparam>
     /// <param name="lastBuilder">给定配置的最后一个 <see cref="IExtensionBuilder"/>。</param>
     /// <returns>返回 <typeparamref name="TTargetBuilder"/>。</returns>
-    public static TTargetBuilder? FindBuilder<TTargetBuilder>(this IExtensionBuilder lastBuilder)
+    public static TTargetBuilder? FindParentBuilder<TTargetBuilder>(this IExtensionBuilder lastBuilder)
         where TTargetBuilder : IExtensionBuilder
     {
         if (!(lastBuilder is TTargetBuilder targetBuilder))
         {
             if (lastBuilder.ParentBuilder is not null)
-                return FindBuilder<TTargetBuilder>(lastBuilder.ParentBuilder);
+                return FindParentBuilder<TTargetBuilder>(lastBuilder.ParentBuilder);
 
             return default;
         }
@@ -39,15 +39,15 @@ public static class ExtensionBuilderExtensions
     }
 
     /// <summary>
-    /// 获取必需的目标扩展构建器（通过 <see cref="FindBuilder{TTargetBuilder}(IExtensionBuilder)"/> 实现，如果未找到则抛出异常）。
+    /// 获取必需的父级目标扩展构建器（通过 <see cref="FindParentBuilder{TTargetBuilder}(IExtensionBuilder)"/> 实现，如果未找到则抛出异常）。
     /// </summary>
     /// <typeparam name="TTargetBuilder">指定的目标扩展构建器类型。</typeparam>
     /// <param name="lastBuilder">给定配置的最后一个 <see cref="IExtensionBuilder"/>。</param>
     /// <returns>返回 <typeparamref name="TTargetBuilder"/>。</returns>
-    public static TTargetBuilder GetRequiredBuilder<TTargetBuilder>(this IExtensionBuilder lastBuilder)
+    public static TTargetBuilder GetRequiredParentBuilder<TTargetBuilder>(this IExtensionBuilder lastBuilder)
         where TTargetBuilder : IExtensionBuilder
     {
-        var targetBuilder = lastBuilder.FindBuilder<TTargetBuilder>();
+        var targetBuilder = lastBuilder.FindParentBuilder<TTargetBuilder>();
         if (targetBuilder is null)
             throw new ArgumentException($"Target builder instance '{typeof(TTargetBuilder)}' not found from current builder '{lastBuilder.GetType()}'.");
 

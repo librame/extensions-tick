@@ -25,7 +25,7 @@ public static class MaybeExtensions
     /// <param name="maybe">给定的 <see cref="Maybe{T}"/>。</param>
     /// <returns>返回 <see cref="List{T}"/>。</returns>
     public static List<T> ToList<T>(this Maybe<T> maybe)
-        => maybe.GetValueOrDefault(value => new List<T> { value }, new List<T>());
+        => maybe.GetValueOrDefault(static value => new List<T> { value }, new List<T>());
 
     /// <summary>
     /// 绑定。

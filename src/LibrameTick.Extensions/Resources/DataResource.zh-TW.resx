@@ -207,4 +207,13 @@
   <data name="VisitorCount" xml:space="preserve">
     <value>觀看人數</value>
   </data>
+  <data name="Partition" xml:space="preserve">
+    <value>分區</value>
+  </data>
+  <data name="Priority" xml:space="preserve">
+    <value>優先級</value>
+  </data>
+  <data name="LockoutStart" xml:space="preserve">
+    <value>鎖定期開始</value>
+  </data>
 </root>

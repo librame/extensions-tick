@@ -93,7 +93,7 @@ public class MongoIdOptions : IOptions
         IncrementBytes = BitConverter.GetBytes(increment);
         Increment = increment;
 
-        var buffer = new byte[12];
+        var buffer = 12.RentByteArray();
         var copyIndex = 0;
 
         var ticksBytes = BitConverter.GetBytes(deltaTicks);
@@ -109,7 +109,10 @@ public class MongoIdOptions : IOptions
         copyIndex += 2;
         Array.Copy(IncrementBytes.Reverse().ToArray(), 1, buffer, copyIndex, 3);
 
-        return buffer.AsHexString();
+        var hex = buffer.AsHexString();
+        buffer.ReturnArray();
+
+        return hex;
     }
 
 
@@ -127,11 +130,12 @@ public class MongoIdOptions : IOptions
 
         var copyIndex = 0;
 
-        var buffer = new byte[4];
+        var buffer = 4.RentByteArray();
         Array.Copy(ticksBytes, copyIndex, buffer, 0, 4);
         Array.Reverse(buffer);
 
         deltaTicks = BitConverter.ToInt32(buffer, 0);
+        buffer.ReturnArray();
 
         copyIndex += 4;
         var machineIdBytes = new byte[4];

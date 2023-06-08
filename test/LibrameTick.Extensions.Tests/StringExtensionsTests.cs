@@ -57,7 +57,9 @@ namespace Librame.Extensions
         public void FormatStringTest()
         {
             var buffer = Guid.NewGuid().ToByteArray();
-            Assert.NotEmpty(buffer.FormatString(DateTime.Now.Ticks));
+            // 8db56dc7163edf5
+            var format = buffer.FormatString(DateTime.Now.Ticks);
+            Assert.NotEmpty(format);
 
             var number = 1;
             Assert.Equal("0001", number.FormatString(4));

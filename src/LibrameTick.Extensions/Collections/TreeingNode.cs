@@ -89,76 +89,6 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
         set => Item.ParentId = value;
     }
 
-
-    /// <summary>
-    /// 获取对象标识。
-    /// </summary>
-    /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-    public override object GetObjectId()
-        => Item.GetObjectId();
-
-    /// <summary>
-    /// 异步获取对象标识。
-    /// </summary>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    public override ValueTask<object> GetObjectIdAsync(CancellationToken cancellationToken)
-        => Item.GetObjectIdAsync(cancellationToken);
-
-
-    /// <summary>
-    /// 获取对象标识。
-    /// </summary>
-    /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-    public override object? GetObjectParentId()
-        => Item.GetObjectParentId();
-
-    /// <summary>
-    /// 异步获取对象标识。
-    /// </summary>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    public override ValueTask<object?> GetObjectParentIdAsync(CancellationToken cancellationToken)
-        => Item.GetObjectParentIdAsync(cancellationToken);
-
-
-    /// <summary>
-    /// 设置对象标识。
-    /// </summary>
-    /// <param name="newId">给定的新对象标识。</param>
-    /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-    public override object SetObjectId(object newId)
-        => Item.SetObjectId(newId);
-
-    /// <summary>
-    /// 异步设置对象标识。
-    /// </summary>
-    /// <param name="newId">给定的新对象标识。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    public override ValueTask<object> SetObjectIdAsync(object newId,
-        CancellationToken cancellationToken = default)
-        => Item.SetObjectIdAsync(newId, cancellationToken);
-
-
-    /// <summary>
-    /// 设置对象标识。
-    /// </summary>
-    /// <param name="newParentId">给定的新对象标识。</param>
-    /// <returns>返回标识（兼容各种引用与值类型标识）。</returns>
-    public override object? SetObjectParentId(object? newParentId)
-        => Item.SetObjectParentId(newParentId);
-
-    /// <summary>
-    /// 异步设置对象标识。
-    /// </summary>
-    /// <param name="newParentId">给定的新对象标识。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    public override ValueTask<object?> SetObjectParentIdAsync(object? newParentId,
-        CancellationToken cancellationToken = default)
-        => Item.SetObjectParentIdAsync(newParentId, cancellationToken);
-
     #endregion
 
 
@@ -207,7 +137,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
             return null;
 
         if (parentId is null)
-            return Children.Where(p => p.ParentId is null).ToList();
+            return Children.Where(static p => p.ParentId is null).ToList();
 
         return Children.Where(p => p.ParentId is not null && p.ParentId.Equals(parentId)).ToList();
     }

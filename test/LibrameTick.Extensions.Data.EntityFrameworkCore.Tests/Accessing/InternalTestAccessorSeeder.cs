@@ -42,7 +42,7 @@ namespace Librame.Extensions.Data.Accessing
                     };
 
                     user.Id = i is 0 ? GetInitialUserId() : IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
-                    user.PopulateCreation(GetInitialUserId(), DateTimeOffset.UtcNow);
+                    user.AsCreationIdentifier().SetCreation(GetInitialUserId(), DateTimeOffset.UtcNow);
 
                     users[i] = user;
                 }
@@ -52,7 +52,7 @@ namespace Librame.Extensions.Data.Accessing
         }
 
         public Task<User[]> GetUsersAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.RunTask(GetUsers);
+            => cancellationToken.SimpleTask(GetUsers);
 
     }
 }

@@ -17,6 +17,7 @@ namespace Librame.Extensions.Data.Sharding;
 /// </summary>
 /// <remarks>
 /// 日期与时间的分片策略支持的参数（区分大小写）包括：%yyyy（4 位年份）、%yy（2 位年份）、%MM（2 位月份）、%dd（2 位天数）、%hh（2 位小时）、%mm（2 位分钟）、%ss（2 位秒数）、%hf（2 位半年）、%qq（2 位季度）、%q（1 位季度）、%ww（2 位周数）。
+/// <para>扩展1：%std（标准包含 2 位年份 + 2 位月份 + 2 位天数）。</para>
 /// </remarks>
 public class DateTimeOffsetShardingStrategy : AbstractShardingStrategy<DateTimeOffset>
 {
@@ -24,26 +25,20 @@ public class DateTimeOffsetShardingStrategy : AbstractShardingStrategy<DateTimeO
     /// 构造一个 <see cref="DateTimeOffsetShardingStrategy"/>。
     /// </summary>
     public DateTimeOffsetShardingStrategy()
-        : base()
+        : base(() => DateTimeOffset.UtcNow)
     {
-        AddParameter("yyyy", now => now.ToString("yyyy")); // 4 位年份
-        AddParameter("yy", now => now.ToString("yy")); // 2 位年份
-        AddParameter("MM", now => now.ToString("MM")); // 2 位月份
-        AddParameter("dd", now => now.ToString("dd")); // 2 位天数
-        AddParameter("hh", now => now.ToString("hh")); // 2 位小时
-        AddParameter("mm", now => now.ToString("mm")); // 2 位分钟
-        AddParameter("ss", now => now.ToString("ss")); // 2 位秒数
-        AddParameter("hf", now => now.AsHalfYear().FormatString(2)); // 2 位半年
-        AddParameter("qq", now => now.AsQuarterOfYear().FormatString(2)); // 2 位季度
-        AddParameter("q", now => now.AsQuarterOfYear().ToString()); // 1 位季度
-        AddParameter("ww", now => now.AsWeekOfYear().FormatString(2)); // 2 位周数
+        AddParameter("std", static now => now.ToString("yyMMdd")); // 标准包含 2 位年份 + 2 位月份 + 2 位天数
+        AddParameter("yyyy", static now => now.ToString("yyyy")); // 4 位年份
+        AddParameter("yy", static now => now.ToString("yy")); // 2 位年份
+        AddParameter("MM", static now => now.ToString("MM")); // 2 位月份
+        AddParameter("dd", static now => now.ToString("dd")); // 2 位天数
+        AddParameter("hh", static now => now.ToString("hh")); // 2 位小时
+        AddParameter("mm", static now => now.ToString("mm")); // 2 位分钟
+        AddParameter("ss", static now => now.ToString("ss")); // 2 位秒数
+        AddParameter("hf", static now => now.AsHalfYear().FormatString(2)); // 2 位半年
+        AddParameter("qq", static now => now.AsQuarterOfYear().FormatString(2)); // 2 位季度
+        AddParameter("q", static now => now.AsQuarterOfYear().ToString()); // 1 位季度
+        AddParameter("ww", static now => now.AsWeekOfYear().FormatString(2)); // 2 位周数
     }
-
-
-    /// <summary>
-    /// 重写默认值为当前 UTC 日期和时间 <see cref="DateTimeOffset.UtcNow"/>。
-    /// </summary>
-    public override Lazy<DateTimeOffset> DefaultValue
-        => new Lazy<DateTimeOffset>(DateTimeOffset.UtcNow);
 
 }

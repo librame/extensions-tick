@@ -3,27 +3,28 @@ using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.ValueConversion;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Globalization;
 
 namespace Librame.Extensions.Data.Accessing
 {
     public class TestDbContext<TDbContext> : BaseDbContext
         where TDbContext : DbContext
     {
-        public TestDbContext(IEncryptionConverterFactory encryptionConverterFactory,
-            IShardingManager shardingManager,
-            IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
-            IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
+        public TestDbContext(IShardingContext shardingContext,
+            IEncryptionConverterFactory encryptionConverterFactory,
+            IOptionsMonitor<DataExtensionOptions> dataOptions,
+            IOptionsMonitor<CoreExtensionOptions> coreOptions,
             DbContextOptions<TDbContext> options)
-            : base(encryptionConverterFactory, shardingManager, dataOptionsMonitor, coreOptionsMonitor, options)
+            : base(shardingContext, encryptionConverterFactory, dataOptions, coreOptions, options)
         {
         }
 
 
-        protected override void ModelCreatingCore(ModelBuilder modelBuilder)
+        protected override void OnModelCreatingCore(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(b =>
             {
-                b.ToTableWithSharding(ShardingManager);
+                b.ToTableWithSharding(ShardingContext);
 
                 b.HasKey(k => k.Id);
 
@@ -33,8 +34,11 @@ namespace Librame.Extensions.Data.Accessing
 
                 b.Property(p => p.Name).HasMaxLength(50);
                 b.Property(p => p.Passwd).HasMaxLength(50);
-                b.Property(p => p.CreatedTime).HasMaxLength(50)
-                    .Sharding<DateTimeOffsetShardingStrategy>(ShardingManager);
+                b.Property(p => p.CreatedTime).HasMaxLength(50);
+
+                b.Sharding(ShardingContext)
+                    .HasProperty(p => p.CreatedTime)
+                    .HasValue(CultureInfo.CurrentUICulture);
             });
         }
 

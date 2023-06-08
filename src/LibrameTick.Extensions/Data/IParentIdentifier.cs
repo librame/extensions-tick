@@ -23,4 +23,54 @@ public interface IParentIdentifier<TId> : IIdentifier<TId>, IObjectParentIdentif
     /// 父标识。
     /// </summary>
     TId? ParentId { get; set; }
+
+
+    #region IObjectParentIdentifier
+
+    /// <summary>
+    /// 获取父对象标识。
+    /// </summary>
+    /// <returns>返回对象父标识（兼容各种引用与值类型标识）。</returns>
+    object? IObjectParentIdentifier.GetObjectParentId()
+        => ParentId;
+
+    /// <summary>
+    /// 异步获取父对象标识。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+    /// <returns>返回一个包含对象父标识（兼容各种引用与值类型标识）的异步操作。</returns>
+    ValueTask<object?> IObjectParentIdentifier.GetObjectParentIdAsync(CancellationToken cancellationToken)
+        => cancellationToken.SimpleValueTask(GetObjectParentId);
+
+
+    /// <summary>
+    /// 设置父对象标识。
+    /// </summary>
+    /// <param name="newParentId">给定的父标识对象。</param>
+    /// <returns>返回对象父标识（兼容各种引用与值类型标识）。</returns>
+    object? IObjectParentIdentifier.SetObjectParentId(object? newParentId)
+    {
+        ParentId = ToId(newParentId, nameof(newParentId));
+        return newParentId;
+    }
+
+    /// <summary>
+    /// 异步设置父对象标识。
+    /// </summary>
+    /// <param name="newParentId">给定的父标识对象。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+    /// <returns>返回一个包含对象父标识（兼容各种引用与值类型标识）的异步操作。</returns>
+    ValueTask<object?> IObjectParentIdentifier.SetObjectParentIdAsync(object? newParentId, CancellationToken cancellationToken)
+    {
+        var parentId = ToId(newParentId, nameof(newParentId));
+
+        return cancellationToken.SimpleValueTask(() =>
+        {
+            ParentId = parentId;
+            return newParentId;
+        });
+    }
+
+    #endregion
+
 }

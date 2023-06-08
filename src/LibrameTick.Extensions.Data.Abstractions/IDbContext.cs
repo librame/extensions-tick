@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Sharding;
+
 namespace Librame.Extensions.Data;
 
 /// <summary>
@@ -17,11 +19,15 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public interface IDbContext : IDisposable, IAsyncDisposable
 {
-
     /// <summary>
     /// 上下文类型。
     /// </summary>
     Type ContextType { get; }
+
+    /// <summary>
+    /// 分片上下文。
+    /// </summary>
+    IShardingContext ShardingContext { get; }
 
 
     #region Find

@@ -71,10 +71,10 @@ public class CompositePagingList<T> : PagingList<T>
     /// </summary>
     /// <returns>返回枚举器。</returns>
     public override IEnumerator<T> GetEnumerator()
-        => PagingLists.SelectMany(s => s).GetEnumerator();
+        => PagingLists.SelectMany(static s => s).GetEnumerator();
 
 
     private static IEnumerable<T> CombineList(IEnumerable<IPagingList<T>> collection)
-        => collection.SelectMany(s => s);
+        => collection.SelectMany(static s => s);
 
 }

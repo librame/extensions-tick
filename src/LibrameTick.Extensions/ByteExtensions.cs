@@ -189,7 +189,7 @@ public static class ByteExtensions
         var length = hexString.Length / 2;
         var buffer = new byte[length];
 
-        for (int i = 0; i < length; i++)
+        for (var i = 0; i < length; i++)
             buffer[i] = Convert.ToByte(hexString.Substring(i * 2, 2), 16);
 
         return buffer;

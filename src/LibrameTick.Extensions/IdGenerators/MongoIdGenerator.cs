@@ -86,9 +86,9 @@ public class MongoIdGenerator : AbstractClockIdGenerator<string>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含字符串的异步操作。</returns>
-    public override async Task<string> GenerateIdAsync(CancellationToken cancellationToken = default)
+    public override async ValueTask<string> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DisableAwaitContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
 
         _lastTicksAsync = nowTicksAsync;
         Options.GeneratingAction?.Invoke(new(nowTicksAsync, _baseTicks, TemporalAccuracy.Second));
@@ -121,8 +121,8 @@ public class MongoIdGenerator : AbstractClockIdGenerator<string>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含长整数的异步操作。</returns>
-    public virtual Task<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => _lastTicksAsync);
+    public virtual ValueTask<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.SimpleValueTask(() => _lastTicksAsync);
 
 
     /// <summary>

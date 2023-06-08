@@ -36,7 +36,7 @@ public class BitmapList : AbstractDisposable, IBitmapList
     /// <param name="bitmaps">给定的 <see cref="IEnumerable{SKBitmap}"/>。</param>
     public BitmapList(IEnumerable<SKBitmap> bitmaps)
     {
-        _bitmaps = bitmaps.Select(s => new BitmapDescriptor(s)).ToList();
+        _bitmaps = bitmaps.Select(static s => new BitmapDescriptor(s)).ToList();
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class BitmapList : AbstractDisposable, IBitmapList
     /// </summary>
     /// <param name="imageBuffers">给定的字节数组集合。</param>
     public void Add(IEnumerable<byte[]> imageBuffers)
-        => imageBuffers.ForEach(buffer => Add(buffer));
+        => imageBuffers.ForEach(Add);
 
     /// <summary>
     /// 添加位图。
@@ -88,7 +88,7 @@ public class BitmapList : AbstractDisposable, IBitmapList
     /// </summary>
     /// <param name="imagePaths">给定的图像路径集合。</param>
     public void Add(IEnumerable<string> imagePaths)
-        => imagePaths.ForEach(path => Add(path));
+        => imagePaths.ForEach(Add);
 
     /// <summary>
     /// 添加位图描述符。
@@ -112,7 +112,7 @@ public class BitmapList : AbstractDisposable, IBitmapList
     {
         if (_bitmaps.Count > 0)
         {
-            _bitmaps.ForEach(b => ((SKBitmap)b.Source).Dispose());
+            _bitmaps.ForEach(static b => ((SKBitmap)b.Source).Dispose());
             _bitmaps.Clear();
         }
     }

@@ -24,16 +24,9 @@ public class ModShardingStrategy : AbstractShardingStrategy<long>
     /// 构造一个 <see cref="ModShardingStrategy"/>。
     /// </summary>
     public ModShardingStrategy()
-        : base()
+        : base(() => 0L)
     {
-        AddParameter("m", id => (id % 2).ToString());
+        AddParameter("m", static id => (id % 2).ToString());
     }
-
-
-    /// <summary>
-    /// 重写默认值为 0。
-    /// </summary>
-    public override Lazy<long> DefaultValue
-        => new Lazy<long>(0L);
 
 }

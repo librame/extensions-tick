@@ -360,7 +360,7 @@ public static class ExpressionExtensions
         }
         else
         {
-            parameterTypes ??= parameters.Select(s => s.GetType()).ToArray();
+            parameterTypes ??= parameters.Select(static s => s.GetType()).ToArray();
 
             var constructor = type.GetConstructor(parameterTypes)
                 ?? throw new ArgumentException($"No ConstructorInfo matching the specified parameters was found in the type '{type}'.");

@@ -22,16 +22,15 @@ public static class ConfigurationBuilderExtensions
 {
 
     /// <summary>
-    /// 添加当前应用根目录的 appsettings.json 配置文件。
+    /// 添加当前应用根目录的配置文件。
     /// </summary>
     /// <param name="configurationBuilder">给定的 <see cref="IConfigurationBuilder"/>。</param>
+    /// <param name="fileName">给定的根目录配置文件名（可选；默认为 'appsettings.json'）。</param>
     /// <returns>返回 <see cref="IConfigurationBuilder"/>。</returns>
-    public static IConfigurationBuilder AddAppSettingsJsonFile(this IConfigurationBuilder configurationBuilder)
-    {
-        return configurationBuilder
-            .AddJsonFile("appsettings.json")
+    public static IConfigurationBuilder AddAppSettingsJsonFile(this IConfigurationBuilder configurationBuilder,
+        string fileName = "appsettings.json")
+        => configurationBuilder.AddJsonFile(fileName)
             .SetBasePath(PathExtensions.CurrentDirectoryWithoutDevelopmentRelativeSubpath);
-    }
 
     /// <summary>
     /// 添加 URI JSON 配置流。

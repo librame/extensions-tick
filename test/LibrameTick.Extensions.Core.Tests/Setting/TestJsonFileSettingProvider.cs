@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Librame.Extensions.Proxy;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace Librame.Extensions.Setting
 {
-    public class TestSetting : ISetting
+    public class TestSetting : ISettingRoot
     {
         public string? Id { get; set; }
 
@@ -15,7 +16,7 @@ namespace Librame.Extensions.Setting
     }
 
 
-    public class TestJsonFileSettingProvider : JsonFileSettingProvider<TestSetting>
+    public class TestJsonFileSettingProvider : AbstractJsonFileSettingProvider<TestSetting>
     {
         public TestJsonFileSettingProvider(ILoggerFactory loggerFactory)
             : base(loggerFactory, "test_settings.json".SetBasePath())
@@ -23,7 +24,8 @@ namespace Librame.Extensions.Setting
         }
 
 
-        public override TestSetting? Generate()
+        [TestInterception]
+        public override TestSetting Generate()
         {
             return new TestSetting
             {

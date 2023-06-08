@@ -51,4 +51,32 @@ public interface IObjectRanking
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含排名（兼容整数、单双精度的排序字段）的异步操作。</returns>
     ValueTask<object> SetObjectRankAsync(object newRank, CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// 设置对象排名。
+    /// </summary>
+    /// <param name="newRankFactory">给定的新对象排名工厂方法。</param>
+    /// <returns>返回排名（兼容整数、单双精度的排序字段）。</returns>
+    object SetObjectRank(Func<object, object> newRankFactory)
+    {
+        var currentRank = GetObjectRank();
+
+        return SetObjectRank(newRankFactory(currentRank));
+    }
+
+    /// <summary>
+    /// 异步设置对象排名。
+    /// </summary>
+    /// <param name="newRankFactory">给定的新对象排名工厂方法。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含排名（兼容整数、单双精度的排序字段）的异步操作。</returns>
+    async ValueTask<object> SetObjectRankAsync(Func<object, object> newRankFactory,
+        CancellationToken cancellationToken = default)
+    {
+        var currentRank = await GetObjectRankAsync(cancellationToken).DiscontinueCapturedContext();
+
+        return await SetObjectRankAsync(newRankFactory(currentRank), cancellationToken).DiscontinueCapturedContext();
+    }
+
 }

@@ -62,12 +62,12 @@ public class BaseDispatcher<TSource> : IDispatcher<TSource>
     /// <summary>
     /// 首个来源。
     /// </summary>
-    public TSource First => Sources.First();
+    public TSource FirstSource => Sources.First();
 
     /// <summary>
     /// 末尾来源。
     /// </summary>
-    public TSource Last => Sources.Last();
+    public TSource LastSource => Sources.Last();
 
 
     /// <summary>
@@ -487,7 +487,7 @@ public class BaseDispatcher<TSource> : IDispatcher<TSource>
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => string.Join(',', Sources.Select(s => s?.ToString()).Distinct());
+        => string.Join(',', Sources.Select(static s => s?.ToString()).Distinct());
 
 
     /// <summary>

@@ -30,5 +30,5 @@ public interface IIdGenerator<TId> : IObjectIdGenerator
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <typeparamref name="TId"/> 的异步操作。</returns>
-    Task<TId> GenerateIdAsync(CancellationToken cancellationToken = default);
+    ValueTask<TId> GenerateIdAsync(CancellationToken cancellationToken = default);
 }

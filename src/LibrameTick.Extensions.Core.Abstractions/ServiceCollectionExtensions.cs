@@ -613,7 +613,7 @@ public static class ServiceCollectionExtensions
 
             // 移除找到的所有描述符
             oldDescriptors.ForEach(descriptor => services.Remove(descriptor));
-                
+            
             // 添加新描述符
             services.Add(ServiceDescriptor.Describe(serviceType, newImplementationType, lifetime));
             return true;

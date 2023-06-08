@@ -23,7 +23,7 @@ public class HttpEndpointOptions : IOptions
 
 
     /// <summary>
-    /// 使用给定的 <see cref="IPropertyNotifier"/> 构造一个 <see cref="HttpEndpointOptions"/>。
+    /// 使用给定的 <see cref="IRequestOptions"/> 构造一个 <see cref="HttpEndpointOptions"/>。
     /// </summary>
     /// <param name="requestOptions">给定的父级 <see cref="IRequestOptions"/>。</param>
     /// <param name="path">给定的路径。</param>

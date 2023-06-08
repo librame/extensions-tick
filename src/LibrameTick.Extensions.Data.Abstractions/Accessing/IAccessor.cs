@@ -20,7 +20,7 @@ namespace Librame.Extensions.Data.Accessing;
 /// <summary>
 /// 定义一个表示数据访问的存取器接口。
 /// </summary>
-public interface IAccessor : ISortable, IShardable, IEquatable<IAccessor>
+public interface IAccessor : IPriorable, IShardable, IShardingValue<DateTimeOffset>, IEquatable<IAccessor>
 {
     /// <summary>
     /// 当前数据库上下文。
@@ -307,6 +307,31 @@ public interface IAccessor : ISortable, IShardable, IEquatable<IAccessor>
     /// <param name="entity">给定要更新的实体。</param>
     /// <returns>返回 <typeparamref name="TEntity"/>。</returns>
     TEntity Update<TEntity>(TEntity entity)
+        where TEntity : class;
+
+    #endregion
+
+
+    #region DirectExecute
+
+    /// <summary>
+    /// 直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <returns>返回受影响的行数。</returns>
+    int DirectDelete<TEntity>(Expression<Func<TEntity, bool>>? predicate = null)
+        where TEntity : class;
+
+    /// <summary>
+    /// 异步直接删除，不通过跟踪实体实现。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="predicate">给定的断定条件（可选；默认为空表示删除所有）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含受影响行数的异步操作。</returns>
+    Task<int> DirectDeleteAsync<TEntity>(Expression<Func<TEntity, bool>>? predicate = null,
+        CancellationToken cancellationToken = default)
         where TEntity : class;
 
     #endregion

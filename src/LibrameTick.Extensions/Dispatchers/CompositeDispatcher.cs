@@ -30,7 +30,7 @@ public class CompositeDispatcher<TSource> : BaseDispatcher<TSource>, IComposable
     /// <param name="dispatchers">给定的调度器集合。</param>
     /// <param name="options">给定的 <see cref="DispatchingOptions"/>。</param>
     public CompositeDispatcher(IEnumerable<IDispatcher<TSource>> dispatchers, DispatchingOptions options)
-        : base(dispatchers.SelectMany(s => s), DispatchingMode.Striping, options)
+        : base(dispatchers.SelectMany(static s => s), DispatchingMode.Striping, options)
     {
         // 复合模式仅支持分割模式，即聚合执行多调度器
         _dispatchers = dispatchers;

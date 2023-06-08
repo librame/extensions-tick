@@ -32,7 +32,7 @@ public static class TreeingListExtensions
         where TId : IEquatable<TId>
     {
         // 提取根父标识
-        var rootParentId = items.Select(s => s.ParentId).Min();
+        var rootParentId = items.Select(static s => s.ParentId).Min();
 
         return new TreeingList<TItem, TId>(LookupNodes(items, rootParentId));
     }
@@ -49,7 +49,7 @@ public static class TreeingListExtensions
         CancellationToken cancellationToken = default)
         where TItem : IParentIdentifier<TId>
         where TId : IEquatable<TId>
-        => cancellationToken.RunTask(items.AsTreeing<TItem, TId>);
+        => cancellationToken.SimpleTask(items.AsTreeing<TItem, TId>);
 
 
     private static List<TreeingNode<TItem, TId>> LookupNodes<TItem, TId>(IEnumerable<TItem> items,
@@ -63,7 +63,7 @@ public static class TreeingListExtensions
         List<TItem> parents;
 
         if (currentParentId is null)
-            parents = items.Where(p => p.ParentId is null).ToList();
+            parents = items.Where(static p => p.ParentId is null).ToList();
         else
             parents = items.Where(p => p.ParentId is not null && p.ParentId.Equals(currentParentId)).ToList();
 

@@ -13,13 +13,13 @@
 namespace Librame.Extensions.Setting;
 
 /// <summary>
-/// 定义抽象实现 <see cref="IFileSettingProvider{TSetting}"/> 的文件型设置提供程序。
+/// 定义抽象实现 <see cref="IFileSettingProvider{TSettingRoot}"/> 的文件型设置提供程序。
 /// </summary>
-public abstract class AbstractFileSettingProvider<TSetting> : AbstractSettingProvider<TSetting>, IFileSettingProvider<TSetting>
-    where TSetting : ISetting
+public abstract class AbstractFileSettingProvider<TSettingRoot> : AbstractSettingProvider<TSettingRoot>, IFileSettingProvider<TSettingRoot>
+    where TSettingRoot : ISettingRoot
 {
     /// <summary>
-    /// 构造一个 <see cref="AbstractFileSettingProvider{TSetting}"/>。
+    /// 构造一个 <see cref="AbstractFileSettingProvider{TSettingRoot}"/>。
     /// </summary>
     /// <param name="loggerFactory">给定的 <see cref="ILoggerFactory"/>。</param>
     /// <param name="filePath">给定的文件路径。</param>

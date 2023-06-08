@@ -18,142 +18,237 @@ namespace Librame.Extensions;
 public static class TaskExtensions
 {
 
-    /// <summary>
-    /// 转换为 <see cref="ValueTask"/>。
-    /// </summary>
-    /// <param name="task">给定的 <see cref="Task"/>。</param>
-    /// <returns>返回 <see cref="ValueTask"/>。</returns>
-    public static ValueTask AsValueTask(this Task task)
-        => new(task);
+    #region DiscontinueCapturedContext
 
     /// <summary>
-    /// 转换为 <see cref="ValueTask{TResult}"/>。
+    /// 使用停止捕获上下文的配置等待任务。
     /// </summary>
+    /// <remarks>
+    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
+    /// </remarks>
+    /// <param name="task">给定的 <see cref="Task"/>。</param>
+    /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
+    public static ConfiguredTaskAwaitable DiscontinueCapturedContext(this Task task)
+        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+
+    /// <summary>
+    /// 使用停止捕获上下文的配置等待任务。
+    /// </summary>
+    /// <remarks>
+    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
+    /// </remarks>
     /// <typeparam name="TResult">指定的结果类型。</typeparam>
     /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
-    /// <returns>返回 <see cref="ValueTask{TResult}"/>。</returns>
-    public static ValueTask<TResult> AsValueTask<TResult>(this Task<TResult> task)
-        => new(task);
+    /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
+    public static ConfiguredTaskAwaitable<TResult> DiscontinueCapturedContext<TResult>(this Task<TResult> task)
+        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
 
-
-    #region RunTask
 
     /// <summary>
-    /// 运行一个异步任务。
+    /// 使用停止捕获上下文的配置等待任务。
+    /// </summary>
+    /// <remarks>
+    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
+    /// </remarks>
+    /// <param name="valueTask">给定的 <see cref="ValueTask"/>。</param>
+    /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable"/>。</returns>
+    public static ConfiguredValueTaskAwaitable DiscontinueCapturedContext(this ValueTask valueTask)
+        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+
+    /// <summary>
+    /// 使用停止捕获上下文的配置等待任务。
+    /// </summary>
+    /// <remarks>
+    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
+    /// </remarks>
+    /// <typeparam name="TResult">指定的结果类型。</typeparam>
+    /// <param name="valueTask">给定的 <see cref="ValueTask{TResult}"/>。</param>
+    /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable{TResult}"/>。</returns>
+    public static ConfiguredValueTaskAwaitable<TResult> DiscontinueCapturedContext<TResult>(this ValueTask<TResult> valueTask)
+        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+
+    #endregion
+
+
+    #region SkipByTimeout
+
+    /// <summary>
+    /// 超时跳过当前异步任务。
+    /// </summary>
+    /// <param name="sourceTask">给定的来源 <see cref="Task"/>。</param>
+    /// <param name="timeout">给定的超时 <see cref="TimeSpan"/>。</param>
+    /// <returns>返回一个异步操作。</returns>
+    public static async Task SkipByTimeout(this Task sourceTask, TimeSpan timeout)
+    {
+        using (var cts = new CancellationTokenSource())
+        {
+            var timeoutTask = Task.Delay(timeout, cts.Token);
+            var resultTask = await Task.WhenAny(sourceTask, timeoutTask);
+
+            if (resultTask == timeoutTask)
+            {
+                // sourceTask 来源任务不能取消
+            }
+            else
+            {
+                await sourceTask;
+            }
+            
+            // 取消计时器任务
+            cts.Cancel();
+        }
+    }
+
+    /// <summary>
+    /// 超时跳过当前异步任务。
+    /// </summary>
+    /// <param name="sourceTask">给定的来源 <see cref="Task{TResult}"/>。</param>
+    /// <param name="timeout">给定的超时 <see cref="TimeSpan"/>。</param>
+    /// <returns>返回一个包含结果的异步操作。</returns>
+    public static async Task<TResult?> SkipByTimeout<TResult>(this Task<TResult> sourceTask, TimeSpan timeout)
+    {
+        using (var cts = new CancellationTokenSource())
+        {
+            TResult? result;
+
+            var timeoutTask = Task.Delay(timeout, cts.Token);
+            var resultTask = await Task.WhenAny(sourceTask, timeoutTask);
+            
+            if (resultTask == timeoutTask)
+            {
+                // sourceTask 来源任务不能取消
+                result = default;
+            }
+            else
+            {
+                result = await sourceTask;
+            }
+
+            // 取消计时器任务
+            cts.Cancel();
+
+            return result;
+        }
+    }
+
+    #endregion
+
+
+    #region SimpleTask
+
+    /// <summary>
+    /// 执行一个简单异步任务。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <param name="action">给定要执行的动作。</param>
     /// <returns>返回 <see cref="Task"/>。</returns>
-    public static Task RunTask(this CancellationToken cancellationToken, Action action)
-        => Task.Run(action, cancellationToken);
+    public static async Task SimpleTask(this CancellationToken cancellationToken, Action action)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            await Task.CompletedTask;
+
+        action.BeginInvoke(action.EndInvoke, null);
+    }
 
     /// <summary>
-    /// 运行一个包含结果的异步任务。
+    /// 执行一个包含结果的简单异步任务。
     /// </summary>
+    /// <remarks>
+    /// 直接调用 <paramref name="resultFunc"/> 方法并使用 <see cref="Task.FromResult{TResult}(TResult)"/> 对结果包装。
+    /// </remarks>
     /// <typeparam name="TResult">指定的结果类型。</typeparam>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
-    /// <param name="func">给定要执行的函数。</param>
+    /// <param name="resultFunc">给定的结果。</param>
     /// <returns>返回 <see cref="Task{TResult}"/>。</returns>
-    public static Task<TResult> RunTask<TResult>(this CancellationToken cancellationToken, Func<TResult> func)
-        => Task.Run(func, cancellationToken);
+    /// <exception cref="ArgumentNullException">
+    /// The <paramref name="resultFunc"/> invoke result is null.
+    /// </exception>
+    public static Task<TResult> SimpleTask<TResult>(this CancellationToken cancellationToken, Func<TResult> resultFunc)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<TResult>(cancellationToken);
+
+        TResult? result = default;
+
+        resultFunc.BeginInvoke(asyncResult => result = resultFunc.EndInvoke(asyncResult), null);
+
+        return Task.FromResult(result ?? throw new ArgumentNullException(nameof(resultFunc),
+            $"The {nameof(resultFunc)} invoke result is null."));
+    }
+
+    /// <summary>
+    /// 执行一个包含结果的简单异步任务。
+    /// </summary>
+    /// <remarks>
+    /// 直接使用 <see cref="Task.FromResult{TResult}(TResult)"/> 对结果包装。
+    /// </remarks>
+    /// <typeparam name="TResult">指定的结果类型。</typeparam>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+    /// <param name="result">给定的结果。</param>
+    /// <returns>返回 <see cref="Task{TResult}"/>。</returns>
+    public static Task<TResult> SimpleTask<TResult>(this CancellationToken cancellationToken, TResult result)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<TResult>(cancellationToken);
+
+        return Task.FromResult(result);
+    }
 
 
     /// <summary>
-    /// 运行一个异步值任务。
+    /// 执行一个简单异步任务。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <param name="action">给定要执行的动作。</param>
     /// <returns>返回 <see cref="ValueTask"/>。</returns>
-    public static ValueTask RunValueTask(this CancellationToken cancellationToken, Action action)
-        => Task.Run(action, cancellationToken).AsValueTask();
+    public static async ValueTask SimpleValueTask(this CancellationToken cancellationToken, Action action)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            await ValueTask.CompletedTask;
+
+        action.BeginInvoke(action.EndInvoke, null);
+    }
 
     /// <summary>
-    /// 运行一个包含结果的异步值任务。
+    /// 执行一个包含结果的简单异步任务。
+    /// </summary>
+    /// <remarks>
+    /// 直接调用 <paramref name="resultFunc"/> 方法并使用 <see cref="Task.FromResult{TResult}(TResult)"/> 对结果包装。
+    /// </remarks>
+    /// <typeparam name="TResult">指定的结果类型。</typeparam>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
+    /// <param name="resultFunc">给定的结果。</param>
+    /// <returns>返回 <see cref="ValueTask{TResult}"/>。</returns>
+    /// <exception cref="ArgumentNullException">
+    /// The <paramref name="resultFunc"/> invoke result is null.
+    /// </exception>
+    public static ValueTask<TResult> SimpleValueTask<TResult>(this CancellationToken cancellationToken, Func<TResult> resultFunc)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return ValueTask.FromCanceled<TResult>(cancellationToken);
+
+        TResult? result = default;
+
+        resultFunc.BeginInvoke(asyncResult => result = resultFunc.EndInvoke(asyncResult), null);
+
+        return ValueTask.FromResult(result ?? throw new ArgumentNullException(nameof(resultFunc),
+            $"The {nameof(resultFunc)} invoke result is null."));
+    }
+
+    /// <summary>
+    /// 执行一个包含结果的简单异步值任务。
     /// </summary>
     /// <typeparam name="TResult">指定的结果类型。</typeparam>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
-    /// <param name="func">给定要执行的函数。</param>
+    /// <param name="result">给定的结果。</param>
     /// <returns>返回 <see cref="ValueTask{TResult}"/>。</returns>
-    public static ValueTask<TResult> RunValueTask<TResult>(this CancellationToken cancellationToken, Func<TResult> func)
-        => Task.Run(func, cancellationToken).AsValueTask();
+    public static ValueTask<TResult> SimpleValueTask<TResult>(this CancellationToken cancellationToken, TResult result)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return ValueTask.FromCanceled<TResult>(cancellationToken);
 
-    #endregion
-
-
-    #region ConfiguredTaskAwaitable
-
-    /// <summary>
-    /// 结束对已完成任务的等待。
-    /// </summary>
-    /// <param name="awaitable">给定的 <see cref="ConfiguredTaskAwaitable" />。</param>
-    public static void Await(this ConfiguredTaskAwaitable awaitable)
-        => awaitable.GetAwaiter().GetResult();
-
-    /// <summary>
-    /// 结束对已完成任务的等待，并返回执行结果。
-    /// </summary>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="awaitable">给定的 <see cref="ConfiguredTaskAwaitable" />。</param>
-    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
-    public static TResult AwaitResult<TResult>(this ConfiguredTaskAwaitable<TResult> awaitable)
-        => awaitable.GetAwaiter().GetResult();
-
-
-    /// <summary>
-    /// 禁用捕获上下文配置可等待任务。
-    /// </summary>
-    /// <param name="task">给定的 <see cref="Task"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
-    public static ConfiguredTaskAwaitable DisableAwaitContext(this Task task)
-        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
-
-    /// <summary>
-    /// 禁用捕获上下文配置可等待任务。
-    /// </summary>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredTaskAwaitable<TResult> DisableAwaitContext<TResult>(this Task<TResult> task)
-        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
-
-    #endregion
-
-
-    #region ConfiguredValueTaskAwaitable
-
-    /// <summary>
-    /// 结束对已完成任务的等待。
-    /// </summary>
-    /// <param name="awaitable">给定的 <see cref="ConfiguredValueTaskAwaitable" />。</param>
-    public static void Await(this ConfiguredValueTaskAwaitable awaitable)
-        => awaitable.GetAwaiter().GetResult();
-
-    /// <summary>
-    /// 结束对已完成任务的等待，并返回执行结果。
-    /// </summary>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="awaitable">给定的 <see cref="ConfiguredValueTaskAwaitable" />。</param>
-    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
-    public static TResult AwaitResult<TResult>(this ConfiguredValueTaskAwaitable<TResult> awaitable)
-        => awaitable.GetAwaiter().GetResult();
-
-
-    /// <summary>
-    /// 禁用捕获上下文配置可等待任务。
-    /// </summary>
-    /// <param name="valueTask">给定的 <see cref="ValueTask"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable"/>。</returns>
-    public static ConfiguredValueTaskAwaitable DisableAwaitContext(this ValueTask valueTask)
-        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
-
-    /// <summary>
-    /// 禁用捕获上下文配置可等待任务。
-    /// </summary>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="valueTask">给定的 <see cref="ValueTask{TResult}"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredValueTaskAwaitable<TResult> DisableAwaitContext<TResult>(this ValueTask<TResult> valueTask)
-        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+        return ValueTask.FromResult(result);
+    }
 
     #endregion
 

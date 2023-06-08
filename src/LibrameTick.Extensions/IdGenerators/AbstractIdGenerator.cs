@@ -37,7 +37,7 @@ public abstract class AbstractIdGenerator<TId> : IIdGenerator<TId>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <typeparamref name="TId"/> 的异步操作。</returns>
-    public abstract Task<TId> GenerateIdAsync(CancellationToken cancellationToken = default);
+    public abstract ValueTask<TId> GenerateIdAsync(CancellationToken cancellationToken = default);
 
 
     /// <summary>
@@ -58,9 +58,9 @@ public abstract class AbstractIdGenerator<TId> : IIdGenerator<TId>
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含标识对象的异步操作。</returns>
-    public virtual async Task<object> GenerateObjectIdAsync(CancellationToken cancellationToken = default)
+    public virtual async ValueTask<object> GenerateObjectIdAsync(CancellationToken cancellationToken = default)
     {
-        var id = await GenerateIdAsync(cancellationToken).DisableAwaitContext();
+        var id = await GenerateIdAsync(cancellationToken).DiscontinueCapturedContext();
         if (id is null)
             throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.");
 

@@ -18,6 +18,7 @@ using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Librame.Extensions.Setting;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -46,6 +47,7 @@ public static class DataExtensionBuilderExtensions
             .AddAccessing()
             .AddAuditing()
             .AddIdentification()
+            .AddSetting()
             .AddSharding()
             .AddStoring()
             .AddValueConversion();
@@ -56,7 +58,7 @@ public static class DataExtensionBuilderExtensions
 
     private static DataExtensionBuilder AddAccessing(this DataExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService<IAccessorManager, InternalAccessorManager>();
+        builder.TryAddOrReplaceService<IAccessorContext, InternalAccessorContext>();
         builder.TryAddOrReplaceService<IAccessorMigrator, InternalAccessorMigrator>();
         builder.TryAddOrReplaceService<IAccessorResolver, InternalAccessorResolver>();
 
@@ -65,7 +67,9 @@ public static class DataExtensionBuilderExtensions
 
     private static DataExtensionBuilder AddAuditing(this DataExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService<IAuditingManager, InternalAuditingManager>();
+        builder.TryAddOrReplaceService<IAuditingParser<EntityEntry, Audit>, InternalAuditingParser>();
+        builder.TryAddOrReplaceService<IAuditingTracker<EntityEntry>, InternalAuditingTracker>();
+        builder.TryAddOrReplaceService<IAuditingContext<EntityEntry, Audit>, InternalAuditingContext>();
 
         return builder;
     }
@@ -77,9 +81,20 @@ public static class DataExtensionBuilderExtensions
         return builder;
     }
 
+    private static DataExtensionBuilder AddSetting(this DataExtensionBuilder builder)
+    {
+        builder.AddSettingProvider<DataExtensionBuilder, DatabaseJsonFileSettingProvider>();
+        builder.AddSettingProvider<DataExtensionBuilder, TableJsonFileSettingProvider>();
+        builder.TryAddOrReplaceService<IShardingSettingProvider, InternalShardingSettingProvider>();
+
+        return builder;
+    }
+
     private static DataExtensionBuilder AddSharding(this DataExtensionBuilder builder)
     {
-        builder.TryAddOrReplaceService<IShardingManager, InternalShardingManager>();
+        builder.TryAddOrReplaceService<IShardingContext, InternalShardingContext>();
+        builder.TryAddOrReplaceService<IShardingStrategyProvider, InternalShardingStrategyProvider>();
+        builder.TryAddOrReplaceService<IShardingTracker, InternalShardingTracker>();
 
         return builder;
     }
@@ -113,7 +128,7 @@ public static class DataExtensionBuilderExtensions
         return builder;
     }
 
-    private static readonly Type _iAccessorType = typeof(IAccessor);
+    internal static readonly Type IAccessorType = typeof(IAccessor);
     private static readonly Type _baseAccessorType = typeof(BaseAccessor<>);
     /// <summary>
     /// 添加存取器。
@@ -125,8 +140,8 @@ public static class DataExtensionBuilderExtensions
     public static DataExtensionBuilder AddAccessor(this DataExtensionBuilder builder, Type accessorType,
         bool autoReferenceDbContext = false)
     {
-        if (!accessorType.IsImplementedType(_iAccessorType))
-            throw new ArgumentException($"Invalid accessor type, the required interface '{_iAccessorType}' was not implemented.");
+        if (!accessorType.IsImplementedType(IAccessorType))
+            throw new ArgumentException($"Invalid accessor type, the required interface '{IAccessorType}' was not implemented.");
 
         if (autoReferenceDbContext && accessorType.IsGenericTypeDefinition)
         {

@@ -15,7 +15,7 @@ using Librame.Extensions.Data.Accessing;
 
 namespace Librame.Extensions.Data.ValueConversion;
 
-class InternalEncryptionConverterFactory : IEncryptionConverterFactory
+sealed internal class InternalEncryptionConverterFactory : IEncryptionConverterFactory
 {
     private readonly ConcurrentDictionary<DbContextId, List<ValueConverter>> _dictionary = new();
 

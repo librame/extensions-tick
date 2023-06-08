@@ -13,10 +13,10 @@
 namespace Librame.Extensions.Setting;
 
 /// <summary>
-/// 定义一个继承 <see cref="ISettingProvider{TSetting}"/> 的文件型设置提供程序接口。
+/// 定义一个继承 <see cref="ISettingProvider{TSettingRoot}"/> 的文件型设置提供程序接口。
 /// </summary>
-public interface IFileSettingProvider<TSetting> : ISettingProvider<TSetting>
-    where TSetting : ISetting
+public interface IFileSettingProvider<TSettingRoot> : ISettingProvider<TSettingRoot>
+    where TSettingRoot : ISettingRoot
 {
     /// <summary>
     /// 文件路径。

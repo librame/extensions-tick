@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Dispatchers;
 
-internal class InternalDispatcherFactory : AbstractDispatcherFactory
+sealed internal class InternalDispatcherFactory : AbstractDispatcherFactory
 {
     public InternalDispatcherFactory(IOptionsMonitor<CoreExtensionOptions> optionsMonitor)
         : base(optionsMonitor.CurrentValue.Dispatching)

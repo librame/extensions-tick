@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Storage;
 
-class InternalStorableFileManager : IStorableFileManager
+sealed internal class InternalStorableFileManager : IStorableFileManager
 {
     private readonly IMemoryCache _memoryCache;
     private readonly IOptionsMonitor<CoreExtensionOptions> _optionsMonitor;
@@ -39,17 +39,20 @@ class InternalStorableFileManager : IStorableFileManager
     public CoreExtensionOptions Options
         => _optionsMonitor.CurrentValue;
 
+    public int BufferSize
+        => Options.WebFile.BufferSize;
+
 
     public Action<StorageProgressDescriptor>? ProgressAction { get; set; }
 
 
     public Task<IStorableFileInfo> GetFileInfoAsync(string subpath,
         CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => _fileProvider.GetFileInfo(subpath));
+        => cancellationToken.SimpleTask(() => _fileProvider.GetFileInfo(subpath));
 
     public Task<IStorableDirectoryContents> GetDirectoryContentsAsync(string subpath,
         CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(() => _fileProvider.GetDirectoryContents(subpath));
+        => cancellationToken.SimpleTask(() => _fileProvider.GetDirectoryContents(subpath));
 
 
     #region Read
@@ -92,11 +95,11 @@ class InternalStorableFileManager : IStorableFileManager
             var beginSecond = DateTime.Now.Second;
 
             var readLength = 0;
-            var buffer = new byte[Options.WebFile.BufferSize];
+            var buffer = BufferSize.RentByteArray();
 
-            while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length).DisableAwaitContext()) > 0)
+            while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length, cancellationToken).DiscontinueCapturedContext()) > 0)
             {
-                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DisableAwaitContext();
+                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DiscontinueCapturedContext();
 
                 processingSize += readLength;
                 processingSpeed += readLength;
@@ -124,6 +127,8 @@ class InternalStorableFileManager : IStorableFileManager
                     }
                 }
             }
+
+            buffer.ReturnArray();
         }
     }
 
@@ -167,11 +172,11 @@ class InternalStorableFileManager : IStorableFileManager
             var beginSecond = DateTime.Now.Second;
 
             var readLength = 0;
-            var buffer = new byte[Options.WebFile.BufferSize];
+            var buffer = BufferSize.RentByteArray();
 
-            while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).DisableAwaitContext()) > 0)
+            while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).DiscontinueCapturedContext()) > 0)
             {
-                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DisableAwaitContext();
+                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DiscontinueCapturedContext();
 
                 processingSize += readLength;
                 processingSpeed += readLength;
@@ -199,6 +204,8 @@ class InternalStorableFileManager : IStorableFileManager
                     }
                 }
             }
+
+            buffer.ReturnArray();
         }
     }
 

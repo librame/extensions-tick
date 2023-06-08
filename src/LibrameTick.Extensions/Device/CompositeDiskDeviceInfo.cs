@@ -30,19 +30,19 @@ public readonly struct CompositeDiskDeviceInfo : IDiskDeviceInfo, IComposable<ID
     public CompositeDiskDeviceInfo(IEnumerable<IDiskDeviceInfo> infos)
     {
         _infos = infos;
-        _driveTypes = _infos.Select(s => s.DriveType).Distinct().ToArray();
+        _driveTypes = _infos.Select(static s => s.DriveType).Distinct().ToArray();
     }
 
 
     /// <summary>
     /// 磁盘名称。
     /// </summary>
-    public string Name => string.Join(',', _infos.Select(s => s.Name));
+    public string Name => string.Join(',', _infos.Select(static s => s.Name));
 
     /// <summary>
     /// 磁盘根目录。
     /// </summary>
-    public string RootPath => string.Join(',', _infos.Select(s => s.RootPath));
+    public string RootPath => string.Join(',', _infos.Select(static s => s.RootPath));
 
     /// <summary>
     /// 驱动器类型（多个驱动器类型相同则返回同类型，反之返回未知）。
@@ -52,17 +52,17 @@ public readonly struct CompositeDiskDeviceInfo : IDiskDeviceInfo, IComposable<ID
     /// <summary>
     /// 文件系统。
     /// </summary>
-    public string FileSystem => string.Join(',', _infos.Select(s => s.FileSystem));
+    public string FileSystem => string.Join(',', _infos.Select(static s => s.FileSystem));
 
     /// <summary>
     /// 磁盘剩余容量（以字节为单位）。
     /// </summary>
-    public long FreeSpace => _infos.Select(s => s.FreeSpace).Sum();
+    public long FreeSpace => _infos.Select(static s => s.FreeSpace).Sum();
 
     /// <summary>
     /// 磁盘总容量（以字节为单位）。
     /// </summary>
-    public long TotalSize => _infos.Select(s => s.TotalSize).Sum();
+    public long TotalSize => _infos.Select(static s => s.TotalSize).Sum();
 
     /// <summary>
     /// 磁盘已用容量（以字节为单位）。

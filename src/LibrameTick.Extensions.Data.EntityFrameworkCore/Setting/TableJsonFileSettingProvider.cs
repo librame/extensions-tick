@@ -10,11 +10,14 @@
 
 #endregion
 
-using Librame.Extensions.Setting;
+using Librame.Extensions.Data;
 
-namespace Librame.Extensions.Data.Setting;
+namespace Librame.Extensions.Setting;
 
-internal class TableJsonFileSettingProvider : AbstractFileSettingProvider<ShardingTableSetting>
+/// <summary>
+/// 定义实现 <see cref="ISettingProvider{ShardingTableSetting}"/> 的分表 JSON 文件型选项提供程序。
+/// </summary>
+public class TableJsonFileSettingProvider : AbstractFileSettingProvider<ShardingTableSettingRoot>
 {
     /// <summary>
     /// 构造一个 <see cref="TableJsonFileSettingProvider"/>。
@@ -34,12 +37,12 @@ internal class TableJsonFileSettingProvider : AbstractFileSettingProvider<Shardi
     /// <summary>
     /// 加载设置。
     /// </summary>
-    /// <returns>返回 <see cref="ShardingTableSetting"/>。</returns>
-    public override ShardingTableSetting Load()
+    /// <returns>返回 <see cref="ShardingTableSettingRoot"/>。</returns>
+    public override ShardingTableSettingRoot Load()
     {
-        var setting = FilePath.DeserializeJsonFile<ShardingTableSetting>();
+        var setting = FilePath.DeserializeJsonFile<ShardingTableSettingRoot>();
         if (setting is null)
-            throw new NotSupportedException($"Unsupported {nameof(ShardingTableSetting)} file format.");
+            throw new NotSupportedException($"Unsupported {nameof(ShardingTableSettingRoot)} file format.");
 
         return setting;
     }
@@ -47,13 +50,21 @@ internal class TableJsonFileSettingProvider : AbstractFileSettingProvider<Shardi
     /// <summary>
     /// 保存设置。
     /// </summary>
-    /// <param name="setting">给定的 <see cref="ShardingTableSetting"/>。</param>
-    /// <returns>返回 <see cref="ShardingTableSetting"/>。</returns>
-    public override ShardingTableSetting Save(ShardingTableSetting setting)
+    /// <param name="setting">给定的 <see cref="ShardingTableSettingRoot"/>。</param>
+    /// <returns>返回 <see cref="ShardingTableSettingRoot"/>。</returns>
+    public override ShardingTableSettingRoot Save(ShardingTableSettingRoot setting)
     {
         FilePath.SerializeJsonFile(setting);
 
         return setting;
     }
+
+
+    /// <summary>
+    /// 生成设置。
+    /// </summary>
+    /// <returns>返回 <see cref="ShardingTableSettingRoot"/>。</returns>
+    public override ShardingTableSettingRoot Generate()
+        => new();
 
 }

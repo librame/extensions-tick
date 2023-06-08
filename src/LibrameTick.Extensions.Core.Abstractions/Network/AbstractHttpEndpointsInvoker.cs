@@ -120,7 +120,7 @@ public abstract class AbstractHttpEndpointsInvoker : IHttpEndpointsInvoker
             }
             catch (Exception ex)
             {
-                var message = ex.GetInnerMessage();
+                var message = ex.GetInnermostMessage();
 
                 results.Add(message);
                 _logger.LogError(message);

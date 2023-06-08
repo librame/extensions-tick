@@ -27,13 +27,13 @@ public sealed class PropertyNotifier : IPropertyNotifier
     /// 构造一个 <see cref="PropertyNotifier"/>。
     /// </summary>
     /// <param name="source">给定的属性源。</param>
-    /// <param name="sourceAliase">给定的属性源别名（可选）。</param>
-    public PropertyNotifier(object source, string? sourceAliase = null)
-        : this(source, sourceAliase, parentNotifier: null, propertyValues: null, propertyFuncs: null)
+    /// <param name="named">给定的属性命名（可选）。</param>
+    public PropertyNotifier(object source, string? named = null)
+        : this(source, named, parentNotifier: null, propertyValues: null, propertyFuncs: null)
     {
     }
 
-    private PropertyNotifier(object source, string? sourceAliase,
+    private PropertyNotifier(object source, string? named,
         IPropertyNotifier? parentNotifier,
         ConcurrentDictionary<PropertyNoticeNamedKey, object>? propertyValues,
         ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>>? propertyFuncs)
@@ -41,10 +41,10 @@ public sealed class PropertyNotifier : IPropertyNotifier
         _propertyValues = propertyValues ?? new ConcurrentDictionary<PropertyNoticeNamedKey, object>();
         _propertyFuncs = propertyFuncs ?? new ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>>();
 
-        _baseKey = new TypeNamedKey(source.GetType(), sourceAliase);
+        _baseKey = new TypeNamedKey(source.GetType(), named);
 
         Source = source;
-        SourceAliase = sourceAliase;
+        Named = named;
         ParentNotifier = parentNotifier;
     }
 
@@ -55,9 +55,9 @@ public sealed class PropertyNotifier : IPropertyNotifier
     public object Source { get; init; }
 
     /// <summary>
-    /// 属性源别名。
+    /// 属性命名。
     /// </summary>
-    public string? SourceAliase { get; init; }
+    public string? Named { get; init; }
 
 
     /// <summary>
@@ -315,9 +315,9 @@ public sealed class PropertyNotifier : IPropertyNotifier
     /// 使用新属性源创建一个 <see cref="IPropertyNotifier"/>。
     /// </summary>
     /// <param name="newSource">给定的新属性源。</param>
-    /// <param name="sourceAliase">给定的源别名（可选）。</param>
+    /// <param name="named">给定的属性命名（可选）。</param>
     /// <returns>返回 <see cref="IPropertyNotifier"/>。</returns>
-    public IPropertyNotifier WithSource(object newSource, string? sourceAliase = null)
-        => new PropertyNotifier(newSource, sourceAliase, this, _propertyValues, _propertyFuncs);
+    public IPropertyNotifier WithSource(object newSource, string? named = null)
+        => new PropertyNotifier(newSource, named, this, _propertyValues, _propertyFuncs);
 
 }

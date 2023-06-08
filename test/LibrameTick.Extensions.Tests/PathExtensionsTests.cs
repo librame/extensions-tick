@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using Xunit;
 
 namespace Librame.Extensions
@@ -29,6 +28,21 @@ namespace Librame.Extensions
 
         #region BinaryFile
 
+        //[Fact]
+        //public void FileEqualsTest()
+        //{
+        //    var ts = StopwatchExtensions.Run(s =>
+        //    {
+        //        var path1 = "D:\\Downloads\\123.exe"; // 876.214KB
+        //        var path2 = "D:\\Downloads\\456.exe"; // 876.214KB
+
+        //        Assert.True(path1.FileEquals(path2));
+
+        //        return s.ElapsedMilliseconds;
+        //    });
+        //    Assert.True(ts >= 100); // 371ms-374ms
+        //}
+
         [Fact]
         public void ReadBinaryFileTest()
         {
@@ -39,7 +53,7 @@ namespace Librame.Extensions
             Assert.True(path.FileExists());
 
             var buffer = path.ReadBinaryFile();
-            Assert.True(byteArray.SequenceEqual(buffer));
+            Assert.True(byteArray.SequenceEqualByReadOnlySpan(buffer));
 
             path.FileDelete();
         }

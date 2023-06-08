@@ -34,8 +34,8 @@ public static class DiskDevice
     {
         var infos = DriveInfo.GetDrives()
             .Where(_isValidDiskFunc)
-            .Select(s => (IDiskDeviceInfo)new DiskDeviceInfo(s))
-            .DistinctBy(ks => ks.Name)
+            .Select(static s => (IDiskDeviceInfo)new DiskDeviceInfo(s))
+            .DistinctBy(static ks => ks.Name)
             .ToArray();
 
         return new CompositeDiskDeviceInfo(infos);

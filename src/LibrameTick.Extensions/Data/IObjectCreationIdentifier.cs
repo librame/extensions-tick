@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义对象创建标识符接口。
+/// 定义联合 <see cref="IObjectCreation"/> 与 <see cref="IObjectIdentifier"/> 的对象创建标识符接口。
 /// </summary>
 public interface IObjectCreationIdentifier : IObjectCreation, IObjectIdentifier
 {

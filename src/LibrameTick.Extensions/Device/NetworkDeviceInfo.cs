@@ -100,21 +100,21 @@ public readonly struct NetworkDeviceInfo : INetworkDeviceInfo
     /// </summary>
     /// <remarks>ex：192.168.3.38</remarks>
     public IReadOnlyCollection<IPAddress> MulticastAddresses
-        => _info.GetIPProperties().MulticastAddresses.Select(x => x.Address).AsReadOnlyCollection();
+        => _info.GetIPProperties().MulticastAddresses.Select(static x => x.Address).AsReadOnlyCollection();
 
     /// <summary>
     /// 分配的单播地址。
     /// </summary>
     /// <remarks>ex：192.168.3.38</remarks>
     public IReadOnlyCollection<IPAddress> UnicastAddresses
-        => _info.GetIPProperties().UnicastAddresses.Select(x => x.Address).AsReadOnlyCollection();
+        => _info.GetIPProperties().UnicastAddresses.Select(static x => x.Address).AsReadOnlyCollection();
 
     /// <summary>
     /// 网关地址（依次为IPv4、IPv6）。
     /// </summary>
     /// <remarks>ex：fe80::1677:40ff:fef9:bf95%5、192.168.3.1</remarks>
     public IReadOnlyCollection<IPAddress> GatewayAddresses
-        => _info.GetIPProperties().GatewayAddresses.Select(x => x.Address).AsReadOnlyCollection();
+        => _info.GetIPProperties().GatewayAddresses.Select(static x => x.Address).AsReadOnlyCollection();
 
     /// <summary>
     /// 域名系统 (DNS) 服务器地址（依次为IPv4、IPv6）。

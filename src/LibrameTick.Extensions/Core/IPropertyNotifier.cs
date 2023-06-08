@@ -25,7 +25,7 @@ public interface IPropertyNotifier : INotifyPropertyChanging, INotifyPropertyCha
     /// <summary>
     /// 属性源别名。
     /// </summary>
-    string? SourceAliase { get; }
+    string? Named { get; }
 
 
     /// <summary>

@@ -8,12 +8,12 @@ namespace Librame.Extensions.Data.Accessing
 {
     public class TestSqliteDbContext : TestDbContext<TestSqliteDbContext>
     {
-        public TestSqliteDbContext(IEncryptionConverterFactory encryptionConverterFactory,
-            IShardingManager shardingManager,
+        public TestSqliteDbContext(IShardingContext shardingContext,
+            IEncryptionConverterFactory encryptionConverterFactory,
             IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
             IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
             DbContextOptions<TestSqliteDbContext> options)
-            : base(encryptionConverterFactory, shardingManager, dataOptionsMonitor, coreOptionsMonitor, options)
+            : base(shardingContext, encryptionConverterFactory, dataOptionsMonitor, coreOptionsMonitor, options)
         {
         }
 

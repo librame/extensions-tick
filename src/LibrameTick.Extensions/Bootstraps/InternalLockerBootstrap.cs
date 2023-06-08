@@ -16,7 +16,7 @@ class InternalLockerBootstrap : AbstsractBootstrap, ILockerBootstrap
 {
     // 禁止只读限制
     private Lazy<SpinLock> _spinLock
-        = new Lazy<SpinLock>(() => new SpinLock(enableThreadOwnerTracking: false));
+        = new Lazy<SpinLock>(static () => new SpinLock(enableThreadOwnerTracking: false));
 
     // 定义最大锁定器数（默认为处理器线程数）
     private readonly int _maxLockersCount = Environment.ProcessorCount;
@@ -94,9 +94,9 @@ class InternalLockerBootstrap : AbstsractBootstrap, ILockerBootstrap
 
         while (true)
         {
-            // 使用 _lockers.FirstOrDefault(obj => !Monitor.IsEntered(obj))
+            // 使用 _lockers.FirstOrDefault(static obj => !Monitor.IsEntered(obj))
             // 可能会抛出 IndexOutOfRangeException 异常（特别是存在死锁的情形下）
-            var locker = _lockers.Where(obj => !Monitor.IsEntered(obj)).FirstOrDefault();
+            var locker = _lockers.Where(static obj => !Monitor.IsEntered(obj)).FirstOrDefault();
             
             if (locker is not null)
             {

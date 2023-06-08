@@ -30,11 +30,12 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
     private string? _name;
     private int _group;
+    private int _partition;
     private AccessMode _access;
     private DispatchingMode _dispatching;
     private float _priority;
     private AlgorithmOptions? _algorithm;
-    private ShardedAttribute? _sharded;
+    private ShardingAttribute? _sharding;
     private string? _loaderHost;
     private Type? _serviceType;
 
@@ -58,12 +59,13 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     protected AccessorDbContextOptionsExtension(AccessorDbContextOptionsExtension copyFrom)
     {
         _group = copyFrom.Group;
+        _partition = copyFrom.Partition;
         _access = copyFrom.Access;
         _dispatching = copyFrom.Dispatching;
         //_pooling = copyFrom.Pooling;
         _priority = copyFrom.Priority;
         _algorithm = copyFrom.Algorithm;
-        _sharded = copyFrom.Sharded;
+        _sharding = copyFrom.Sharding;
         _loaderHost = copyFrom._loaderHost;
         _serviceType = copyFrom.ServiceType;
     }
@@ -72,21 +74,41 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// <summary>
     /// 名称。
     /// </summary>
+    /// <remarks>
+    /// <para>给存取器命名，名称必需唯一，通常在使用命名规约存取器获取指定存取器进行存取操作时有效。</para>
+    /// </remarks>
     public string? Name => _name;
 
     /// <summary>
-    /// 所属群组（默认为 0）。
+    /// 所属群组。
     /// </summary>
+    /// <remarks>
+    /// <para>将多个存取器划分为一组，同组中可设置不同的访问模式与调度模式。</para>
+    /// </remarks>
     public int Group => _group;
 
     /// <summary>
-    /// 访问模式（默认为 <see cref="AccessMode.ReadWrite"/>，表示存取器可以进行读/写数据库操作）。
+    /// 所属分区。
     /// </summary>
+    /// <remarks>
+    /// <para>当调度模式为 <see cref="DispatchingMode.Striping"/> 时有效，通常从 1、2... 开始编号（总数不超过同群组存取器个数），实体则按特定算法取存取器个数的模进行存取操作。</para>
+    /// </remarks>
+    public int Partition => _partition;
+
+    /// <summary>
+    /// 访问模式（默认为 <see cref="AccessMode.ReadWrite"/>）。
+    /// </summary>
+    /// <remarks>
+    /// <para>将同组的多个存取器划分为相同或不同的访问模式，可分别实现读、写、读/写等同读写或读写分离模式。</para>
+    /// </remarks>
     public AccessMode Access => _access;
 
     /// <summary>
     /// 调度模式（默认为 <see cref="DispatchingMode.Mirroring"/>，表示多库环境中可互为主备）。
     /// </summary>
+    /// <remarks>
+    /// <para>将同组的多个存取器设定为不同的调度模式，即可调用对应的调度器分别实现默认、镜像、条带（即分片）、复合等存取操作。</para>
+    /// </remarks>
     public DispatchingMode Dispatching => _dispatching;
 
     ///// <summary>
@@ -96,8 +118,11 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     //    => _pooling;
 
     /// <summary>
-    /// 存取器优先级（默认为 <see cref="float.Tau"/>，但会优先使用存取器实现的 <see cref="ISortable.Priority"/> 的属性值）。
+    /// 存取器优先级（默认为 <see cref="float.Tau"/>，但会优先使用存取器实现的 <see cref="IPriorable{T}.GetPriority()"/> 的属性值）。
     /// </summary>
+    /// <remarks>
+    /// <para>为同组的多个存取器设定不同的优先级，配合调度模式可实现优先或负载使用存取器进行存取操作。</para>
+    /// </remarks>
     public float Priority => _priority;
 
     /// <summary>
@@ -106,13 +131,19 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     public AlgorithmOptions? Algorithm => _algorithm;
 
     /// <summary>
-    /// 分库特性（默认为 NULL，表示不启用分库）。
+    /// 分片规则特性。
     /// </summary>
-    public ShardedAttribute? Sharded => _sharded;
+    /// <remarks>
+    /// <para>如果要使用分库，此为必选项，可设置分库的规则。</para>
+    /// </remarks>
+    public ShardingAttribute? Sharding => _sharding;
 
     /// <summary>
     /// 负载器主机。
     /// </summary>
+    /// <remarks>
+    /// <para>当调度模式为 <see cref="DispatchingMode.Mirroring"/> 时有效，可配置获取服务器负载信息的主机名（本机用 <see cref="DeviceLoadOptions.Localhost"/> 表示，远程主机需返回 <see cref="DeviceUsageDescriptor"/> 的 JSON 形式），详情参见 <see cref="AccessorDeviceLoader"/>。</para>
+    /// </remarks>
     public string? LoaderHost => _loaderHost;
 
     /// <summary>
@@ -160,6 +191,20 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         var clone = Clone();
 
         clone._group = group;
+
+        return clone;
+    }
+
+    /// <summary>
+    /// 使用指定的所属分区创建一个选项扩展实例副本。
+    /// </summary>
+    /// <param name="partition">给定的所属分区。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+    public virtual AccessorDbContextOptionsExtension WithPartition(int partition)
+    {
+        var clone = Clone();
+
+        clone._partition = partition;
 
         return clone;
     }
@@ -237,13 +282,13 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// <summary>
     /// 使用指定的分片特性创建一个选项扩展实例副本。
     /// </summary>
-    /// <param name="sharded">给定的 <see cref="ShardedAttribute"/>。</param>
+    /// <param name="sharding">给定的 <see cref="ShardingAttribute"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-    public virtual AccessorDbContextOptionsExtension WithSharding(ShardedAttribute sharded)
+    public virtual AccessorDbContextOptionsExtension WithSharding(ShardingAttribute sharding)
     {
         var clone = Clone();
 
-        clone._sharded = sharded;
+        clone._sharding = sharding;
 
         return clone;
     }
@@ -281,7 +326,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// 应用服务集合。
     /// </summary>
     /// <param name="services">给定的 <see cref="IServiceCollection"/>。</param>
-    public void ApplyServices(IServiceCollection services)
+    public virtual void ApplyServices(IServiceCollection services)
     {
     }
 
@@ -289,7 +334,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// 验证选项扩展。
     /// </summary>
     /// <param name="options">给定的 <see cref="IDbContextOptions"/>。</param>
-    public void Validate(IDbContextOptions options)
+    public virtual void Validate(IDbContextOptions options)
     {
         ServiceType.NotNull(nameof(ServiceType));
     }
@@ -327,6 +372,10 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                     builder.Append(": ");
                     builder.Append(Extension.Group).Append(' ');
 
+                    builder.Append(nameof(Extension.Partition));
+                    builder.Append(": ");
+                    builder.Append(Extension.Partition).Append(' ');
+
                     builder.Append(nameof(Extension.Access));
                     builder.Append(": ");
                     builder.Append(Extension.Access).Append(' ');
@@ -350,9 +399,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                         builder.Append(Extension.Algorithm).Append(' ');
                     }
 
-                    if (Extension.Sharded is not null)
+                    if (Extension.Sharding is not null)
                     {
-                        builder.Append("ShardingNaming: ").Append(Extension.Sharded).Append(' ');
+                        builder.Append("Sharding: ").Append(Extension.Sharding).Append(' ');
                     }
 
                     if (Extension.LoaderHost is not null)
@@ -382,6 +431,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
                 hashCode.Add(Extension._name);
                 hashCode.Add(Extension._group);
+                hashCode.Add(Extension._partition);
                 hashCode.Add(Extension._access);
                 hashCode.Add(Extension._dispatching);
                 //hashCode.Add(Extension._pooling);
@@ -390,8 +440,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 if (Extension._algorithm is not null)
                     hashCode.Add(Extension._algorithm);
 
-                if (Extension._sharded is not null)
-                    hashCode.Add(Extension._sharded);
+                if (Extension._sharding is not null)
+                    hashCode.Add(Extension._sharding);
 
                 if (Extension._loaderHost is not null)
                     hashCode.Add(Extension._loaderHost);
@@ -409,12 +459,13 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             => other is ExtensionInfo otherInfo
                 && Extension._name == otherInfo.Extension._name
                 && Extension._group == otherInfo.Extension._group
+                && Extension._partition == otherInfo.Extension._partition
                 && Extension._access == otherInfo.Extension._access
                 && Extension._dispatching == otherInfo.Extension._dispatching
                 //&& Extension._pooling == otherInfo.Extension._pooling
                 && Extension._priority == otherInfo.Extension._priority
                 && Extension._algorithm?.ToString() == otherInfo.Extension._algorithm?.ToString()
-                && Extension._sharded?.ToString() == otherInfo.Extension._sharded?.ToString()
+                && Extension._sharding?.ToString() == otherInfo.Extension._sharding?.ToString()
                 && Extension._loaderHost == otherInfo.Extension._loaderHost
                 && Extension._serviceType == otherInfo.Extension._serviceType;
 
@@ -425,6 +476,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
 
             debugInfo["Accessor:" + nameof(Extension.Group)] =
                 Extension.Group.GetHashCode().ToString(CultureInfo.InvariantCulture);
+
+            debugInfo["Accessor:" + nameof(Extension.Partition)] =
+                Extension.Partition.GetHashCode().ToString(CultureInfo.InvariantCulture);
 
             debugInfo["Accessor:" + nameof(Extension.Access)] =
                 Extension.Access.GetHashCode().ToString(CultureInfo.InvariantCulture);
@@ -441,8 +495,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             debugInfo["Accessor:" + nameof(Extension.Algorithm)] =
                 (Extension.Algorithm?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
-            debugInfo["Accessor:" + nameof(Extension.Sharded)] =
-                (Extension.Sharded?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
+            debugInfo["Accessor:" + nameof(Extension.Sharding)] =
+                (Extension.Sharding?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
             debugInfo["Accessor:" + nameof(Extension.LoaderHost)] =
                 (Extension.LoaderHost?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);

@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义对象创建接口。
+/// 定义联合 <see cref="IObjectCreationTime"/> 与 <see cref="IObjectCreator"/> 的创建接口。
 /// </summary>
 public interface IObjectCreation : IObjectCreationTime, IObjectCreator
 {

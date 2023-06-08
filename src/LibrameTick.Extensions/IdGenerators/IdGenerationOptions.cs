@@ -19,7 +19,17 @@ namespace Librame.Extensions.IdGenerators;
 /// </summary>
 public class IdGenerationOptions : IOptions
 {
-    private static readonly DateTime _baseTime = new DateTime(2020, 1, 1);
+    /// <summary>
+    /// 构造一个 <see cref="IdGenerationOptions"/>。
+    /// </summary>
+    public IdGenerationOptions()
+    {
+        BaseTime = 2020.WithYearFirstDay();
+        UtcBaseTime = 2020.WithYearFirstDayOffset();
+
+        BaseTicks = BaseTime.Ticks;
+        UtcBaseTicks = UtcBaseTime.Ticks;
+    }
 
 
     /// <summary>
@@ -38,14 +48,24 @@ public class IdGenerationOptions : IOptions
     public uint WorkId { get; set; } = 1;
 
     /// <summary>
-    /// 基础时钟周期数。
+    /// 基础时间。
     /// </summary>
-    public long BaseTicks { get; set; } = _baseTime.Ticks;
+    public DateTime BaseTime { get; set; }
 
     /// <summary>
-    /// 基础 UTC 时钟周期数。
+    /// UTC 基础时间。
     /// </summary>
-    public long UtcBaseTicks { get; set; } = _baseTime.ToOffset(useLocalOffset: true).Ticks;
+    public DateTimeOffset UtcBaseTime { get; set; }
+
+    /// <summary>
+    /// 基础时钟周期数。
+    /// </summary>
+    public long BaseTicks { get; set; }
+
+    /// <summary>
+    /// UTC 基础时钟周期数。
+    /// </summary>
+    public long UtcBaseTicks { get; set; }
 
     /// <summary>
     /// 上次时钟周期数（支持初始限制时间回拨）。
@@ -53,7 +73,7 @@ public class IdGenerationOptions : IOptions
     public long? LastTicks { get; set; }
 
     /// <summary>
-    /// 上次 UTC 时钟周期数（支持初始限制时间回拨）。
+    /// UTC 上次时钟周期数（支持初始限制时间回拨）。
     /// </summary>
     public long? UtcLastTicks { get; set; }
 

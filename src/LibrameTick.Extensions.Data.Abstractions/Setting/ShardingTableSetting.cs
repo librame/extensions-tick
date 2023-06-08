@@ -10,14 +10,53 @@
 
 #endregion
 
-using Librame.Extensions.Setting;
+using Librame.Extensions.Data.Sharding;
 
-namespace Librame.Extensions.Data.Setting;
+namespace Librame.Extensions.Setting;
 
 /// <summary>
 /// 定义分表设置。
 /// </summary>
-public class ShardingTableSetting : ISetting
+public class ShardingTableSetting : AbstractShardingSetting
 {
+    /// <summary>
+    /// 构造一个默认 <see cref="ShardingTableSetting"/>。
+    /// </summary>
+    public ShardingTableSetting()
+    {
+    }
+
+    /// <summary>
+    /// 使用 <see cref="ShardingDescriptor"/> 构造一个 <see cref="ShardingTableSetting"/>。
+    /// </summary>
+    /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
+    protected ShardingTableSetting(ShardingDescriptor descriptor)
+        : base(descriptor)
+    {
+
+    }
+
+    /// <summary>
+    /// 使用 <see cref="AbstractShardingSetting"/> 构造一个 <see cref="ShardingTableSetting"/>。
+    /// </summary>
+    /// <param name="setting">给定的 <see cref="AbstractShardingSetting"/>。</param>
+    protected ShardingTableSetting(AbstractShardingSetting setting)
+        : base(setting)
+    {
+
+    }
+
+
+    /// <summary>
+    /// 使用分片描述符创建分表设置。
+    /// </summary>
+    /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
+    /// <returns>返回 <see cref="ShardingTableSetting"/>。</returns>
+    public static ShardingTableSetting Create(ShardingDescriptor descriptor)
+    {
+        var setting = new ShardingTableSetting(descriptor);
+
+        return setting;
+    }
 
 }

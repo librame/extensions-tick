@@ -34,12 +34,12 @@ public interface IDispatcher<TSource> : IComposable<TSource>, IEquatable<IDispat
     /// <summary>
     /// 首个来源。
     /// </summary>
-    TSource First { get; }
+    TSource FirstSource { get; }
 
     /// <summary>
     /// 末尾来源。
     /// </summary>
-    TSource Last { get; }
+    TSource LastSource { get; }
 
 
     /// <summary>

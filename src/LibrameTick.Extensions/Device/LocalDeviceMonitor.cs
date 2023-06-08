@@ -68,8 +68,8 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
             _ping = new Ping();
 
         return timeout is null
-            ? cancellationToken.RunTask(() => _ping.SendPingAsync(hostNameOrAddress).Result)
-            : cancellationToken.RunTask(() => _ping.SendPingAsync(hostNameOrAddress, timeout.Value).Result);
+            ? _ping.SendPingAsync(hostNameOrAddress)
+            : _ping.SendPingAsync(hostNameOrAddress, timeout.Value);
     }
 
 
@@ -86,7 +86,7 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IProcessorDeviceInfo"/> 的异步操作。</returns>
     public Task<IProcessorDeviceInfo> GetProcessorAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(GetProcessor);
+        => cancellationToken.SimpleTask(GetProcessor);
 
 
     /// <summary>
@@ -102,7 +102,7 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="INetworkDeviceInfo"/> 的异步操作。</returns>
     public Task<INetworkDeviceInfo> GetNetworkAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(GetNetwork);
+        => cancellationToken.SimpleTask(GetNetwork);
 
 
     /// <summary>
@@ -118,7 +118,7 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IMemoryDeviceInfo"/> 的异步操作。</returns>
     public Task<IMemoryDeviceInfo> GetMemoryAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(GetMemory);
+        => cancellationToken.SimpleTask(GetMemory);
 
 
     /// <summary>
@@ -134,7 +134,7 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IDiskDeviceInfo"/> 的异步操作。</returns>
     public Task<IDiskDeviceInfo> GetDiskAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.RunTask(GetDisk);
+        => cancellationToken.SimpleTask(GetDisk);
 
 
     /// <summary>

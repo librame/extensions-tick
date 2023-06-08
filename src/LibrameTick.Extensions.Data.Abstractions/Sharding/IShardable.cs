@@ -18,7 +18,7 @@ namespace Librame.Extensions.Data.Sharding;
 public interface IShardable
 {
     /// <summary>
-    /// 分片管理器。
+    /// 分片上下文。
     /// </summary>
-    IShardingManager ShardingManager { get; }
+    IShardingContext ShardingContext { get; }
 }
