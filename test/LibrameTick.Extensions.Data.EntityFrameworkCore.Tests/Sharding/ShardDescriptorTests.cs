@@ -1,75 +1,80 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Librame.Extensions.Setting;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using Xunit;
 
 namespace Librame.Extensions.Data.Sharding
 {
+    [Sharding("%m", typeof(ModShardingStrategy))] // 使用模运算分片策略
+    public class TestShardingProperty : AbstractIdentifier<long>
+    {
+        public string? Name { get; set; }
+    }
+
+
     public class ShardDescriptorTests
     {
+        private readonly IShardingContext _context;
+        private readonly IIdGeneratorFactory _idGenerator;
+
+
+        public ShardDescriptorTests()
+        {
+            _context = DataExtensionBuilderHelper.CurrentServices.GetRequiredService<IShardingContext>();
+            _idGenerator = DataExtensionBuilderHelper.CurrentServices.GetRequiredService<IIdGeneratorFactory>();
+        }
+
 
         [Fact]
         public void ShardingValueTest()
         {
-            var attribute = ShardingAttribute.ParseFromEntity(typeof(User), defaultTableName: null);
-            var shardingContext = DataExtensionBuilderHelper.CurrentServices.GetRequiredService<IShardingContext>();
-            
-            var user = new User();
+            // 用户实体已标注使用文化信息与时间联合分片（实体也已实现对应的分片值接口，不需要手动配置）
+            var user = new User
+            {
+                Name = $"Test Name",
+                Passwd = "123456",
+                Id = _idGenerator.GetMongoIdGenerator().GenerateId()
+            };
 
-            var descriptor = new ShardingDescriptor(attribute, shardingContext.StrategyProvider.GetStrategy);
-            descriptor.FormatSuffix(user);
-
-            var nowSuffix = descriptor.FormattedSuffix;
-            Assert.NotNull(nowSuffix);
-
-            user.CreatedTime = user.CreatedTime.AddMonths(-2);
-            descriptor.FormatSuffix(user);
-
-            Assert.NotEqual(nowSuffix, descriptor.FormattedSuffix);
+            var setting = _context.ShardTable(user);
+            Assert.NotNull(setting.ShardedName);
+            Assert.NotEqual(setting.BaseName, setting.ShardedName);
         }
 
         [Fact]
         public void ShardingPropertyTest()
         {
-            var shardingContext = DataExtensionBuilderHelper.CurrentServices.GetRequiredService<IShardingContext>();
-
             // 手动配置实体分片属性
-            var shardingBuilder = new ShardingBuilder<TestShardingProperty>(shardingContext);
-            shardingBuilder.HasProperty(p => p.Id); // 使用整数标识进行模运算分片
+            var builder = new ShardingBuilder<TestShardingProperty>(_context);
+            builder.HasProperty(p => p.Id); // 使用整数标识进行模运算分片
 
             // 准备实体数据
             var properties = ReadyProperties();
-            var descriptors = new List<ShardingDescriptor>();
+            var settings = new List<ShardingTableSetting>();
 
             foreach (var prop in properties)
             {
-                shardingContext.ShardTable(prop, null, out var descriptor);
-                Assert.NotNull(descriptor.FormattedSuffix);
+                var setting = _context.ShardTable(prop);
+                Assert.NotNull(setting.ShardedName);
 
-                descriptors.Add(descriptor);
+                settings.Add(setting);
             }
 
-            Assert.NotEmpty(descriptors);
+            Assert.NotEmpty(settings);
+        }
 
-            static IEnumerable<TestShardingProperty> ReadyProperties()
+        private static IEnumerable<TestShardingProperty> ReadyProperties()
+        {
+            for (var i = 1; i < 10; i++)
             {
-                for (var i = 1; i < 10; i++)
+                yield return new TestShardingProperty
                 {
-                    yield return new TestShardingProperty
-                    {
-                        Id = i,
-                        Name = $"{nameof(TestShardingProperty)}{i}",
-                    };
-                }
+                    Id = i,
+                    Name = $"{nameof(TestShardingProperty)}{i}",
+                };
             }
         }
 
-    }
-
-
-    [Sharding("%m", typeof(ModShardingStrategy))]
-    public class TestShardingProperty : AbstractIdentifier<long>
-    {
-        public string? Name { get; set; }
     }
 
 }

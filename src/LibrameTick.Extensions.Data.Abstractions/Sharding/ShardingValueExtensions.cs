@@ -32,10 +32,10 @@ public static class ShardingValueExtensions
     public static IShardingValue<TProperty> AsShardingValue<TEntity, TProperty>(
         this IShardingProperty<TEntity, TProperty> value, object entity)
     {
-        var realValue = ((IShardingValue)value).AsShardingValue(entity);
+        var realValue = GetRealValue(value, entity) as IShardingValue<TProperty>;
         ArgumentNullException.ThrowIfNull(realValue, nameof(value));
 
-        return (realValue as IShardingValue<TProperty>)!;
+        return realValue;
     }
 
     /// <summary>
@@ -44,36 +44,29 @@ public static class ShardingValueExtensions
     /// <param name="values">给定可能包含分片属性的 <see cref="IShardingValue"/> 集合。</param>
     /// <param name="entity">给定的实体对象。</param>
     /// <returns>返回分片值的 <see cref="IShardingValue"/> 集合。</returns>
-    public static IEnumerable<IShardingValue> AsShardingValues(this IEnumerable<IShardingValue> values, object entity)
-    {
-        foreach (var value in values)
-        {
-            var realValue = value.AsShardingValue(entity);
-            if (realValue is not null)
-                yield return realValue;
-        }
-    }
+    public static IReadOnlyCollection<IShardingValue> AsShardingValues(this IReadOnlyCollection<IShardingValue> values, object entity)
+        => values.Select(v => GetRealValue(v, entity)).WhereNotNull().AsReadOnlyCollection();
 
-    private static IShardingValue? AsShardingValue(this IShardingValue value, object entity)
+    private static IShardingValue? GetRealValue(IShardingValue value, object entity)
     {
         var type = value.GetType();
         var typeDefinition = type.GetGenericTypeDefinition();
 
-        if (typeDefinition == _valueGenericTypeDefinition)
+        if (typeDefinition.IsImplementedType(_valueGenericTypeDefinition))
         {
             return value;
         }
-        else if (typeDefinition == _propertyGenericTypeDefinition)
+        else if (typeDefinition.IsImplementedType(_propertyGenericTypeDefinition))
         {
-            var method = type.GetMethod(nameof(IShardingValue<string>.GetShardedValue));
+            var method = type.GetMethod(nameof(IShardingProperty<Storing.Audit, long>.GetShardedValue));
+            ArgumentNullException.ThrowIfNull(method, nameof(type));
 
-            var defaultValueType = type.GenericTypeArguments[1];
-            var defaultValue = defaultValueType.IsNullableType() ? null : Activator.CreateInstance(defaultValueType);
+            var realValueObject = method.Invoke(value, new object?[] { entity });
+            ArgumentNullException.ThrowIfNull(realValueObject, nameof(value));
 
-            var realValueObject = method!.Invoke(entity, new object?[] { entity, defaultValue });
-            var realType = typeof(SingleShardingValue<>).MakeGenericType(defaultValueType);
+            var realType = typeof(SingleShardingValue<>).MakeGenericType(type.GenericTypeArguments[1]);
+            var realValue = (IShardingValue)realType.NewByExpression(realValueObject);
 
-            var realValue = Activator.CreateInstance(realType, realValueObject) as IShardingValue;
             return realValue;
         }
         else

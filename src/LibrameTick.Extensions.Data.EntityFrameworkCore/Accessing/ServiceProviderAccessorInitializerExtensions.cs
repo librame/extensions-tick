@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Sharding;
+
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
@@ -35,7 +37,7 @@ public static class ServiceProviderAccessorInitializerExtensions
             foreach (var accessor in context.ResolvedAccessors)
             {
                 // 初始尝试对所有存取器分库
-                context.ShardingContext.ShardDatabase(accessor, out _);
+                context.ShardingContext.ShardDatabase(accessor);
 
                 initializer.Initialize(accessor, services);
             }

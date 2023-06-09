@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 
 namespace Librame.Extensions.Setting;
@@ -49,10 +50,17 @@ public class ShardingDatabaseSetting : AbstractShardingSetting
     /// 使用分片描述符创建分库设置。
     /// </summary>
     /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
+    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    /// <param name="shardedName">给定的分片名称。</param>
     /// <returns>返回 <see cref="ShardingDatabaseSetting"/>。</returns>
-    public static ShardingDatabaseSetting Create(ShardingDescriptor descriptor)
+    public static ShardingDatabaseSetting Create(ShardingDescriptor descriptor,
+        IAccessor accessor, string shardedName)
     {
-        var setting = new ShardingDatabaseSetting(descriptor);
+        var setting = new ShardingDatabaseSetting(descriptor)
+        {
+            ShardedName = shardedName,
+            SourceId = accessor.AccessorId // 分库使用访问器标识作用引用标识
+        };
 
         return setting;
     }

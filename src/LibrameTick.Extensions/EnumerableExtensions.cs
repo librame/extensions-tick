@@ -63,7 +63,22 @@ public static class EnumerableExtensions
 
 
     /// <summary>
-    /// 基于谓词筛选值序列。
+    /// 筛选不为空的序列。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
+    /// <returns>返回不为空的 <typeparamref name="T"/> 元素集合。</returns>
+    public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> enumerable)
+    {
+        foreach (var item in enumerable)
+        {
+            if (item is not null)
+                yield return item;
+        }
+    }
+
+    /// <summary>
+    /// 基于谓词筛选序列。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>

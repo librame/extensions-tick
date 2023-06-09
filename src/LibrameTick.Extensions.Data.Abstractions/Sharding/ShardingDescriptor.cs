@@ -26,10 +26,6 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
     public static readonly string DefaultConnector = "_";
 
 
-    //private readonly ShardingAttribute _attribute;
-    //private readonly Func<Type, IShardingStrategy> _createStrategyFunc;
-
-
     /// <summary>
     /// 使用 <see cref="ShardingAttribute"/> 构造一个 <see cref="ShardingDescriptor"/>。
     /// </summary>
@@ -47,9 +43,6 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
         SourceType = attribute.SourceType;
         Kind = attribute.Kind;
         Connector = connector ?? DefaultConnector;
-
-        //_attribute = attribute;
-        //_createStrategyFunc = createStrategyFunc;
     }
 
 
@@ -88,18 +81,13 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
     /// </summary>
     public ShardingKind? Kind { get; set; } = ShardingKind.Unspecified;
 
-    /// <summary>
-    /// 经过格式化的后缀。
-    /// </summary>
-    public string? FormattedSuffix { get; set; }
-
 
     /// <summary>
     /// 使用默认策略格式化后缀。
     /// </summary>
     /// <param name="shardingValue">给定的 <see cref="IShardingValue"/>。</param>
     /// <returns>返回 <see cref="ShardingDescriptor"/>。</returns>
-    public virtual ShardingDescriptor FormatSuffix(IShardingValue? shardingValue)
+    public virtual string FormatSuffix(IShardingValue? shardingValue)
     {
         if (Strategies is null)
             return this;
@@ -111,8 +99,7 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
             formatter = strategy.Format(formatter, shardingValue);
         }
 
-        FormattedSuffix = formatter;
-        return this;
+        return ToStringWithSuffix(formatter);
     }
 
 
@@ -120,26 +107,18 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
     /// 为数据库连接字符串验证是否需要分片。
     /// </summary>
     /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
-    /// <param name="databaseSetting">输出 <see cref="ShardingDatabaseSetting"/>。</param>
+    /// <param name="setting">输出 <see cref="ShardingDatabaseSetting"/>。</param>
     /// <param name="newConnectionString">输出新连接字符串。</param>
     /// <returns>返回是否需要分片的布尔值。</returns>
     public virtual bool IsNeedShardingForConnectionString(IAccessor accessor,
-        out ShardingDatabaseSetting databaseSetting,
-        [MaybeNullWhen(false)] out string? newConnectionString)
+        out ShardingDatabaseSetting setting, [MaybeNullWhen(false)] out string? newConnectionString)
     {
-        FormatSuffix(accessor);
+        var shardedName = FormatSuffix(accessor);
+        setting = ShardingDatabaseSetting.Create(this, accessor, shardedName);
 
         // 从数据库连接字符串提取数据库名称（不一定是原始名称）
         var connectionString = accessor.CurrentConnectionString!;
         var database = connectionString.ParseDatabaseFromConnectionString();
-
-        var shardedName = ToString();
-
-        databaseSetting = ShardingDatabaseSetting.Create(this);
-        databaseSetting.ChangeShardedName(shardedName);
-
-        // 分库使用访问器标识作用引用标识
-        databaseSetting.ChangeReferenceId(accessor.AccessorId);
 
         // 与当前分片名称对比
         if (!shardedName.Equals(database, StringComparison.Ordinal))
@@ -155,17 +134,15 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
     /// <summary>
     /// 为实体定义的分片特性验证是否需要分片。
     /// </summary>
-    /// <param name="entity">给定的 <see cref="IShardingValue"/>。</param>
-    /// <param name="tableSetting">输出 <see cref="ShardingTableSetting"/>。</param>
+    /// <param name="value">给定的 <see cref="IShardingValue"/>。</param>
+    /// <param name="entity">给定的实体对象。</param>
+    /// <param name="setting">输出 <see cref="ShardingTableSetting"/>。</param>
     /// <returns>返回是否需要分片的布尔值。</returns>
-    public virtual bool IsNeedShardingForEntity(IShardingValue? entity, out ShardingTableSetting tableSetting)
+    public virtual bool IsNeedShardingForEntity(IShardingValue? value, object? entity,
+        out ShardingTableSetting setting)
     {
-        FormatSuffix(entity);
-
-        var shardedName = ToString();
-
-        tableSetting = ShardingTableSetting.Create(this);
-        tableSetting.ChangeShardedName(shardedName);
+        var shardedName = FormatSuffix(value);
+        setting = ShardingTableSetting.Create(this, entity as IObjectIdentifier, shardedName);
 
         return !shardedName.Equals(BaseName, StringComparison.Ordinal);
     }
@@ -205,15 +182,23 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
 
 
     /// <summary>
-    /// 转为字符串。
+    /// 转为带后缀格式器结尾的字符串。
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-    {
-        if (!string.IsNullOrEmpty(FormattedSuffix))
-            return $"{BaseName}{Connector}{FormattedSuffix}";
+        => ToStringWithSuffix(SuffixFormatter);
 
-        return BaseName ?? string.Empty;
+    /// <summary>
+    /// 转为带后缀结尾的字符串。
+    /// </summary>
+    /// <param name="suffix">给定的后缀。</param>
+    /// <returns>返回字符串。</returns>
+    protected virtual string ToStringWithSuffix(string suffix)
+    {
+        if (!string.IsNullOrEmpty(suffix))
+            return $"{BaseName}{Connector}{suffix}";
+
+        return BaseName;
     }
 
 

@@ -67,8 +67,8 @@ public abstract class AbstractShardingContext : IShardingContext
     /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
     /// <param name="descriptor">输出 <see cref="ShardingDescriptor"/>。</param>
     /// <param name="shardedAction">给定已分片的动作（可选）。</param>
-    /// <returns>返回是否分片的布尔值。</returns>
-    public virtual bool ShardDatabase(IAccessor accessor, out ShardingDescriptor descriptor,
+    /// <returns>返回 <see cref="ShardingDatabaseSetting"/>。</returns>
+    public virtual ShardingDatabaseSetting ShardDatabase(IAccessor accessor, out ShardingDescriptor descriptor,
         Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null)
     {
         var sharded = accessor.AccessorDescriptor?.Sharded;
@@ -77,36 +77,22 @@ public abstract class AbstractShardingContext : IShardingContext
         descriptor = Tracker.GetOrAddDescriptor(accessor,
             key => new(sharded, StrategyProvider.GetStrategy));
 
-        var isSharded = false;
         if (descriptor.IsNeedShardingForConnectionString(accessor,
             out var databaseSetting, out var newConnectionString))
         {
             // 切换为分片数据连接
             accessor.ChangeConnection(newConnectionString!);
+            databaseSetting.IsNeedSharding = true;
 
             shardedAction?.Invoke(descriptor, databaseSetting);
-            isSharded = true;
         }
 
         // 支持自行过滤已分库设置（默认添加可支持首次分库）
         SettingProvider.AddDatabaseSettings(databaseSetting);
 
-        return isSharded;
+        return databaseSetting;
     }
 
-
-    /// <summary>
-    /// 对实体的数据表分片。
-    /// </summary>
-    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
-    /// <param name="entity">给定的 <typeparamref name="TEntity"/>。</param>
-    /// <param name="defaultTableName">给定的默认表名。</param>
-    /// <param name="descriptor">输出 <see cref="ShardingDescriptor"/>。</param>
-    /// <param name="shardedAction">给定已分片的动作（可选）。</param>
-    /// <returns>返回是否分片的布尔值。</returns>
-    public virtual bool ShardTable<TEntity>(TEntity? entity, string? defaultTableName,
-        out ShardingDescriptor descriptor, Action<ShardingDescriptor, ShardingTableSetting>? shardedAction = null)
-        => ShardTable(typeof(TEntity), entity, defaultTableName, out descriptor, shardedAction);
 
     /// <summary>
     /// 对实体的数据表分片。
@@ -116,8 +102,8 @@ public abstract class AbstractShardingContext : IShardingContext
     /// <param name="defaultTableName">给定的默认表名。</param>
     /// <param name="descriptor">输出 <see cref="ShardingDescriptor"/>。</param>
     /// <param name="shardedAction">给定已分片的动作（可选）。</param>
-    /// <returns>返回是否分片的布尔值。</returns>
-    public virtual bool ShardTable(Type entityType, object? entity, string? defaultTableName,
+    /// <returns>返回 <see cref="ShardingTableSetting"/>。</returns>
+    public virtual ShardingTableSetting ShardTable(Type entityType, object? entity, string? defaultTableName,
         out ShardingDescriptor descriptor, Action<ShardingDescriptor, ShardingTableSetting>? shardedAction = null)
     {
         descriptor = Tracker.GetOrAddDescriptor(entityType, key =>
@@ -129,19 +115,19 @@ public abstract class AbstractShardingContext : IShardingContext
         });
 
         // 解析实体对象的分片值
-        var value = ParseValue(entityType, entity);
+        var value = ParseShardingValue(entityType, entity);
 
-        var isSharded = false;
-        if (descriptor.IsNeedShardingForEntity(value, out var tableSetting))
+        if (descriptor.IsNeedShardingForEntity(value, entity, out var tableSetting))
         {
+            tableSetting.IsNeedSharding = true;
+
             shardedAction?.Invoke(descriptor, tableSetting);
-            isSharded = true;
         }
 
         // 支持自行过滤已分表设置（默认添加首次分表）
         SettingProvider.AddTableSettings(tableSetting);
 
-        return isSharded;
+        return tableSetting;
     }
 
     /// <summary>
@@ -153,7 +139,7 @@ public abstract class AbstractShardingContext : IShardingContext
     /// <exception cref="NotImplementedException">
     /// The entity type is not implemented sharding value.
     /// </exception>
-    protected virtual IShardingValue? ParseValue(Type entityType, object? entity)
+    protected virtual IShardingValue? ParseShardingValue(Type entityType, object? entity)
     {
         if (entity is null)
             return null;

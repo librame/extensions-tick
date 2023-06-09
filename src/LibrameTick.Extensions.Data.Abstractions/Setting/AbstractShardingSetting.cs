@@ -33,11 +33,10 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     protected AbstractShardingSetting(ShardingDescriptor descriptor)
     {
         BaseName = descriptor.BaseName;
-        SuffixFormat = descriptor.SuffixFormatter;
-        FormattedSuffix = descriptor.FormattedSuffix;
+        SuffixFormatter = descriptor.SuffixFormatter;
         Connector = descriptor.Connector;
-        ShardedStrategyTypes = descriptor.StrategyTypes;
-        ReferenceType = descriptor.SourceType;
+        StrategyTypes = descriptor.StrategyTypes;
+        SourceType = descriptor.SourceType;
         //ReferenceName = descriptor.ReferenceName;
     }
 
@@ -48,14 +47,14 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     protected AbstractShardingSetting(AbstractShardingSetting setting)
     {
         BaseName = setting.BaseName;
-        SuffixFormat = setting.SuffixFormat;
-        FormattedSuffix = setting.FormattedSuffix;
+        SuffixFormatter = setting.SuffixFormatter;
+        //FormattedSuffix = setting.FormattedSuffix;
         Connector = setting.Connector;
         ShardedName = setting.ShardedName;
-        ShardedStrategyTypes = setting.ShardedStrategyTypes;
-        ReferenceType = setting.ReferenceType;
+        StrategyTypes = setting.StrategyTypes;
+        SourceType = setting.SourceType;
         //ReferenceName = setting.ReferenceName;
-        ReferenceId = setting.ReferenceId;
+        SourceId = setting.SourceId;
     }
 
 
@@ -65,14 +64,14 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     public string? BaseName { get; set; }
 
     /// <summary>
-    /// 后缀格式。
+    /// 带分片策略参数的后缀格式化器。
     /// </summary>
-    public string? SuffixFormat { get; set; }
+    public string? SuffixFormatter { get; set; }
 
-    /// <summary>
-    /// 经过格式化的后缀。
-    /// </summary>
-    public string? FormattedSuffix { get; set; }
+    ///// <summary>
+    ///// 经过格式化的后缀。
+    ///// </summary>
+    //public string? FormattedSuffix { get; set; }
 
     /// <summary>
     /// 连接符。
@@ -80,19 +79,24 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     public string? Connector { get; set; }
 
     /// <summary>
-    /// 当前分片名称。
+    /// 分片名称。
     /// </summary>
     public string? ShardedName { get; set; }
 
     /// <summary>
-    /// 当前分片策略类型集合。
+    /// 是否需要分片。
     /// </summary>
-    public List<Type>? ShardedStrategyTypes { get; set; }
+    public bool IsNeedSharding { get; set; }
 
     /// <summary>
-    /// 引用类型。
+    /// 分片策略类型集合。
     /// </summary>
-    public Type? ReferenceType { get; set; }
+    public List<Type>? StrategyTypes { get; set; }
+
+    /// <summary>
+    /// 来源类型。
+    /// </summary>
+    public Type? SourceType { get; set; }
 
     ///// <summary>
     ///// 引用名称。
@@ -100,32 +104,9 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     //public string? ReferenceName { get; set; }
 
     /// <summary>
-    /// 引用标识。
+    /// 来源标识。
     /// </summary>
-    public string? ReferenceId { get; set; }
-
-
-    /// <summary>
-    /// 修改分片名称。
-    /// </summary>
-    /// <param name="shardedName">给定的分片名称。</param>
-    /// <returns>返回当前 <see cref="AbstractShardingSetting"/>。</returns>
-    public virtual AbstractShardingSetting ChangeShardedName(string shardedName)
-    {
-        ShardedName = shardedName;
-        return this;
-    }
-
-    /// <summary>
-    /// 修改引用标识。
-    /// </summary>
-    /// <param name="referenceId">给定的引用标识。</param>
-    /// <returns>返回当前 <see cref="AbstractShardingSetting"/>。</returns>
-    public virtual AbstractShardingSetting ChangeReferenceId(string referenceId)
-    {
-        ReferenceId = referenceId;
-        return this;
-    }
+    public string? SourceId { get; set; }
 
 
     /// <summary>
@@ -140,10 +121,10 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     {
         var comparison = StringComparison.Ordinal;
 
-        if (ReferenceId is not null && !ReferenceId.Equals(other?.ReferenceId, comparison))
+        if (ShardedName is not null && !ShardedName.Equals(other?.ShardedName, comparison))
             return false;
 
-        if (ShardedName is not null && !ShardedName.Equals(other?.ShardedName, comparison))
+        if (SourceId is not null && !SourceId.Equals(other?.SourceId, comparison))
             return false;
 
         return BaseName is not null && BaseName.Equals(other?.BaseName, comparison);
@@ -164,11 +145,11 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     /// <returns>返回整数。</returns>
     public override int GetHashCode()
     {
-        if (ReferenceId is not null)
-            return ReferenceId.GetHashCode();
-
         if (ShardedName is not null)
             return ShardedName.GetHashCode();
+
+        if (SourceId is not null)
+            return SourceId.GetHashCode();
 
         return BaseName?.GetHashCode() ?? -1;
     }
@@ -179,6 +160,6 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{nameof(BaseName)}={BaseName},{nameof(ShardedName)}={ShardedName},{nameof(ReferenceId)}={ReferenceId}";
+        => $"{nameof(BaseName)}={BaseName},{nameof(ShardedName)}={ShardedName},{nameof(SourceId)}={SourceId}";
 
 }
