@@ -20,12 +20,25 @@ public interface IShardingSettingProvider
     /// <summary>
     /// 分库设置根。
     /// </summary>
-    ShardingDatabaseSettingRoot DatabaseSettings { get; }
+    ShardingDatabaseSettingRoot DatabaseRoot { get; }
 
     /// <summary>
     /// 分表设置根。
     /// </summary>
-    ShardingTableSettingRoot TableSettings { get; }
+    ShardingTableSettingRoot TableRoot { get; }
+
+
+    /// <summary>
+    /// 保存分库设置根。
+    /// </summary>
+    /// <returns>返回 <see cref="ShardingDatabaseSettingRoot"/>。</returns>
+    ShardingDatabaseSettingRoot SaveDatabaseRoot();
+
+    /// <summary>
+    /// 保存分库设置根。
+    /// </summary>
+    /// <returns>返回 <see cref="ShardingTableSettingRoot"/>。</returns>
+    ShardingTableSettingRoot SaveTableRoot();
 
 
     /// <summary>

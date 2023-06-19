@@ -20,5 +20,20 @@ public class ShardingTableSettingRoot : ISettingRoot
     /// <summary>
     /// 分表设置集合。
     /// </summary>
-    public List<ShardingTableSetting> Shardeds { get; set; } = new();
+    public List<ShardingTableSetting> Tables { get; set; } = new();
+
+
+    /// <summary>
+    /// 尝试获取指定实体类型的分表设置。
+    /// </summary>
+    /// <param name="entityType">给定的实体类型。</param>
+    /// <param name="result">输出 <see cref="ShardingTableSetting"/>。</param>
+    /// <returns>返回是否存在的布尔值。</returns>
+    public virtual bool TryGetTable(Type entityType,
+        [MaybeNullWhen(false)] out ShardingTableSetting result)
+    {
+        result = Tables.SingleOrDefault(p => p.SourceType == entityType);
+        return result is not null;
+    }
+
 }

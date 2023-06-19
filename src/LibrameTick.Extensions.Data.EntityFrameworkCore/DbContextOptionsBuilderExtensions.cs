@@ -29,8 +29,7 @@ public static class DbContextOptionsBuilderExtensions
         TExtension? extension = null)
         where TExtension : class, IDbContextOptionsExtension, new()
     {
-        if (extension is null)
-            extension = builder.Options.GetOrDefault<TExtension>();
+        extension ??= builder.Options.FindExtension<TExtension>() ?? new TExtension();
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
 
@@ -48,7 +47,7 @@ public static class DbContextOptionsBuilderExtensions
         Func<TExtension, TExtension> configureFunc)
         where TExtension : class, IDbContextOptionsExtension, new()
     {
-        var extension = configureFunc(builder.Options.GetOrDefault<TExtension>());
+        var extension = configureFunc(builder.Options.FindExtension<TExtension>() ?? new TExtension());
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
 

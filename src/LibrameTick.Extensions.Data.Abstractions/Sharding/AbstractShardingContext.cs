@@ -77,18 +77,30 @@ public abstract class AbstractShardingContext : IShardingContext
         descriptor = Tracker.GetOrAddDescriptor(accessor,
             key => new(sharded, StrategyProvider.GetStrategy));
 
-        if (descriptor.IsNeedShardingForConnectionString(accessor,
-            out var databaseSetting, out var newConnectionString))
+        var shardedName = descriptor.FormatSuffix(accessor);
+
+        ShardingItemSetting? itemSetting = null;
+        if (!SettingProvider.DatabaseRoot.TryGetDatabase(accessor.AccessorType, out var databaseSetting))
         {
+            databaseSetting = ShardingDatabaseSetting.Create(descriptor, accessor, shardedName, out itemSetting);
+            SettingProvider.SaveDatabaseRoot();
+        }
+        else
+        {
+            itemSetting = databaseSetting.GetOrAddItem(accessor, shardedName, () => SettingProvider.SaveDatabaseRoot());
+        }
+
+        if (itemSetting.IsNeedSharding)
+        {
+            // 从数据库连接字符串提取数据库名称（不一定是原始名称）
+            var connectionString = accessor.CurrentConnectionString!;
+            var database = connectionString.ParseDatabaseFromConnectionString();
+
             // 切换为分片数据连接
-            accessor.ChangeConnection(newConnectionString!);
-            databaseSetting.IsNeedSharding = true;
+            accessor.ChangeConnection(connectionString.Replace(database, shardedName));
 
             shardedAction?.Invoke(descriptor, databaseSetting);
         }
-
-        // 支持自行过滤已分库设置（默认添加可支持首次分库）
-        SettingProvider.AddDatabaseSettings(databaseSetting);
 
         return databaseSetting;
     }
@@ -114,18 +126,28 @@ public abstract class AbstractShardingContext : IShardingContext
             return descr;
         });
 
+        var identifier = entity as IObjectIdentifier;
+
         // 解析实体对象的分片值
         var value = ParseShardingValue(entityType, entity);
 
-        if (descriptor.IsNeedShardingForEntity(value, entity, out var tableSetting))
-        {
-            tableSetting.IsNeedSharding = true;
+        var shardedName = descriptor.FormatSuffix(value);
 
-            shardedAction?.Invoke(descriptor, tableSetting);
+        ShardingItemSetting? itemSetting = null;
+        if (!SettingProvider.TableRoot.TryGetTable(entityType, out var tableSetting))
+        {
+            tableSetting = ShardingTableSetting.Create(descriptor, identifier, shardedName, out itemSetting);
+            SettingProvider.SaveDatabaseRoot();
+        }
+        else
+        {
+            itemSetting = tableSetting.GetOrAddItem(identifier, shardedName, () => SettingProvider.SaveDatabaseRoot());
         }
 
-        // 支持自行过滤已分表设置（默认添加首次分表）
-        SettingProvider.AddTableSettings(tableSetting);
+        if (itemSetting.IsNeedSharding)
+        {
+            shardedAction?.Invoke(descriptor, tableSetting);
+        }
 
         return tableSetting;
     }

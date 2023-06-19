@@ -13,6 +13,7 @@
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Auditing;
+using Librame.Extensions.Data.Saving;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Device;
@@ -35,6 +36,9 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     public DataExtensionOptions()
     {
         ShardingDirectory = Directories.ResourceDirectory.CombineDirectory("shardings");
+
+        SavingBehaviors.Add(new InternalAuditingSavingBehavior());
+        SavingBehaviors.Add(new InternalShardingSavingBehavior());
     }
 
 
@@ -99,23 +103,36 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
 
 
     /// <summary>
-    /// 标识生成器字典集合（默认已集成 <see cref="string"/> “MongoDB”、<see cref="long"/> “雪花”、<see cref="Guid"/> “COMB for SQLServer/MySQL/Oracle” 等标识类型的生成器）。
+    /// 标识生成器集合（默认已集成 <see cref="string"/> “MongoDB”、<see cref="long"/> “雪花”、<see cref="Guid"/> “COMB for SQLServer/MySQL/Oracle” 等标识类型的生成器）。
     /// </summary>
     [JsonIgnore]
     public IReadOnlyDictionary<TypeNamedKey, IObjectIdGenerator> IdGenerators
         => _idGenerators;
 
     /// <summary>
-    /// 分片策略列表集合（默认已集成 <see cref="CultureInfoShardingStrategy"/>、<see cref="DateTimeShardingStrategy"/>、<see cref="DateTimeOffsetShardingStrategy"/> 等分片策略）。
+    /// 分片策略集合（默认已集成 <see cref="CultureInfoShardingStrategy"/>、<see cref="DateTimeShardingStrategy"/>、<see cref="DateTimeOffsetShardingStrategy"/> 等分片策略）。
     /// </summary>
     [JsonIgnore]
     public List<IShardingStrategy> ShardingStrategies { get; init; } = new();
 
     /// <summary>
-    /// 查询过滤器列表集合。
+    /// 查询过滤器集合。
     /// </summary>
     [JsonIgnore]
     public List<IQueryFilter> QueryFilters { get; init; } = new();
+
+    /// <summary>
+    /// 保存行为集合。
+    /// </summary>
+    [JsonIgnore]
+    public List<ISavingBehavior<BaseDbContext, EntityEntry>> SavingBehaviors { get; init; } = new();
+
+    /// <summary>
+    /// 保存变化事件处理器。
+    /// </summary>
+    [JsonIgnore]
+    public Func<BaseDbContext, ISaveChangesEventHandler> SaveChangesEventHandler { get; set; }
+        = context => new InternalSaveChangesEventHandler();
 
     /// <summary>
     /// 保存审计集合动作（默认保存到当前数据库）。

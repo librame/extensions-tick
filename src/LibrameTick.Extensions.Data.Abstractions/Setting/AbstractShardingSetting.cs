@@ -20,10 +20,16 @@ namespace Librame.Extensions.Setting;
 public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetting>
 {
     /// <summary>
-    /// 构造一个默认的 <see cref="AbstractShardingSetting"/>。
+    /// 构造一个 <see cref="AbstractShardingSetting"/>。
     /// </summary>
-    public AbstractShardingSetting()
+    protected AbstractShardingSetting()
     {
+        BaseName = string.Empty;
+        SuffixFormatter = string.Empty;
+        Connector = string.Empty;
+
+        Items = new();
+        StrategyTypes = new();
     }
 
     /// <summary>
@@ -35,9 +41,10 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
         BaseName = descriptor.BaseName;
         SuffixFormatter = descriptor.SuffixFormatter;
         Connector = descriptor.Connector;
-        StrategyTypes = descriptor.StrategyTypes;
         SourceType = descriptor.SourceType;
-        //ReferenceName = descriptor.ReferenceName;
+
+        Items = new();
+        StrategyTypes = descriptor.StrategyTypes;
     }
 
     /// <summary>
@@ -48,72 +55,64 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     {
         BaseName = setting.BaseName;
         SuffixFormatter = setting.SuffixFormatter;
-        //FormattedSuffix = setting.FormattedSuffix;
         Connector = setting.Connector;
-        ShardedName = setting.ShardedName;
-        StrategyTypes = setting.StrategyTypes;
         SourceType = setting.SourceType;
-        //ReferenceName = setting.ReferenceName;
-        SourceId = setting.SourceId;
+
+        Items = setting.Items;
+        StrategyTypes = setting.StrategyTypes;
     }
 
 
     /// <summary>
     /// 基础名称。
     /// </summary>
-    public string? BaseName { get; set; }
+    public string BaseName { get; set; }
 
     /// <summary>
     /// 带分片策略参数的后缀格式化器。
     /// </summary>
-    public string? SuffixFormatter { get; set; }
-
-    ///// <summary>
-    ///// 经过格式化的后缀。
-    ///// </summary>
-    //public string? FormattedSuffix { get; set; }
+    public string SuffixFormatter { get; set; }
 
     /// <summary>
     /// 连接符。
     /// </summary>
-    public string? Connector { get; set; }
-
-    /// <summary>
-    /// 分片名称。
-    /// </summary>
-    public string? ShardedName { get; set; }
-
-    /// <summary>
-    /// 是否需要分片。
-    /// </summary>
-    public bool IsNeedSharding { get; set; }
-
-    /// <summary>
-    /// 分片策略类型集合。
-    /// </summary>
-    public List<Type>? StrategyTypes { get; set; }
+    public string Connector { get; set; }
 
     /// <summary>
     /// 来源类型。
     /// </summary>
     public Type? SourceType { get; set; }
 
-    ///// <summary>
-    ///// 引用名称。
-    ///// </summary>
-    //public string? ReferenceName { get; set; }
+    /// <summary>
+    /// 分片策略类型集合。
+    /// </summary>
+    public List<Type> StrategyTypes { get; set; }
+    
+    /// <summary>
+    /// 分片项集合。
+    /// </summary>
+    public List<ShardingItemSetting> Items { get; set; }
+
 
     /// <summary>
-    /// 来源标识。
+    /// 尝试获取指定分片名称项设置。
     /// </summary>
-    public string? SourceId { get; set; }
+    /// <param name="shardedName">给定的分片名称。</param>
+    /// <param name="result">输出 <see cref="ShardingItemSetting"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    public virtual bool TryGetItem(string shardedName,
+        [MaybeNullWhen(false)] out ShardingItemSetting result)
+    {
+        result = Items.SingleOrDefault(p => p.ShardedName == shardedName);
+        return result is not null;
+    }
 
 
     /// <summary>
     /// 比较相等。
     /// </summary>
     /// <remarks>
-    /// <para>优先比较引用标识（如果标识不为空），其次比较分片名称（如果分片名称不为空），最后比较基础名称。</para>
+    /// 主要比较 <see cref="BaseName"/> 与 <see cref="SuffixFormatter"/> 是否相等，区别大小写。
     /// </remarks>
     /// <param name="other">给定的 <see cref="AbstractShardingSetting"/>。</param>
     /// <returns>返回布尔值。</returns>
@@ -121,13 +120,8 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     {
         var comparison = StringComparison.Ordinal;
 
-        if (ShardedName is not null && !ShardedName.Equals(other?.ShardedName, comparison))
-            return false;
-
-        if (SourceId is not null && !SourceId.Equals(other?.SourceId, comparison))
-            return false;
-
-        return BaseName is not null && BaseName.Equals(other?.BaseName, comparison);
+        return other?.BaseName.Equals(BaseName, comparison) == true
+            && other.SuffixFormatter.Equals(SuffixFormatter, comparison);
     }
 
     /// <summary>
@@ -144,15 +138,7 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     /// </summary>
     /// <returns>返回整数。</returns>
     public override int GetHashCode()
-    {
-        if (ShardedName is not null)
-            return ShardedName.GetHashCode();
-
-        if (SourceId is not null)
-            return SourceId.GetHashCode();
-
-        return BaseName?.GetHashCode() ?? -1;
-    }
+        => HashCode.Combine(BaseName, SuffixFormatter);
 
 
     /// <summary>
@@ -160,6 +146,6 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{nameof(BaseName)}={BaseName},{nameof(ShardedName)}={ShardedName},{nameof(SourceId)}={SourceId}";
+        => $"{nameof(BaseName)}={BaseName},{nameof(SuffixFormatter)}={SuffixFormatter}";
 
 }

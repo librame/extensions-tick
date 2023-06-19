@@ -11,24 +11,22 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Data.Auditing;
+using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Data.Saving;
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
-using Microsoft.EntityFrameworkCore;
 
-namespace Librame.Extensions.Data.Accessing;
+namespace Librame.Extensions.Data;
 
 /// <summary>
 /// 定义一个实现 <see cref="DbContext"/> 与 <see cref="IDbContext"/> 的基础数据库上下文。
 /// </summary>
 public class BaseDbContext : DbContext, IDbContext
 {
-    private IEnumerable<Audit>? _savingAudits;
-
     private readonly IOptionsMonitor<DataExtensionOptions> _dataOptions;
     private readonly IOptionsMonitor<CoreExtensionOptions> _coreOptions;
-    private readonly DbContextOptions _dbContextOptions;
+    private readonly DbContextOptions _options;
+    private readonly ISaveChangesEventHandler _saveChangesEventHandler;
 
 
     /// <summary>
@@ -48,16 +46,26 @@ public class BaseDbContext : DbContext, IDbContext
     {
         _dataOptions = dataOptions;
         _coreOptions = coreOptions;
-        _dbContextOptions = options;
+        _options = options;
+        _saveChangesEventHandler = dataOptions.CurrentValue.SaveChangesEventHandler(this);
+
         EncryptionConverterFactory = encryptionConverterFactory;
         ShardingContext = shardingContext;
-
-        if (DataOptions.Audit.Enabling)
-        {
-            SavingChanges += BaseDbContext_SavingChanges;
-            SavedChanges += BaseDbContext_SavedChanges;
-        }
+        
+        SavingChanges += BaseDbContext_SavingChanges;
+        SavedChanges += BaseDbContext_SavedChanges;
+        SaveChangesFailed += BaseDbContext_SaveChangesFailed;
     }
+
+
+    private void BaseDbContext_SavingChanges(object? sender, SavingChangesEventArgs e)
+        => _saveChangesEventHandler.SavingChanges(this, e.AcceptAllChangesOnSuccess);
+
+    private void BaseDbContext_SavedChanges(object? sender, SavedChangesEventArgs e)
+        => _saveChangesEventHandler.SavedChanges(this, e.AcceptAllChangesOnSuccess, e.EntitiesSavedCount);
+
+    private void BaseDbContext_SaveChangesFailed(object? sender, SaveChangesFailedEventArgs e)
+        => _saveChangesEventHandler.SaveChangesFailed(this, e.AcceptAllChangesOnSuccess, e.Exception);
 
 
     /// <summary>
@@ -81,13 +89,13 @@ public class BaseDbContext : DbContext, IDbContext
     /// 存取器选项扩展。
     /// </summary>
     public AccessorDbContextOptionsExtension? AccessorExtension
-        => _dbContextOptions.FindExtension<AccessorDbContextOptionsExtension>();
+        => _options.FindExtension<AccessorDbContextOptionsExtension>();
 
     /// <summary>
     /// 关系型选项扩展。
     /// </summary>
     public RelationalOptionsExtension? RelationalExtension
-        => _dbContextOptions.Extensions.OfType<RelationalOptionsExtension>().FirstOrDefault();
+        => _options.Extensions.OfType<RelationalOptionsExtension>().FirstOrDefault();
 
 
     /// <summary>
@@ -201,27 +209,6 @@ public class BaseDbContext : DbContext, IDbContext
 
             PostModelCreatedAction?.Invoke(entityType, modelBuilder, this);
         }
-    }
-
-
-    private void BaseDbContext_SavedChanges(object? sender, SavedChangesEventArgs e)
-    {
-        var dbContext = (sender as BaseDbContext)!;
-        if (dbContext._savingAudits is not null)
-            dbContext.DataOptions.Audit.NotificationAction?.Invoke(dbContext._savingAudits);
-    }
-
-    private void BaseDbContext_SavingChanges(object? sender, SavingChangesEventArgs e)
-    {
-        var dbContext = (sender as BaseDbContext)!;
-        var auditOptions = dbContext.DataOptions.Audit;
-
-        var auditingContext = dbContext.GetService<IAuditingContext<EntityEntry, Audit>>();
-        dbContext._savingAudits = auditingContext.GetAudits(dbContext);
-
-        // 保存审计数据
-        if (auditOptions.SaveAudits && dbContext._savingAudits?.Count() > 0)
-            dbContext.DataOptions.SavingAuditsAction(dbContext, dbContext._savingAudits);
     }
 
 }

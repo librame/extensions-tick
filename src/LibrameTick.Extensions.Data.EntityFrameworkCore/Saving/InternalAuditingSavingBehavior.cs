@@ -10,38 +10,41 @@
 
 #endregion
 
+using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Storing;
 
-namespace Librame.Extensions.Data.Auditing;
+namespace Librame.Extensions.Data.Saving;
 
-sealed internal class InternalAuditingParser : IAuditingParser<EntityEntry, Audit>
+internal sealed class InternalAuditingSavingBehavior : AbstractSavingBehavior
 {
-    private readonly Type _notAuditedType = typeof(NotAuditedAttribute);
-
-    private readonly IIdGeneratorFactory _idGeneratorFactory;
-    private readonly IOptionsMonitor<DataExtensionOptions> _optionsMonitor;
+    private static readonly Type _notAuditedType = typeof(NotAuditedAttribute);
 
 
-    public InternalAuditingParser(IIdGeneratorFactory idGeneratorFactory,
-        IOptionsMonitor<DataExtensionOptions> optionsMonitor)
+    internal IReadOnlyList<Audit>? SavingAudits { get; private set; }
+
+
+    protected override void HandleCore(ISavingContext<BaseDbContext, EntityEntry> context)
     {
-        _idGeneratorFactory = idGeneratorFactory;
-        _optionsMonitor = optionsMonitor;
+        var idGenerator = context.DbContext.GetService<IIdGeneratorFactory>();
+        var options = context.DbContext.DataOptions;
+
+        SavingAudits = ParseEntities(idGenerator, options, context.ChangeEntries);
+
+        // 保存审计数据
+        if (options.Audit.SaveAudits && SavingAudits?.Count > 0)
+            options.SavingAuditsAction(context.DbContext, SavingAudits);
     }
 
 
-    public DataExtensionOptions Options
-        => _optionsMonitor.CurrentValue;
-
-
-    public IEnumerable<Audit>? ParseEntities(IEnumerable<EntityEntry>? sources)
+    private List<Audit>? ParseEntities(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
+        IEnumerable<EntityEntry>? entityEntries)
     {
-        if (sources is null)
+        if (entityEntries is null)
             return null;
 
         var audits = new List<Audit>();
 
-        foreach (var entry in sources)
+        foreach (var entry in entityEntries)
         {
             // 过滤标记不审计特性的实体
             if (entry.Metadata.ClrType.IsDefined(_notAuditedType, inherit: false))
@@ -49,13 +52,13 @@ sealed internal class InternalAuditingParser : IAuditingParser<EntityEntry, Audi
 
             var audit = new Audit();
 
-            audit.Id = _idGeneratorFactory.GetSnowflakeIdGenerator().GenerateId();
+            audit.Id = idGenerator.GetSnowflakeIdGenerator().GenerateId();
             audit.TableName = GetEntityTableName(entry.Metadata);
             audit.EntityTypeName = GetTypeName(entry.Metadata.ClrType);
             audit.EntityId = GetEntityId(entry);
             audit.StateName = entry.State.ToString();
 
-            PopulateProperties(audit, entry);
+            PopulateProperties(idGenerator, options, audit, entry);
 
             audits.Add(audit);
         }
@@ -63,7 +66,8 @@ sealed internal class InternalAuditingParser : IAuditingParser<EntityEntry, Audi
         return audits;
     }
 
-    private void PopulateProperties(Audit audit, EntityEntry entityEntry)
+    private void PopulateProperties(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
+        Audit audit, EntityEntry entityEntry)
     {
         foreach (var property in entityEntry.CurrentValues.Properties)
         {
@@ -78,13 +82,13 @@ sealed internal class InternalAuditingParser : IAuditingParser<EntityEntry, Audi
 
             var auditProperty = new AuditProperty();
 
-            auditProperty.Id = _idGeneratorFactory.GetSnowflakeIdGenerator().GenerateId();
+            auditProperty.Id = idGenerator.GetSnowflakeIdGenerator().GenerateId();
             auditProperty.PropertyName = property.Name;
             auditProperty.PropertyTypeName = GetTypeName(property.ClrType);
             auditProperty.NewValue = newValue;
             auditProperty.OldValue = oldValue;
 
-            if (!Options.Store.MapRelationship)
+            if (!options.Store.MapRelationship)
                 auditProperty.AuditId = audit.Id;
             else
                 auditProperty.Audit = audit;

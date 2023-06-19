@@ -62,42 +62,6 @@ public static class EnumerableExtensions
     }
 
 
-    /// <summary>
-    /// 筛选不为空的序列。
-    /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <returns>返回不为空的 <typeparamref name="T"/> 元素集合。</returns>
-    public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> enumerable)
-    {
-        foreach (var item in enumerable)
-        {
-            if (item is not null)
-                yield return item;
-        }
-    }
-
-    /// <summary>
-    /// 基于谓词筛选序列。
-    /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <param name="predicate">给定的谓词筛选条件。</param>
-    /// <returns>返回包含索引与元素的键值对集合。</returns>
-    public static IEnumerable<Core.Pair<int, T>> WhereAt<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate)
-    {
-        var i = 0;
-        foreach (var item in enumerable)
-        {
-            if (predicate(item))
-            {
-                yield return Core.Pair.Create(i, item);
-            }
-            i++;
-        }
-    }
-
-
     #region AsEnumerable
 
     /// <summary>
@@ -470,6 +434,69 @@ public static class EnumerableExtensions
         }
 
         return enumerable;
+    }
+
+    #endregion
+
+
+    #region Where
+
+    /// <summary>
+    /// 筛选不为空的序列。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
+    /// <returns>返回不为空的 <typeparamref name="T"/> 元素集合。</returns>
+    public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> enumerable)
+    {
+        foreach (var item in enumerable)
+        {
+            if (item is not null)
+                yield return item;
+        }
+    }
+
+    /// <summary>
+    /// 基于谓词筛选序列，并返回匹配的元素与索引键值对集合。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
+    /// <param name="predicate">给定的谓词筛选条件。</param>
+    /// <returns>返回包含索引与元素的键值对集合。</returns>
+    public static IEnumerable<Core.Pair<int, T>> WhereAt<T>(this IEnumerable<T> enumerable, Func<T, bool> predicate)
+    {
+        var i = 0;
+        foreach (var item in enumerable)
+        {
+            if (predicate(item))
+            {
+                yield return Core.Pair.Create(i, item);
+            }
+            i++;
+        }
+    }
+
+    /// <summary>
+    /// 筛选可转为目标实例的集合。
+    /// </summary>
+    /// <typeparam name="TSource">指定的来源类型。</typeparam>
+    /// <typeparam name="TTarget">指定的目标类型。</typeparam>
+    /// <param name="enumerable">给定的 <see cref="IEnumerable{TSource}"/>。</param>
+    /// <param name="predicate">给定进一步筛选的谓词条件（可选）。</param>
+    /// <returns>返回 <see cref="IEnumerable{TTarget}"/>。</returns>
+    public static IEnumerable<TTarget> WhereAre<TSource, TTarget>(this IEnumerable<TSource> enumerable,
+        Func<TTarget, bool>? predicate = null)
+        where TTarget : TSource
+    {
+        predicate ??= x => true;
+
+        foreach (var item in enumerable)
+        {
+            if (item is TTarget target && predicate(target))
+            {
+                yield return target;
+            }
+        }
     }
 
     #endregion

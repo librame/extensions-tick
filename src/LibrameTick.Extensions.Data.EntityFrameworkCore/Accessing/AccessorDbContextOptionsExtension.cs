@@ -37,7 +37,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     private AlgorithmOptions? _algorithm;
     private ShardingAttribute? _sharding;
     private string? _loaderHost;
-    private Type? _serviceType;
+    private Type? _accessorType;
 
     private DbContextOptionsExtensionInfo? _info;
 
@@ -67,7 +67,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         _algorithm = copyFrom.Algorithm;
         _sharding = copyFrom.Sharding;
         _loaderHost = copyFrom._loaderHost;
-        _serviceType = copyFrom.ServiceType;
+        _accessorType = copyFrom.AccessorType;
     }
 
 
@@ -147,9 +147,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     public string? LoaderHost => _loaderHost;
 
     /// <summary>
-    /// 服务类型。
+    /// 存取器类型。
     /// </summary>
-    public Type? ServiceType => _serviceType;
+    public Type? AccessorType => _accessorType;
 
 
     /// <summary>
@@ -308,15 +308,15 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     }
 
     /// <summary>
-    /// 使用指定的服务类型创建一个选项扩展实例副本。
+    /// 使用指定的存取器类型创建一个选项扩展实例副本。
     /// </summary>
-    /// <param name="serviceType">给定的服务类型。</param>
+    /// <param name="accessorType">给定的存取器类型。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
-    public virtual AccessorDbContextOptionsExtension WithServiceType(Type serviceType)
+    public virtual AccessorDbContextOptionsExtension WithAccessorType(Type accessorType)
     {
         var clone = Clone();
 
-        clone._serviceType = serviceType;
+        clone._accessorType = accessorType;
 
         return clone;
     }
@@ -336,7 +336,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     /// <param name="options">给定的 <see cref="IDbContextOptions"/>。</param>
     public virtual void Validate(IDbContextOptions options)
     {
-        ServiceType.NotNull(nameof(ServiceType));
+        AccessorType.NotNull(nameof(AccessorType));
     }
 
 
@@ -411,9 +411,9 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                         builder.Append(Extension.LoaderHost).Append(' ');
                     }
 
-                    if (Extension.ServiceType is not null)
+                    if (Extension.AccessorType is not null)
                     {
-                        builder.Append("Service: ").Append(Extension.ServiceType).Append(' ');
+                        builder.Append("Service: ").Append(Extension.AccessorType).Append(' ');
                     }
 
                     _logFragment = builder.ToString();
@@ -446,8 +446,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 if (Extension._loaderHost is not null)
                     hashCode.Add(Extension._loaderHost);
 
-                if (Extension._serviceType is not null)
-                    hashCode.Add(Extension._serviceType);
+                if (Extension._accessorType is not null)
+                    hashCode.Add(Extension._accessorType);
 
                 _serviceProviderHash = hashCode.ToHashCode();
             }
@@ -467,7 +467,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
                 && Extension._algorithm?.ToString() == otherInfo.Extension._algorithm?.ToString()
                 && Extension._sharding?.ToString() == otherInfo.Extension._sharding?.ToString()
                 && Extension._loaderHost == otherInfo.Extension._loaderHost
-                && Extension._serviceType == otherInfo.Extension._serviceType;
+                && Extension._accessorType == otherInfo.Extension._accessorType;
 
         public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
         {
@@ -501,8 +501,8 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
             debugInfo["Accessor:" + nameof(Extension.LoaderHost)] =
                 (Extension.LoaderHost?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
 
-            debugInfo["Accessor:" + nameof(Extension.ServiceType)] =
-                (Extension.ServiceType?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
+            debugInfo["Accessor:" + nameof(Extension.AccessorType)] =
+                (Extension.AccessorType?.GetHashCode() ?? 0).ToString(CultureInfo.InvariantCulture);
         }
 
     }

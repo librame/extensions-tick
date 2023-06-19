@@ -36,7 +36,8 @@ public class AccessorDbContextOptionsBuilder
         ParentBuilder = parentBuilder;
 
         //_coreOptionsExtension = parentBuilder.Options.FindExtension<CoreOptionsExtension>();
-        _relationalOptionsExtension = parentBuilder.Options.LikeExtensions<RelationalOptionsExtension>()?.FirstOrDefault();
+        _relationalOptionsExtension = parentBuilder.Options.Extensions
+            .WhereAre<IDbContextOptionsExtension, RelationalOptionsExtension>(p => p.Info.IsDatabaseProvider)?.FirstOrDefault();
 
         //if (_coreOptionsExtension?.MaxPoolSize > 0)
         //    WithOption(e => e.WithPooling(true));
@@ -160,8 +161,8 @@ public class AccessorDbContextOptionsBuilder
     public virtual AccessorDbContextOptionsBuilder WithSharding(string suffixFormatter,
         Action<ShardingAttribute>? configureAction, params Type[] strategyTypes)
     {
-        var attribute = ShardingAttribute.ParseFromConnectionString(ParentBuilder.Options.ContextType,
-            suffixFormatter, strategyTypes, _relationalOptionsExtension?.ConnectionString);
+        //var attribute = ShardingAttribute.ParseFromConnectionString(ParentBuilder.Options.ContextType,
+        //    suffixFormatter, strategyTypes, _relationalOptionsExtension?.ConnectionString);
 
         configureAction?.Invoke(attribute);
 
@@ -202,13 +203,13 @@ public class AccessorDbContextOptionsBuilder
         => WithOption(e => e.WithLoader(host));
 
 
-    /// <summary>
-    /// 配置存取器服务类型（通常不需要修改）。
-    /// </summary>
-    /// <param name="serviceType">给定的存取器服务类型。</param>
-    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithServiceType(Type serviceType)
-        => WithOption(e => e.WithServiceType(serviceType));
+    ///// <summary>
+    ///// 配置存取器类型（通常不需要修改）。
+    ///// </summary>
+    ///// <param name="accessorType">给定的存取器类型。</param>
+    ///// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+    //public virtual AccessorDbContextOptionsBuilder WithAccessorType(Type accessorType)
+    //    => WithOption(e => e.WithAccessorType(accessorType));
 
 
     /// <summary>

@@ -34,7 +34,6 @@ public class ShardingTableSetting : AbstractShardingSetting
     protected ShardingTableSetting(ShardingDescriptor descriptor)
         : base(descriptor)
     {
-
     }
 
     /// <summary>
@@ -44,7 +43,32 @@ public class ShardingTableSetting : AbstractShardingSetting
     protected ShardingTableSetting(AbstractShardingSetting setting)
         : base(setting)
     {
+    }
 
+
+    /// <summary>
+    /// 获取或新增分片项设置。
+    /// </summary>
+    /// <param name="identifier">给定的 <see cref="IObjectIdentifier"/>。</param>
+    /// <param name="shardedName">给定的分片名称。</param>
+    /// <param name="addAction">给定新增后的动作（可选）。</param>
+    /// <returns>返回 <see cref="ShardingItemSetting"/>。</returns>
+    public virtual ShardingItemSetting GetOrAddItem(IObjectIdentifier? identifier, string shardedName,
+        Action? addAction = null)
+    {
+        if (!TryGetItem(shardedName, out var item))
+        {
+            item = CreateItem(identifier, shardedName);
+            Items.Add(item);
+
+            addAction?.Invoke();
+        }
+        else
+        {
+            item.IsNeedSharding = false;
+        }
+
+        return item;
     }
 
 
@@ -54,17 +78,33 @@ public class ShardingTableSetting : AbstractShardingSetting
     /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
     /// <param name="identifier">给定的 <see cref="IObjectIdentifier"/>。</param>
     /// <param name="shardedName">给定的分片名称。</param>
+    /// <param name="result">输出 <see cref="ShardingItemSetting"/>。</param>
     /// <returns>返回 <see cref="ShardingTableSetting"/>。</returns>
     public static ShardingTableSetting Create(ShardingDescriptor descriptor,
-        IObjectIdentifier? identifier, string shardedName)
+        IObjectIdentifier? identifier, string shardedName, out ShardingItemSetting result)
     {
-        var setting = new ShardingTableSetting(descriptor)
-        {
-            ShardedName = shardedName,
-            SourceId = identifier?.GetObjectId().ToString()
-        };
+        var setting = new ShardingTableSetting(descriptor);
+
+        result = CreateItem(identifier, shardedName);
+        setting.Items.Add(result);
 
         return setting;
+    }
+
+    /// <summary>
+    /// 创建分库项设置。
+    /// </summary>
+    /// <param name="identifier">给定的 <see cref="IObjectIdentifier"/>。</param>
+    /// <param name="shardedName">给定的分片名称。</param>
+    /// <returns>返回 <see cref="ShardingItemSetting"/>。</returns>
+    public static ShardingItemSetting CreateItem(IObjectIdentifier? identifier, string shardedName)
+    {
+        return new ShardingItemSetting
+        {
+            IsNeedSharding = true,
+            ShardedName = shardedName,
+            SourceId = identifier?.GetObjectId().ToString() // 分库使用标识符作用引用标识
+        };
     }
 
 }

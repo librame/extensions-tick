@@ -10,9 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Setting;
-
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
@@ -100,51 +97,6 @@ public class ShardingDescriptor : IEquatable<ShardingDescriptor>, IEquatable<str
         }
 
         return ToStringWithSuffix(formatter);
-    }
-
-
-    /// <summary>
-    /// 为数据库连接字符串验证是否需要分片。
-    /// </summary>
-    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
-    /// <param name="setting">输出 <see cref="ShardingDatabaseSetting"/>。</param>
-    /// <param name="newConnectionString">输出新连接字符串。</param>
-    /// <returns>返回是否需要分片的布尔值。</returns>
-    public virtual bool IsNeedShardingForConnectionString(IAccessor accessor,
-        out ShardingDatabaseSetting setting, [MaybeNullWhen(false)] out string? newConnectionString)
-    {
-        var shardedName = FormatSuffix(accessor);
-        setting = ShardingDatabaseSetting.Create(this, accessor, shardedName);
-
-        // 从数据库连接字符串提取数据库名称（不一定是原始名称）
-        var connectionString = accessor.CurrentConnectionString!;
-        var database = connectionString.ParseDatabaseFromConnectionString();
-
-        // 与当前分片名称对比
-        if (!shardedName.Equals(database, StringComparison.Ordinal))
-        {
-            newConnectionString = connectionString.Replace(database, shardedName);
-            return true;
-        }
-
-        newConnectionString = null;
-        return false;
-    }
-
-    /// <summary>
-    /// 为实体定义的分片特性验证是否需要分片。
-    /// </summary>
-    /// <param name="value">给定的 <see cref="IShardingValue"/>。</param>
-    /// <param name="entity">给定的实体对象。</param>
-    /// <param name="setting">输出 <see cref="ShardingTableSetting"/>。</param>
-    /// <returns>返回是否需要分片的布尔值。</returns>
-    public virtual bool IsNeedShardingForEntity(IShardingValue? value, object? entity,
-        out ShardingTableSetting setting)
-    {
-        var shardedName = FormatSuffix(value);
-        setting = ShardingTableSetting.Create(this, entity as IObjectIdentifier, shardedName);
-
-        return !shardedName.Equals(BaseName, StringComparison.Ordinal);
     }
 
 

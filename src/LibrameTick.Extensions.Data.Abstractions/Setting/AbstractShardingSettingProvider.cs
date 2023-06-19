@@ -39,14 +39,29 @@ public abstract class AbstractShardingSettingProvider : IShardingSettingProvider
     /// <summary>
     /// 分库设置根。
     /// </summary>
-    public ShardingDatabaseSettingRoot DatabaseSettings
+    public ShardingDatabaseSettingRoot DatabaseRoot
         => _databaseSettingProvider.LoadOrSave();
 
     /// <summary>
     /// 分表设置根。
     /// </summary>
-    public ShardingTableSettingRoot TableSettings
+    public ShardingTableSettingRoot TableRoot
         => _tableSettingProvider.LoadOrSave();
+
+
+    /// <summary>
+    /// 保存分库设置根。
+    /// </summary>
+    /// <returns>返回 <see cref="ShardingDatabaseSettingRoot"/>。</returns>
+    public virtual ShardingDatabaseSettingRoot SaveDatabaseRoot()
+        => _databaseSettingProvider.Save(DatabaseRoot);
+
+    /// <summary>
+    /// 保存分库设置根。
+    /// </summary>
+    /// <returns>返回 <see cref="ShardingTableSettingRoot"/>。</returns>
+    public virtual ShardingTableSettingRoot SaveTableRoot()
+        => _tableSettingProvider.Save(TableRoot);
 
 
     /// <summary>
@@ -70,9 +85,9 @@ public abstract class AbstractShardingSettingProvider : IShardingSettingProvider
 
             foreach (var setting in settings)
             {
-                if (!DatabaseSettings.Shardeds.Contains(setting))
+                if (!DatabaseRoot.Databases.Contains(setting))
                 {
-                    DatabaseSettings.Shardeds.Add(setting);
+                    DatabaseRoot.Databases.Add(setting);
 
                     if (!isAdded)
                         isAdded = true;
@@ -80,7 +95,7 @@ public abstract class AbstractShardingSettingProvider : IShardingSettingProvider
             }
 
             if (isAdded)
-                _databaseSettingProvider.Save(DatabaseSettings);
+                _databaseSettingProvider.Save(DatabaseRoot);
         });
 
         return this;
@@ -108,9 +123,9 @@ public abstract class AbstractShardingSettingProvider : IShardingSettingProvider
 
             foreach (var setting in settings)
             {
-                if (!TableSettings.Shardeds.Contains(setting))
+                if (!TableRoot.Tables.Contains(setting))
                 {
-                    TableSettings.Shardeds.Add(setting);
+                    TableRoot.Tables.Add(setting);
 
                     if (!isAdded)
                         isAdded = true;
@@ -118,7 +133,7 @@ public abstract class AbstractShardingSettingProvider : IShardingSettingProvider
             }
 
             if (isAdded)
-                _tableSettingProvider.Save(TableSettings);
+                _tableSettingProvider.Save(TableRoot);
         });
 
         return this;

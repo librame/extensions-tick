@@ -35,7 +35,7 @@ public static class AccessorDbContextOptionsExtensionAccessorDescriptorExtension
             ? accessor.CurrentContext.GetType().Name.TrimEnd(nameof(DbContext))
             : extension.Name;
 
-        return new AccessorDescriptor(accessor, extension.ServiceType!, name, extension.Group, extension.Partition,
+        return new AccessorDescriptor(accessor, extension.AccessorType!, name, extension.Group, extension.Partition,
             extension.Access, extension.Dispatching, priority, algorithms, extension.Sharding, extension.LoaderHost);
     }
 

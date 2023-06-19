@@ -1,6 +1,7 @@
 ﻿using Librame.Extensions.Setting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Librame.Extensions.Data.Sharding
@@ -37,8 +38,8 @@ namespace Librame.Extensions.Data.Sharding
             };
 
             var setting = _context.ShardTable(user);
-            Assert.NotNull(setting.ShardedName);
-            Assert.NotEqual(setting.BaseName, setting.ShardedName);
+            Assert.NotEmpty(setting.Items);
+            Assert.StartsWith(setting.BaseName, setting.Items.First().ShardedName);
         }
 
         [Fact]
@@ -55,7 +56,7 @@ namespace Librame.Extensions.Data.Sharding
             foreach (var prop in properties)
             {
                 var setting = _context.ShardTable(prop);
-                Assert.NotNull(setting.ShardedName);
+                Assert.NotEmpty(setting.Items);
 
                 settings.Add(setting);
             }

@@ -26,26 +26,6 @@ public class AuditOptions : IOptions
     public bool Enabling { get; set; } = true;
 
     /// <summary>
-    /// 启用对实体添加状态的审计（默认启用）。
-    /// </summary>
-    public bool AddedState { get; set; } = true;
-
-    /// <summary>
-    /// 启用对实体修改状态的审计（默认启用）。
-    /// </summary>
-    public bool ModifiedState { get; set; } = true;
-
-    /// <summary>
-    /// 启用对实体删除状态的审计（默认启用）。
-    /// </summary>
-    public bool DeletedState { get; set; } = true;
-
-    /// <summary>
-    /// 启用对实体无变化状态的审计（默认不启用）。
-    /// </summary>
-    public bool UnchangedState { get; set; } = true;
-
-    /// <summary>
     /// 保存审计集合（默认启用）。
     /// </summary>
     public bool SaveAudits { get; set; } = true;
