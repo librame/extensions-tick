@@ -74,10 +74,10 @@ public interface IObjectCreationTime
     async ValueTask<object> SetObjectCreatedTimeAsync(Func<object, object> newCreatedTimeFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentCreatedTime = await GetObjectCreatedTimeAsync(cancellationToken).DiscontinueCapturedContext();
+        var currentCreatedTime = await GetObjectCreatedTimeAsync(cancellationToken).AvoidCapturedContext();
 
         return await SetObjectCreatedTimeAsync(newCreatedTimeFactory(currentCreatedTime), cancellationToken)
-            .DiscontinueCapturedContext();
+            .AvoidCapturedContext();
     }
 
 }

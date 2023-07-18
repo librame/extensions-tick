@@ -38,9 +38,9 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         ServiceCharacteristics.AddSingleton<IIdGeneratorFactory>();
 
         // Auditing
-        ServiceCharacteristics.AddSingleton<IAuditingParser<EntityEntry, Audit>>();
-        ServiceCharacteristics.AddSingleton<IAuditingTracker<EntityEntry>>();
-        ServiceCharacteristics.AddSingleton<IAuditingContext<EntityEntry, Audit>>();
+        //ServiceCharacteristics.AddSingleton<IAuditingParser<EntityEntry, Audit>>();
+        //ServiceCharacteristics.AddSingleton<IAuditingTracker<EntityEntry>>();
+        //ServiceCharacteristics.AddSingleton<IAuditingContext<EntityEntry, Audit>>();
 
         // Accessing
         ServiceCharacteristics.AddScope<IAccessorContext>();

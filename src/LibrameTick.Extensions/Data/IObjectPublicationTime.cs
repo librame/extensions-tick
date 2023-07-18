@@ -74,10 +74,10 @@ public interface IObjectPublicationTime
     async ValueTask<object> SetObjectPublishedTimeAsync(Func<object, object> newPublishedTimeFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentPublishedTime = await GetObjectPublishedTimeAsync(cancellationToken).DiscontinueCapturedContext();
+        var currentPublishedTime = await GetObjectPublishedTimeAsync(cancellationToken).AvoidCapturedContext();
 
         return await SetObjectPublishedTimeAsync(newPublishedTimeFactory(currentPublishedTime), cancellationToken)
-            .DiscontinueCapturedContext();
+            .AvoidCapturedContext();
     }
 
 }

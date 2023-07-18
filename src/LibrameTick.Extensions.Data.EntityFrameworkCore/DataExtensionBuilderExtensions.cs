@@ -45,7 +45,7 @@ public static class DataExtensionBuilderExtensions
 
         builder
             .AddAccessing()
-            .AddAuditing()
+            //.AddAuditing()
             .AddIdentification()
             .AddSetting()
             .AddSharding()
@@ -65,14 +65,14 @@ public static class DataExtensionBuilderExtensions
         return builder;
     }
 
-    private static DataExtensionBuilder AddAuditing(this DataExtensionBuilder builder)
-    {
-        builder.TryAddOrReplaceService<IAuditingParser<EntityEntry, Audit>, InternalAuditingParser>();
-        builder.TryAddOrReplaceService<IAuditingTracker<EntityEntry>, InternalAuditingTracker>();
-        builder.TryAddOrReplaceService<IAuditingContext<EntityEntry, Audit>, InternalAuditingContext>();
+    //private static DataExtensionBuilder AddAuditing(this DataExtensionBuilder builder)
+    //{
+    //    builder.TryAddOrReplaceService<IAuditingParser<EntityEntry, Audit>, InternalAuditingParser>();
+    //    builder.TryAddOrReplaceService<IAuditingTracker<EntityEntry>, InternalAuditingTracker>();
+    //    builder.TryAddOrReplaceService<IAuditingContext<EntityEntry, Audit>, InternalAuditingContext>();
 
-        return builder;
-    }
+    //    return builder;
+    //}
 
     private static DataExtensionBuilder AddIdentification(this DataExtensionBuilder builder)
     {

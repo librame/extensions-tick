@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Setting;
 
@@ -22,25 +23,31 @@ internal sealed class InternalShardingSavingBehavior : AbstractSavingBehavior
 
     protected override void HandleCore(ISavingContext<BaseDbContext, EntityEntry> context)
     {
-        SavingShardingTables = ParseTables(context.DbContext.ShardingContext, context.ChangeEntries);
+        SavingShardingTables = ParseShardingTables(context.DbContext.ShardingContext, context.ChangeEntries);
 
         if (SavingShardingTables is null)
             return;
 
-        var pairs = new Dictionary<ShardingItemSetting, ShardingTableSetting>();
+        // 提取需要分表的项集合
+        var shardingItems = new Dictionary<ShardingItemSetting, ShardingTableSetting>();
 
         foreach (var table in SavingShardingTables)
         {
             foreach (var item in table.Items)
             {
                 if (item.IsNeedSharding)
-                    pairs.Add(item, table);
+                    shardingItems.Add(item, table);
             }
         }
 
+        // 得到分表的类型名称集合
+        var shardingTypeNames = shardingItems.Values.WhereNotNullBy(p => p.SourceType)
+            .ToDictionary(s => s.SourceType!, s => s.Items.Select(i => (i.ShardedName, i.Source)));
+
         // 验证数据表是否存在
 
-        CreateShardingTableType(pairs.Values.Select(s => s.SourceType));
+        // 创建所需分表类型与映射实例
+        var shardingTypes = CreateShardingTableTypes(context.DbContext, shardingTypeNames);
 
         // 创建不存在的数据表
         // 1.创建临时分表类
@@ -48,18 +55,34 @@ internal sealed class InternalShardingSavingBehavior : AbstractSavingBehavior
     }
 
 
-    private static List<Type> CreateShardingTableType(IEnumerable<Type?> tableTypes)
+    private static IDictionary<Type, object> CreateShardingTableTypes(BaseDbContext context,
+        IDictionary<Type, IEnumerable<(string shardedName, object? source)>> tableTypes)
     {
-        foreach(var type in tableTypes)
-        {
-            if (type is null)
-                continue;
+        // 创建临时分表类型并缓存数据以便保存到数据库
+        var shardingAssemblyName = context.ContextType.Assembly.GetName().Name;
+        shardingAssemblyName = $"{shardingAssemblyName}_Sharding_{DateTimeOffset.UtcNow.UtcTicks}";
 
-            // 创建临时类型并缓存数据以便保存到数据库
+        var shardingTypes = new Dictionary<Type, object>();
+
+        var moduleBuilder = shardingAssemblyName.BuildModule(out _);
+
+        foreach (var type in tableTypes)
+        {
+            foreach (var (shardedName, source) in type.Value)
+            {
+                var shardingType = moduleBuilder.CopyType(type.Key, shardedName);
+                if (source is not null)
+                {
+                    var mapSource = ObjectMapper.NewByMapAllPublicProperties(source, shardingType);
+                    shardingTypes.Add(shardingType, mapSource);
+                }
+            }
         }
+
+        return shardingTypes;
     }
 
-    private static List<ShardingTableSetting>? ParseTables(IShardingContext shardingContext,
+    private static List<ShardingTableSetting>? ParseShardingTables(IShardingContext shardingContext,
         IEnumerable<EntityEntry>? entityEntries)
     {
         if (entityEntries is null)

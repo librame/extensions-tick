@@ -88,7 +88,7 @@ public class MongoIdGenerator : AbstractClockIdGenerator<string>
     /// <returns>返回一个包含字符串的异步操作。</returns>
     public override async ValueTask<string> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
 
         _lastTicksAsync = nowTicksAsync;
         Options.GeneratingAction?.Invoke(new(nowTicksAsync, _baseTicks, TemporalAccuracy.Second));

@@ -90,6 +90,9 @@ public abstract class AbstractShardingContext : IShardingContext
             itemSetting = databaseSetting.GetOrAddItem(accessor, shardedName, () => SettingProvider.SaveDatabaseRoot());
         }
 
+        // 绑定存取器
+        itemSetting.Source = accessor;
+
         if (itemSetting.IsNeedSharding)
         {
             // 从数据库连接字符串提取数据库名称（不一定是原始名称）
@@ -143,6 +146,9 @@ public abstract class AbstractShardingContext : IShardingContext
         {
             itemSetting = tableSetting.GetOrAddItem(identifier, shardedName, () => SettingProvider.SaveDatabaseRoot());
         }
+
+        // 绑定实体对象
+        itemSetting.Source = entity;
 
         if (itemSetting.IsNeedSharding)
         {

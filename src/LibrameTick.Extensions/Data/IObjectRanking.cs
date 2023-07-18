@@ -74,9 +74,9 @@ public interface IObjectRanking
     async ValueTask<object> SetObjectRankAsync(Func<object, object> newRankFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentRank = await GetObjectRankAsync(cancellationToken).DiscontinueCapturedContext();
+        var currentRank = await GetObjectRankAsync(cancellationToken).AvoidCapturedContext();
 
-        return await SetObjectRankAsync(newRankFactory(currentRank), cancellationToken).DiscontinueCapturedContext();
+        return await SetObjectRankAsync(newRankFactory(currentRank), cancellationToken).AvoidCapturedContext();
     }
 
 }

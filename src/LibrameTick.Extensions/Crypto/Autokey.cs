@@ -15,7 +15,7 @@ namespace Librame.Extensions.Crypto;
 /// <summary>
 /// 定义一个用于序列化的自动密钥。
 /// </summary>
-public class Autokey
+public class Autokey : IEquatable<Autokey>
 {
     /// <summary>
     /// 标识。
@@ -26,6 +26,39 @@ public class Autokey
     /// 通用密钥基础设施。
     /// </summary>
     public CkiOptions Cki { get; set; } = new();
+
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="other">给定的 <see cref="Autokey"/>。</param>
+    /// <returns>返回布尔值。</returns>
+    public virtual bool Equals(Autokey? other)
+        => other is not null && Id?.Equals(other.Id, StringComparison.Ordinal) == true;
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="obj">给定的对象。</param>
+    /// <returns>返回布尔值。</returns>
+    public override bool Equals(object? obj)
+        => Equals(obj as Autokey);
+
+
+    /// <summary>
+    /// 获取哈希码。
+    /// </summary>
+    /// <returns>返回 32 位整数。</returns>
+    public override int GetHashCode()
+        => Id?.GetHashCode() ?? 0;
+
+
+    /// <summary>
+    /// 转为标识字符串。
+    /// </summary>
+    /// <returns>返回字符串。</returns>
+    public override string ToString()
+        => Id ?? string.Empty;
 
 
     /// <summary>

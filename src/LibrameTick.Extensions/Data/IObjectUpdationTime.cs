@@ -74,10 +74,10 @@ public interface IObjectUpdationTime
     async ValueTask<object> SetObjectUpdatedTimeAsync(Func<object, object> newUpdatedTimeFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentUpdatedTime = await GetObjectUpdatedTimeAsync(cancellationToken).DiscontinueCapturedContext();
+        var currentUpdatedTime = await GetObjectUpdatedTimeAsync(cancellationToken).AvoidCapturedContext();
 
         return await SetObjectUpdatedTimeAsync(newUpdatedTimeFactory(currentUpdatedTime), cancellationToken)
-            .DiscontinueCapturedContext();
+            .AvoidCapturedContext();
     }
 
 }

@@ -162,7 +162,7 @@ public class TreeingNode<TItem, TId> : AbstractParentIdentifier<TId>
     /// </summary>
     /// <returns>返回此实例的哈希代码。</returns>
     public override int GetHashCode()
-        => Id.GetHashCode() ^ ParentId?.GetHashCode() ?? 0;
+        => HashCode.Combine(Id.GetHashCode(), ParentId?.GetHashCode());
 
 
     /// <summary>

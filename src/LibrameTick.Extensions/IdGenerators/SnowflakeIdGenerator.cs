@@ -114,19 +114,19 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
     /// <returns>返回一个包含长整数的异步操作。</returns>
     public override async ValueTask<long> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
 
         if (nowTicksAsync < _lastTicksAsync)
         {
             // 时钟回拨
-            nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
+            nowTicksAsync = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
         }
         else if (nowTicksAsync == _lastTicksAsync)
         {
             // 对序列+1并计算该周期内产生的序列号是否已经到达上限
             _sequenceAsync = (_sequenceAsync + 1) & Snowflakes.SequenceMask;
             if (_sequenceAsync is 0)
-                nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
+                nowTicksAsync = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
         }
         else
         {

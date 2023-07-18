@@ -161,8 +161,8 @@ public class AccessorDbContextOptionsBuilder
     public virtual AccessorDbContextOptionsBuilder WithSharding(string suffixFormatter,
         Action<ShardingAttribute>? configureAction, params Type[] strategyTypes)
     {
-        //var attribute = ShardingAttribute.ParseFromConnectionString(ParentBuilder.Options.ContextType,
-        //    suffixFormatter, strategyTypes, _relationalOptionsExtension?.ConnectionString);
+        var attribute = ShardingAttribute.ParseFromConnectionString(ParentBuilder.Options.ContextType,
+            suffixFormatter, strategyTypes, _relationalOptionsExtension?.ConnectionString);
 
         configureAction?.Invoke(attribute);
 

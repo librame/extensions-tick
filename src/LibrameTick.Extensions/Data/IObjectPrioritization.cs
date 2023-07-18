@@ -74,9 +74,9 @@ public interface IObjectPrioritization
     async ValueTask<object> SetObjectPriorityAsync(Func<object, object> newPriorityFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentPriority = await GetObjectPriorityAsync(cancellationToken).DiscontinueCapturedContext();
+        var currentPriority = await GetObjectPriorityAsync(cancellationToken).AvoidCapturedContext();
 
-        return await SetObjectPriorityAsync(newPriorityFactory(currentPriority), cancellationToken).DiscontinueCapturedContext();
+        return await SetObjectPriorityAsync(newPriorityFactory(currentPriority), cancellationToken).AvoidCapturedContext();
     }
 
 }

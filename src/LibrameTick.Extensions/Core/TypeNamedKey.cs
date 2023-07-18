@@ -90,13 +90,21 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
         => other is not null && Typed.IsSameType(other.Typed)
             && Named == other.Named;
 
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <param name="obj">给定的对象。</param>
+    /// <returns>返回布尔值。</returns>
+    public override bool Equals(object? obj)
+        => Equals(obj as TypeNamedKey);
+
 
     /// <summary>
     /// 获取哈希码。
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => Typed.GetHashCode() ^ Named?.GetHashCode() ?? 0;
+        => HashCode.Combine(Typed.GetHashCode(), Named?.GetHashCode());
 
 
     /// <summary>

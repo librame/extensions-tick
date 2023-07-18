@@ -76,7 +76,7 @@ public class TemplateKeyDescriptor : IEquatable<TemplateKeyDescriptor>
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => Name.GetHashCode() ^ Value?.GetHashCode() ?? 0;
+        => HashCode.Combine(Name.GetHashCode(), Value?.GetHashCode());
 
     /// <summary>
     /// 转换为字符串。

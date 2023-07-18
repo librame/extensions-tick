@@ -97,9 +97,9 @@ sealed internal class InternalStorableFileManager : IStorableFileManager
             var readLength = 0;
             var buffer = BufferSize.RentByteArray();
 
-            while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length, cancellationToken).DiscontinueCapturedContext()) > 0)
+            while ((readLength = await rs.ReadAsync(buffer, 0, buffer.Length, cancellationToken).AvoidCapturedContext()) > 0)
             {
-                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DiscontinueCapturedContext();
+                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).AvoidCapturedContext();
 
                 processingSize += readLength;
                 processingSpeed += readLength;
@@ -174,9 +174,9 @@ sealed internal class InternalStorableFileManager : IStorableFileManager
             var readLength = 0;
             var buffer = BufferSize.RentByteArray();
 
-            while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).DiscontinueCapturedContext()) > 0)
+            while ((readLength = await readStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken).AvoidCapturedContext()) > 0)
             {
-                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).DiscontinueCapturedContext();
+                await writeStream.WriteAsync(buffer, 0, readLength, cancellationToken).AvoidCapturedContext();
 
                 processingSize += readLength;
                 processingSpeed += readLength;

@@ -74,9 +74,9 @@ public interface IObjectPublisher
     async ValueTask<object?> SetObjectPublishedByAsync(Func<object?, object?> newPublishedByFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentPublishedBy = await GetObjectPublishedByAsync(cancellationToken).DiscontinueCapturedContext();
+        var currentPublishedBy = await GetObjectPublishedByAsync(cancellationToken).AvoidCapturedContext();
 
-        return await SetObjectPublishedByAsync(newPublishedByFactory(currentPublishedBy), cancellationToken).DiscontinueCapturedContext();
+        return await SetObjectPublishedByAsync(newPublishedByFactory(currentPublishedBy), cancellationToken).AvoidCapturedContext();
     }
 
 }

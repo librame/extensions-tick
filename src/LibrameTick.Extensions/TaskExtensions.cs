@@ -18,21 +18,21 @@ namespace Librame.Extensions;
 public static class TaskExtensions
 {
 
-    #region DiscontinueCapturedContext
+    #region AvoidCapturedContext
 
     /// <summary>
-    /// 使用停止捕获上下文的配置等待任务。
+    /// 在非UI线程或同步上下文中避免捕获上下文。
     /// </summary>
     /// <remarks>
     /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
     /// </remarks>
     /// <param name="task">给定的 <see cref="Task"/>。</param>
     /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
-    public static ConfiguredTaskAwaitable DiscontinueCapturedContext(this Task task)
-        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+    public static ConfiguredTaskAwaitable AvoidCapturedContext(this Task task)
+        => task.ConfigureAwait(continueOnCapturedContext: false);
 
     /// <summary>
-    /// 使用停止捕获上下文的配置等待任务。
+    /// 在非UI线程或同步上下文中避免捕获上下文。
     /// </summary>
     /// <remarks>
     /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
@@ -40,23 +40,23 @@ public static class TaskExtensions
     /// <typeparam name="TResult">指定的结果类型。</typeparam>
     /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
     /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredTaskAwaitable<TResult> DiscontinueCapturedContext<TResult>(this Task<TResult> task)
-        => task.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+    public static ConfiguredTaskAwaitable<TResult> AvoidCapturedContext<TResult>(this Task<TResult> task)
+        => task.ConfigureAwait(continueOnCapturedContext: false);
 
 
     /// <summary>
-    /// 使用停止捕获上下文的配置等待任务。
+    /// 在非UI线程或同步上下文中避免捕获上下文。
     /// </summary>
     /// <remarks>
     /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
     /// </remarks>
     /// <param name="valueTask">给定的 <see cref="ValueTask"/>。</param>
     /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable"/>。</returns>
-    public static ConfiguredValueTaskAwaitable DiscontinueCapturedContext(this ValueTask valueTask)
-        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+    public static ConfiguredValueTaskAwaitable AvoidCapturedContext(this ValueTask valueTask)
+        => valueTask.ConfigureAwait(continueOnCapturedContext: false);
 
     /// <summary>
-    /// 使用停止捕获上下文的配置等待任务。
+    /// 在非UI线程或同步上下文中避免捕获上下文。
     /// </summary>
     /// <remarks>
     /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
@@ -64,8 +64,8 @@ public static class TaskExtensions
     /// <typeparam name="TResult">指定的结果类型。</typeparam>
     /// <param name="valueTask">给定的 <see cref="ValueTask{TResult}"/>。</param>
     /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredValueTaskAwaitable<TResult> DiscontinueCapturedContext<TResult>(this ValueTask<TResult> valueTask)
-        => valueTask.ConfigureAwait(false); // .NET 默认调用 task.ConfigureAwait(true);
+    public static ConfiguredValueTaskAwaitable<TResult> AvoidCapturedContext<TResult>(this ValueTask<TResult> valueTask)
+        => valueTask.ConfigureAwait(continueOnCapturedContext: false);
 
     #endregion
 

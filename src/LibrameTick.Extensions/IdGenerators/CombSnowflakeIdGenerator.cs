@@ -81,7 +81,7 @@ public class CombSnowflakeIdGenerator : AbstractClockIdGenerator<Guid>
     /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
     public override async ValueTask<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).DiscontinueCapturedContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
 
         Options.GeneratingAction?.Invoke(new(nowTicksAsync, 0, TemporalAccuracy.Microsecond));
 

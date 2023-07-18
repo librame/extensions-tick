@@ -32,6 +32,11 @@ public class ShardingItemSetting : IEquatable<ShardingItemSetting>
     /// </summary>
     public string? SourceId { get; set; }
 
+    /// <summary>
+    /// 源对象。
+    /// </summary>
+    public object? Source { get; set; }
+
 
     /// <summary>
     /// 比较相等。
