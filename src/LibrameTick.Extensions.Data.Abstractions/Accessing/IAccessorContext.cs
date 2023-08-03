@@ -37,17 +37,10 @@ public interface IAccessorContext
     IReadOnlyList<IAccessor> ResolvedAccessors { get; }
 
     /// <summary>
-    /// 当前获取的规约存取器集合。
+    /// 当前获取或写入规约的存取器集合（值为是否分片的描述符）。
     /// </summary>
     IReadOnlyDictionary<IAccessor, ShardingDescriptor?>? CurrentAccessors { get; }
 
-
-    /// <summary>
-    /// 获取指定规约的调度器存取器集合。
-    /// </summary>
-    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>。</param>
-    /// <returns>返回 <see cref="IDispatcherAccessors"/>。</returns>
-    IDispatcherAccessors GetAccessors(ISpecification<IAccessor> specification);
 
     /// <summary>
     /// 获取指定规约的读取调度器存取器集合。
@@ -62,4 +55,11 @@ public interface IAccessorContext
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
     /// <returns>返回 <see cref="IDispatcherAccessors"/>。</returns>
     IDispatcherAccessors GetWriteAccessors(ISpecification<IAccessor>? specification = null);
+
+    /// <summary>
+    /// 获取指定规约的调度器存取器集合。
+    /// </summary>
+    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>。</param>
+    /// <returns>返回 <see cref="IDispatcherAccessors"/>。</returns>
+    IDispatcherAccessors GetAccessors(ISpecification<IAccessor> specification);
 }

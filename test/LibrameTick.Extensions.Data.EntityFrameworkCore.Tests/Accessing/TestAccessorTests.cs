@@ -91,11 +91,11 @@ namespace Librame.Extensions.Data.Accessing
                 //    var user = new User
                 //    {
                 //        Name = $"Add Name {i + 1}",
-                //        Passwd = "123456"
+                //        Passwd = "123456",
+                //        Id = userStore.IdGeneratorFactory.GetMongoIdGenerator().GenerateId()
                 //    };
 
-                //    user.Id = userStore.IdGeneratorFactory.GetMongoIdGenerator().GenerateId();
-                //    user.PopulateCreation(pagingUsers.First().Id, DateTimeOffset.UtcNow);
+                //    user.AsCreationIdentifier().SetCreation(pagingUsers.First().Id, DateTimeOffset.UtcNow);
 
                 //    addUsers[i] = user;
                 //}

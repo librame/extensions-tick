@@ -37,8 +37,8 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     {
         ShardingDirectory = Directories.ResourceDirectory.CombineDirectory("shardings");
 
-        SavingBehaviors.Add(new InternalAuditingSavingBehavior());
         SavingBehaviors.Add(new InternalShardingSavingBehavior());
+        SavingBehaviors.Add(new InternalAuditingSavingBehavior());
     }
 
 

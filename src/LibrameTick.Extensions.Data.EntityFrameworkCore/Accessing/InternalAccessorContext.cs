@@ -62,80 +62,89 @@ sealed internal class InternalAccessorContext : IAccessorContext
 
     public IDispatcherAccessors GetAccessors(ISpecification<IAccessor> specification)
     {
-        // 尝试对过滤存取器分库
-        var currentAccessors = new ConcurrentDictionary<IAccessor, ShardingDescriptor?>(
-            PropertyEqualityComparer<IAccessor>.Create(s => s.AccessorId));
+        IEnumerable<IAccessor> currentAccessors;
 
-        // 如果使用命名规约，则取唯一名称存取器，非唯一抛出异常
-        if (specification is NamedAccessorSpecification namedAccessorSpecification)
+        if (ResolvedAccessors.Count == 1)
         {
+            currentAccessors = ResolvedAccessors;
+        }
+        else if (specification is NamedAccessorSpecification namedAccessorSpecification)
+        {
+            // 如果使用命名规约，则取唯一名称存取器，非唯一抛出异常
             var singleAccessor = ResolvedAccessors.Single(namedAccessorSpecification.IsSatisfiedBy);
-
-            CurrentAccessors = AddAccessor(singleAccessor, currentAccessors);
-
-            return new DefaultDispatcherAccessors(CurrentAccessors.Keys, ShardingContext.DispatcherFactory);
-        }
-
-        // 使用筛选规约集合
-        var filterAccessors = ResolvedAccessors.Where(specification.IsSatisfiedBy);
-        if (!filterAccessors.Any())
-            throw new ArgumentNullException($"The filter accessors not found.");
-
-        foreach (var filterAccessor in filterAccessors)
-        {
-            AddAccessor(filterAccessor, currentAccessors);
-        }
-
-        CurrentAccessors = currentAccessors;
-
-        if (specification is AccessAccessorSpecification accessorSpecification)
-        {
-            var mirroringAccessors = filterAccessors.Where(accessorSpecification.IsMirroringDispatching);
-            var stripingAccessors = filterAccessors.Where(accessorSpecification.IsStripingDispatching);
-
-            var allAccessors = new List<IDispatcherAccessors>();
-
-            if (mirroringAccessors.Any())
-            {
-                // 镜像模式支持负载调度
-                if (Options.Access.AutoLoad)
-                {
-                    allAccessors.Add(new MirroringDispatcherAccessors(UpdateHostLoad(mirroringAccessors),
-                        ShardingContext.DispatcherFactory));
-                }
-                else
-                {
-                    allAccessors.Add(new MirroringDispatcherAccessors(mirroringAccessors, ShardingContext.DispatcherFactory));
-                }
-            }
-
-            if (stripingAccessors.Any())
-                allAccessors.Add(new StripingDispatcherAccessors(stripingAccessors, ShardingContext.DispatcherFactory));
-
-            return new CompositeDispatcherAccessors(allAccessors, ShardingContext.DispatcherFactory);
+            currentAccessors = EnumerableExtensions.AsEnumerable(singleAccessor);
         }
         else
         {
-            return new DefaultDispatcherAccessors(CurrentAccessors.Keys, ShardingContext.DispatcherFactory);
+            // 使用自定义规约筛选多个存取器的集合
+            var filterAccessors = ResolvedAccessors.Where(specification.IsSatisfiedBy);
+            if (!filterAccessors.Any())
+                throw new ArgumentNullException($"The filter accessors not found.");
+
+            currentAccessors = filterAccessors;
         }
+
+        CurrentAccessors = ShardingAccessors(currentAccessors);
+
+        if (CurrentAccessors.Count > 1 && specification is AccessAccessorSpecification accessSpecification)
+            return ComposeDispatcherAccessors(currentAccessors, accessSpecification);
+
+        return new DefaultDispatcherAccessors(currentAccessors, ShardingContext.DispatcherFactory);
     }
 
-    private ConcurrentDictionary<IAccessor, ShardingDescriptor?> AddAccessor(IAccessor accessor,
-        ConcurrentDictionary<IAccessor, ShardingDescriptor?> dictionary)
+    private IDispatcherAccessors ComposeDispatcherAccessors(IEnumerable<IAccessor> currentAccessors,
+        AccessAccessorSpecification accessSpecification)
     {
-        if (accessor.AccessorDescriptor?.Sharded is null)
-            return dictionary;
+        var mirroringAccessors = currentAccessors.Where(accessSpecification.IsMirroringDispatching);
+        var stripingAccessors = currentAccessors.Where(accessSpecification.IsStripingDispatching);
 
-        // 尝试对存取器分库
-        ShardingContext.ShardDatabase(accessor, out var descriptor);
+        var allAccessors = new List<IDispatcherAccessors>();
 
-        // 如果分库，则尝试迁移表
-        if (Options.Access.AutoMigration)
-            Migrator.Migrate(accessor);
+        if (mirroringAccessors.Any())
+        {
+            // 镜像模式支持负载调度
+            if (Options.Access.AutoLoad)
+            {
+                allAccessors.Add(new MirroringDispatcherAccessors(UpdateHostLoad(mirroringAccessors),
+                    ShardingContext.DispatcherFactory));
+            }
+            else
+            {
+                allAccessors.Add(new MirroringDispatcherAccessors(mirroringAccessors, ShardingContext.DispatcherFactory));
+            }
+        }
 
-        dictionary.TryAdd(accessor, descriptor);
+        if (stripingAccessors.Any())
+            allAccessors.Add(new StripingDispatcherAccessors(stripingAccessors, ShardingContext.DispatcherFactory));
 
-        return dictionary;
+        return new CompositeDispatcherAccessors(allAccessors, ShardingContext.DispatcherFactory);
+    }
+
+    private IReadOnlyDictionary<IAccessor, ShardingDescriptor?> ShardingAccessors(IEnumerable<IAccessor> accessors)
+    {
+        var shardingAccessors = new Dictionary<IAccessor, ShardingDescriptor?>(
+            PropertyEqualityComparer<IAccessor>.Create(s => s.AccessorId));
+
+        foreach (var accessor in accessors)
+        {
+            if (accessor.AccessorDescriptor?.Sharded is null)
+            {
+                shardingAccessors.Add(accessor, null);
+            }
+            else
+            {
+                // 尝试对存取器分库
+                ShardingContext.ShardDatabase(accessor, out var descriptor);
+
+                // 如果分库，则尝试迁移表
+                if (Options.Access.AutoMigration)
+                    Migrator.Migrate(accessor);
+
+                shardingAccessors.TryAdd(accessor, descriptor);
+            }
+        }
+
+        return shardingAccessors;
     }
 
     private IEnumerable<IAccessor> UpdateHostLoad(IEnumerable<IAccessor> hostAccessors)

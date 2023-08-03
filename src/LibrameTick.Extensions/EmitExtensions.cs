@@ -281,12 +281,6 @@ public static class EmitExtensions
                 }
             }
 
-            var fieldConstant = field.GetRawConstantValue();
-            if (fieldConstant is not null)
-            {
-                fieldBuilder.SetConstant(fieldConstant);
-            }
-
             // 提取属性私有字段
             if (_regBackingField.IsMatch(field.Name))
             {
@@ -404,12 +398,6 @@ public static class EmitExtensions
                 {
                     propertyBuilder.SetCustomAttribute(CreateCustomAttributeBuilder(attributeData));
                 }
-            }
-
-            var propertyConstant = property.GetConstantValue();
-            if (propertyConstant is not null)
-            {
-                propertyBuilder.SetConstant(propertyConstant);
             }
 
             if (getPropertyMethods.TryGetValue(property.Name, out var methodBuilder))
