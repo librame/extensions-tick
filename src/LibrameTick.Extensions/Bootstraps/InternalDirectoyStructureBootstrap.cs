@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Bootstraps;
 
-class InternalDirectoyStructureBootstrap : AbstsractBootstrap, IDirectoryStructureBootstrap
+internal sealed class InternalDirectoyStructureBootstrap : AbstsractBootstrap, IDirectoryStructureBootstrap
 {
     public InternalDirectoyStructureBootstrap()
     {

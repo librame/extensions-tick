@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Device;
 
-sealed internal class InternalDeviceLoader : AbstractDeviceLoader
+internal sealed class InternalDeviceLoader : AbstractDeviceLoader
 {
     public InternalDeviceLoader(IOptionsMonitor<CoreExtensionOptions> optionsMonitor)
         : base(optionsMonitor.CurrentValue.DeviceLoad)

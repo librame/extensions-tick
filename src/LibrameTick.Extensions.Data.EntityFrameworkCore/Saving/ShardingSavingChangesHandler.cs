@@ -16,39 +16,51 @@ using Librame.Extensions.Setting;
 
 namespace Librame.Extensions.Data.Saving;
 
-internal sealed class InternalShardingSavingBehavior : AbstractSavingBehavior
+/// <summary>
+/// 定义继承 <see cref="AbstractSavingChangesHandler"/> 的分片保存变化处理程序。
+/// </summary>
+public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
 {
-    internal IReadOnlyList<ShardingTableSetting>? SavingShardingTables { get; private set; }
 
-
-    protected override void HandleCore(ISavingContext<BaseDbContext, EntityEntry> context)
+    /// <summary>
+    /// 预处理保存上下文。
+    /// </summary>
+    /// <param name="context">给定的 <see cref="ISavingChangesContext"/>。</param>
+    protected override void PreHandlingCore(ISavingChangesContext context)
     {
-        SavingShardingTables = ParseShardingTables(context.DbContext.ShardingContext, context.ChangeEntries);
-        if (SavingShardingTables is null)
+        var shardingTables = ParseShardingTables(context.DataContext.BaseDependencies.ShardingContext,
+            context.ChangesEntities);
+
+        if (shardingTables is null)
             return;
 
-        var descriptors = ParseShardingDescriptors(context.DbContext, SavingShardingTables);
+        var descriptors = ParseShardingDescriptors(context.DataContext, shardingTables);
 
         // 创建所需分表类型与映射对象
-        var shardingTypes = CreateShardingTypes(context.DbContext, descriptors);
+        var shardingTypes = CreateShardingTypes(context.DataContext, descriptors);
 
         // 将分表类型与映射对象附加到上下文
-        AddContext(context.DbContext, shardingTypes);
+        AddContext(context.DataContext, shardingTypes);
     }
 
 
-    private static void AddContext(BaseDbContext context,
+    private static void AddContext(BaseDataContext context,
         IDictionary<(Type Source, Type Sharded), List<ShardingSavingDescriptor>> shardingTypes)
     {
         if (context.Model is not Model model)
             return; // 如果不支持动态添加/移除分表类型，则直接退出
 
+#pragma warning disable EF1001 // Internal EF Core API usage.
+
         var dbSetMethod = context.ContextType.GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!;
+        var shardedEntityTypes = new List<EntityType>();
 
         foreach (var pair in shardingTypes)
         {
             // 注册分表类型
-            model.CopyEntityType(pair.Key.Source, pair.Key.Sharded);
+            var shardedEntityType = model.CopyEntityType(pair.Key.Source, pair.Key.Sharded, shardedEntityTypes);
+            if (shardedEntityType is not null)
+                shardedEntityTypes.Add(shardedEntityType);
 
             // 添加分表类型对象
             var shardingSet = dbSetMethod.MakeGenericMethod(pair.Key.Sharded).Invoke(context, null)!;
@@ -76,10 +88,13 @@ internal sealed class InternalShardingSavingBehavior : AbstractSavingBehavior
                 sourceRemoveMethod.Invoke(sourceSet, removeEntities);
             }
         }
+
+#pragma warning restore EF1001 // Internal EF Core API usage.
+
     }
 
     private static IDictionary<(Type Source, Type Sharded), List<ShardingSavingDescriptor>> CreateShardingTypes(
-        BaseDbContext context, IDictionary<string, List<ShardingSavingDescriptor>> descriptors)
+        BaseDataContext context, IDictionary<string, List<ShardingSavingDescriptor>> descriptors)
     {
         var typePairs = new Dictionary<(Type Source, Type Sharded), List<ShardingSavingDescriptor>>(
             PropertyEqualityComparer<(Type Source, Type Sharded)>.Create(p => p.Sharded.FullName!));
@@ -129,7 +144,7 @@ internal sealed class InternalShardingSavingBehavior : AbstractSavingBehavior
     }
 
     private static IDictionary<string, List<ShardingSavingDescriptor>> ParseShardingDescriptors(
-        BaseDbContext context, IReadOnlyList<ShardingTableSetting> shardingTables)
+        BaseDataContext context, IReadOnlyList<ShardingTableSetting> shardingTables)
     {
         // 解析实体配置的所需分表设置描述符集合
         var pairs = new Dictionary<string, List<ShardingSavingDescriptor>>();
@@ -163,9 +178,9 @@ internal sealed class InternalShardingSavingBehavior : AbstractSavingBehavior
     }
 
     private static List<ShardingTableSetting>? ParseShardingTables(IShardingContext shardingContext,
-        IEnumerable<EntityEntry>? entityEntries)
+        IEnumerable<EntityEntry> entityEntries)
     {
-        if (entityEntries is null || !entityEntries.Any())
+        if (!entityEntries.Any())
             return null;
 
         var tables = new List<ShardingTableSetting>();

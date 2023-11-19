@@ -2,29 +2,34 @@
 
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Core</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+	<PackageReadmeFile>LibrameTick.Extensions.Core.Abstractions.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageDescription>Based on LibrameTick.Extensions and Microsoft.Extensions libraries build of the core extension library. This library contains abstractions for functions such as cryptography, storage, and resources.
 
       基于 LibrameTick.Extensions 和 Microsoft.Extensions 库构建的核心扩展库。该库包含了对密码学、存储和资源等功能的抽象。
     </PackageDescription>
+	<Nullable>enable</Nullable>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\bin\</OutputPath>
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+	<None Include="..\..\docs\readmes\LibrameTick.Extensions.Core.Abstractions.md" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
     
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="7.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="7.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.30.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.0.2" />
   </ItemGroup>
     
   <ItemGroup>

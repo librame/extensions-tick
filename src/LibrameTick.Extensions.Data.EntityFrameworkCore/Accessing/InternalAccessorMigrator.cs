@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Data.Accessing;
 
-sealed internal class InternalAccessorMigrator : IAccessorMigrator
+internal sealed class InternalAccessorMigrator : IAccessorMigrator
 {
     public void Migrate(IEnumerable<IAccessor> accessors)
     {

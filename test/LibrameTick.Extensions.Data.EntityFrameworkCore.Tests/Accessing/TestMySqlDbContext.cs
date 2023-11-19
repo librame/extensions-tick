@@ -1,19 +1,11 @@
-﻿using Librame.Extensions.Core;
-using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.ValueConversion;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestMySqlDbContext : TestDbContext<TestMySqlDbContext>
+    public class TestMySqlDbContext : TestDataContext<TestMySqlDbContext>
     {
-        public TestMySqlDbContext(IShardingContext shardingContext,
-            IEncryptionConverterFactory encryptionConverterFactory,
-            IOptionsMonitor<DataExtensionOptions> dataOptions,
-            IOptionsMonitor<CoreExtensionOptions> coreOptions,
-            DbContextOptions<TestMySqlDbContext> options)
-            : base(shardingContext, encryptionConverterFactory, dataOptions, coreOptions, options)
+        public TestMySqlDbContext(DbContextOptions<TestMySqlDbContext> options)
+            : base(options)
         {
         }
 

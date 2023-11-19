@@ -32,6 +32,22 @@ public static class ShardingContextExtensions
         IAccessor accessor, Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null)
         => context.ShardDatabase(accessor, out _, shardedAction);
 
+    ///// <summary>
+    ///// 异步对存取器的数据库分片。
+    ///// </summary>
+    ///// <param name="context">给定的 <see cref="IShardingContext"/>。</param>
+    ///// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    ///// <param name="shardedAction">给定已分片的动作（可选）。</param>
+    ///// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    ///// <returns>返回包含 <see cref="ShardingDatabaseSetting"/> 的异步操作。</returns>
+    //public static async Task<ShardingDatabaseSetting> ShardDatabaseAsync(this IShardingContext context,
+    //    IAccessor accessor, Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null,
+    //    CancellationToken cancellationToken = default)
+    //{
+    //    var (databaseSetting, _) = await context.ShardDatabaseAsync(accessor, shardedAction, cancellationToken);
+    //    return databaseSetting;
+    //}
+
 
     /// <summary>
     /// 对实体的数据表分片。

@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Data.Accessing;
 
-sealed internal class InternalAccessorResolver : IAccessorResolver
+internal sealed class InternalAccessorResolver : IAccessorResolver
 {
     private readonly DataExtensionBuilder _builder;
     private readonly IServiceProvider _provider;

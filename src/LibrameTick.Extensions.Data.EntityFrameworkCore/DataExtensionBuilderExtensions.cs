@@ -14,7 +14,6 @@ using Librame.Extensions;
 using Librame.Extensions.Core;
 using Librame.Extensions.Data;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
@@ -44,9 +43,8 @@ public static class DataExtensionBuilderExtensions
         var builder = new DataExtensionBuilder(parentBuilder);
 
         builder
+            .AddBase()
             .AddAccessing()
-            //.AddAuditing()
-            .AddIdentification()
             .AddSetting()
             .AddSharding()
             .AddStoring()
@@ -56,27 +54,19 @@ public static class DataExtensionBuilderExtensions
     }
 
 
+    private static DataExtensionBuilder AddBase(this DataExtensionBuilder builder)
+    {
+        builder.TryAddOrReplaceService<IIdGeneratorFactory, InternalIdGeneratorFactory>();
+        builder.TryAddOrReplaceService<IModelCreator, InternalModelCreator>();
+
+        return builder;
+    }
+
     private static DataExtensionBuilder AddAccessing(this DataExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IAccessorContext, InternalAccessorContext>();
         builder.TryAddOrReplaceService<IAccessorMigrator, InternalAccessorMigrator>();
         builder.TryAddOrReplaceService<IAccessorResolver, InternalAccessorResolver>();
-
-        return builder;
-    }
-
-    //private static DataExtensionBuilder AddAuditing(this DataExtensionBuilder builder)
-    //{
-    //    builder.TryAddOrReplaceService<IAuditingParser<EntityEntry, Audit>, InternalAuditingParser>();
-    //    builder.TryAddOrReplaceService<IAuditingTracker<EntityEntry>, InternalAuditingTracker>();
-    //    builder.TryAddOrReplaceService<IAuditingContext<EntityEntry, Audit>, InternalAuditingContext>();
-
-    //    return builder;
-    //}
-
-    private static DataExtensionBuilder AddIdentification(this DataExtensionBuilder builder)
-    {
-        builder.TryAddOrReplaceService<IIdGeneratorFactory, InternalIdGeneratorFactory>();
 
         return builder;
     }

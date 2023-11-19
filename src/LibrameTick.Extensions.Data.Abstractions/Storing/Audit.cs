@@ -22,13 +22,7 @@ namespace Librame.Extensions.Data.Storing;
 [Sharding("%std", typeof(DateTimeOffsetShardingStrategy))]
 public class Audit : AbstractCreationIdentifier<long, string>, IShardingValue<DateTimeOffset>
 {
-    /// <summary>
-    /// 构造一个 <see cref="Audit"/>。
-    /// </summary>
-    public Audit()
-    {
-        Properties = new List<AuditProperty>();
-    }
+    private readonly List<AuditProperty> _properties = new();
 
 
     /// <summary>
@@ -59,7 +53,16 @@ public class Audit : AbstractCreationIdentifier<long, string>, IShardingValue<Da
     /// <summary>
     /// 审计属性集合。
     /// </summary>
-    public virtual ICollection<AuditProperty> Properties { get; set; }
+    public virtual IEnumerable<AuditProperty> Properties
+        => _properties;
+
+
+    /// <summary>
+    /// 添加审计属性。
+    /// </summary>
+    /// <param name="property">给定的 <see cref="AuditProperty"/>。</param>
+    public virtual void AddProperty(AuditProperty property)
+        => _properties.Add(property);
 
 
     /// <summary>

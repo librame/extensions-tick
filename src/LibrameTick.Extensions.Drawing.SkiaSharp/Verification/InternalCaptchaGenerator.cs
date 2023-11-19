@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Drawing.Verification;
 
-sealed internal class InternalCaptchaGenerator : AbstractDisposable, ICaptchaGenerator
+internal sealed class InternalCaptchaGenerator : AbstractDisposable, ICaptchaGenerator
 {
     private readonly DrawingExtensionOptions _options;
     private readonly SKEncodedImageFormat _imageFormat;

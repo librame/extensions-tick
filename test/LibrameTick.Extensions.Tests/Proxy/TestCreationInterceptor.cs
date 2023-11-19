@@ -7,18 +7,18 @@ namespace Librame.Extensions.Proxy
         public ITestCreation? Creation { get; set; }
 
 
-        protected override void PreProceed(IInvocation invocation)
+        protected override void BeforeInvoke(IInvocation invocation)
         {
             Creation = (ITestCreation)Source!;
 
             Creation.CurrentName = invocation.Method.Args?[0]?.ToString() + " Peng";
         }
 
-        protected override void ExceptionProceed(IInvocation invocation, Exception exception)
+        protected override void ExceptionInvoke(IInvocation invocation, Exception exception)
         {
         }
 
-        protected override void PostProceed(IInvocation invocation)
+        protected override void AfterInvoke(IInvocation invocation)
         {
         }
 

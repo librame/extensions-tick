@@ -14,7 +14,7 @@ using Librame.Extensions.Microparts;
 
 namespace Librame.Extensions.Network;
 
-sealed internal class InternalHttpClientInvokerFactory : IHttpClientInvokerFactory
+internal sealed class InternalHttpClientInvokerFactory : IHttpClientInvokerFactory
 {
     private readonly IHttpClientFactory _clientFactory;
 

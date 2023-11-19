@@ -18,7 +18,7 @@ using Librame.Extensions.Specifications;
 
 namespace Librame.Extensions.Data.Accessing;
 
-sealed internal class InternalAccessorContext : IAccessorContext
+internal sealed class InternalAccessorContext : IAccessorContext
 {
     private readonly IOptionsMonitor<DataExtensionOptions> _options;
     private readonly ConcurrentDictionary<string, IDeviceLoader> _deviceLoaders;
@@ -155,12 +155,11 @@ sealed internal class InternalAccessorContext : IAccessorContext
         var hosts = hostAccessors
             .Select(s => s.AccessorDescriptor!.LoaderHost!)
             .Distinct()
-            .AsEnumerable();
+            .ToList();
 
-        var hostsKey = Options.CreateDeviceLoadHostsKeyFunc(hosts);
+        var hostsKey = string.Join(',', hosts.Order());
 
-        var deviceLoader = _deviceLoaders.GetOrAdd(hostsKey,
-            key => Options.CreateDeviceLoaderFunc(Options, hosts));
+        var deviceLoader = _deviceLoaders.GetOrAdd(hostsKey, key => Options.DeviceLoaderFactory(Options, hosts));
 
         var usages = deviceLoader.GetUsages(Options.DeviceLoadRealtimeForEverytime);
         foreach (var usage in usages)

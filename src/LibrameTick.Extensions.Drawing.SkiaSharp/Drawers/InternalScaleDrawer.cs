@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Drawing.Drawers;
 
-sealed internal class InternalScaleDrawer : AbstractInternalDrawer, IScalingDrawer
+internal sealed class InternalScaleDrawer : AbstractInternalDrawer, IScalingDrawer
 {
     private IWatermarkDrawer _watermarkDrawer;
 

@@ -12,7 +12,6 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
@@ -36,11 +35,7 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         : base(parentBuilder)
     {
         ServiceCharacteristics.AddSingleton<IIdGeneratorFactory>();
-
-        // Auditing
-        //ServiceCharacteristics.AddSingleton<IAuditingParser<EntityEntry, Audit>>();
-        //ServiceCharacteristics.AddSingleton<IAuditingTracker<EntityEntry>>();
-        //ServiceCharacteristics.AddSingleton<IAuditingContext<EntityEntry, Audit>>();
+        ServiceCharacteristics.AddSingleton<IModelCreator>();
 
         // Accessing
         ServiceCharacteristics.AddScope<IAccessorContext>();

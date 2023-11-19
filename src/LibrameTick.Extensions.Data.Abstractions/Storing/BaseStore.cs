@@ -127,7 +127,7 @@ public class BaseStore<T> : IStore<T>
     /// </summary>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="action">要执行的动作。</param>
-    protected virtual void WriteAccessorContext(IEnumerable<T> entities, Action<IDbContext, IEnumerable<T>> action)
+    protected virtual void WriteAccessorContext(IEnumerable<T> entities, Action<IDataContext, IEnumerable<T>> action)
     {
         if (CurrentWriteAccessor.WritingDispatcher.Mode == DispatchingMode.Striping)
         {
@@ -153,7 +153,7 @@ public class BaseStore<T> : IStore<T>
     /// <param name="entities">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="action">要执行的动作。</param>
     /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>。</param>
-    protected virtual void WriteAccessorContext(IEnumerable<T> entities, Action<IDbContext, IEnumerable<T>> action,
+    protected virtual void WriteAccessorContext(IEnumerable<T> entities, Action<IDataContext, IEnumerable<T>> action,
         ISpecification<IAccessor>? specification)
     {
         var dispatcher = GetWritingDispatcher(specification);

@@ -108,6 +108,53 @@ public abstract class AbstractShardingContext : IShardingContext
         return databaseSetting;
     }
 
+    /// <summary>
+    /// 异步对存取器的数据库分片。
+    /// </summary>
+    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    /// <param name="shardedAction">给定已分片的动作（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="ShardingDatabaseSetting"/> 与 <see cref="ShardingDescriptor"/> 元组的异步操作。</returns>
+    public virtual async Task<(ShardingDatabaseSetting databaseSetting, ShardingDescriptor descriptor)> ShardDatabaseAsync(IAccessor accessor,
+        Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null, CancellationToken cancellationToken = default)
+    {
+        var sharded = accessor.AccessorDescriptor?.Sharded;
+        ArgumentNullException.ThrowIfNull(sharded, nameof(accessor));
+
+        var descriptor = Tracker.GetOrAddDescriptor(accessor,
+            key => new(sharded, StrategyProvider.GetStrategy));
+
+        var shardedName = descriptor.FormatSuffix(accessor);
+
+        ShardingItemSetting? itemSetting = null;
+        if (!SettingProvider.DatabaseRoot.TryGetDatabase(accessor.AccessorType, out var databaseSetting))
+        {
+            databaseSetting = ShardingDatabaseSetting.Create(descriptor, accessor, shardedName, out itemSetting);
+            SettingProvider.SaveDatabaseRoot();
+        }
+        else
+        {
+            itemSetting = databaseSetting.GetOrAddItem(accessor, shardedName, () => SettingProvider.SaveDatabaseRoot());
+        }
+
+        // 绑定存取器
+        itemSetting.Source = accessor;
+
+        if (itemSetting.IsNeedSharding)
+        {
+            // 从数据库连接字符串提取数据库名称（不一定是原始名称）
+            var connectionString = accessor.CurrentConnectionString!;
+            var database = connectionString.ParseDatabaseFromConnectionString();
+
+            // 切换为分片数据连接
+            await accessor.ChangeConnectionAsync(connectionString.Replace(database, shardedName), cancellationToken);
+
+            shardedAction?.Invoke(descriptor, databaseSetting);
+        }
+
+        return (databaseSetting, descriptor);
+    }
+
 
     /// <summary>
     /// 对实体的数据表分片。

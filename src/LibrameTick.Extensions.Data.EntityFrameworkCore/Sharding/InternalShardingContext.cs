@@ -15,7 +15,7 @@ using Librame.Extensions.Setting;
 
 namespace Librame.Extensions.Data.Sharding;
 
-sealed internal class InternalShardingContext : AbstractShardingContext
+internal sealed class InternalShardingContext : AbstractShardingContext
 {
     public InternalShardingContext(IDispatcherFactory dispatcherFactory,
         IShardingSettingProvider settingProvider,

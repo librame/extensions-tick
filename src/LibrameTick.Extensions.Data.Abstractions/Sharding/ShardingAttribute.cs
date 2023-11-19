@@ -119,7 +119,7 @@ public class ShardingAttribute : Attribute, IValidatable<ShardingAttribute>
     /// <summary>
     /// 验证是否有效。
     /// </summary>
-    /// <returns></returns>
+    /// <returns>返回布尔值。</returns>
     public bool IsValidated()
         => !string.IsNullOrEmpty(BaseName) && SourceType is not null;
 

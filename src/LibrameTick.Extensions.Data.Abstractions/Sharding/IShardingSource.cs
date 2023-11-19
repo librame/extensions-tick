@@ -10,15 +10,14 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+namespace Librame.Extensions.Data.Sharding;
 
-namespace Librame.Extensions.Storage;
-
-internal sealed class InternalWebFilePermission : AbstractWebFilePermission
+public interface IShardingSource
 {
-    public InternalWebFilePermission(IOptionsMonitor<CoreExtensionOptions> options)
-        : base(options.CurrentValue.WebFile)
-    {
-    }
+    object Create(IDataContext context,
+        [DynamicallyAccessedMembers(IEntityType.DynamicallyAccessedMemberTypes)] Type type);
 
+    object Create(IDataContext context,
+        string name,
+        [DynamicallyAccessedMembers(IEntityType.DynamicallyAccessedMemberTypes)] Type type);
 }

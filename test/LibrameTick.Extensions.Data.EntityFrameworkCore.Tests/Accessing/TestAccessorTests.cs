@@ -31,7 +31,6 @@ namespace Librame.Extensions.Data.Accessing
             {
                 opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
                     a => a.MigrationsAssembly(modelAssemblyName));
-
                 opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(2).WithLocalhostLoader());
             });
 
@@ -50,7 +49,7 @@ namespace Librame.Extensions.Data.Accessing
                 .AddInitializer<InternalTestAccessorInitializer>()
                 .AddSeeder<InternalTestAccessorSeeder>();
 
-            _rootProvider = builder.Services.BuildServiceProvider();
+            _rootProvider = builder.Services.BuildServiceProvider(validateScopes: true);
         }
 
 

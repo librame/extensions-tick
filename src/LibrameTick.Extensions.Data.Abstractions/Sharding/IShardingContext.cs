@@ -53,6 +53,17 @@ public interface IShardingContext
         Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null);
 
     /// <summary>
+    /// 对存取器的数据库分片。
+    /// </summary>
+    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    /// <param name="shardedAction">给定已分片的动作（可选）。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="ShardingDatabaseSetting"/> 与 <see cref="ShardingDescriptor"/> 元组的异步操作。</returns>
+    Task<(ShardingDatabaseSetting databaseSetting, ShardingDescriptor descriptor)> ShardDatabaseAsync(IAccessor accessor,
+        Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null, CancellationToken cancellationToken = default);
+
+
+    /// <summary>
     /// 对实体的数据表分片。
     /// </summary>
     /// <param name="entityType">给定的实体类型。</param>

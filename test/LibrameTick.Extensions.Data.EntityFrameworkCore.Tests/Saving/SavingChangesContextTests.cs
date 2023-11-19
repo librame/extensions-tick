@@ -8,19 +8,19 @@ using Xunit;
 
 namespace Librame.Extensions.Data.Saving
 {
-    public class SavingBehaviorTests
+    public class SavingChangesContextTests
     {
         private readonly IServiceProvider _rootProvider;
 
 
-        public SavingBehaviorTests()
+        public SavingChangesContextTests()
         {
             var modelAssemblyName = typeof(User).Assembly.FullName;
 
             var services = new ServiceCollection();
             services.AddDbContext<TestSqliteDbContext>(opts =>
             {
-                opts.UseSqlite("Data Source=librame_extensions_savingbehavior.db",
+                opts.UseSqlite("Data Source=librame_extensions_saving-changes.db",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
                 opts.UseAccessor();
@@ -68,8 +68,12 @@ namespace Librame.Extensions.Data.Saving
                 userStore.SaveChanges();
 
                 var context = userStore.CurrentWriteAccessor.WritingDispatcher.FirstSource.CurrentContext;
-                var options = (context as BaseDbContext)?.DataOptions!;
-                Assert.NotNull(options.SavingBehaviors);
+                var options = context.As<BaseDataContext>().DataExtOptions;
+
+                foreach (var handler in options.SavingChangesHandlers)
+                {
+                    Assert.True(handler.IsHandled);
+                }
             }
         }
 

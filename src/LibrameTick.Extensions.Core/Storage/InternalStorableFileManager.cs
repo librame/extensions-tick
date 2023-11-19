@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Storage;
 
-sealed internal class InternalStorableFileManager : IStorableFileManager
+internal sealed class InternalStorableFileManager : IStorableFileManager
 {
     private readonly IMemoryCache _memoryCache;
     private readonly IOptionsMonitor<CoreExtensionOptions> _optionsMonitor;

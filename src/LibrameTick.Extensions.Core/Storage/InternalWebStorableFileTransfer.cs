@@ -15,7 +15,7 @@ using Librame.Extensions.Network;
 
 namespace Librame.Extensions.Storage;
 
-sealed internal class InternalWebStorableFileTransfer : IWebStorableFileTransfer
+internal sealed class InternalWebStorableFileTransfer : IWebStorableFileTransfer
 {
     private readonly IWebFilePermission _permission;
     private readonly IHttpClientInvokerFactory _factory;

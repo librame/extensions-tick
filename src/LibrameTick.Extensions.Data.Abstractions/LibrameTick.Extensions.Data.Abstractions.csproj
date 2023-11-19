@@ -2,19 +2,24 @@
 
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Data</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+	<PackageReadmeFile>LibrameTick.Extensions.Data.Abstractions.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageDescription>Based on LibrameTick.Extensions.Core.Abstractions library build of the data extension library. This library contains abstractions for functions such as accessing, auditing, cryptography, sharding, specification, and storing.
 
       基于 LibrameTick.Extensions.Core.Abstractions 库构建的数据扩展库。该库包含了数据访问、审计、密码学、分片、规约和存储等功能的抽象。
     </PackageDescription>
+	<Nullable>enable</Nullable>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\bin\</OutputPath>
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+	<None Include="..\..\docs\readmes\LibrameTick.Extensions.Data.Abstractions.md" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj" />

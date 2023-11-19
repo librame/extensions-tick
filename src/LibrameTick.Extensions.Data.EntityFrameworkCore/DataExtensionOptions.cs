@@ -37,8 +37,9 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     {
         ShardingDirectory = Directories.ResourceDirectory.CombineDirectory("shardings");
 
-        SavingBehaviors.Add(new InternalShardingSavingBehavior());
-        SavingBehaviors.Add(new InternalAuditingSavingBehavior());
+        // 先审计再分片（审计表也可能需要分表）
+        SavingChangesHandlers.Add(new AuditingSavingChangesHandler());
+        SavingChangesHandlers.Add(new ShardingSavingChangesHandler());
     }
 
 
@@ -88,18 +89,18 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     public bool DeviceLoadRealtimeForEverytime { get; set; }
 
     /// <summary>
-    /// 创建设备负载主机集合键方法，用于缓存单次 <see cref="IDeviceLoader"/> 实例。
+    /// 存取器设备负载器工厂（默认使用 <see cref="AccessorDeviceLoader"/>）。
     /// </summary>
     [JsonIgnore]
-    public Func<IEnumerable<string>, string> CreateDeviceLoadHostsKeyFunc { get; set; }
-        = hosts => string.Join(',', hosts.Order());
+    public Func<DataExtensionOptions, IEnumerable<string>, IDeviceLoader> DeviceLoaderFactory { get; set; }
+        = (options, hosts) => new AccessorDeviceLoader(options, hosts);
 
     /// <summary>
-    /// 创建设备负载器方法（默认使用 <see cref="AccessorDeviceLoader"/>）。
+    /// 保存变化上下文工厂（默认使用 <see cref="SavingChangesContext"/>）。
     /// </summary>
     [JsonIgnore]
-    public Func<DataExtensionOptions, IEnumerable<string>, IDeviceLoader> CreateDeviceLoaderFunc { get; set; }
-        = (options, hosts) => new AccessorDeviceLoader(options, hosts);
+    public Func<BaseDataContext, ISavingChangesContext> SavingChangesContextFactory { get; set; }
+        = context => new SavingChangesContext(context);
 
 
     /// <summary>
@@ -122,23 +123,16 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     public List<IQueryFilter> QueryFilters { get; init; } = new();
 
     /// <summary>
-    /// 保存行为集合。
+    /// 保存变化的处理程序集合。
     /// </summary>
     [JsonIgnore]
-    public List<ISavingBehavior<BaseDbContext, EntityEntry>> SavingBehaviors { get; init; } = new();
-
-    /// <summary>
-    /// 保存变化事件处理器。
-    /// </summary>
-    [JsonIgnore]
-    public Func<BaseDbContext, ISaveChangesEventHandler> SaveChangesEventHandler { get; set; }
-        = context => new InternalSaveChangesEventHandler();
+    public List<ISavingChangesHandler> SavingChangesHandlers { get; init; } = new();
 
     /// <summary>
     /// 保存审计集合动作（默认保存到当前数据库）。
     /// </summary>
     [JsonIgnore]
-    public Action<BaseDbContext, IEnumerable<Audit>> SavingAuditsAction { get; set; }
+    public Action<BaseDataContext, IEnumerable<Audit>> SavingAuditsAction { get; set; }
         = (context, audits) => context.Set<Audit>().AddRange(audits);
 
 

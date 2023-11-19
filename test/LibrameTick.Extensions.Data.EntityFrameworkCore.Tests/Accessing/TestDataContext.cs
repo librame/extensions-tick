@@ -1,21 +1,13 @@
-﻿using Librame.Extensions.Core;
-using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.ValueConversion;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestDbContext<TDbContext> : BaseDbContext
+    public class TestDataContext<TDbContext> : BaseDataContext
         where TDbContext : DbContext
     {
-        public TestDbContext(IShardingContext shardingContext,
-            IEncryptionConverterFactory encryptionConverterFactory,
-            IOptionsMonitor<DataExtensionOptions> dataOptions,
-            IOptionsMonitor<CoreExtensionOptions> coreOptions,
-            DbContextOptions<TDbContext> options)
-            : base(shardingContext, encryptionConverterFactory, dataOptions, coreOptions, options)
+        public TestDataContext(DbContextOptions<TDbContext> options)
+            : base(options)
         {
         }
 
@@ -24,8 +16,6 @@ namespace Librame.Extensions.Data.Accessing
         {
             modelBuilder.Entity<User>(b =>
             {
-                b.ToTableWithSharding(ShardingContext);
-
                 b.HasKey(k => k.Id);
 
                 b.HasIndex(i => i.Name);
@@ -36,7 +26,7 @@ namespace Librame.Extensions.Data.Accessing
                 b.Property(p => p.Passwd).HasMaxLength(50);
                 b.Property(p => p.CreatedTime).HasMaxLength(50);
 
-                b.Sharding(ShardingContext)
+                b.Sharding(BaseDependencies.ShardingContext)
                     .HasProperty(p => p.CreatedTime)
                     .HasValue(CultureInfo.CurrentUICulture);
             });

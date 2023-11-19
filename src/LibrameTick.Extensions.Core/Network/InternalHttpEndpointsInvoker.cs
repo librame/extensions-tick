@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Network;
 
-sealed internal class InternalHttpEndpointsInvoker : AbstractHttpEndpointsInvoker
+internal sealed class InternalHttpEndpointsInvoker : AbstractHttpEndpointsInvoker
 {
     public InternalHttpEndpointsInvoker(ILoggerFactory loggerFactory,
         IHttpClientInvokerFactory factory, IOptionsMonitor<CoreExtensionOptions> options)

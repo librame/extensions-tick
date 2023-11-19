@@ -37,12 +37,12 @@ public static class MutableEntityTypeExtensions
     /// </summary>
     /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
     /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
-    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDataContext"/>。</param>
     /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
     public static IMutableEntityType UseEncryption(this IMutableEntityType entityType,
-        PropertyInfo property, BaseDbContext dbContext)
+        PropertyInfo property, BaseDataContext dbContext)
     {
-        var converter = dbContext.EncryptionConverterFactory.GetConverter(dbContext, property.PropertyType);
+        var converter = dbContext.BaseDependencies.EncryptionConverterFactory.GetConverter(dbContext, property.PropertyType);
         entityType.GetProperty(property.Name).SetValueConverter(converter);
 
         return entityType;
@@ -108,10 +108,10 @@ public static class MutableEntityTypeExtensions
     /// </summary>
     /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
     /// <param name="queryFilters">给定的查询过滤器集合。</param>
-    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDataContext"/>。</param>
     /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
     public static IMutableEntityType UseQueryFilters(this IMutableEntityType entityType,
-        IEnumerable<IQueryFilter> queryFilters, BaseDbContext dbContext)
+        IEnumerable<IQueryFilter> queryFilters, BaseDataContext dbContext)
     {
         foreach (var filter in queryFilters)
         {

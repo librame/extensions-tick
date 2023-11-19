@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Bootstraps;
 
-class InternalClockBootstrap : AbstsractBootstrap, IClockBootstrap
+internal sealed class InternalClockBootstrap : AbstsractBootstrap, IClockBootstrap
 {
     // 定义时钟回流偏移量
     private readonly TimeSpan _refluxOffsetMilliseconds;

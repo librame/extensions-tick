@@ -25,8 +25,8 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessor"/>。
     /// </summary>
-    /// <param name="context">给定的 <see cref="BaseDbContext"/>。</param>
-    protected AbstractAccessor(BaseDbContext context)
+    /// <param name="context">给定的 <see cref="BaseDataContext"/>。</param>
+    protected AbstractAccessor(BaseDataContext context)
     {
         OriginalContext = context;
         CurrentContext = context;
@@ -36,12 +36,12 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
     /// <summary>
     /// 原始数据库上下文。
     /// </summary>
-    public BaseDbContext OriginalContext { get; init; }
+    public BaseDataContext OriginalContext { get; init; }
 
     /// <summary>
     /// 当前数据库上下文。
     /// </summary>
-    public virtual IDbContext CurrentContext { get; protected set; }
+    public virtual IDataContext CurrentContext { get; protected set; }
 
 
     /// <summary>
@@ -67,13 +67,13 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
     /// 数据扩展选项。
     /// </summary>
     public DataExtensionOptions DataOptions
-        => OriginalContext.DataOptions;
+        => OriginalContext.DataExtOptions;
 
     /// <summary>
     /// 核心扩展选项。
     /// </summary>
     public CoreExtensionOptions CoreOptions
-        => OriginalContext.CoreOptions;
+        => OriginalContext.CoreExtOptions;
 
     /// <summary>
     /// 存取器选项扩展。
@@ -111,11 +111,28 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
         if (newConnectionString.Equals(RelationalConnection.ConnectionString, StringComparison.Ordinal))
             return this;
 
-        DataOptions.Access.ConnectionChangingAction?.Invoke(this);
+        TryCreateDatabase();
 
         RelationalConnection.ConnectionString = newConnectionString;
 
-        DataOptions.Access.ConnectionChangedAction?.Invoke(this);
+        return this;
+    }
+
+    /// <summary>
+    /// 异步尝试改变数据库连接。
+    /// </summary>
+    /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="IAccessor"/> 的异步操作。</returns>
+    public virtual async Task<IAccessor> ChangeConnectionAsync(string newConnectionString,
+        CancellationToken cancellationToken = default)
+    {
+        if (newConnectionString.Equals(RelationalConnection.ConnectionString, StringComparison.Ordinal))
+            return this;
+
+        await TryCreateDatabaseAsync(cancellationToken);
+
+        RelationalConnection.ConnectionString = newConnectionString;
 
         return this;
     }
@@ -135,7 +152,7 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
             }
             catch (Exception ex)
             {
-                // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
+                // 用于临时解决文件型数据库分库后，DatabaseFacade 仍使用分库前的基础库名
                 // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
                 if (!ex.Message.Contains("already exists"))
                     throw;
@@ -160,7 +177,7 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
             }
             catch (Exception ex)
             {
-                // 用于临时解决文件型数据库分库后，DatabaseFacade 扔使用分库前的基础库名
+                // 用于临时解决文件型数据库分库后，DatabaseFacade 仍使用分库前的基础库名
                 // 判断数据库是否存在，实际上分库后的新库已存在导致建表发生已存在的异常
                 if (!ex.Message.Contains("already exists"))
                     throw;

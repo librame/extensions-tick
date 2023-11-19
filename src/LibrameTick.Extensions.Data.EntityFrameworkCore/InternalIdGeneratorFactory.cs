@@ -15,7 +15,7 @@ using Librame.Extensions.IdGenerators;
 
 namespace Librame.Extensions.Data;
 
-class InternalIdGeneratorFactory : IIdGeneratorFactory
+internal sealed class InternalIdGeneratorFactory : IIdGeneratorFactory
 {
     private readonly Dictionary<TypeNamedKey, IObjectIdGenerator> _idGenerators = new();
 

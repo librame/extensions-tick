@@ -72,17 +72,6 @@ public class AccessOptions : IOptions
     /// </summary>
     public float DefaultPriority { get; set; } = 7;
 
-    /// <summary>
-    /// 连接改变时动作。
-    /// </summary>
-    public Action<IAccessor>? ConnectionChangingAction { get; set; }
-
-    /// <summary>
-    /// 连接改变后动作（默认连接改变后会尝试创建数据库）。
-    /// </summary>
-    public Action<IAccessor>? ConnectionChangedAction { get; set; }
-        = static accessor => accessor.TryCreateDatabase();
-
 
     /// <summary>
     /// 使用指定的架构格式化 SQL 语句。

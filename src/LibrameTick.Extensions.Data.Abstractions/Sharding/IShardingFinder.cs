@@ -10,15 +10,14 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+namespace Librame.Extensions.Data.Sharding;
 
-namespace Librame.Extensions.Storage;
-
-internal sealed class InternalWebFilePermission : AbstractWebFilePermission
+public interface IShardingFinder
 {
-    public InternalWebFilePermission(IOptionsMonitor<CoreExtensionOptions> options)
-        : base(options.CurrentValue.WebFile)
-    {
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="contextType"></param>
+    /// <returns></returns>
+    IReadOnlyList<ShardingAttribute> Find(Type contextType);
 }

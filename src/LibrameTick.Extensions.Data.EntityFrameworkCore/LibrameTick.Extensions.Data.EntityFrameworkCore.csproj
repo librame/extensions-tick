@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Data</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+	<PackageReadmeFile>LibrameTick.Extensions.Data.EntityFrameworkCore.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageDescription>Based on LibrameTick.Extensions.Data.Abstractions and Microsoft.EntityFrameworkCore.Relational libraries build of the data extension library. This library contains implementations for functions such as accessing, auditing, cryptography, sharding, specification, and storing.
 
       基于 LibrameTick.Extensions.Data.Abstractions 和 Microsoft.EntityFrameworkCore.Relational 库构建的数据扩展库。该库包含了数据访问、审计、密码学、分片、规约和存储等功能的实现。
     </PackageDescription>
+	<Nullable>enable</Nullable>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.5" />
+	<None Include="..\..\docs\readmes\LibrameTick.Extensions.Data.EntityFrameworkCore.md" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.12" />
   </ItemGroup>
 
   <ItemGroup>

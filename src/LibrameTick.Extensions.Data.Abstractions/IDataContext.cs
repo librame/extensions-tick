@@ -10,14 +10,12 @@
 
 #endregion
 
-using Librame.Extensions.Data.Sharding;
-
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义一个继承 <see cref="IDisposable"/> 与 <see cref="IAsyncDisposable"/> 的数据库上下文接口。
+/// 定义一个继承 <see cref="IDisposable"/> 与 <see cref="IAsyncDisposable"/> 的数据上下文接口。
 /// </summary>
-public interface IDbContext : IDisposable, IAsyncDisposable
+public interface IDataContext : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// 上下文类型。
@@ -25,9 +23,9 @@ public interface IDbContext : IDisposable, IAsyncDisposable
     Type ContextType { get; }
 
     /// <summary>
-    /// 分片上下文。
+    /// 上下文依赖集合。
     /// </summary>
-    IShardingContext ShardingContext { get; }
+    IDataContextDependencies Dependencies { get; }
 
 
     #region Find

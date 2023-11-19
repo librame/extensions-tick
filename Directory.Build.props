@@ -2,21 +2,21 @@
   <Import Project="build\Version.props" />
     
   <PropertyGroup>
-    <ApplicationIcon>..\..\Librame.ico</ApplicationIcon>
-    <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>Librame Peng</Authors>
-    <Company>https://github.com/librame</Company>
-    <Copyright>Copyright © Librame 2012-2023</Copyright>
-    <PackageTags>net7</PackageTags>
-    <PackageIcon>Librame.png</PackageIcon>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/librame/extensions-tick</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/librame</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\LibrameTick.Extensions.pfx</AssemblyOriginatorKeyFile>
-    <NeutralLanguage>en-US</NeutralLanguage>
+	<NeutralLanguage>en-US</NeutralLanguage>
+	<Nullable>enable</Nullable>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<Authors>Librame Peng</Authors>
+	<Company>https://github.com/librame</Company>
+	<Copyright>Copyright © Librame 2012-2023</Copyright>
+	<PackageTags>net7</PackageTags>
+	<PackageIcon>Librame.png</PackageIcon>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageProjectUrl>https://github.com/librame/extensions-tick</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/librame</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<SignAssembly>true</SignAssembly>
+	<ApplicationIcon>..\..\Librame.ico</ApplicationIcon>
+	<AssemblyOriginatorKeyFile>..\..\LibrameTick.Extensions.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

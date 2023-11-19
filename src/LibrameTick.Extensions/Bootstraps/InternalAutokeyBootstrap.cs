@@ -14,7 +14,7 @@ using Librame.Extensions.Crypto;
 
 namespace Librame.Extensions.Bootstraps;
 
-class InternalAutokeyBootstrap : AbstsractBootstrap, IAutokeyBootstrap
+internal sealed class InternalAutokeyBootstrap : AbstsractBootstrap, IAutokeyBootstrap
 {
     public IAutokeyProvider Provider
         => new JsonFileAutokeyProvider();

@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Drawing</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+	<PackageReadmeFile>LibrameTick.Extensions.Drawing.SkiaSharp.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageDescription>Based on LibrameTick.Extensions.Drawing.Abstractions and SkiaSharp libraries build of the drawing extension library. This library contains implementations for functions such as drawers, and verification.
 
       基于 LibrameTick.Extensions.Drawing.Abstractions 和 SkiaSharp 库构建的绘图扩展库。该库包含了绘制器和验证等功能的实现。
     </PackageDescription>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="2.88.3" />
+	<None Include="..\..\docs\readmes\LibrameTick.Extensions.Drawing.SkiaSharp.md" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="2.88.6" />
   </ItemGroup>
 
   <ItemGroup>

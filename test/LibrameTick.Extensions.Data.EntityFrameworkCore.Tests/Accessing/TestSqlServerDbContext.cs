@@ -1,19 +1,11 @@
-﻿using Librame.Extensions.Core;
-using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.ValueConversion;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestSqlServerDbContext : TestDbContext<TestSqlServerDbContext>
+    public class TestSqlServerDbContext : TestDataContext<TestSqlServerDbContext>
     {
-        public TestSqlServerDbContext(IShardingContext shardingContext,
-            IEncryptionConverterFactory encryptionConverterFactory,
-            IOptionsMonitor<DataExtensionOptions> dataOptionsMonitor,
-            IOptionsMonitor<CoreExtensionOptions> coreOptionsMonitor,
-            DbContextOptions<TestSqlServerDbContext> options)
-            : base(shardingContext, encryptionConverterFactory, dataOptionsMonitor, coreOptionsMonitor, options)
+        public TestSqlServerDbContext(DbContextOptions<TestSqlServerDbContext> options)
+            : base(options)
         {
         }
 

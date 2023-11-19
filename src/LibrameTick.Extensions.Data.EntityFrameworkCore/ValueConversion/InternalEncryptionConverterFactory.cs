@@ -14,7 +14,7 @@ using Librame.Extensions.Crypto;
 
 namespace Librame.Extensions.Data.ValueConversion;
 
-sealed internal class InternalEncryptionConverterFactory : IEncryptionConverterFactory
+internal sealed class InternalEncryptionConverterFactory : IEncryptionConverterFactory
 {
     private readonly ConcurrentDictionary<DbContextId, List<ValueConverter>> _dictionary = new();
 
@@ -27,7 +27,7 @@ sealed internal class InternalEncryptionConverterFactory : IEncryptionConverterF
     }
 
 
-    public ValueConverter GetConverter(BaseDbContext dbContext, Type propertyType)
+    public ValueConverter GetConverter(BaseDataContext dbContext, Type propertyType)
     {
         if (!_dictionary.TryGetValue(dbContext.ContextId, out var converters))
         {
@@ -35,7 +35,7 @@ sealed internal class InternalEncryptionConverterFactory : IEncryptionConverterF
 
             // 以字节数组为基础加密提供程序
             var byteArrayProvider = new ByteArrayEncryptionProvider(_symmetric,
-                dbContext.AccessorExtension?.Algorithm ?? dbContext.CoreOptions.Algorithm);
+                dbContext.AccessorExtension?.Algorithm ?? dbContext.CoreExtOptions.Algorithm);
 
             // 支持对字节数组类型加密
             converters.Add(new EncryptionConverter<byte[]>(byteArrayProvider));

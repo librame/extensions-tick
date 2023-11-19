@@ -15,7 +15,7 @@ using Librame.Extensions.Core;
 
 namespace Librame.Extensions.Drawing.Drawers;
 
-sealed internal class InternalSavingDrawer : AbstractInternalDrawer, ISavingDrawer
+internal sealed class InternalSavingDrawer : AbstractInternalDrawer, ISavingDrawer
 {
     private readonly IOptionsMonitor<CoreExtensionOptions> _coreOptionsMonitor;
 

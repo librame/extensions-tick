@@ -22,19 +22,19 @@ public abstract class InterceptionAttribute : Attribute
     /// 预处理。
     /// </summary>
     /// <param name="invocation">给定的 <see cref="IInvocation"/>。</param>
-    public abstract void PreAction(IInvocation invocation);
+    public abstract void PreProcess(IInvocation invocation);
 
     /// <summary>
     /// 后置处理。
     /// </summary>
     /// <param name="invocation">给定的 <see cref="IInvocation"/>。</param>
-    public abstract void PostAction(IInvocation invocation);
+    public abstract void PostProcess(IInvocation invocation);
 
     /// <summary>
     /// 异常处理。
     /// </summary>
     /// <param name="invocation">给定的 <see cref="IInvocation"/>。</param>
-    public virtual void ExceptionAction(IInvocation invocation)
+    public virtual void ExceptionProcess(IInvocation invocation)
     {
         //
     }

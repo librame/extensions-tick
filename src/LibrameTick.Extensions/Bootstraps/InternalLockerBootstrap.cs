@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Bootstraps;
 
-class InternalLockerBootstrap : AbstsractBootstrap, ILockerBootstrap
+internal sealed class InternalLockerBootstrap : AbstsractBootstrap, ILockerBootstrap
 {
     // 禁止只读限制
     private Lazy<SpinLock> _spinLock

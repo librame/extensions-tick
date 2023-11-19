@@ -15,24 +15,33 @@ using Librame.Extensions.Data.Storing;
 
 namespace Librame.Extensions.Data.Saving;
 
-internal sealed class InternalAuditingSavingBehavior : AbstractSavingBehavior
+/// <summary>
+/// 定义继承 <see cref="AbstractSavingChangesHandler"/> 的审计保存变化处理程序。
+/// </summary>
+public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
 {
     private static readonly Type _notAuditedType = typeof(NotAuditedAttribute);
 
-
+    /// <summary>
+    /// 保存审计集合。
+    /// </summary>
     internal IReadOnlyList<Audit>? SavingAudits { get; private set; }
 
 
-    protected override void HandleCore(ISavingContext<BaseDbContext, EntityEntry> context)
+    /// <summary>
+    /// 预处理保存上下文。
+    /// </summary>
+    /// <param name="context">给定的 <see cref="ISavingChangesContext"/>。</param>
+    protected override void PreHandlingCore(ISavingChangesContext context)
     {
-        var idGenerator = context.DbContext.GetService<IIdGeneratorFactory>();
-        var options = context.DbContext.DataOptions;
+        var idGenerator = context.DataContext.GetService<IIdGeneratorFactory>();
+        var options = context.DataContext.DataExtOptions;
 
-        SavingAudits = ParseEntities(idGenerator, options, context.ChangeEntries);
+        SavingAudits = ParseEntities(idGenerator, options, context.ChangesEntities);
 
         // 保存审计数据
         if (options.Audit.SaveAudits && SavingAudits?.Count > 0)
-            options.SavingAuditsAction(context.DbContext, SavingAudits);
+            options.SavingAuditsAction(context.DataContext, SavingAudits);
     }
 
 
@@ -93,7 +102,7 @@ internal sealed class InternalAuditingSavingBehavior : AbstractSavingBehavior
             else
                 auditProperty.Audit = audit;
 
-            audit.Properties.Add(auditProperty);
+            audit.AddProperty(auditProperty);
         }
     }
 

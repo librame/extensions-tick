@@ -15,7 +15,7 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义 <see cref="ModelBuilder"/> 与 <see cref="BaseDbContext"/> 的静态扩展。
+/// 定义 <see cref="ModelBuilder"/> 与 <see cref="BaseDataContext"/> 的静态扩展。
 /// </summary>
 public static class ModelBuilderBaseDbContextExtensions
 {
@@ -66,17 +66,17 @@ public static class ModelBuilderBaseDbContextExtensions
     /// 创建审计模型集合。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    /// <param name="dbContext">给定的 <see cref="BaseDbContext"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="BaseDataContext"/>。</param>
     /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
     public static ModelBuilder CreateAuditingModels(this ModelBuilder modelBuilder,
-        BaseDbContext dbContext)
+        BaseDataContext dbContext)
     {
-        var limitableMaxLength = dbContext.DataOptions.Store.LimitableMaxLengthOfProperty;
-        var mapRelationship = dbContext.DataOptions.Store.MapRelationship;
+        var limitableMaxLength = dbContext.DataExtOptions.Store.LimitableMaxLengthOfProperty;
+        var mapRelationship = dbContext.DataExtOptions.Store.MapRelationship;
 
         modelBuilder.Entity<Audit>(b =>
         {
-            b.ToTableWithSharding(dbContext.ShardingContext);
+            b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
 
             b.HasIndex(static i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
@@ -95,7 +95,7 @@ public static class ModelBuilderBaseDbContextExtensions
 
         modelBuilder.Entity<AuditProperty>(b =>
         {
-            b.ToTableWithSharding(dbContext.ShardingContext);
+            b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
 
             b.HasIndex(static i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
 

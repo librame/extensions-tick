@@ -2,19 +2,24 @@
 
   <PropertyGroup>
     <RootNamespace>Librame.Extensions.Drawing</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+	<PackageReadmeFile>LibrameTick.Extensions.Drawing.Abstractions.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageDescription>Based on LibrameTick.Extensions.Core.Abstractions library build of the drawing extension library. This library contains abstractions for functions such as drawers, and verification.
 
       基于 LibrameTick.Extensions.Core.Abstractions 库构建的绘图扩展库。该库包含了绘制器和验证等功能的抽象。
     </PackageDescription>
+	<Nullable>enable</Nullable>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <OutputPath>..\..\bin\</OutputPath>
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+	<None Include="..\..\docs\readmes\LibrameTick.Extensions.Drawing.Abstractions.md" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LibrameTick.Extensions.Core.Abstractions\LibrameTick.Extensions.Core.Abstractions.csproj" />

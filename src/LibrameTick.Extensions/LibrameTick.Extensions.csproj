@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <RootNamespace>Librame.Extensions</RootNamespace>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+	<PackageReadmeFile>LibrameTick.Extensions.md</PackageReadmeFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageDescription>LibrameTick.Extensions is a series of libraries based on .NET 7 base framework, but also for the original Librame.Extensions series of libraries refactored into the next generation of the base framework series of libraries.
 
       LibrameTick.Extensions 是一个基于 .NET 7 的基础框架系列库，也是针对原 Librame.Extensions 系列库重构而成的下一代基础框架系列库。
     </PackageDescription>
+	<Nullable>enable</Nullable>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -16,5 +17,9 @@
     <DocumentationFile>..\..\bin\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+	<None Include="..\..\docs\readmes\LibrameTick.Extensions.md" Pack="true" Visible="false" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

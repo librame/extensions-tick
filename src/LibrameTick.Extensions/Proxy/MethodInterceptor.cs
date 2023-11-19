@@ -62,7 +62,7 @@ public class MethodInterceptor : DispatchProxy, IInterceptor
         var invocation = new MethodInvocation(this, method, attribs);
         Invocation = invocation;
 
-        PreProceed(invocation);
+        BeforeInvoke(invocation);
 
         try
         {
@@ -71,10 +71,10 @@ public class MethodInterceptor : DispatchProxy, IInterceptor
         }
         catch (Exception ex)
         {
-            ExceptionProceed(invocation, ex);
+            ExceptionInvoke(invocation, ex);
         }
 
-        PostProceed(invocation);
+        AfterInvoke(invocation);
 
         return invocation.Result;
     }
@@ -90,39 +90,39 @@ public class MethodInterceptor : DispatchProxy, IInterceptor
 
 
     /// <summary>
-    /// 预处理。
+    /// 前置调用。
     /// </summary>
     /// <param name="invocation">给定的 <see cref="IInvocation"/>。</param>
-    protected virtual void PreProceed(IInvocation invocation)
+    protected virtual void BeforeInvoke(IInvocation invocation)
     {
         foreach (var interception in invocation.Interceptions)
         {
-            interception.PreAction(invocation);
+            interception.PreProcess(invocation);
         }
     }
 
     /// <summary>
-    /// 后置处理。
+    /// 后置调用。
     /// </summary>
     /// <param name="invocation">给定的 <see cref="IInvocation"/>。</param>
-    protected virtual void PostProceed(IInvocation invocation)
+    protected virtual void AfterInvoke(IInvocation invocation)
     {
         foreach (var interception in invocation.Interceptions)
         {
-            interception.PostAction(invocation);
+            interception.PostProcess(invocation);
         }
     }
 
     /// <summary>
-    /// 异常处理。
+    /// 异常调用。
     /// </summary>
     /// <param name="invocation">给定的 <see cref="IInvocation"/>。</param>
     /// <param name="exception">给定的异常。</param>
-    protected virtual void ExceptionProceed(IInvocation invocation, Exception exception)
+    protected virtual void ExceptionInvoke(IInvocation invocation, Exception exception)
     {
         foreach (var interception in invocation.Interceptions)
         {
-            interception.ExceptionAction(invocation);
+            interception.ExceptionProcess(invocation);
         }
     }
 

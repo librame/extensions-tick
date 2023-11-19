@@ -87,9 +87,9 @@ public class BaseDispatcherAccessors : AbstractPriorable, IDispatcherAccessors
 
 
     /// <summary>
-    /// 当前数据库上下文（默认返回读存取器的第一项 <see cref="IDbContext"/>）。
+    /// 当前数据库上下文（默认返回读存取器的第一项 <see cref="IDataContext"/>）。
     /// </summary>
-    public virtual IDbContext CurrentContext
+    public virtual IDataContext CurrentContext
         => DefaultAccessor.CurrentContext;
 
 
@@ -131,6 +131,16 @@ public class BaseDispatcherAccessors : AbstractPriorable, IDispatcherAccessors
     /// </exception>
     public virtual IAccessor ChangeConnection(string newConnectionString)
         => DefaultAccessor.ChangeConnection(newConnectionString);
+
+    /// <summary>
+    /// 异步尝试改变数据库连接。
+    /// </summary>
+    /// <param name="newConnectionString">给定的新数据库连接字符串。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="IAccessor"/> 的异步操作。</returns>
+    public virtual async Task<IAccessor> ChangeConnectionAsync(string newConnectionString,
+        CancellationToken cancellationToken = default)
+        => await DefaultAccessor.ChangeConnectionAsync(newConnectionString, cancellationToken);
 
 
     /// <summary>

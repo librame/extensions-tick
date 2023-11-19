@@ -44,6 +44,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Data
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Drawing.SkiaSharp.Tests", "test\LibrameTick.Extensions.Drawing.SkiaSharp.Tests\LibrameTick.Extensions.Drawing.SkiaSharp.Tests.csproj", "{271BE4B7-19A4-4A9C-960F-DE436E838755}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{BE8DB1F9-E800-4EC2-B001-896D6DF35033}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "readmes", "readmes", "{7FD1DA05-E98B-45B6-A261-A29011A89C3B}"
+	ProjectSection(SolutionItems) = preProject
+		docs\readmes\LibrameTick.Extensions.Core.Abstractions.md = docs\readmes\LibrameTick.Extensions.Core.Abstractions.md
+		docs\readmes\LibrameTick.Extensions.Core.md = docs\readmes\LibrameTick.Extensions.Core.md
+		docs\readmes\LibrameTick.Extensions.Data.Abstractions.md = docs\readmes\LibrameTick.Extensions.Data.Abstractions.md
+		docs\readmes\LibrameTick.Extensions.Data.EntityFrameworkCore.md = docs\readmes\LibrameTick.Extensions.Data.EntityFrameworkCore.md
+		docs\readmes\LibrameTick.Extensions.Drawing.Abstractions.md = docs\readmes\LibrameTick.Extensions.Drawing.Abstractions.md
+		docs\readmes\LibrameTick.Extensions.Drawing.SkiaSharp.md = docs\readmes\LibrameTick.Extensions.Drawing.SkiaSharp.md
+		docs\readmes\LibrameTick.Extensions.md = docs\readmes\LibrameTick.Extensions.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +128,7 @@ Global
 		{5B7147BF-2DA8-4813-B2D8-35992871B62F} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
 		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
 		{271BE4B7-19A4-4A9C-960F-DE436E838755} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
+		{7FD1DA05-E98B-45B6-A261-A29011A89C3B} = {BE8DB1F9-E800-4EC2-B001-896D6DF35033}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {830A172B-0219-487F-BB20-5A070B3A51D4}

@@ -12,7 +12,7 @@
 
 namespace Librame.Extensions.Data.Sharding;
 
-sealed internal class InternalShardingStrategyProvider : AbstractShardingStrategyProvider
+internal sealed class InternalShardingStrategyProvider : AbstractShardingStrategyProvider
 {
     public InternalShardingStrategyProvider(IOptionsMonitor<DataExtensionOptions> dataOptions)
         : base()
