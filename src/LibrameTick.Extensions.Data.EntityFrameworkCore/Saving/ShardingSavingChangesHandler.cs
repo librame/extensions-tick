@@ -28,24 +28,23 @@ public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
     /// <param name="context">给定的 <see cref="ISavingChangesContext"/>。</param>
     protected override void PreHandlingCore(ISavingChangesContext context)
     {
-        var shardingTables = ParseShardingTables(context.DataContext.BaseDependencies.ShardingContext,
-            context.ChangesEntities);
+        var descriptorSettings = context.DataContext.CurrentServices.
+            ShardingContext.ShardingTables(context.DataContext);
 
-        if (shardingTables is null)
-            return;
+        if (descriptorSettings is null) return;
 
-        var descriptors = ParseShardingDescriptors(context.DataContext, shardingTables);
+        //var descriptors = ParseShardingDescriptors(context.DataContext, shardingTables);
 
         // 创建所需分表类型与映射对象
-        var shardingTypes = CreateShardingTypes(context.DataContext, descriptors);
+        CreateShardedTypes(context.DataContext, descriptorSettings);
 
         // 将分表类型与映射对象附加到上下文
-        AddContext(context.DataContext, shardingTypes);
+        AddContext(context.DataContext, descriptorSettings);
     }
 
 
-    private static void AddContext(BaseDataContext context,
-        IDictionary<(Type Source, Type Sharded), List<ShardingSavingDescriptor>> shardingTypes)
+    private static void AddContext(DataContext context,
+        Dictionary<ShardingDescriptor, List<ShardingItemSetting>> descriptorSettings)
     {
         if (context.Model is not Model model)
             return; // 如果不支持动态添加/移除分表类型，则直接退出
@@ -55,37 +54,34 @@ public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
         var dbSetMethod = context.ContextType.GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!;
         var shardedEntityTypes = new List<EntityType>();
 
-        foreach (var pair in shardingTypes)
+        foreach (var descriptor in descriptorSettings)
         {
-            // 注册分表类型
-            var shardedEntityType = model.CopyEntityType(pair.Key.Source, pair.Key.Sharded, shardedEntityTypes);
-            if (shardedEntityType is not null)
-                shardedEntityTypes.Add(shardedEntityType);
-
-            // 添加分表类型对象
-            var shardingSet = dbSetMethod.MakeGenericMethod(pair.Key.Sharded).Invoke(context, null)!;
-            var shardingSetType = shardingSet.GetType();
-
-            var addParamTypes = new Type[] { pair.Key.Sharded };
-            var shardingAddMethod = shardingSetType.GetMethod(nameof(DbSet<ShardingItemSetting>.Add), addParamTypes)!;
-
-            foreach (var descr in pair.Value)
+            foreach (var setting in descriptor.Value)
             {
-                shardingAddMethod.Invoke(shardingSet, new object[] { descr.Sharded! });
-            }
+                var shardedType = setting.ShardedType!.UnderlyingSystemType;
 
-            // 移除旧来源类型对象
-            var sourceTypes = pair.Value.GroupBy(static s => s.SourceType);
-            foreach (var sourceType in sourceTypes)
-            {
-                var sourceSet = dbSetMethod.MakeGenericMethod(sourceType.Key).Invoke(context, null)!;
+                // 注册分表类型
+                var shardedEntityType = model.CopyEntityType(descriptor.Key.SourceType, shardedType, shardedEntityTypes);
+                if (shardedEntityType is not null)
+                    shardedEntityTypes.Add(shardedEntityType);
+
+                // 添加分表类型对象
+                var shardedSet = dbSetMethod.MakeGenericMethod(shardedType).Invoke(context, null)!;
+                var shardedSetType = shardedSet.GetType();
+
+                var addParameterTypes = new Type[] { shardedType };
+                var shardingAddMethod = shardedSetType.GetMethod(nameof(DbSet<ShardingItemSetting>.Add), addParameterTypes)!;
+
+                shardingAddMethod.Invoke(shardedSet, new object[] { setting.Sharded! });
+
+                // 移除旧来源类型对象
+                var sourceSet = dbSetMethod.MakeGenericMethod(descriptor.Key.SourceType).Invoke(context, null)!;
                 var sourceSetType = sourceSet.GetType();
 
-                var removeRangeParamTypes = new Type[] { typeof(IEnumerable<>).MakeGenericType(new Type[] { sourceType.Key }) };
-                var sourceRemoveMethod = shardingSetType.GetMethod(nameof(DbSet<ShardingItemSetting>.RemoveRange), removeRangeParamTypes)!;
+                var removeParameterTypes = new Type[] { descriptor.Key.SourceType };
+                var sourceRemoveMethod = sourceSetType.GetMethod(nameof(DbSet<ShardingItemSetting>.Remove), removeParameterTypes)!;
 
-                var removeEntities = sourceType.Select(static s => s.Source).ToArray();
-                sourceRemoveMethod.Invoke(sourceSet, removeEntities);
+                sourceRemoveMethod.Invoke(sourceSet, new object[] { setting.Source! });
             }
         }
 
@@ -93,105 +89,79 @@ public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
 
     }
 
-    private static IDictionary<(Type Source, Type Sharded), List<ShardingSavingDescriptor>> CreateShardingTypes(
-        BaseDataContext context, IDictionary<string, List<ShardingSavingDescriptor>> descriptors)
-    {
-        var typePairs = new Dictionary<(Type Source, Type Sharded), List<ShardingSavingDescriptor>>(
-            PropertyEqualityComparer<(Type Source, Type Sharded)>.Create(p => p.Sharded.FullName!));
 
+    private static void CreateShardedTypes(DataContext context,
+        Dictionary<ShardingDescriptor, List<ShardingItemSetting>> descriptorSettings)
+    {
         // 创建临时分表类型并缓存数据以便保存到数据库
+        var now = context.CurrentServices.CoreOptions.Clock.GetNow();
+
         var shardingAssemblyName = context.ContextType.Assembly.GetName().Name;
-        shardingAssemblyName = $"{shardingAssemblyName}_Sharding_{DateTimeOffset.UtcNow.UtcTicks}";
+        shardingAssemblyName = $"{shardingAssemblyName}_Sharding_{now.Ticks}";
 
         var moduleBuilder = shardingAssemblyName.BuildModule(out _);
 
-        foreach (var pair in descriptors)
+        foreach (var descriptor in descriptorSettings)
         {
-            foreach (var descr in pair.Value)
+            foreach (var setting in descriptor.Value)
             {
-                KeyValuePair<(Type Source, Type Sharded), List<ShardingSavingDescriptor>>? currentTypePair = null;
+                var shardedType = moduleBuilder.CopyType(descriptor.Key.SourceType, setting.CurrentName);
+                var sharded = ObjectMapper.NewByMapAllPublicProperties(setting.Source!, shardedType);
 
-                foreach (var typePair in typePairs)
-                {
-                    if (typePair.Key.Sharded.FullName!.Equals(descr.ShardedName, StringComparison.Ordinal))
-                    {
-                        currentTypePair = typePair;
-                        break;
-                    }
-                }
-
-                if (currentTypePair is null)
-                {
-                    var shardingType = moduleBuilder.CopyType(descr.SourceType, descr.ShardedName);
-                    var sharded = ObjectMapper.NewByMapAllPublicProperties(descr.Source, shardingType);
-
-                    typePairs.Add((descr.SourceType, shardingType), new List<ShardingSavingDescriptor>
-                    {
-                        descr.ChangeSharded(sharded, shardingType)
-                    });
-                }
-                else
-                {
-                    var shardingType = currentTypePair.Value.Key.Sharded;
-                    var sharded = ObjectMapper.NewByMapAllPublicProperties(descr.Source, shardingType);
-
-                    currentTypePair.Value.Value.Add(descr.ChangeSharded(sharded, shardingType));
-                }
+                setting.ChangeSharded(sharded, shardedType);
             }
         }
-
-        return typePairs;
     }
 
-    private static IDictionary<string, List<ShardingSavingDescriptor>> ParseShardingDescriptors(
-        BaseDataContext context, IReadOnlyList<ShardingTableSetting> shardingTables)
-    {
-        // 解析实体配置的所需分表设置描述符集合
-        var pairs = new Dictionary<string, List<ShardingSavingDescriptor>>();
+    //private static IDictionary<string, List<ShardingSavingDescriptor>> ParseShardingDescriptors(
+    //    DataContext context, IReadOnlyList<ShardingTableSetting> shardingTables)
+    //{
+    //    // 解析实体配置的所需分表设置描述符集合
+    //    var pairs = new Dictionary<string, List<ShardingSavingDescriptor>>();
 
-        var dbModel = context.Model.GetRelationalModel();
-        var dbTableNames = dbModel.Tables.Select(static s => s.Name).ToArray();
+    //    var dbModel = context.Model.GetRelationalModel();
+    //    var dbTableNames = dbModel.Tables.Select(static s => s.Name).ToArray();
 
-        foreach (var table in shardingTables)
-        {
-            if (table.SourceType is null)
-                continue;
+    //    foreach (var table in shardingTables)
+    //    {
+    //        if (table.ShardedType is null)
+    //            continue;
 
-            foreach (var item in table.Items)
-            {
-                if (item.IsNeedSharding && !dbTableNames.Contains(item.ShardedName))
-                {
-                    var descriptor = new ShardingSavingDescriptor(item.ShardedName, item.Source!, table.SourceType);
-                    if (pairs.TryGetValue(item.ShardedName, out var value))
-                    {
-                        value.Add(descriptor);
-                    }
-                    else
-                    {
-                        pairs.Add(item.ShardedName, new List<ShardingSavingDescriptor> { descriptor });
-                    }
-                }
-            }
-        }
+    //        foreach (var item in table.Items)
+    //        {
+    //            if (!dbTableNames.Contains(item.ThisShardedName))
+    //            {
+    //                var descriptor = new ShardingSavingDescriptor(item.ThisShardedName, item.Source!, table.ShardedType);
+    //                if (pairs.TryGetValue(item.ThisShardedName, out var value))
+    //                {
+    //                    value.Add(descriptor);
+    //                }
+    //                else
+    //                {
+    //                    pairs.Add(item.ThisShardedName, new List<ShardingSavingDescriptor> { descriptor });
+    //                }
+    //            }
+    //        }
+    //    }
 
-        return pairs;
-    }
+    //    return pairs;
+    //}
 
-    private static List<ShardingTableSetting>? ParseShardingTables(IShardingContext shardingContext,
-        IEnumerable<EntityEntry> entityEntries)
-    {
-        if (!entityEntries.Any())
-            return null;
+    //private static List<ShardingTableSetting>? ParseShardingTables(IShardingContext shardingContext,
+    //    IEnumerable<EntityEntry> entityEntries)
+    //{
+    //    if (!entityEntries.Any())
+    //        return null;
 
-        var tables = new List<ShardingTableSetting>();
+    //    var tables = new List<ShardingTableSetting>();
 
-        foreach (var entry in entityEntries)
-        {
-            var table = shardingContext.ShardTable(entry.Metadata.ClrType, entry.Entity);
-            tables.Add(table);
-        }
+    //    foreach (var entry in entityEntries)
+    //    {
+    //        var table = shardingContext.ShardTable(entry.Metadata.ClrType, entry.Entity);
+    //        tables.Add(table);
+    //    }
 
-        return tables;
-    }
+    //    return tables;
+    //}
 
 }

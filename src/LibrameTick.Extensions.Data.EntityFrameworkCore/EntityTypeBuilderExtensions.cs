@@ -10,6 +10,7 @@
 
 #endregion
 
+using Librame.Extensions.Data;
 using Librame.Extensions.Data.Sharding;
 
 namespace Microsoft.EntityFrameworkCore;
@@ -21,20 +22,73 @@ public static class EntityTypeBuilderExtensions
 {
 
     /// <summary>
-    /// 返回可用于配置实体类型的分片的对象。
+    /// 返回可用于配置实体类型的分片构建器。
     /// </summary>
     /// <typeparam name="TEntity">指定的实体类型。</typeparam>
     /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
-    /// <param name="context">给定的 <see cref="IShardingContext"/>。</param>
-    /// <returns>返回 <see cref="ShardingBuilder{TEntity}"/>。</returns>
-    public static ShardingBuilder<TEntity> Sharding<TEntity>(this EntityTypeBuilder<TEntity> builder, IShardingContext context)
+    /// <param name="baseName">给定用于分片的基础名称。</param>
+    /// <param name="suffixFormatter">给定带分片策略参数的后缀格式化器（支持的参数可参考指定的分片策略类型）。</param>
+    /// <param name="strategyTypes">给定要引用的分片策略类型集合。</param>
+    /// <returns>返回 <see cref="ShardingEntityTypeBuilder{TEntity}"/>。</returns>
+    public static ShardingEntityTypeBuilder<TEntity> Sharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
+        string baseName, string suffixFormatter, params Type[] strategyTypes)
         where TEntity : class
-        => new(builder, context);
+        => builder.Sharding(new ShardingAttribute(ShardingKind.Table, baseName, suffixFormatter, strategyTypes));
 
-    public static ShardingBuilder<TEntity> Sharding<TEntity>(this EntityTypeBuilder<TEntity> builder, ShardingAttribute sharding)
+    /// <summary>
+    /// 返回可用于配置实体类型的分片构建器。
+    /// </summary>
+    /// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    /// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
+    /// <param name="attribute">给定的 <see cref="ShardingAttribute"/>。</param>
+    /// <returns>返回 <see cref="ShardingEntityTypeBuilder{TEntity}"/>。</returns>
+    public static ShardingEntityTypeBuilder<TEntity> Sharding<TEntity>(this EntityTypeBuilder<TEntity> builder,
+        ShardingAttribute? attribute = null)
+        where TEntity : class
     {
-        //string suffixFormatter, params Type[] strategyTypes
+        attribute ??= builder.Metadata.GetShardingAttribute();
+        ArgumentNullException.ThrowIfNull(attribute);
+
+        var shardingBuilder = new ShardingEntityTypeBuilder<TEntity>(builder, attribute);
+        builder.Metadata.SetShardingBuilder(shardingBuilder);
+
+        return shardingBuilder;
     }
+
+
+    ///// <summary>
+    ///// 获取分片实体类型构建器。
+    ///// </summary>
+    ///// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    ///// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
+    ///// <returns>返回 <see cref="ShardingEntityTypeBuilder{TEntity}"/>。</returns>
+    //public static ShardingEntityTypeBuilder<TEntity>? GetShardingBuilder<TEntity>(this EntityTypeBuilder<TEntity> builder)
+    //    where TEntity : class
+    //{
+    //    var shardingAnnotation = builder.Metadata.FindAnnotation(ShardingAnnotationName);
+    //    return (ShardingEntityTypeBuilder<TEntity>?)shardingAnnotation?.Value;
+    //}
+
+    ///// <summary>
+    ///// 设置分片实体类型构建器。
+    ///// </summary>
+    ///// <typeparam name="TEntity">指定的实体类型。</typeparam>
+    ///// <param name="builder">给定的 <see cref="EntityTypeBuilder{TEntity}"/>。</param>
+    ///// <param name="shardingBuilder">给定的 <see cref="ShardingEntityTypeBuilder{TEntity}"/>。</param>
+    ///// <returns>返回 <see cref="ShardingEntityTypeBuilder{TEntity}"/>。</returns>
+    //public static ShardingEntityTypeBuilder<TEntity>? SetShardingBuilder<TEntity>(this EntityTypeBuilder<TEntity> builder,
+    //    ShardingEntityTypeBuilder<TEntity> shardingBuilder)
+    //    where TEntity : class
+    //{
+    //    builder.Metadata.SetAnnotation(ShardingAnnotationName, shardingBuilder);
+    //    return shardingBuilder;
+    //}
+
+
+    //public static ShardingBuilder<TEntity> Sharding<TEntity>(this EntityTypeBuilder<TEntity> builder, ShardingAttribute attribute)
+    //{
+    //    //string suffixFormatter, params Type[] strategyTypes
+    //}
 
 
     ///// <summary>

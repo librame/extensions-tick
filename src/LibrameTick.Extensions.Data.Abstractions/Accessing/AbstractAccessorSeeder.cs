@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
+using Librame.Extensions.IdGenerators;
 
 namespace Librame.Extensions.Data.Accessing;
 

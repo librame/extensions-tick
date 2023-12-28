@@ -68,8 +68,7 @@ public static class ExpressionMapper<TInput, TOutput>
         var memberInitExpression = Expression.MemberInit(Expression.New(outputType),
             memberAssignments.ToArray());
 
-        var lambda = Expression.Lambda<Func<TInput, TOutput>>(memberInitExpression,
-            new ParameterExpression[] { parameterExpression });
+        var lambda = Expression.Lambda<Func<TInput, TOutput>>(memberInitExpression, [parameterExpression]);
 
         return lambda.Compile();
     }
@@ -84,12 +83,12 @@ public static class ExpressionMapper<TInput, TOutput>
         var parameterExpression = Expression.Parameter(inputType, "p");
 
         // 映射所有字段（私有字段包含属性实现）
-        foreach (var outField in outputType.GetAllFields())
+        foreach (var outField in outputType.GetFields(TypeExtensions.AllMemberFlags))
         {
             if (outField.FieldType.IsSameOrNullableType(outputType))
                 continue; // 排除自引用类型
 
-            var inField = inputType.GetAllField(outField.Name);
+            var inField = inputType.GetField(outField.Name, TypeExtensions.AllMemberFlags);
             if (inField is not null && outField.FieldType.IsSameOrNullableType(inField.FieldType))
             {
                 var propertyExpression = Expression.Field(parameterExpression, inField);
@@ -102,9 +101,7 @@ public static class ExpressionMapper<TInput, TOutput>
         var memberInitExpression = Expression.MemberInit(Expression.New(outputType),
             memberAssignments.ToArray());
 
-        var lambda = Expression.Lambda<Func<TInput, TOutput>>(memberInitExpression,
-            new ParameterExpression[] { parameterExpression });
-
+        var lambda = Expression.Lambda<Func<TInput, TOutput>>(memberInitExpression, [parameterExpression]);
         return lambda.Compile();
     }
 

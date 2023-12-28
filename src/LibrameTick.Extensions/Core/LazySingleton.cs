@@ -39,8 +39,14 @@ public static class LazySingleton<TSingleton>
     /// 延迟创建（每个线程唯一）实例。
     /// </summary>
     [ThreadStatic]
-    private static readonly Lazy<TSingleton> _lazy
-        = new Lazy<TSingleton>(CreateInstance);
+    private static readonly Lazy<TSingleton> _lazy;
+
+
+    static LazySingleton()
+    {
+        _lazy ??= new(CreateInstance);
+    }
+
 
     /// <summary>
     /// 得到单例。

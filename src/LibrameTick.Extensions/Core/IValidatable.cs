@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Core;
 
 /// <summary>
-/// 定义一个可验证接口。
+/// 定义一个流式可验证接口。
 /// </summary>
 /// <typeparam name="T">指定的验证类型。</typeparam>
 public interface IValidatable<T> : IValidatable

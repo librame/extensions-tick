@@ -195,7 +195,7 @@ public abstract class AbstractCronExpression<TDateTime>
     protected virtual IEnumerable<string> FormatDomainDescriptions(IEnumerable<string> descriptions)
     {
         // 尝试跳过可能存在的多组每周期描述语言习惯（如：每月 每天...）
-        var lastEvery = descriptions.WhereAt(s => s.StartsWith("每")).LastOrDefault();
+        var lastEvery = descriptions.SelectPairsWith(s => s.StartsWith('每')).LastOrDefault();
 
         if (lastEvery is null)
             return descriptions;

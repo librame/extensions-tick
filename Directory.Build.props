@@ -8,7 +8,7 @@
 	<Authors>Librame Peng</Authors>
 	<Company>https://github.com/librame</Company>
 	<Copyright>Copyright © Librame 2012-2023</Copyright>
-	<PackageTags>net7</PackageTags>
+	<PackageTags>net8</PackageTags>
 	<PackageIcon>Librame.png</PackageIcon>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageProjectUrl>https://github.com/librame/extensions-tick</PackageProjectUrl>

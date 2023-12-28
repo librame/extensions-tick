@@ -10,15 +10,14 @@
 
 #endregion
 
-
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
 /// 定义一个实现 <see cref="AbstractAccessor"/> 的基础存取器。
 /// </summary>
-/// <typeparam name="TContext">指定实现 <see cref="BaseDataContext"/> 的数据库上下文类型。</typeparam>
+/// <typeparam name="TContext">指定实现 <see cref="DataContext"/> 的数据库上下文类型。</typeparam>
 public class BaseAccessor<TContext> : AbstractAccessor
-    where TContext : BaseDataContext
+    where TContext : DataContext
 {
     /// <summary>
     /// 构造一个 <see cref="BaseAccessor{TDbContext}"/>。

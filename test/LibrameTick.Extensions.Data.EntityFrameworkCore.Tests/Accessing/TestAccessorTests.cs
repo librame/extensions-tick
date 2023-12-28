@@ -24,14 +24,14 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlServer("Data Source=.;Initial Catalog=librame_extensions;Integrated Security=true;TrustServerCertificate=true;",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.ReadWrite).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(3).WithLocalhostLoader());
+                opts.UseAccessor(b => b.WithAccess(AccessMode.ReadWrite).WithPriority(3).WithLocalhostLoader());
             });
 
             services.AddDbContext<TestMySqlDbContext>(opts =>
             {
                 opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_extensions;user=root;password=123456;", out var version), version,
                     a => a.MigrationsAssembly(modelAssemblyName));
-                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(2).WithLocalhostLoader());
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Write).WithPriority(2).WithLocalhostLoader());
             });
 
             // SQLite 不支持事务，不推荐用于集群中（至少不做为写入库），即使用在集群中，在使用事务时会捕获到异常而切换到下一个数据库上下文
@@ -40,7 +40,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlite("Data Source=librame_extensions.db",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithAccess(AccessMode.Read).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithPriority(1).WithLocalhostLoader());
+                opts.UseAccessor(b => b.WithAccess(AccessMode.Read).WithPriority(1).WithLocalhostLoader());
             });
 
             var builder = services.AddLibrame()

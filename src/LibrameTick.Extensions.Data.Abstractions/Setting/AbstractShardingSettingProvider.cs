@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
+using Librame.Extensions.Data.Sharding;
 
 namespace Librame.Extensions.Setting;
 
@@ -19,34 +20,47 @@ namespace Librame.Extensions.Setting;
 /// </summary>
 public abstract class AbstractShardingSettingProvider : IShardingSettingProvider
 {
-    private ISettingProvider<ShardingDatabaseSettingRoot> _databaseSettingProvider;
-    private ISettingProvider<ShardingTableSettingRoot> _tableSettingProvider;
+    private readonly ISettingProvider<ShardingDatabaseSettingRoot> _databaseProvider;
+    private readonly ISettingProvider<ShardingTableSettingRoot> _tableProvider;
 
 
     /// <summary>
     /// 构造一个 <see cref="AbstractShardingSettingProvider"/>。
     /// </summary>
-    /// <param name="databaseSettingProvider">给定的 <see cref="ISettingProvider{ShardingDatabaseSetting}"/>。</param>
-    /// <param name="tableSettingProvider">给定的 <see cref="ISettingProvider{ShardingTableSetting}"/>。</param>
-    protected AbstractShardingSettingProvider(ISettingProvider<ShardingDatabaseSettingRoot> databaseSettingProvider,
-        ISettingProvider<ShardingTableSettingRoot> tableSettingProvider)
+    /// <param name="databaseProvider">给定的 <see cref="ISettingProvider{ShardingDatabaseSetting}"/>。</param>
+    /// <param name="tableProvider">给定的 <see cref="ISettingProvider{ShardingTableSetting}"/>。</param>
+    protected AbstractShardingSettingProvider(ISettingProvider<ShardingDatabaseSettingRoot> databaseProvider,
+        ISettingProvider<ShardingTableSettingRoot> tableProvider)
     {
-        _databaseSettingProvider = databaseSettingProvider;
-        _tableSettingProvider = tableSettingProvider;
+        _databaseProvider = databaseProvider;
+        _tableProvider = tableProvider;
     }
+
+
+    /// <summary>
+    /// 数据库设置提供程序。
+    /// </summary>
+    public ISettingProvider<ShardingDatabaseSettingRoot> DatabaseProvider
+        => _databaseProvider;
+
+    /// <summary>
+    /// 数据表设置提供程序。
+    /// </summary>
+    public ISettingProvider<ShardingTableSettingRoot> TableProvider
+        => _tableProvider;
 
 
     /// <summary>
     /// 分库设置根。
     /// </summary>
     public ShardingDatabaseSettingRoot DatabaseRoot
-        => _databaseSettingProvider.LoadOrSave();
+        => _databaseProvider.LoadOrSave();
 
     /// <summary>
     /// 分表设置根。
     /// </summary>
     public ShardingTableSettingRoot TableRoot
-        => _tableSettingProvider.LoadOrSave();
+        => _tableProvider.LoadOrSave();
 
 
     /// <summary>
@@ -54,89 +68,118 @@ public abstract class AbstractShardingSettingProvider : IShardingSettingProvider
     /// </summary>
     /// <returns>返回 <see cref="ShardingDatabaseSettingRoot"/>。</returns>
     public virtual ShardingDatabaseSettingRoot SaveDatabaseRoot()
-        => _databaseSettingProvider.Save(DatabaseRoot);
+        => _databaseProvider.Save(DatabaseRoot);
 
     /// <summary>
     /// 保存分库设置根。
     /// </summary>
     /// <returns>返回 <see cref="ShardingTableSettingRoot"/>。</returns>
     public virtual ShardingTableSettingRoot SaveTableRoot()
-        => _tableSettingProvider.Save(TableRoot);
+        => _tableProvider.Save(TableRoot);
 
 
     /// <summary>
-    /// 添加分库设置集合并保存。
+    /// 获取或创建分库设置并自动保存。
     /// </summary>
-    /// <param name="settings">给定的 <see cref="ShardingDatabaseSetting"/> 数组。</param>
-    /// <returns>返回 <see cref="IShardingSettingProvider"/>。</returns>
-    public virtual IShardingSettingProvider AddDatabaseSettings(params ShardingDatabaseSetting[] settings)
-        => AddDatabaseSettings((IEnumerable<ShardingDatabaseSetting>)settings);
-
-    /// <summary>
-    /// 添加分库设置集合并保存。
-    /// </summary>
-    /// <param name="settings">给定的 <see cref="IEnumerable{ShardingDatabaseSetting}"/>。</param>
-    /// <returns>返回 <see cref="IShardingSettingProvider"/>。</returns>
-    public virtual IShardingSettingProvider AddDatabaseSettings(IEnumerable<ShardingDatabaseSetting> settings)
+    /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
+    /// <param name="shardedName">给定的分库名称。</param>
+    /// <param name="sourceId">给定的来源标识。</param>
+    /// <param name="source">给定的来源（暂不支持持久化）。</param>
+    /// <returns>返回包含 <see cref="ShardingDatabaseSetting"/> 与 <see cref="ShardingItemSetting"/> 的元组。</returns>
+    public virtual (ShardingDatabaseSetting databaseSetting, ShardingItemSetting itemSetting) GetOrCreateDatabase(
+        ShardingDescriptor descriptor, string shardedName, string? sourceId, object? source)
     {
-        Bootstrapper.GetLocker().Lock(index =>
+        return Bootstrapper.GetLocker().Lock(index =>
         {
-            var isAdded = false;
-
-            foreach (var setting in settings)
-            {
-                if (!DatabaseRoot.Databases.Contains(setting))
-                {
-                    DatabaseRoot.Databases.Add(setting);
-
-                    if (!isAdded)
-                        isAdded = true;
-                }
-            }
-
-            if (isAdded)
-                _databaseSettingProvider.Save(DatabaseRoot);
+            return DatabaseRoot.GetOrCreate(descriptor, shardedName, sourceId, source, () => SaveDatabaseRoot());
         });
+    }
 
-        return this;
+    /// <summary>
+    /// 获取或创建分表设置并自动保存（不推荐用于遍历集合）。
+    /// </summary>
+    /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
+    /// <param name="shardedName">给定的分表名称。</param>
+    /// <param name="sourceId">给定的来源标识。</param>
+    /// <param name="source">给定的来源（暂不支持持久化）。</param>
+    /// <returns>返回包含 <see cref="ShardingTableSetting"/> 与 <see cref="ShardingItemSetting"/> 的元组。</returns>
+    public virtual (ShardingTableSetting tableSetting, ShardingItemSetting itemSetting) GetOrCreateTable(
+        ShardingDescriptor descriptor, string shardedName, string? sourceId, object? source)
+    {
+        return Bootstrapper.GetLocker().Lock(index =>
+        {
+            return TableRoot.GetOrCreate(descriptor, shardedName, sourceId, source, () => SaveTableRoot());
+        });
     }
 
 
     /// <summary>
-    /// 添加分表设置集合并保存。
+    /// 尝试添加分库设置集合并保存。
     /// </summary>
-    /// <param name="settings">给定的 <see cref="ShardingTableSetting"/> 数组。</param>
-    /// <returns>返回 <see cref="IShardingSettingProvider"/>。</returns>
-    public virtual IShardingSettingProvider AddTableSettings(params ShardingTableSetting[] settings)
-        => AddTableSettings((IEnumerable<ShardingTableSetting>)settings);
+    /// <param name="databases">给定的 <see cref="ShardingDatabaseSetting"/> 数组。</param>
+    /// <returns>返回是否添加的布尔值。</returns>
+    public virtual bool TryAddDatabases(params ShardingDatabaseSetting[] databases)
+        => TryAddDatabases((IEnumerable<ShardingDatabaseSetting>)databases);
 
     /// <summary>
-    /// 添加分表设置集合并保存。
+    /// 尝试添加分库设置集合并保存。
     /// </summary>
-    /// <param name="settings">给定的 <see cref="IEnumerable{ShardingTableSetting}"/>。</param>
-    /// <returns>返回 <see cref="IShardingSettingProvider"/>。</returns>
-    public virtual IShardingSettingProvider AddTableSettings(IEnumerable<ShardingTableSetting> settings)
+    /// <param name="databases">给定的 <see cref="IEnumerable{ShardingDatabaseSetting}"/>。</param>
+    /// <returns>返回是否添加的布尔值。</returns>
+    public virtual bool TryAddDatabases(IEnumerable<ShardingDatabaseSetting> databases)
     {
-        Bootstrapper.GetLocker().Lock(index =>
+        return Bootstrapper.GetLocker().Lock(index =>
         {
             var isAdded = false;
 
-            foreach (var setting in settings)
+            foreach (var database in databases)
             {
-                if (!TableRoot.Tables.Contains(setting))
+                if (DatabaseRoot.TryAdd(database))
                 {
-                    TableRoot.Tables.Add(setting);
-
-                    if (!isAdded)
-                        isAdded = true;
+                    if (!isAdded) isAdded = true;
                 }
             }
 
             if (isAdded)
-                _tableSettingProvider.Save(TableRoot);
-        });
+                SaveDatabaseRoot();
 
-        return this;
+            return isAdded;
+        });
+    }
+
+
+    /// <summary>
+    /// 尝试添加分表设置集合并保存。
+    /// </summary>
+    /// <param name="tables">给定的 <see cref="ShardingTableSetting"/> 数组。</param>
+    /// <returns>返回是否添加的布尔值。</returns>
+    public virtual bool TryAddTables(params ShardingTableSetting[] tables)
+        => TryAddTables((IEnumerable<ShardingTableSetting>)tables);
+
+    /// <summary>
+    /// 尝试添加分表设置集合并保存。
+    /// </summary>
+    /// <param name="tables">给定的 <see cref="IEnumerable{ShardingTableSetting}"/>。</param>
+    /// <returns>返回是否添加的布尔值。</returns>
+    public virtual bool TryAddTables(IEnumerable<ShardingTableSetting> tables)
+    {
+        return Bootstrapper.GetLocker().Lock(index =>
+        {
+            var isAdded = false;
+
+            foreach (var table in tables)
+            {
+                if (TableRoot.TryAdd(table))
+                {
+                    if (!isAdded) isAdded = true;
+                }
+            }
+
+            if (isAdded)
+                SaveTableRoot();
+
+            return isAdded;
+        });
     }
 
 }

@@ -27,9 +27,6 @@ namespace Librame.Extensions.Data;
 /// </summary>
 public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOptions>
 {
-    private readonly Dictionary<TypeNamedKey, IObjectIdGenerator> _idGenerators = new();
-
-
     /// <summary>
     /// 构造一个 <see cref="DataExtensionOptions"/>。
     /// </summary>
@@ -44,6 +41,12 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
 
 
     /// <summary>
+    /// 分片目录。
+    /// </summary>
+    public string ShardingDirectory { get; set; }
+
+
+    /// <summary>
     /// 访问选项。
     /// </summary>
     public AccessOptions Access { get; set; } = new();
@@ -54,29 +57,24 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     public AuditOptions Audit { get; set; } = new();
 
     /// <summary>
-    /// 存储选项。
+    /// 数据标识生成选项。
     /// </summary>
-    public StoreOptions Store { get; set; } = new();
+    public DataIdGenerationOptions DataIdGeneration { get; set; } = new();
 
     /// <summary>
-    /// 标识生成选项。
+    /// 分片选项。
     /// </summary>
-    public IdGenerationOptions IdGeneration { get; set; } = new();
-
-    /// <summary>
-    /// Mongo 标识选项。
-    /// </summary>
-    public MongoIdOptions Mongo { get; set; } = new();
-
-    /// <summary>
-    /// 雪花标识选项。
-    /// </summary>
-    public SnowflakeIdOptions Snowflake { get; set; } = new();
+    public ShardingOptions Sharding { get; set; } = new();
 
     /// <summary>
     /// 设置选项。
     /// </summary>
     public SettingOptions Setting { get; set; } = new();
+
+    /// <summary>
+    /// 存储选项。
+    /// </summary>
+    public StoreOptions Store { get; set; } = new();
 
     /// <summary>
     /// 设备负载选项。
@@ -99,67 +97,36 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     /// 保存变化上下文工厂（默认使用 <see cref="SavingChangesContext"/>）。
     /// </summary>
     [JsonIgnore]
-    public Func<BaseDataContext, ISavingChangesContext> SavingChangesContextFactory { get; set; }
+    public Func<DataContext, ISavingChangesContext> SavingChangesContextFactory { get; set; }
         = context => new SavingChangesContext(context);
 
+    /// <summary>
+    /// 后置创建模型的配置实体类型动作。
+    /// </summary>
+    public Action<DataContext, ModelBuilder, IMutableEntityType>? PostConfigureEntityTypeAction { get; set; }
 
     /// <summary>
-    /// 标识生成器集合（默认已集成 <see cref="string"/> “MongoDB”、<see cref="long"/> “雪花”、<see cref="Guid"/> “COMB for SQLServer/MySQL/Oracle” 等标识类型的生成器）。
+    /// 后置创建模型的配置实体类型属性动作。
     /// </summary>
-    [JsonIgnore]
-    public IReadOnlyDictionary<TypeNamedKey, IObjectIdGenerator> IdGenerators
-        => _idGenerators;
-
-    /// <summary>
-    /// 分片策略集合（默认已集成 <see cref="CultureInfoShardingStrategy"/>、<see cref="DateTimeShardingStrategy"/>、<see cref="DateTimeOffsetShardingStrategy"/> 等分片策略）。
-    /// </summary>
-    [JsonIgnore]
-    public List<IShardingStrategy> ShardingStrategies { get; init; } = new();
+    public Action<DataContext, ModelBuilder, IMutableEntityType, PropertyInfo>? PostConfigureEntityTypePropertyAction { get; set; }
 
     /// <summary>
     /// 查询过滤器集合。
     /// </summary>
     [JsonIgnore]
-    public List<IQueryFilter> QueryFilters { get; init; } = new();
+    public List<IQueryFilter> QueryFilters { get; init; } = [];
 
     /// <summary>
     /// 保存变化的处理程序集合。
     /// </summary>
     [JsonIgnore]
-    public List<ISavingChangesHandler> SavingChangesHandlers { get; init; } = new();
+    public List<ISavingChangesHandler> SavingChangesHandlers { get; init; } = [];
 
     /// <summary>
     /// 保存审计集合动作（默认保存到当前数据库）。
     /// </summary>
     [JsonIgnore]
-    public Action<BaseDataContext, IEnumerable<Audit>> SavingAuditsAction { get; set; }
+    public Action<DataContext, IEnumerable<Audit>> SavingAuditsAction { get; set; }
         = (context, audits) => context.Set<Audit>().AddRange(audits);
-
-
-    /// <summary>
-    /// 分片目录。
-    /// </summary>
-    public string ShardingDirectory { get; set; }
-
-
-    /// <summary>
-    /// 添加实现 <see cref="IIdGenerator{TId}"/> 的标识生成器（推荐从 <see cref="AbstractIdGenerator{TId}"/> 派生）。
-    /// </summary>
-    /// <typeparam name="TId">指定的标识类型。</typeparam>
-    /// <param name="idGenerator">给定的 <see cref="IIdGenerator{TId}"/>。</param>
-    /// <param name="named">给定的命名（可选）。</param>
-    public void AddIdGenerator<TId>(IIdGenerator<TId> idGenerator, string? named = null)
-        where TId : IEquatable<TId>
-        => _idGenerators.Add(new TypeNamedKey(idGenerator.GetType(), named), idGenerator);
-
-    /// <summary>
-    /// 添加实现 <see cref="IIdGenerator{TId}"/> 的标识生成器（推荐从 <see cref="AbstractIdGenerator{TId}"/> 派生）。
-    /// </summary>
-    /// <typeparam name="TId">指定的标识类型。</typeparam>
-    /// <param name="idGenerator">给定的 <see cref="IIdGenerator{TId}"/>。</param>
-    /// <param name="key">给定的 <see cref="TypeNamedKey"/>。</param>
-    public void AddIdGenerator<TId>(IIdGenerator<TId> idGenerator, TypeNamedKey key)
-        where TId : IEquatable<TId>
-        => _idGenerators.Add(key, idGenerator);
 
 }

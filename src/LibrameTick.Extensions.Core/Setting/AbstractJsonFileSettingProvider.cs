@@ -45,13 +45,13 @@ public abstract class AbstractJsonFileSettingProvider<TSettingRoot> : AbstractFi
     /// <summary>
     /// 保存设置。
     /// </summary>
-    /// <param name="settingRoot">给定的 <typeparamref name="TSettingRoot"/>。</param>
+    /// <param name="root">给定的 <typeparamref name="TSettingRoot"/>。</param>
     /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    public override TSettingRoot Save(TSettingRoot settingRoot)
+    public override TSettingRoot Save(TSettingRoot root)
     {
-        FilePath.SerializeJsonFile(settingRoot);
+        FilePath.SerializeJsonFile(root);
 
-        return settingRoot;
+        return root;
     }
 
 }

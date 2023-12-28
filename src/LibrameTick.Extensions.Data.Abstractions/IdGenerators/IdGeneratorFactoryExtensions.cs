@@ -11,9 +11,8 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.IdGenerators;
 
-namespace Librame.Extensions.Data;
+namespace Librame.Extensions.IdGenerators;
 
 /// <summary>
 /// <see cref="IIdGeneratorFactory"/> 静态扩展。

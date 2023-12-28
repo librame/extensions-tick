@@ -1,22 +1,22 @@
-﻿using Xunit;
+﻿using System.Globalization;
+using Xunit;
 
 namespace Librame.Extensions.Data.Sharding
 {
     public class CultureInfoShardingStrategyTests
     {
 
-        //[Fact]
-        //public void AllTest()
-        //{
-        //    var sharded = new ShardingDescriptor("sharding", "%c");
-        //    var original = sharded.ToString();
+        [Fact]
+        public void AllTest()
+        {
+            var strategry = new CultureInfoShardingStrategy(() => CultureInfo.CurrentCulture);
 
-        //    var strategy = new CultureInfoShardingStrategy();
-        //    strategy.FormatSuffix(sharded);
-
-        //    var format = sharded.ToString();
-        //    Assert.NotEqual(original, format);
-        //}
+            foreach (var key in strategry.AllKeys)
+            {
+                var name = strategry.Format(key, shardingValue: null); // Use Default CultureInfo
+                Assert.NotEqual(key, name);
+            }
+        }
 
     }
 }

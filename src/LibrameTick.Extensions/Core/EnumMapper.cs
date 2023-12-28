@@ -26,7 +26,7 @@ public static class EnumMapper<TEnum>
     {
         var enumType = typeof(TEnum);
 
-        return typeof(TEnum).GetEnumFields()
+        return typeof(TEnum).GetFields(TypeExtensions.EnumFlags)
             .Select(field => new EnumDescriptor<TEnum>(enumType, field))
             .AsReadOnlyCollection();
     }

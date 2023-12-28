@@ -20,7 +20,7 @@ namespace Librame.Extensions.Data
     /// <summary>
     /// 用户模型。
     /// </summary>
-    [Sharding("%c_%std", typeof(CultureInfoShardingStrategy), typeof(DateTimeOffsetShardingStrategy))]
+    [ShardingTable("%ci:n3lwl_%dto:d6", typeof(CultureInfoShardingStrategy), typeof(DateTimeOffsetShardingStrategy))]
     public class User : AbstractCreationIdentifier<string, string>, IPartitioning<int>
         , IShardingValue<CultureInfo>, IShardingValue<DateTimeOffset>
     {

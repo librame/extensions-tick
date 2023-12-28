@@ -64,9 +64,26 @@ public static class ColorExtensions
         double componentThreshold = 15, double distanceThreshold = 8.66)
     {
         var component = left.GetComponent(right);
-        var distance = left.GetEuclideanDistance(right).SubWithoutRound(2);
+        var distance = left.GetEuclideanDistance(right).Truncate(2);
 
         return component <= componentThreshold && distance <= distanceThreshold;
+    }
+
+    /// <summary>
+    /// 通过比较两个颜色的分量差值是否在允许范围内来判断颜色相似性。
+    /// </summary>
+    /// <param name="left">给定的基础 <see cref="Color"/>。</param>
+    /// <param name="right">给定用于比较的 <see cref="Color"/>。</param>
+    /// <param name="allowOffset">给定允许的分量差值偏移量（如：3~5）。</param>
+    /// <returns>返回是否相似的布尔值。</returns>
+    public static bool IsSimilar(this Color left, Color right, int allowOffset)
+    {
+        return CalcComponentDiff(left.R, right.R) <= allowOffset
+            && CalcComponentDiff(left.G, right.G) <= allowOffset
+            && CalcComponentDiff(left.B, right.B) <= allowOffset;
+
+        static int CalcComponentDiff(byte leftValue, byte rightValue)
+            => Math.Abs(leftValue - rightValue);
     }
 
 }

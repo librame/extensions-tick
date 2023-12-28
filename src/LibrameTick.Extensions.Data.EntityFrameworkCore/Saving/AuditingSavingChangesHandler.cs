@@ -12,6 +12,7 @@
 
 using Librame.Extensions.Data.Auditing;
 using Librame.Extensions.Data.Storing;
+using Librame.Extensions.IdGenerators;
 
 namespace Librame.Extensions.Data.Saving;
 
@@ -35,7 +36,7 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
     protected override void PreHandlingCore(ISavingChangesContext context)
     {
         var idGenerator = context.DataContext.GetService<IIdGeneratorFactory>();
-        var options = context.DataContext.DataExtOptions;
+        var options = context.DataContext.CurrentServices.DataOptions;
 
         SavingAudits = ParseEntities(idGenerator, options, context.ChangesEntities);
 
@@ -46,7 +47,7 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
 
 
     private List<Audit>? ParseEntities(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
-        IEnumerable<EntityEntry>? entityEntries)
+        IReadOnlyList<EntityEntry>? entityEntries)
     {
         if (entityEntries is null)
             return null;
@@ -59,15 +60,16 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
             if (entry.Metadata.ClrType.IsDefined(_notAuditedType, inherit: false))
                 continue;
 
-            var audit = new Audit();
+            var audit = new Audit
+            {
+                Id = idGenerator.GetSnowflakeIdGenerator().GenerateId(),
+                TableName = GetEntityTableName(entry.Metadata),
+                EntityTypeName = GetTypeName(entry.Metadata.ClrType),
+                EntityId = GetEntityId(entry),
+                StateName = entry.State.ToString()
+            };
 
-            audit.Id = idGenerator.GetSnowflakeIdGenerator().GenerateId();
-            audit.TableName = GetEntityTableName(entry.Metadata);
-            audit.EntityTypeName = GetTypeName(entry.Metadata.ClrType);
-            audit.EntityId = GetEntityId(entry);
-            audit.StateName = entry.State.ToString();
-
-            PopulateProperties(idGenerator, options, audit, entry);
+            PopulateDetails(idGenerator, options, audit, entry);
 
             audits.Add(audit);
         }
@@ -75,7 +77,7 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
         return audits;
     }
 
-    private void PopulateProperties(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
+    private void PopulateDetails(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
         Audit audit, EntityEntry entityEntry)
     {
         foreach (var property in entityEntry.CurrentValues.Properties)
@@ -89,20 +91,21 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
             if (string.IsNullOrEmpty(newValue) && string.IsNullOrEmpty(oldValue))
                 continue;
 
-            var auditProperty = new AuditProperty();
-
-            auditProperty.Id = idGenerator.GetSnowflakeIdGenerator().GenerateId();
-            auditProperty.PropertyName = property.Name;
-            auditProperty.PropertyTypeName = GetTypeName(property.ClrType);
-            auditProperty.NewValue = newValue;
-            auditProperty.OldValue = oldValue;
+            var detail = new AuditDetail
+            {
+                Id = idGenerator.GetSnowflakeIdGenerator().GenerateId(),
+                DetailName = property.Name,
+                DetailTypeName = GetTypeName(property.ClrType),
+                NewValue = newValue,
+                OldValue = oldValue
+            };
 
             if (!options.Store.MapRelationship)
-                auditProperty.AuditId = audit.Id;
+                detail.AuditId = audit.Id;
             else
-                auditProperty.Audit = audit;
+                detail.Audit = audit;
 
-            audit.AddProperty(auditProperty);
+            audit.AddDetail(detail);
         }
     }
 

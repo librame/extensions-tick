@@ -17,19 +17,22 @@ namespace Librame.Extensions.Setting;
 /// <summary>
 /// 定义抽象分片设置。
 /// </summary>
-public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetting>
+public abstract class AbstractShardingSetting : IShardingInfo, IEquatable<AbstractShardingSetting>
 {
+    private ShardingKey? _key;
+
+
     /// <summary>
-    /// 构造一个 <see cref="AbstractShardingSetting"/>。
+    /// 构造一个 <see cref="AbstractShardingSetting"/> 用于反序列化。
     /// </summary>
     protected AbstractShardingSetting()
     {
         BaseName = string.Empty;
         SuffixFormatter = string.Empty;
+        StrategyTypes = [];
+        Kind = ShardingKind.Unspecified;
+        SourceType = null;
         Connector = string.Empty;
-
-        Items = new();
-        StrategyTypes = new();
     }
 
     /// <summary>
@@ -37,14 +40,8 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     /// </summary>
     /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
     protected AbstractShardingSetting(ShardingDescriptor descriptor)
+        : this(descriptor.Attribute)
     {
-        BaseName = descriptor.BaseName;
-        SuffixFormatter = descriptor.SuffixFormatter;
-        Connector = descriptor.Connector;
-        SourceType = descriptor.SourceType;
-
-        Items = new();
-        StrategyTypes = descriptor.StrategyTypes;
     }
 
     /// <summary>
@@ -52,16 +49,26 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     /// </summary>
     /// <param name="setting">给定的 <see cref="AbstractShardingSetting"/>。</param>
     protected AbstractShardingSetting(AbstractShardingSetting setting)
+        : this((IShardingInfo)setting)
     {
-        BaseName = setting.BaseName;
-        SuffixFormatter = setting.SuffixFormatter;
-        Connector = setting.Connector;
-        SourceType = setting.SourceType;
-
         Items = setting.Items;
-        StrategyTypes = setting.StrategyTypes;
     }
 
+    private AbstractShardingSetting(IShardingInfo info)
+    {
+        Kind = info.Kind;
+        BaseName = info.BaseName;
+        SuffixFormatter = info.SuffixFormatter;
+        StrategyTypes = info.StrategyTypes;
+        SourceType = info.SourceType;
+        Connector = info.Connector;
+    }
+
+
+    /// <summary>
+    /// 分片种类。
+    /// </summary>
+    public ShardingKind Kind { get; set; }
 
     /// <summary>
     /// 基础名称。
@@ -74,9 +81,9 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     public string SuffixFormatter { get; set; }
 
     /// <summary>
-    /// 连接符。
+    /// 分片策略类型集合。
     /// </summary>
-    public string Connector { get; set; }
+    public List<Type> StrategyTypes { get; set; }
 
     /// <summary>
     /// 来源类型。
@@ -84,61 +91,79 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     public Type? SourceType { get; set; }
 
     /// <summary>
-    /// 分片策略类型集合。
+    /// 连接符。
     /// </summary>
-    public List<Type> StrategyTypes { get; set; }
-    
+    public string Connector { get; set; }
+
     /// <summary>
     /// 分片项集合。
     /// </summary>
-    public List<ShardingItemSetting> Items { get; set; }
+    public List<ShardingItemSetting> Items { get; set; } = [];
 
+
+    /// <summary>
+    /// 获取分片键。
+    /// </summary>
+    /// <returns>返回 <see cref="ShardingKey"/>。</returns>
+    public virtual ShardingKey GetKey()
+    {
+        _key ??= new(this);
+        return _key;
+    }
+
+
+    /// <summary>
+    /// 添加分片项设置。
+    /// </summary>
+    /// <param name="item">给定的 <see cref="ShardingItemSetting"/>。</param>
+    /// <returns>返回是否添加的布尔值。</returns>
+    public virtual bool TryAdd(ShardingItemSetting item)
+    {
+        if (Items.Any(p => p.CurrentName == item.CurrentName))
+            return false;
+
+        Items.Add(item);
+        return true;
+    }
 
     /// <summary>
     /// 尝试获取指定分片名称项设置。
     /// </summary>
     /// <param name="shardedName">给定的分片名称。</param>
     /// <param name="result">输出 <see cref="ShardingItemSetting"/>。</param>
-    /// <returns>返回布尔值。</returns>
+    /// <returns>返回是否存在的布尔值。</returns>
     public virtual bool TryGetItem(string shardedName,
-        [MaybeNullWhen(false)] out ShardingItemSetting result)
+        [NotNullWhen(true)] out ShardingItemSetting? result)
     {
-        result = Items.SingleOrDefault(p => p.ShardedName == shardedName);
+        result = Items.SingleOrDefault(p => p.CurrentName == shardedName);
         return result is not null;
     }
 
 
     /// <summary>
-    /// 比较相等。
+    /// 通过比较 <see cref="IShardingInfo"/> 与后缀格式化器来判定指定分片设置的相等性。
     /// </summary>
-    /// <remarks>
-    /// 主要比较 <see cref="BaseName"/> 与 <see cref="SuffixFormatter"/> 是否相等，区别大小写。
-    /// </remarks>
-    /// <param name="other">给定的 <see cref="AbstractShardingSetting"/>。</param>
-    /// <returns>返回布尔值。</returns>
-    public virtual bool Equals(AbstractShardingSetting? other)
-    {
-        var comparison = StringComparison.Ordinal;
-
-        return other?.BaseName.Equals(BaseName, comparison) == true
-            && other.SuffixFormatter.Equals(SuffixFormatter, comparison);
-    }
+    /// <param name="other">给定要比较的 <see cref="AbstractShardingSetting"/>。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public virtual bool Equals([NotNullWhen(true)] AbstractShardingSetting? other)
+        => ((IShardingInfo)this).Equals(other)
+        && SuffixFormatter.Equals(other.SuffixFormatter, StringComparison.Ordinal);
 
     /// <summary>
     /// 比较相等，通过调用 <see cref="Equals(AbstractShardingSetting?)"/> 实现。
     /// </summary>
-    /// <param name="obj">给定的对象。</param>
-    /// <returns>返回布尔值。</returns>
-    public override bool Equals(object? obj)
+    /// <param name="obj">给定要比较的对象。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public override bool Equals([NotNullWhen(true)] object? obj)
         => Equals(obj as AbstractShardingSetting);
 
 
     /// <summary>
     /// 获取哈希码。
     /// </summary>
-    /// <returns>返回整数。</returns>
+    /// <returns>返回哈希码整数。</returns>
     public override int GetHashCode()
-        => HashCode.Combine(BaseName, SuffixFormatter);
+        => HashCode.Combine(((IShardingInfo)this).GetKey(), SuffixFormatter);
 
 
     /// <summary>
@@ -146,6 +171,6 @@ public abstract class AbstractShardingSetting : IEquatable<AbstractShardingSetti
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{nameof(BaseName)}={BaseName},{nameof(SuffixFormatter)}={SuffixFormatter}";
+        => $"{SuffixFormatter};{((IShardingInfo)this).GetKey()}";
 
 }

@@ -15,7 +15,7 @@ using Librame.Extensions.Data.Storing;
 namespace Librame.Extensions.Data.Accessing;
 
 /// <summary>
-/// 定义 <see cref="ModelBuilder"/> 与 <see cref="BaseDataContext"/> 的静态扩展。
+/// 定义 <see cref="ModelBuilder"/> 与 <see cref="DataContext"/> 的静态扩展。
 /// </summary>
 public static class ModelBuilderBaseDbContextExtensions
 {
@@ -66,17 +66,19 @@ public static class ModelBuilderBaseDbContextExtensions
     /// 创建审计模型集合。
     /// </summary>
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
-    /// <param name="dbContext">给定的 <see cref="BaseDataContext"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="DataContext"/>。</param>
     /// <returns>返回 <see cref="ModelBuilder"/>。</returns>
     public static ModelBuilder CreateAuditingModels(this ModelBuilder modelBuilder,
-        BaseDataContext dbContext)
+        DataContext dbContext)
     {
-        var limitableMaxLength = dbContext.DataExtOptions.Store.LimitableMaxLengthOfProperty;
-        var mapRelationship = dbContext.DataExtOptions.Store.MapRelationship;
+        var limitableMaxLength = 250;
+        //dbContext.BaseDependencies.DataExtOptions.Store.LimitableMaxLengthOfProperty;
+        var mapRelationship = true;
+        //dbContext.BaseDependencies.DataExtOptions.Store.MapRelationship;
 
         modelBuilder.Entity<Audit>(b =>
         {
-            b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
+            //b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
 
             b.HasIndex(static i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
@@ -93,11 +95,11 @@ public static class ModelBuilderBaseDbContextExtensions
             }
         });
 
-        modelBuilder.Entity<AuditProperty>(b =>
+        modelBuilder.Entity<AuditDetail>(b =>
         {
-            b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
+            //b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
 
-            b.HasIndex(static i => new { i.AuditId, i.PropertyName }).HasDatabaseName();
+            b.HasIndex(static i => new { i.AuditId, i.DetailName }).HasDatabaseName();
 
             b.HasKey(static k => k.Id);
 
@@ -106,8 +108,8 @@ public static class ModelBuilderBaseDbContextExtensions
             if (limitableMaxLength > 0)
             {
                 b.Property(static p => p.AuditId).HasMaxLength(limitableMaxLength).IsRequired();
-                b.Property(static p => p.PropertyName).HasMaxLength(limitableMaxLength);
-                b.Property(static p => p.PropertyTypeName).HasMaxLength(limitableMaxLength);
+                b.Property(static p => p.DetailName).HasMaxLength(limitableMaxLength);
+                b.Property(static p => p.DetailTypeName).HasMaxLength(limitableMaxLength);
             }
 
             // MaxLength
@@ -116,7 +118,7 @@ public static class ModelBuilderBaseDbContextExtensions
 
             if (mapRelationship)
             {
-                b.HasOne(static f => f.Audit).WithMany(static p => p.Properties).HasForeignKey(static fk => fk.AuditId);
+                b.HasOne(static f => f.Audit).WithMany(static p => p.Details).HasForeignKey(static fk => fk.AuditId);
             }
         });
 

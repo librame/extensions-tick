@@ -110,6 +110,17 @@ public class AccessOptions : IOptions
         return sql;
     }
 
+    /// <summary>
+    /// 解析连接字符串的数据库名称。
+    /// </summary>
+    /// <remarks>
+    /// 默认支持数据库的键为 <see cref="ConnectionStringExtensions.DefaultSupportedDatabaseKeys"/>，详情参见 <see cref="ConnectionStringExtensions.ParseDatabaseFromConnectionString(string?)"/>。
+    /// </remarks>
+    /// <param name="connectionString">给定的连接字符串。</param>
+    /// <returns>返回数据库名称字符串。</returns>
+    public virtual string? ParseDatabaseName(string? connectionString)
+        => connectionString.ParseDatabaseFromConnectionString();
+
 
     /// <summary>
     /// 初始化访问模板选项（默认支持“${Table}、${Schema}”格式键）。

@@ -17,6 +17,7 @@ using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Librame.Extensions.IdGenerators;
 using Librame.Extensions.Setting;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -82,9 +83,9 @@ public static class DataExtensionBuilderExtensions
 
     private static DataExtensionBuilder AddSharding(this DataExtensionBuilder builder)
     {
+        builder.TryAddOrReplaceService<IShardingFinder, InternalShardingFinder>();
         builder.TryAddOrReplaceService<IShardingContext, InternalShardingContext>();
         builder.TryAddOrReplaceService<IShardingStrategyProvider, InternalShardingStrategyProvider>();
-        builder.TryAddOrReplaceService<IShardingTracker, InternalShardingTracker>();
 
         return builder;
     }
@@ -120,12 +121,14 @@ public static class DataExtensionBuilderExtensions
 
     internal static readonly Type IAccessorType = typeof(IAccessor);
     private static readonly Type _baseAccessorType = typeof(BaseAccessor<>);
+    private static readonly Type _dataContextType = typeof(DataContext);
+
     /// <summary>
     /// 添加存取器。
     /// </summary>
     /// <param name="builder">给定的 <see cref="DataExtensionBuilder"/>。</param>
     /// <param name="accessorType">给定的存取器类型。</param>
-    /// <param name="autoReferenceDbContext">自动引用当前注册的数据库上下文（可选；默认不自动引用；如果要启用，需确保存取器类型为泛型，且类型定义仅为 <see cref="DbContext"/> 或其扩展）。</param>
+    /// <param name="autoReferenceDbContext">自动引用当前注册的数据库上下文（可选；默认不自动引用；如果要启用，需确保存取器类型为泛型且包含一个从 <see cref="DataContext"/> 派生的类型参数）。</param>
     /// <returns>返回 <see cref="DataExtensionBuilder"/>。</returns>
     public static DataExtensionBuilder AddAccessor(this DataExtensionBuilder builder, Type accessorType,
         bool autoReferenceDbContext = false)
@@ -136,15 +139,13 @@ public static class DataExtensionBuilderExtensions
         if (autoReferenceDbContext && accessorType.IsGenericTypeDefinition)
         {
             var parameterType = accessorType.GetTypeInfo().GenericTypeParameters[0];
-            if (parameterType?.BaseType?.IsImplementedType(typeof(DbContext)) != true)
-                throw new ArgumentException($"Invalid generic accessor definition, see {_baseAccessorType} for details.");
+            if (parameterType.BaseType?.IsImplementedType(_dataContextType) != true)
+                throw new ArgumentException($"Invalid generic accessor definition, see '{_baseAccessorType}' for details.");
 
-            var dbContextType = typeof(DbContext);
-            var implementedTypes = builder.Services
-                .Where(s => dbContextType.IsAssignableFrom(s.ServiceType))
-                .Select(s => accessorType.MakeGenericType(s.ServiceType))
-                .ToArray();
+            if (builder.ContextTypes is null)
+                throw new ArgumentException($"The database context is not resolved, please refer to the registration manually.");
 
+            var implementedTypes = builder.ContextTypes.Select(s => accessorType.MakeGenericType(s)).ToArray();
             foreach (var implementedType in implementedTypes)
             {
                 builder.TryAddOrReplaceService(implementedType, implementedType, _baseAccessorType);

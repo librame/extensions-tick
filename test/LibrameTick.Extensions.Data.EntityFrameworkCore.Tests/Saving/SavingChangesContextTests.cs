@@ -1,5 +1,7 @@
 ﻿using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
+using Librame.Extensions.IdGenerators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -21,9 +23,11 @@ namespace Librame.Extensions.Data.Saving
             services.AddDbContext<TestSqliteDbContext>(opts =>
             {
                 opts.UseSqlite("Data Source=librame_extensions_saving-changes.db",
-                    a => a.MigrationsAssembly(modelAssemblyName));
+                    b => b.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor();
+                opts.UseAccessor(
+                    b => b.WithSharding("%dto:wk", typeof(DateTimeOffsetShardingStrategy)).WithShardingValue(() => DateTimeOffset.UtcNow)
+                );
             });
 
             var builder = services.AddLibrame()
@@ -42,6 +46,26 @@ namespace Librame.Extensions.Data.Saving
             using (var scope = _rootProvider.CreateScope())
             {
                 var provider = scope.ServiceProvider;
+
+                //var accessors = provider.GetRequiredService<IAccessorContext>();
+                //var database = accessors.GetFirstReadAccessor().ShardingDescriptor;
+                //var tables = accessors.GetFirstWriteAccessor().GetShardingTableDescriptors();
+                //Assert.NotNull(database);
+                //Assert.NotNull(tables);
+
+                //var shardedDatabase = database.GenerateShardingName(newShardingValues: null);
+                //Assert.NotEqual(database.ToString(), shardedDatabase);
+
+                //var user = new User
+                //{
+                //    Name = $"Test Name",
+                //    Passwd = "123456",
+                //    Id = "123456"
+                //};
+
+                //var userTable = tables.Single(p => p.SourceType == typeof(User));
+                //var shardedUser = userTable.GenerateShardingName(user);
+                //Assert.NotEqual(userTable.ToString(), shardedUser);
 
                 var userStore = provider.GetRequiredService<IStore<User>>();
 
@@ -68,7 +92,7 @@ namespace Librame.Extensions.Data.Saving
                 userStore.SaveChanges();
 
                 var context = userStore.CurrentWriteAccessor.WritingDispatcher.FirstSource.CurrentContext;
-                var options = context.As<BaseDataContext>().DataExtOptions;
+                var options = context.As<DataContext>().CurrentServices.DataOptions;
 
                 foreach (var handler in options.SavingChangesHandlers)
                 {

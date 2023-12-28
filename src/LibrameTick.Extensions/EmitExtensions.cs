@@ -10,9 +10,6 @@
 
 #endregion
 
-using System;
-using System.Reflection.Emit;
-
 namespace Librame.Extensions;
 
 /// <summary>
@@ -20,10 +17,10 @@ namespace Librame.Extensions;
 /// </summary>
 public static class EmitExtensions
 {
-    private static readonly string _getPropertyMethodNamePrefix = "get_";
-    private static readonly string _setPropertyMethodNamePrefix = "set_";
+    private const string _getPropertyMethodNamePrefix = "get_";
+    private const string _setPropertyMethodNamePrefix = "set_";
     private static readonly ConstructorInfo _defaultObjectConstructor = typeof(object).GetConstructor(Type.EmptyTypes)!;
-    private static readonly Regex _regBackingField = new Regex("(?<__backingFieldName>k__BackingField)$");
+    private static readonly Regex _regBackingField = new("(?<__backingFieldName>k__BackingField)$");
 
 
     //#region TValue
@@ -289,6 +286,10 @@ public static class EmitExtensions
 
                 propertyFields.Add(fieldName, fieldBuilder);
             }
+            else
+            {
+                propertyFields.Add(field.Name, fieldBuilder);
+            }
         }
 
         // 复制构造函数
@@ -318,7 +319,7 @@ public static class EmitExtensions
             ctorIL.Emit(OpCodes.Ret);
         }
 
-        Type[] parameterTypes = { typeof(int) };
+        Type[] parameterTypes = [typeof(int)];
 
         var canReadOrWriteProperties = sourceTypeInfo.DeclaredProperties.Where(p => p.CanRead || p.CanWrite).ToArray();
         var getPropertyMethods = new Dictionary<string, MethodBuilder>();
@@ -341,8 +342,33 @@ public static class EmitExtensions
 
                 getPropertyMethods.Add(propertyMethodName, getMethodBuilder);
 
-                // 绑定属性字段
-                if (propertyFields.TryGetValue(propertyMethodName, out var fieldBuilder))
+                if (!propertyFields.TryGetValue(propertyMethodName, out var fieldBuilder))
+                {
+                    // 尝试匹配普通字段
+                    var matchFields = sourceTypeInfo.DeclaredFields.Where(f => f.FieldType == method.ReturnType).ToArray();
+
+                    var matchField = matchFields.Length > 1
+                        ? matchFields.FirstOrDefault(p => p.Name.Contains(propertyMethodName, StringComparison.OrdinalIgnoreCase))
+                        : matchFields.FirstOrDefault();
+
+                    if (matchField is null)
+                    {
+                        foreach (var field in sourceTypeInfo.DeclaredFields)
+                        {
+                            if (method.ReturnType.IsAssignableFrom(field.FieldType))
+                            {
+                                matchField = field;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (matchField is null) continue;
+
+                    propertyFields.TryGetValue(matchField.Name, out fieldBuilder);
+                }
+
+                if (fieldBuilder is not null)
                 {
                     getMethodIL.Emit(OpCodes.Ldarg_0);
                     getMethodIL.Emit(OpCodes.Ldfld, fieldBuilder);

@@ -16,17 +16,12 @@ namespace Librame.Extensions.Core;
 /// 定义类型命名键。
 /// </summary>
 /// <typeparam name="TSource">指定的源类型。</typeparam>
-public class TypeNamedKey<TSource> : TypeNamedKey
+/// <remarks>
+/// 构造一个 <see cref="TypeNamedKey{TSource}"/>。
+/// </remarks>
+/// <param name="named">给定的命名（可选）。</param>
+public sealed class TypeNamedKey<TSource>(string? named = null) : TypeNamedKey(typeof(TSource), named)
 {
-    /// <summary>
-    /// 构造一个 <see cref="TypeNamedKey{TSource}"/>。
-    /// </summary>
-    /// <param name="named">给定的命名（可选）。</param>
-    public TypeNamedKey(string? named = null)
-        : base(typeof(TSource), named)
-    {
-    }
-
 
     /// <summary>
     /// 使用新命名创建一个 <see cref="TypeNamedKey"/> 副本。
@@ -42,29 +37,23 @@ public class TypeNamedKey<TSource> : TypeNamedKey
 /// <summary>
 /// 定义类型命名键。
 /// </summary>
-public class TypeNamedKey : IEquatable<TypeNamedKey>
+/// <remarks>
+/// 构造一个 <see cref="TypeNamedKey"/>。
+/// </remarks>
+/// <param name="typed">给定的类型。</param>
+/// <param name="named">给定的命名（可选）。</param>
+public class TypeNamedKey(Type typed, string? named = null) : IEquatable<TypeNamedKey>
 {
-    /// <summary>
-    /// 构造一个 <see cref="TypeNamedKey"/>。
-    /// </summary>
-    /// <param name="typed">给定的类型。</param>
-    /// <param name="named">给定的命名（可选）。</param>
-    public TypeNamedKey(Type typed, string? named = null)
-    {
-        Typed = typed;
-        Named = named;
-    }
-
 
     /// <summary>
     /// 类型。
     /// </summary>
-    public Type Typed { get; init; }
+    public Type Typed { get; init; } = typed;
 
     /// <summary>
     /// 命名。
     /// </summary>
-    public string? Named { get; init; }
+    public string? Named { get; init; } = named;
 
     /// <summary>
     /// 字符串连接符。
@@ -84,18 +73,17 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// <summary>
     /// 比较相等。
     /// </summary>
-    /// <param name="other">给定的 <see cref="TypeNamedKey"/>。</param>
+    /// <param name="other">给定要比较的 <see cref="TypeNamedKey"/>。</param>
     /// <returns>返回布尔值。</returns>
-    public virtual bool Equals(TypeNamedKey? other)
-        => other is not null && Typed.IsSameType(other.Typed)
-            && Named == other.Named;
+    public virtual bool Equals([NotNullWhen(true)] TypeNamedKey? other)
+        => Typed.IsSameType(other?.Typed) && Named == other.Named;
 
     /// <summary>
     /// 比较相等。
     /// </summary>
-    /// <param name="obj">给定的对象。</param>
+    /// <param name="obj">给定要比较的对象。</param>
     /// <returns>返回布尔值。</returns>
-    public override bool Equals(object? obj)
+    public override bool Equals([NotNullWhen(true)] object? obj)
         => Equals(obj as TypeNamedKey);
 
 
@@ -104,7 +92,7 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => HashCode.Combine(Typed.GetHashCode(), Named?.GetHashCode());
+        => HashCode.Combine(Typed, Named);
 
 
     /// <summary>
@@ -114,16 +102,28 @@ public class TypeNamedKey : IEquatable<TypeNamedKey>
     public override string ToString()
     {
         if (string.IsNullOrEmpty(Named))
-            return GetTypedString();
+            return Typed.AsSimpleString();
 
-        return $"{GetTypedString()}{Connector}{Named}";
+        return $"{Typed.AsSimpleString()}{Connector}{Named}";
     }
 
+
     /// <summary>
-    /// 获取类型字符串。
+    /// 比较相等性。
     /// </summary>
-    /// <returns>返回简单字符串。</returns>
-    protected virtual string GetTypedString()
-        => Typed.AsSimpleString();
+    /// <param name="a">给定的 <see cref="TypeNamedKey"/>。</param>
+    /// <param name="b">给定要比较的 <see cref="TypeNamedKey"/>。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    public static bool operator ==([NotNullWhen(true)] TypeNamedKey? a, [NotNullWhen(true)] TypeNamedKey? b)
+        => a?.Equals(b) == true;
+
+    /// <summary>
+    /// 通过比较分片种类、基础名称、分片类型来判定指定分片键的不等性。
+    /// </summary>
+    /// <param name="a">给定的 <see cref="TypeNamedKey"/>。</param>
+    /// <param name="b">给定要比较的 <see cref="TypeNamedKey"/>。</param>
+    /// <returns>返回是否不等的布尔值。</returns>
+    public static bool operator !=([NotNullWhen(true)] TypeNamedKey? a, [NotNullWhen(true)] TypeNamedKey? b)
+        => !(a == b);
 
 }

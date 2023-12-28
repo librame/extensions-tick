@@ -10,167 +10,137 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Crypto;
+using Librame.Extensions.Data.Sharding;
+using Librame.Extensions.Data.ValueConversion;
 
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义 <see cref="EntityType"/> 静态扩展。
+/// 定义 <see cref="IEntityType"/> 静态扩展。
 /// </summary>
 public static class EntityTypeExtensions
 {
+    private static readonly Type _rowVersionType = typeof(IRowVersion);
 
-#pragma warning disable EF1001 // Internal EF Core API usage.
 
     /// <summary>
-    /// 复制实体类型。
+    /// 获取实体类型标注的分片特性。
     /// </summary>
-    /// <typeparam name="TModel">指定的模型类型。</typeparam>
-    /// <param name="model">给定的 <typeparamref name="TModel"/>。</param>
-    /// <param name="sourceType">给定要复制的源类型。</param>
-    /// <param name="newType">给定的新类型。</param>
-    /// <param name="otherEntityTypes">给定的其他复制实体类型集合。</param>
-    /// <returns>返回 <see cref="EntityType"/>。</returns>
-    public static EntityType? CopyEntityType<TModel>(this TModel model, Type sourceType, Type newType,
-        IEnumerable<EntityType>? otherEntityTypes)
-        where TModel : Model
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <returns>返回 <see cref="ShardingAttribute"/>。</returns>
+    public static ShardingAttribute? GetShardingAttribute(this IReadOnlyEntityType entityType)
+        => ShardingTableAttribute.GetTable(entityType.ClrType,
+            entityType.GetTableName() ?? entityType.ClrType.Name.AsPluralize());
+
+
+    /// <summary>
+    /// 实体是否实现 <see cref="IRowVersion"/> 接口。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IReadOnlyEntityType"/>。</param>
+    /// <returns>返回是否实现的布尔值。</returns>
+    public static bool IsRowVersionType(this IReadOnlyEntityType entityType)
+        => entityType.ClrType.IsAssignableTo(_rowVersionType);
+
+
+    /// <summary>
+    /// 对使用 <see cref="EncryptedAttribute"/> 的属性应用加密功能。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+    /// <param name="dbContext">给定的 <see cref="DataContext"/>。</param>
+    /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+    public static IMutableEntityType UseEncryption(this IMutableEntityType entityType,
+        PropertyInfo property, DataContext dbContext)
     {
-        var srcEntityType = model.FindEntityType(sourceType);
-        if (srcEntityType is null)
-            return null;
+        var converter = dbContext.CurrentServices.EncryptionConverterFactory.GetConverter(dbContext, property.PropertyType);
+        entityType.GetProperty(property.Name).SetValueConverter(converter);
 
-        var newEntityType = model.AddEntityType(newType, srcEntityType.IsOwned(), srcEntityType.GetConfigurationSource());
-        if (newEntityType is null)
-            return null;
-
-        // AddAnnotations
-        newEntityType.AddAnnotations(srcEntityType.GetAnnotations());
-
-        // AddCheckConstraints
-        foreach (var srcCheckConstraint in ((IMutableEntityType)srcEntityType).GetCheckConstraints())
-        {
-            newEntityType.AddCheckConstraint(srcCheckConstraint.Name!, srcCheckConstraint.Sql);
-        }
-
-        // AddData
-        var srcData = srcEntityType.GetRawSeedData();
-        if (srcData is not null)
-        {
-            var newData = srcData.Select(src => ObjectMapper.NewByMapAllPublicProperties(src, newType)).ToArray();
-            newEntityType.AddData(newData);
-        }
-
-        // AddIgnored
-        foreach (var srcIgnored in srcEntityType.GetIgnoredMembers())
-        {
-            var configurationSource = srcEntityType.FindIgnoredConfigurationSource(srcIgnored) ?? srcEntityType.GetConfigurationSource();
-            newEntityType.AddIgnored(srcIgnored, configurationSource);
-        }
-
-        // AddProperties
-        var newProperties = new List<Property>();
-        foreach (var srcProperty in srcEntityType.GetProperties())
-        {
-            var newProperty = newEntityType.AddProperty(srcProperty.Name, srcProperty.ClrType, srcProperty.GetTypeConfigurationSource(),
-                srcProperty.GetConfigurationSource());
-
-            if (newProperty is not null)
-                newProperties.Add(newProperty);
-        }
-
-        // AddKeys
-        var newKeys = new List<Key>();
-        foreach (var srcKey in srcEntityType.GetKeys())
-        {
-            var newKeyProperties = srcKey.Properties.Select(src => newProperties.Single(s => s.Name == src.Name)).ToArray();
-            var newKey = newEntityType.AddKey(newKeyProperties, srcKey.GetConfigurationSource());
-
-            if (newKey is not null)
-                newKeys.Add(newKey);
-        }
-
-        // AddIndexes
-        var newIndexes = new List<Microsoft.EntityFrameworkCore.Metadata.Internal.Index>();
-        foreach (var srcIndex in srcEntityType.GetIndexes())
-        {
-            var newIndexProperties = srcIndex.Properties.Select(src => newProperties.Single(s => s.Name == src.Name)).ToArray();
-            var newIndex = newEntityType.AddIndex(newIndexProperties, srcIndex.GetConfigurationSource());
-
-            if (newIndex is not null)
-                newIndexes.Add(newIndex);
-        }
-
-        // AddForeignKeys
-        var newForeignKeys = new List<ForeignKey>();
-        foreach (var srcFKProperty in srcEntityType.ForeignKeyProperties)
-        {
-            if (srcFKProperty is not Property srcInternalFKProperty)
-                continue;
-
-            var newPrincipalKey = newEntityType.FindPrimaryKey();
-            if (newPrincipalKey is null)
-                continue;
-
-            var newFKProperty = srcEntityType == srcInternalFKProperty.DeclaringEntityType
-                ? newProperties.SingleOrDefault(s => s.Name == srcInternalFKProperty.Name) // 外键是自身实体类型
-                : otherEntityTypes?.SingleOrDefault(s => s == srcInternalFKProperty.DeclaringEntityType)
-                    ?.FindProperty(srcInternalFKProperty.Name); // 外键是其他复制实体类型
-
-            if (newFKProperty is null)
-            {
-                // 外键是普通实体类型
-                newFKProperty = srcInternalFKProperty;
-                //newFKProperty = new Property(srcFKProperty.Name, srcFKProperty.ClrType, srcFKProperty.PropertyInfo, srcFKProperty.FieldInfo,
-                //    newEntityType, srcFKProperty.GetConfigurationSource(), srcFKProperty.GetTypeConfigurationSource());
-            }
-
-            var newForeignKey = newEntityType.AddForeignKey(newFKProperty, newPrincipalKey, newEntityType,
-                srcInternalFKProperty.GetCommentConfigurationSource(), srcInternalFKProperty.GetConfigurationSource());
-            
-            if (newForeignKey is not null)
-                newForeignKeys.Add(newForeignKey);
-        }
-
-        // AddNavigations
-        foreach (var srcNav in srcEntityType.GetNavigations())
-        {
-            var newForeignKey = newForeignKeys.FirstOrDefault(p => p.PrincipalKey.GetName() == srcNav.ForeignKey.PrincipalKey.GetName());
-            if (newForeignKey is not null)
-            {
-                newEntityType.AddNavigation(srcNav.Name, newForeignKey,
-                    pointsToPrincipal: srcNav.DeclaringEntityType != srcNav.ForeignKey.DeclaringEntityType);
-            }
-        }
-
-        // AddSkipNavigations
-        foreach (var srcSkipNav in srcEntityType.GetSkipNavigations())
-        {
-            var newProperty = newProperties.SingleOrDefault(s => s.Name == srcSkipNav.Name);
-            var targetEntityType = otherEntityTypes?.SingleOrDefault(s => s == srcSkipNav.TargetEntityType);
-
-            if (targetEntityType is null)
-                targetEntityType = model.FindEntityType(srcSkipNav.ClrType);
-
-            newEntityType.AddSkipNavigation(srcSkipNav.Name, newProperty?.PropertyInfo, targetEntityType!,
-                srcSkipNav.IsCollection, srcSkipNav.IsOnDependent, srcSkipNav.GetConfigurationSource());
-        }
-
-        // AddServiceProperties
-        foreach (var srcServiceProperty in srcEntityType.GetServiceProperties())
-        {
-            var newProperty = newProperties.Single(s => s.Name == srcServiceProperty.Name);
-            newEntityType.AddServiceProperty(newProperty.PropertyInfo!, srcServiceProperty.GetConfigurationSource());
-        }
-
-        // AddTriggers
-        foreach (var srcTrigger in srcEntityType.GetDeclaredTriggers())
-        {
-            newEntityType.AddTrigger(srcTrigger.ModelName, srcTrigger.GetConfigurationSource());
-        }
-
-        return newEntityType;
+        return entityType;
     }
 
-#pragma warning restore EF1001 // Internal EF Core API usage.
+    /// <summary>
+    /// 对使用强类型的属性应用转换器。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+    /// <param name="valueType">给定的原始值类型。</param>
+    /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+    public static IMutableEntityType UseStronglyTypedIdentifier(this IMutableEntityType entityType,
+        PropertyInfo property, Type valueType)
+    {
+        var converter = typeof(StronglyTypedIdentifierConverter<>).MakeGenericType(valueType);
+        entityType.GetProperty(property.Name).SetValueConverter(converter);
+
+        return entityType;
+    }
+
+    /// <summary>
+    /// 使用数据版本标识以支持并发功能。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+    /// <param name="builder">给定的 <see cref="ModelBuilder"/>。</param>
+    /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+    public static IMutableEntityType UseRowVersion(this IMutableEntityType entityType,
+        PropertyInfo property, ModelBuilder builder)
+    {
+        // 增加数据版本标识以更好支持并发
+        builder.Entity(entityType.ClrType)
+            .Property(property.Name)
+            .IsRowVersion();
+
+        return entityType;
+    }
+
+    /// <summary>
+    /// 将 Guid 转换为 char(36) 处理以支持跨库的 GUID。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="property">给定的 <see cref="PropertyInfo"/>。</param>
+    /// <param name="builder">给定的 <see cref="ModelBuilder"/>。</param>
+    /// <param name="isNullable">是否可空。</param>
+    /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+    public static IMutableEntityType UseGuidToChars(this IMutableEntityType entityType,
+        PropertyInfo property, ModelBuilder builder, bool isNullable)
+    {
+        // 将 Guid 类型设置为 char(36)
+        builder.Entity(entityType.ClrType)
+            .Property(property.Name)
+            .HasColumnType("char(36)")
+            .IsRequired(!isNullable);
+
+        return entityType;
+    }
+
+
+    /// <summary>
+    /// 使用查询过滤器集合。
+    /// </summary>
+    /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
+    /// <param name="queryFilters">给定的查询过滤器集合。</param>
+    /// <param name="dbContext">给定的 <see cref="DataContext"/>。</param>
+    /// <returns>返回 <see cref="IMutableEntityType"/>。</returns>
+    public static IMutableEntityType UseQueryFilters(this IMutableEntityType entityType,
+        IEnumerable<IQueryFilter> queryFilters, DataContext dbContext)
+    {
+        foreach (var filter in queryFilters)
+        {
+            if (filter.Enabling(entityType.ClrType))
+            {
+                var method = filter.GetType()
+                    .GetMethod(nameof(filter.GetQueryFilter))?
+                    .MakeGenericMethod(entityType.ClrType);
+
+                if (method is not null)
+                {
+                    var expression = (LambdaExpression?)method.Invoke(filter, new object[] { dbContext });
+                    entityType.SetQueryFilter(expression);
+                }
+            }
+        }
+
+        return entityType;
+    }
 
 }

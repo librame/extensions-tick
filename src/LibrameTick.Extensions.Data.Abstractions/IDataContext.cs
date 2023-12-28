@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Accessing;
+
 namespace Librame.Extensions.Data;
 
 /// <summary>
@@ -18,14 +20,19 @@ namespace Librame.Extensions.Data;
 public interface IDataContext : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// 上下文类型。
+    /// 数据上下文类型。
     /// </summary>
     Type ContextType { get; }
 
     /// <summary>
-    /// 上下文依赖集合。
+    /// 数据上下文服务集合。
     /// </summary>
-    IDataContextDependencies Dependencies { get; }
+    IDataContextServices Services { get; }
+
+    /// <summary>
+    /// 后置存取器。
+    /// </summary>
+    IAccessor? PostAccessor { get; set; }
 
 
     #region Find

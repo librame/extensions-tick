@@ -18,10 +18,10 @@ namespace Librame.Extensions.Data;
 public static class ConnectionStringExtensions
 {
     /// <summary>
-    /// 默认已支持的数据库键集合。
+    /// 默认已支持的数据库键集合（如：Database、Initial Catalog、Data Source 等）。
     /// </summary>
     public static readonly string[] DefaultSupportedDatabaseKeys
-        = new string[] { "Database", "Initial Catalog", "Data Source" };
+        = ["Database", "Initial Catalog", "Data Source"];
 
 
     /// <summary>
@@ -32,8 +32,20 @@ public static class ConnectionStringExtensions
     /// <exception cref="ArgumentException">
     /// A matching supported database keys was not found from the current connection string, Please specify the database key.
     /// </exception>
-    public static string ParseDatabaseFromConnectionString(this string? connectionString)
+    public static string? ParseDatabaseFromConnectionString(this string? connectionString)
         => connectionString.ParseDatabaseFromConnectionString(out var _, out var _);
+
+    /// <summary>
+    /// 从数据库连接字符串解析数据库名。
+    /// </summary>
+    /// <param name="connectionString">给定的连接字符串。</param>
+    /// <param name="isFileDatabase">输出是否为文件型数据源。</param>
+    /// <returns>返回数据库名。</returns>
+    /// <exception cref="ArgumentException">
+    /// A matching supported database keys was not found from the current connection string, Please specify the database key.
+    /// </exception>
+    public static string? ParseDatabaseFromConnectionString(this string? connectionString, out bool isFileDatabase)
+        => connectionString.ParseDatabaseFromConnectionString(out var _, out isFileDatabase);
 
     /// <summary>
     /// 从数据库连接字符串解析数据库名。
@@ -51,11 +63,17 @@ public static class ConnectionStringExtensions
     /// <exception cref="ArgumentException">
     /// The database key for the current connection string is null or empty.
     /// </exception>
-    public static string ParseDatabaseFromConnectionString(this string? connectionString,
+    public static string? ParseDatabaseFromConnectionString(this string? connectionString,
         out Dictionary<string, string>? segments, out bool isFileDatabase,
         string keyValueSeparator = "=", string pairDelimiter = ";", string? databaseKey = null)
     {
-        ArgumentException.ThrowIfNullOrEmpty(connectionString);
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            segments = null;
+            isFileDatabase = false;
+
+            return null;
+        }
 
         // 提取连接字符串的键值对集合
         segments = connectionString

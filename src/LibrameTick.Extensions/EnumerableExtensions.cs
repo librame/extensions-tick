@@ -10,6 +10,8 @@
 
 #endregion
 
+using System.Linq;
+
 namespace Librame.Extensions;
 
 /// <summary>
@@ -439,84 +441,73 @@ public static class EnumerableExtensions
     #endregion
 
 
-    #region Where
+    #region Select
 
     /// <summary>
-    /// 筛选对象不为空的序列。
+    /// 投射为没有 NULL 的结果集合。
     /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <returns>返回不为空的 <typeparamref name="T"/> 元素集合。</returns>
-    public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> enumerable)
+    /// <typeparam name="TSource">指定的来源类型。</typeparam>
+    /// <typeparam name="TResult">指定的结果类型。</typeparam>
+    /// <param name="source">给定的来源集合。</param>
+    /// <param name="selector">给定的投射方法。</param>
+    /// <returns>返回结果集合。</returns>
+    public static IEnumerable<TResult> SelectWithoutNull<TSource, TResult>(this IEnumerable<TSource> source,
+        Func<TSource, int, TResult?> selector)
     {
-        foreach (var item in enumerable)
+        var i = 0;
+
+        foreach (var item in source)
         {
-            if (item is not null)
-                yield return item;
+            var result = selector(item, i);
+
+            if (result is not null)
+                yield return result;
+
+            i++;
         }
     }
 
     /// <summary>
-    /// 筛选对象及指定属性不为空的序列。
+    /// 投射为没有 NULL 的结果集合。
     /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <typeparam name="TProperty">指定的属性类型。</typeparam>
-    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <param name="propertyFunc">指定验证不为空的属性方法。</param>
-    /// <returns>返回不为空的 <typeparamref name="T"/> 元素集合。</returns>
-    public static IEnumerable<T> WhereNotNullBy<T, TProperty>(this IEnumerable<T?> enumerable,
-        Func<T, TProperty> propertyFunc)
+    /// <typeparam name="TSource">指定的来源类型。</typeparam>
+    /// <typeparam name="TResult">指定的结果类型。</typeparam>
+    /// <param name="source">给定的来源集合。</param>
+    /// <param name="selector">给定的投射方法。</param>
+    /// <returns>返回结果集合。</returns>
+    public static IEnumerable<TResult> SelectWithoutNull<TSource, TResult>(this IEnumerable<TSource> source,
+        Func<TSource, TResult?> selector)
     {
-        foreach (var item in enumerable)
+        foreach (var item in source)
         {
-            if (item is not null && propertyFunc(item) is not null)
-                yield return item;
+            var result = selector(item);
+
+            if (result is not null)
+                yield return result;
         }
     }
 
 
     /// <summary>
-    /// 基于谓词筛选序列，并返回匹配的元素与索引键值对集合。
+    /// 基于谓词筛选序列，并返回匹配的索引与元素的键值对集合。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
     /// <param name="predicate">给定的谓词筛选条件。</param>
     /// <returns>返回包含索引与元素的键值对集合。</returns>
-    public static IEnumerable<Core.Pair<int, T>> WhereAt<T>(this IEnumerable<T> enumerable,
+    public static IEnumerable<Core.Pair<int, T>> SelectPairsWith<T>(this IEnumerable<T> enumerable,
         Func<T, bool> predicate)
     {
         var i = 0;
+
         foreach (var item in enumerable)
         {
             if (predicate(item))
             {
                 yield return Core.Pair.Create(i, item);
             }
+
             i++;
-        }
-    }
-
-
-    /// <summary>
-    /// 筛选可转为目标实例的集合。
-    /// </summary>
-    /// <typeparam name="TSource">指定的来源类型。</typeparam>
-    /// <typeparam name="TTarget">指定的目标类型。</typeparam>
-    /// <param name="enumerable">给定的 <see cref="IEnumerable{TSource}"/>。</param>
-    /// <param name="predicate">给定进一步筛选的谓词条件（可选）。</param>
-    /// <returns>返回 <see cref="IEnumerable{TTarget}"/>。</returns>
-    public static IEnumerable<TTarget> WhereAre<TSource, TTarget>(this IEnumerable<TSource> enumerable,
-        Func<TTarget, bool>? predicate = null)
-        where TTarget : TSource
-    {
-        predicate ??= x => true;
-
-        foreach (var item in enumerable)
-        {
-            if (item is TTarget target && predicate(target))
-            {
-                yield return target;
-            }
         }
     }
 

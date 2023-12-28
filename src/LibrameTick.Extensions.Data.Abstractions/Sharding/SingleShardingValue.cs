@@ -16,19 +16,13 @@ namespace Librame.Extensions.Data.Sharding;
 /// 定义一个实现 <see cref="IShardingValue{TValue}"/> 的泛型单个分片值。
 /// </summary>
 /// <typeparam name="TValue">指定的值类型。</typeparam>
-public class SingleShardingValue<TValue> : IShardingValue<TValue>
+/// <remarks>
+/// 构造一个 <see cref="SingleShardingValue{TValue}"/>。
+/// </remarks>
+/// <param name="valueFactory">给定的值工厂方法。</param>
+public sealed class SingleShardingValue<TValue>(Func<TValue> valueFactory) : IShardingValue<TValue>
 {
-    private readonly TValue _initialValue;
-
-
-    /// <summary>
-    /// 构造一个 <see cref="SingleShardingValue{TValue}"/>。
-    /// </summary>
-    /// <param name="initialValue">给定的初始值。</param>
-    public SingleShardingValue(TValue initialValue)
-    {
-        _initialValue = initialValue;
-    }
+    private readonly Func<TValue> _valueFactory = valueFactory;
 
 
     /// <summary>
@@ -36,7 +30,7 @@ public class SingleShardingValue<TValue> : IShardingValue<TValue>
     /// </summary>
     /// <param name="defaultValue">给定的默认值。</param>
     /// <returns>返回 <typeparamref name="TValue"/>。</returns>
-    public virtual TValue GetShardedValue(TValue? defaultValue)
-        => _initialValue;
+    public TValue GetShardedValue(TValue? defaultValue)
+        => _valueFactory();
 
 }

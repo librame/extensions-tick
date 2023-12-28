@@ -30,6 +30,13 @@ public interface IShardingValue<TValue> : IShardingValue
 /// <summary>
 /// 标记一个分片值接口。
 /// </summary>
-public interface IShardingValue
+public interface IShardingValue : IEquatable<IShardingValue>
 {
+    /// <summary>
+    /// 类型相等。
+    /// </summary>
+    /// <param name="other">给定要比较的 <see cref="IShardingValue"/>。</param>
+    /// <returns>返回是否相等的布尔值。</returns>
+    bool IEquatable<IShardingValue>.Equals(IShardingValue? other)
+        => other?.GetType() == GetType();
 }

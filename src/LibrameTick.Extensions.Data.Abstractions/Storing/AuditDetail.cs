@@ -16,11 +16,11 @@ using Librame.Extensions.Data.Sharding;
 namespace Librame.Extensions.Data.Storing;
 
 /// <summary>
-/// 定义实现 <see cref="IIdentifier{Int64}"/> 的数据审计属性。
+/// 定义实现 <see cref="IIdentifier{Int64}"/> 的数据审计明细。
 /// </summary>
 [NotAudited]
-[Sharding("%std", typeof(DateTimeOffsetShardingStrategy))]
-public class AuditProperty : AbstractIdentifier<long>, IShardingValue<DateTimeOffset>
+[ShardingTable("%dto:d6", typeof(DateTimeOffsetShardingStrategy))]
+public class AuditDetail : AbstractIdentifier<long>, IShardingValue<DateTimeOffset>
 {
     /// <summary>
     /// 审计标识。
@@ -28,15 +28,15 @@ public class AuditProperty : AbstractIdentifier<long>, IShardingValue<DateTimeOf
     public virtual long AuditId { get; set; }
 
     /// <summary>
-    /// 属性名称。
+    /// 明细名称。
     /// </summary>
-    public virtual string PropertyName { get; set; }
+    public virtual string DetailName { get; set; }
         = string.Empty;
 
     /// <summary>
-    /// 属性类型名称。
+    /// 明细类型名称。
     /// </summary>
-    public virtual string PropertyTypeName { get; set; }
+    public virtual string DetailTypeName { get; set; }
         = string.Empty;
 
     /// <summary>
@@ -71,6 +71,6 @@ public class AuditProperty : AbstractIdentifier<long>, IShardingValue<DateTimeOf
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{base.ToString()};{nameof(AuditId)}={AuditId};{nameof(PropertyName)}={PropertyName};{nameof(PropertyTypeName)}={PropertyTypeName};{nameof(OldValue)}={OldValue};{nameof(NewValue)}={NewValue}";
+        => $"{base.ToString()};{nameof(AuditId)}={AuditId};{nameof(DetailName)}={DetailName};{nameof(DetailTypeName)}={DetailTypeName};{nameof(OldValue)}={OldValue};{nameof(NewValue)}={NewValue}";
 
 }

@@ -27,7 +27,7 @@ internal sealed class InternalEncryptionConverterFactory : IEncryptionConverterF
     }
 
 
-    public ValueConverter GetConverter(BaseDataContext dbContext, Type propertyType)
+    public ValueConverter GetConverter(DataContext dbContext, Type propertyType)
     {
         if (!_dictionary.TryGetValue(dbContext.ContextId, out var converters))
         {
@@ -35,7 +35,7 @@ internal sealed class InternalEncryptionConverterFactory : IEncryptionConverterF
 
             // 以字节数组为基础加密提供程序
             var byteArrayProvider = new ByteArrayEncryptionProvider(_symmetric,
-                dbContext.AccessorExtension?.Algorithm ?? dbContext.CoreExtOptions.Algorithm);
+                dbContext.CurrentServices.ContextAccessorOptions?.Algorithm ?? dbContext.CurrentServices.CoreOptions.Algorithm);
 
             // 支持对字节数组类型加密
             converters.Add(new EncryptionConverter<byte[]>(byteArrayProvider));

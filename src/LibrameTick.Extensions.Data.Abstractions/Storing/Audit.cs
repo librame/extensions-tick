@@ -19,10 +19,10 @@ namespace Librame.Extensions.Data.Storing;
 /// 定义实现 <see cref="IIdentifier{Int64}"/> 的数据审计。
 /// </summary>
 [NotAudited]
-[Sharding("%std", typeof(DateTimeOffsetShardingStrategy))]
+[ShardingTable("%dto:d6", typeof(DateTimeOffsetShardingStrategy))]
 public class Audit : AbstractCreationIdentifier<long, string>, IShardingValue<DateTimeOffset>
 {
-    private readonly List<AuditProperty> _properties = new();
+    private readonly List<AuditDetail> _details = [];
 
 
     /// <summary>
@@ -51,18 +51,18 @@ public class Audit : AbstractCreationIdentifier<long, string>, IShardingValue<Da
 
 
     /// <summary>
-    /// 审计属性集合。
+    /// 审计明细集合。
     /// </summary>
-    public virtual IEnumerable<AuditProperty> Properties
-        => _properties;
+    public virtual IEnumerable<AuditDetail> Details
+        => _details;
 
 
     /// <summary>
-    /// 添加审计属性。
+    /// 添加审计明细。
     /// </summary>
-    /// <param name="property">给定的 <see cref="AuditProperty"/>。</param>
-    public virtual void AddProperty(AuditProperty property)
-        => _properties.Add(property);
+    /// <param name="detail">给定的 <see cref="AuditDetail"/>。</param>
+    public virtual void AddDetail(AuditDetail detail)
+        => _details.Add(detail);
 
 
     /// <summary>

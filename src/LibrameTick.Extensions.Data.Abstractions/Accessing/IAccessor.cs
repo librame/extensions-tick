@@ -20,10 +20,10 @@ namespace Librame.Extensions.Data.Accessing;
 /// <summary>
 /// 定义一个表示数据访问的存取器接口。
 /// </summary>
-public interface IAccessor : IPriorable, IShardable, IShardingValue<DateTimeOffset>, IEquatable<IAccessor>
+public interface IAccessor : IPriorable, IShardable, IEquatable<IAccessor>
 {
     /// <summary>
-    /// 当前数据库上下文。
+    /// 当前数据上下文。
     /// </summary>
     IDataContext CurrentContext { get; }
 
@@ -32,6 +32,11 @@ public interface IAccessor : IPriorable, IShardable, IShardingValue<DateTimeOffs
     /// 存取器描述符。
     /// </summary>
     AccessorDescriptor? AccessorDescriptor { get; }
+
+    /// <summary>
+    /// 分库描述符。
+    /// </summary>
+    ShardingDescriptor? ShardingDescriptor { get; }
 
     /// <summary>
     /// 存取器标识。

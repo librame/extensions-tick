@@ -22,7 +22,7 @@ public interface ISettingProvider<TSettingRoot>
     /// <summary>
     /// 设置根类型。
     /// </summary>
-    Type SettingRootType { get; }
+    Type RootType { get; }
 
 
     /// <summary>
@@ -55,7 +55,7 @@ public interface ISettingProvider<TSettingRoot>
     /// <summary>
     /// 保存设置。
     /// </summary>
-    /// <param name="settingRoot">给定的 <typeparamref name="TSettingRoot"/>。</param>
+    /// <param name="root">给定的 <typeparamref name="TSettingRoot"/>。</param>
     /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    TSettingRoot Save(TSettingRoot settingRoot);
+    TSettingRoot Save(TSettingRoot root);
 }

@@ -100,6 +100,12 @@ public class BaseDispatcherAccessors : AbstractPriorable, IDispatcherAccessors
         => DefaultAccessor.AccessorDescriptor;
 
     /// <summary>
+    /// 分库描述符（默认返回读存取器的第一项 <see cref="ShardingDescriptor"/>）。
+    /// </summary>
+    public ShardingDescriptor? ShardingDescriptor
+        => DefaultAccessor.ShardingDescriptor;
+
+    /// <summary>
     /// 存取器标识（默认返回读存取器的所有项存取器标识集合）。
     /// </summary>
     public string AccessorId

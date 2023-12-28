@@ -17,15 +17,17 @@ internal sealed class InternalShardingStrategyProvider : AbstractShardingStrateg
     public InternalShardingStrategyProvider(IOptionsMonitor<DataExtensionOptions> dataOptions)
         : base()
     {
-        AddStrategy(new DateTimeShardingStrategy());
-        AddStrategy(new DateTimeOffsetShardingStrategy());
-        AddStrategy(new CultureInfoShardingStrategy());
+        var options = dataOptions.CurrentValue.Sharding;
+
+        AddStrategy(new CultureInfoShardingStrategy(options.DefaultCultureInfoFactory));
+        AddStrategy(new DateTimeShardingStrategy(options.DefaultDateTimeFactory));
+        AddStrategy(new DateTimeOffsetShardingStrategy(options.DefaultDateTimeOffsetFactory));
         AddStrategy(new ModShardingStrategy());
 
         // 合并选项自定义策略集合
-        if (dataOptions.CurrentValue.ShardingStrategies.Count > 0)
+        if (options.AttachStrategies.Count > 0)
         {
-            foreach (var strategy in dataOptions.CurrentValue.ShardingStrategies)
+            foreach (var strategy in options.AttachStrategies)
             {
                 AddStrategy(strategy);
             }

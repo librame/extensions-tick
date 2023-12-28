@@ -18,10 +18,10 @@ namespace Librame.Extensions;
 public static class NumberExtensions
 {
 
-    #region SubWithoutRound
+    #region Truncate
 
     /// <summary>
-    /// 截取没有四舍五入的整数与小数部分。
+    /// 通过非四舍五入形式截取指定小数位数的浮点数。
     /// </summary>
     /// <remarks>
     /// <para>注：虽然 float 最大支持包含整数部分在内的 9 位长度，但超出 8 位长度会出现精度丢失的情况。</para>
@@ -29,8 +29,16 @@ public static class NumberExtensions
     /// <param name="f">给定的单精度浮点。</param>
     /// <param name="fractDigits">要截取小数位数（可选；默认保留 2 位小数）。</param>
     /// <returns>返回单精度浮点。</returns>
-    public static float SubWithoutRound(this float f, int fractDigits = 2)
+    public static float Truncate(this float f, int fractDigits = 2)
     {
+        if (fractDigits < 6)
+        {
+            if (fractDigits == 0) return (float)Math.Truncate(f);
+
+            var multiple = (int)Math.Pow(10, fractDigits);
+            return (float)Math.Truncate(f * multiple) / multiple;
+        }
+
         // 精度默认仅支持 7 位，可使用 G9 格式符保留完整最大 9 位长度。
         var format = f.ToString("G9");
 
@@ -47,7 +55,7 @@ public static class NumberExtensions
     }
 
     /// <summary>
-    /// 截取没有四舍五入的整数与小数部分。
+    /// 通过非四舍五入形式截取指定小数位数的浮点数。
     /// </summary>
     /// <remarks>
     /// <para>注：虽然 double 最大支持包含整数部分在内的 17 位长度，但超出 16 位长度会出现精度丢失的情况。</para>
@@ -55,8 +63,16 @@ public static class NumberExtensions
     /// <param name="d">给定的双精度浮点。</param>
     /// <param name="fractDigits">要截取小数位数（可选；默认保留 2 位小数）。</param>
     /// <returns>返回双精度浮点。</returns>
-    public static double SubWithoutRound(this double d, int fractDigits = 2)
+    public static double Truncate(this double d, int fractDigits = 2)
     {
+        if (fractDigits < 6)
+        {
+            if (fractDigits == 0) return Math.Truncate(d);
+
+            var multiple = (int)Math.Pow(10, fractDigits);
+            return Math.Truncate(d * multiple) / multiple;
+        }
+
         // double 最大仅支持 16 位精度
         var format = d.ToString();
 

@@ -24,14 +24,21 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy<TValu
     /// <summary>
     /// 构造一个 <see cref="AbstractShardingStrategy{TValue}"/>。
     /// </summary>
+    /// <param name="prefix">给定的策略前缀。</param>
     /// <param name="defaultValueFactory">给定的默认值工厂方法。</param>
-    protected AbstractShardingStrategy(Func<TValue> defaultValueFactory)
+    protected AbstractShardingStrategy(string prefix, Func<TValue> defaultValueFactory)
     {
         _parameters = new();
 
+        Prefix = prefix;
         DefaultValue = new Lazy<TValue>(defaultValueFactory);
     }
 
+
+    /// <summary>
+    /// 策略前缀。
+    /// </summary>
+    public string Prefix { get; init; }
 
     /// <summary>
     /// 默认值。
@@ -71,20 +78,21 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy<TValu
     /// <summary>
     /// 添加参数。
     /// </summary>
-    /// <param name="name">给定的名称。</param>
+    /// <param name="name">给定的参数名称（纯名称，不含任何前缀或标识符）。</param>
     /// <param name="valueFormatter">给定的值格式化器。</param>
     /// <param name="defaultValue">给定的默认值（可选；默认为 <see cref="string.Empty"/>）。</param>
+    /// <param name="prefixConnector">给定的前缀连接符（可选；默认为 <see cref="ShardingStrategyParameter{TValue}.DefaultPrefixConnector"/>）。</param>
     /// <param name="keyIndicator">给定的键指示符（可选；默认为 <see cref="ShardingStrategyParameter{TValue}.DefaultKeyIndicator"/>）。</param>
     protected void AddParameter(string name, Func<TValue, string> valueFormatter,
-        string? defaultValue = null, string? keyIndicator = null)
-        => AddParameter(new ShardingStrategyParameter<TValue>(name, valueFormatter, defaultValue, keyIndicator));
+        string? defaultValue = null, string? prefixConnector = null, string? keyIndicator = null)
+        => AddParameter(new ShardingStrategyParameter<TValue>(Prefix, name, valueFormatter, defaultValue, prefixConnector, keyIndicator));
 
     /// <summary>
     /// 添加参数。
     /// </summary>
     /// <param name="parameter">给定的 <see cref="ShardingStrategyParameter{TValue}"/>。</param>
     protected void AddParameter(ShardingStrategyParameter<TValue> parameter)
-        => _parameters.AddOrUpdate(parameter.Key, parameter, (key, value) => parameter);
+        => _parameters.AddOrUpdate(parameter.BuildKey(), parameter, (key, value) => parameter);
 
 
     /// <summary>
@@ -107,7 +115,7 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy<TValu
         if (!ContainsKey(formatter))
             return formatter;
 
-        TValue? value = default;
+        TValue? value;
 
         if (shardingValue is IShardingValue<TValue> realValue)
         {
@@ -117,8 +125,12 @@ public abstract class AbstractShardingStrategy<TValue> : IShardingStrategy<TValu
         {
             value = realValues.GetShardedValue(DefaultValue.Value);
         }
+        else
+        {
+            value = DefaultValue.Value;
+        }
 
-        return FormatCore(formatter, value ?? DefaultValue.Value);
+        return FormatCore(formatter, value);
     }
 
     /// <summary>

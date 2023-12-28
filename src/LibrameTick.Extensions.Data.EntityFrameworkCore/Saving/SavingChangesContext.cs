@@ -23,15 +23,14 @@ public sealed class SavingChangesContext : ISavingChangesContext
     /// <summary>
     /// 构造一个 <see cref="SavingChangesContext"/>。
     /// </summary>
-    /// <param name="dataContext">给定的 <see cref="BaseDataContext"/>。</param>
-    public SavingChangesContext(BaseDataContext dataContext)
+    /// <param name="dataContext">给定的 <see cref="Data.DataContext"/>。</param>
+    public SavingChangesContext(DataContext dataContext)
     {
-        var dbContextDependencies = dataContext.BaseDependencies.GetScopeService<IDbContextDependencies>();
+        var states = dataContext.CurrentServices.GetContextService<IStateManager>();
 
         DataContext = dataContext;
         
-        ChangesEntities = dbContextDependencies.StateManager
-            .GetEntriesForState(added: true, modified: true, deleted: true)
+        ChangesEntities = states.GetEntriesForState(added: true, modified: true, deleted: true)
             .Select(static s => new EntityEntry(s))
             .ToList();
     }
@@ -40,7 +39,7 @@ public sealed class SavingChangesContext : ISavingChangesContext
     /// <summary>
     /// 数据上下文。
     /// </summary>
-    public BaseDataContext DataContext { get; init; }
+    public DataContext DataContext { get; init; }
 
     /// <summary>
     /// 变化的实体入口集合。
@@ -56,7 +55,8 @@ public sealed class SavingChangesContext : ISavingChangesContext
     public void Preprocess()
     {
         // 按照添加的先后顺序执行
-        foreach (var handler in DataContext.DataExtOptions.SavingChangesHandlers)
+        var handlers = DataContext.CurrentServices.DataOptions.SavingChangesHandlers;
+        foreach (var handler in handlers)
         {
             handler.PreHandling(this);
         }

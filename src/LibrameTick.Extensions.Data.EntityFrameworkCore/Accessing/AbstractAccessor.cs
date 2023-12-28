@@ -25,21 +25,35 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
     /// <summary>
     /// 构造一个 <see cref="AbstractAccessor"/>。
     /// </summary>
-    /// <param name="context">给定的 <see cref="BaseDataContext"/>。</param>
-    protected AbstractAccessor(BaseDataContext context)
+    /// <param name="context">给定的 <see cref="DataContext"/>。</param>
+    protected AbstractAccessor(DataContext context)
     {
         OriginalContext = context;
         CurrentContext = context;
+
+        InitializeAccessor();
+    }
+
+    private void InitializeAccessor()
+    {
+        OriginalContext.PostAccessor ??= this;
+
+        // 首次尝试将默认数据库分库
+        var newConnectionString = CurrentContext.Services.ShardingContext.ShardingDatabase(CurrentContext);
+        if (newConnectionString is not null)
+        {
+            ChangeConnection(newConnectionString);
+        }
     }
 
 
     /// <summary>
-    /// 原始数据库上下文。
+    /// 原始数据上下文。
     /// </summary>
-    public BaseDataContext OriginalContext { get; init; }
+    public DataContext OriginalContext { get; init; }
 
     /// <summary>
-    /// 当前数据库上下文。
+    /// 当前数据上下文。
     /// </summary>
     public virtual IDataContext CurrentContext { get; protected set; }
 
@@ -48,7 +62,13 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
     /// 存取器描述符。
     /// </summary>
     public AccessorDescriptor? AccessorDescriptor
-        => OriginalContext.AccessorExtension?.ToDescriptor(this);
+        => OriginalContext.CurrentServices.ContextAccessorOptions?.ToDescriptor(this);
+
+    /// <summary>
+    /// 分库描述符。
+    /// </summary>
+    public ShardingDescriptor? ShardingDescriptor
+        => OriginalContext.CurrentServices.InitialShardingDescriptor;
 
     /// <summary>
     /// 存取器标识。
@@ -67,32 +87,20 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
     /// 数据扩展选项。
     /// </summary>
     public DataExtensionOptions DataOptions
-        => OriginalContext.DataExtOptions;
+        => OriginalContext.CurrentServices.DataOptions;
 
     /// <summary>
     /// 核心扩展选项。
     /// </summary>
     public CoreExtensionOptions CoreOptions
-        => OriginalContext.CoreExtOptions;
-
-    /// <summary>
-    /// 存取器选项扩展。
-    /// </summary>
-    public AccessorDbContextOptionsExtension? AccessorExtension
-        => OriginalContext.AccessorExtension;
-
-    /// <summary>
-    /// 关系型选项扩展。
-    /// </summary>
-    public RelationalOptionsExtension? RelationalExtension
-        => OriginalContext.RelationalExtension;
+        => OriginalContext.CurrentServices.CoreOptions;
 
 
     /// <summary>
     /// 关系连接接口。
     /// </summary>
     protected IRelationalConnection RelationalConnection
-        => OriginalContext.GetService<IRelationalConnection>();
+        => OriginalContext.CurrentServices.RelationalConnection;
 
     /// <summary>
     /// 当前连接字符串。
@@ -186,42 +194,6 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
         
         return false;
     }
-
-
-    #region IPriorable
-
-    /// <summary>
-    /// 获取优先级。
-    /// </summary>
-    /// <returns>返回浮点数。</returns>
-    public override float GetPriority()
-        => AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
-
-    #endregion
-
-
-    #region IShardable
-
-    /// <summary>
-    /// 分片上下文。
-    /// </summary>
-    public IShardingContext ShardingContext
-        => OriginalContext.GetService<IShardingContext>();
-
-    #endregion
-
-
-    #region IShardingValue<DateTimeOffset>
-
-    /// <summary>
-    /// 获取分片值。
-    /// </summary>
-    /// <param name="defaultValue">给定的默认值。</param>
-    /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
-    public virtual DateTimeOffset GetShardedValue(DateTimeOffset defaultValue)
-        => DateTimeOffset.UtcNow;
-
-    #endregion
 
 
     #region Query
@@ -610,6 +582,29 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
 
         return await Query<TEntity>().Where(predicate).ExecuteUpdateAsync(setPropertyCalls, cancellationToken);
     }
+
+    #endregion
+
+
+    #region IPriorable
+
+    /// <summary>
+    /// 获取优先级。
+    /// </summary>
+    /// <returns>返回浮点数。</returns>
+    public override float GetPriority()
+        => AccessorDescriptor?.Priority ?? DataOptions.Access.DefaultPriority;
+
+    #endregion
+
+
+    #region IShardable
+
+    /// <summary>
+    /// 分片上下文。
+    /// </summary>
+    public virtual IShardingContext ShardingContext
+        => OriginalContext.CurrentServices.ShardingContext.Initialize(CurrentContext);
 
     #endregion
 

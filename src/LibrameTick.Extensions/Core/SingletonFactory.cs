@@ -48,7 +48,7 @@ public sealed class SingletonFactory<TSingleton>
     {
         get
         {
-            if (!(_reference?.Target is TSingleton instance))
+            if (_reference?.Target is not TSingleton instance)
             {
                 instance = CreateInstance();
                 _reference = new WeakReference(instance);

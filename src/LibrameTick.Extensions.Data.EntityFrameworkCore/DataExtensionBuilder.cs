@@ -15,6 +15,7 @@ using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
+using Librame.Extensions.IdGenerators;
 using Librame.Extensions.Setting;
 
 namespace Librame.Extensions.Data;
@@ -34,6 +35,13 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
     public DataExtensionBuilder(IExtensionBuilder parentBuilder)
         : base(parentBuilder)
     {
+        var baseContextType = typeof(DbContext);
+
+        ContextTypes = parentBuilder.Services
+            .Where(p => baseContextType.IsAssignableFrom(p.ServiceType))
+            .Select(s => s.ServiceType)
+            .ToArray();
+
         ServiceCharacteristics.AddSingleton<IIdGeneratorFactory>();
         ServiceCharacteristics.AddSingleton<IModelCreator>();
 
@@ -50,9 +58,9 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         ServiceCharacteristics.AddSingleton<IShardingSettingProvider>();
 
         // Sharding
+        ServiceCharacteristics.AddSingleton<IShardingFinder>();
         ServiceCharacteristics.AddSingleton<IShardingContext>();
         ServiceCharacteristics.AddSingleton<IShardingStrategyProvider>();
-        ServiceCharacteristics.AddSingleton<IShardingTracker>();
 
         // Storing
         ServiceCharacteristics.AddScope(typeof(IStore<>));
@@ -60,5 +68,11 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         // ValueConversion
         ServiceCharacteristics.AddSingleton<IEncryptionConverterFactory>();
     }
+
+
+    /// <summary>
+    /// 已注册的上下文集合。
+    /// </summary>
+    public Type[]? ContextTypes { get; init; }
 
 }

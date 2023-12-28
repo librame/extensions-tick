@@ -1,9 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Librame.Extensions.Data.Sharding;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Globalization;
 
 namespace Librame.Extensions.Data.Accessing
 {
-    public class TestDataContext<TDbContext> : BaseDataContext
+
+    [ShardingDatabase("%dto:wk", typeof(DateTimeOffsetShardingStrategy))]
+    public class TestDataContext<TDbContext> : DataContext, IShardingValue<DateTimeOffset>
         where TDbContext : DbContext
     {
         public TestDataContext(DbContextOptions<TDbContext> options)
@@ -26,11 +30,17 @@ namespace Librame.Extensions.Data.Accessing
                 b.Property(p => p.Passwd).HasMaxLength(50);
                 b.Property(p => p.CreatedTime).HasMaxLength(50);
 
-                b.Sharding(BaseDependencies.ShardingContext)
-                    .HasProperty(p => p.CreatedTime)
-                    .HasValue(CultureInfo.CurrentUICulture);
+                b.Sharding().HasProperty(p => p.CreatedTime).HasValue(() => CultureInfo.CurrentUICulture);
             });
         }
+
+
+        /// <summary>
+        /// 获取分片值。
+        /// </summary>
+        /// <returns>返回 <see cref="DateTimeOffset"/>。</returns>
+        public virtual DateTimeOffset GetShardedValue(DateTimeOffset defaultValue)
+            => DateTimeOffset.Now;
 
     }
 }

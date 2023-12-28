@@ -12,10 +12,10 @@
 
 namespace Librame.Extensions.Data.Sharding;
 
-internal sealed class InternalShardingTracker : AbstractShardingTracker
-{
-    public InternalShardingTracker()
-    {
-    }
+//internal sealed class InternalShardingTracker : AbstractShardingTracker
+//{
+//    public InternalShardingTracker()
+//    {
+//    }
 
-}
+//}

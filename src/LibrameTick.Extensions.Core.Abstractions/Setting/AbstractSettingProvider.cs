@@ -21,7 +21,7 @@ public abstract class AbstractSettingProvider<TSettingRoot> : ISettingProvider<T
     /// <summary>
     /// 设置类型。
     /// </summary>
-    public Type SettingRootType => typeof(TSettingRoot);
+    public Type RootType => typeof(TSettingRoot);
 
 
     /// <summary>
@@ -63,7 +63,7 @@ public abstract class AbstractSettingProvider<TSettingRoot> : ISettingProvider<T
     /// <summary>
     /// 保存设置。
     /// </summary>
-    /// <param name="settingRoot">给定的 <typeparamref name="TSettingRoot"/>。</param>
+    /// <param name="root">给定的 <typeparamref name="TSettingRoot"/>。</param>
     /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    public abstract TSettingRoot Save(TSettingRoot settingRoot);
+    public abstract TSettingRoot Save(TSettingRoot root);
 }

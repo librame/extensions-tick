@@ -20,7 +20,7 @@ public interface ISavingChangesContext
     /// <summary>
     /// 数据上下文。
     /// </summary>
-    BaseDataContext DataContext { get; }
+    DataContext DataContext { get; }
 
     /// <summary>
     /// 变化的实体入口集合。

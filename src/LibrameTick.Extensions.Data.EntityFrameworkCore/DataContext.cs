@@ -10,98 +10,66 @@
 
 #endregion
 
-using Librame.Extensions.Core;
 using Librame.Extensions.Data.Accessing;
 
 namespace Librame.Extensions.Data;
 
 /// <summary>
-/// 定义一个实现 <see cref="DbContext"/> 与 <see cref="IDataContext"/> 的基础数据上下文。
+/// 定义一个实现 <see cref="DbContext"/> 与 <see cref="IDataContext"/> 数据上下文。
 /// </summary>
-public class BaseDataContext : DbContext, IDataContext
+public class DataContext : DbContext, IDataContext
 {
-    private DbContextOptions _options;
-    private BaseDataContextDependencies? _dependencies;
+    private readonly DbContextOptions _options;
+    private DataContextServices? _contextServices;
 
 
     /// <summary>
-    /// 构造一个 <see cref="BaseDataContext"/>。
+    /// 构造一个 <see cref="DataContext"/>。
     /// </summary>
     /// <param name="options">给定的 <see cref="DbContextOptions"/>。</param>
-    public BaseDataContext(DbContextOptions options)
+    public DataContext(DbContextOptions options)
         : base(options)
     {
         _options = options;
-
+        
         SavingChanges += BaseDataContext_SavingChanges;
     }
 
     private void BaseDataContext_SavingChanges(object? sender, SavingChangesEventArgs e)
     {
-        var savingChangesContext = DataExtOptions.SavingChangesContextFactory(this);
+        var newConnectionString = CurrentServices.ShardingContext.ShardingDatabase(this);
+        if (newConnectionString is not null)
+        {
+            PostAccessor?.ChangeConnection(newConnectionString);
+        }
+
+        var savingChangesContext = CurrentServices.DataOptions.SavingChangesContextFactory(this);
         savingChangesContext.Preprocess();
     }
 
 
     /// <summary>
-    /// 上下文类型。
+    /// 数据上下文类型。
     /// </summary>
     public virtual Type ContextType
         => GetType();
 
     /// <summary>
-    /// 上下文依赖集合。
+    /// 数据上下文服务集合。
     /// </summary>
-    IDataContextDependencies IDataContext.Dependencies
-        => BaseDependencies;
+    IDataContextServices IDataContext.Services
+        => CurrentServices;
 
     /// <summary>
-    /// 基础上下文依赖集合。
+    /// 当前数据上下文服务集合。
     /// </summary>
-    public BaseDataContextDependencies BaseDependencies
-        => _dependencies ??= new BaseDataContextDependencies(this);
+    public DataContextServices CurrentServices
+        => _contextServices ??= new DataContextServices(this, _options);
 
     /// <summary>
-    /// 核心扩展选项。
+    /// 后置存取器。
     /// </summary>
-    public CoreExtensionOptions CoreExtOptions
-        => BaseDependencies.CoreExtOptions;
-
-    /// <summary>
-    /// 数据扩展选项。
-    /// </summary>
-    public DataExtensionOptions DataExtOptions
-        => BaseDependencies.DataExtOptions;
-
-
-    /// <summary>
-    /// 存取器选项扩展。
-    /// </summary>
-    public AccessorDbContextOptionsExtension? AccessorExtension
-        => _options.FindExtension<AccessorDbContextOptionsExtension>();
-
-    /// <summary>
-    /// 核心选项扩展。
-    /// </summary>
-    public CoreOptionsExtension? CoreExtension
-        => _options.FindExtension<CoreOptionsExtension>();
-
-    /// <summary>
-    /// 关系型选项扩展。
-    /// </summary>
-    public RelationalOptionsExtension? RelationalExtension
-        => _options.Extensions.OfType<RelationalOptionsExtension>().FirstOrDefault();
-
-
-    /// <summary>
-    /// 后置创建模型动作。
-    /// </summary>
-    public Action<BaseDataContext, ModelBuilder, IMutableEntityType>? PostModelCreatingAction { get; set; }
-
-    /// <summary>
-    /// 后置创建模型属性动作。
-    /// </summary>
-    public Action<BaseDataContext, ModelBuilder, IMutableEntityType, PropertyInfo>? PostModelCreatingPropertyAction { get; set; }
+    public IAccessor? PostAccessor { get; set; }
 
 
     /// <summary>
@@ -110,7 +78,8 @@ public class BaseDataContext : DbContext, IDataContext
     /// <param name="modelBuilder">给定的 <see cref="ModelBuilder"/>。</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var modelCreator = CoreExtension?.ApplicationServiceProvider?.GetService<IModelCreator>();
+        var modelCreator = CurrentServices.ContextCoreOptions?.
+            ApplicationServiceProvider?.GetService<IModelCreator>();
 
         try
         {

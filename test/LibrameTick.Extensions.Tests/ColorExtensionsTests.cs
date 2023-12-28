@@ -12,6 +12,7 @@ namespace Librame.Extensions
             var right = Color.FromArgb(250, 250, 250);
 
             Assert.True(left.IsSimilar(right));
+            Assert.False(left.IsSimilar(right, 3));
         }
 
     }

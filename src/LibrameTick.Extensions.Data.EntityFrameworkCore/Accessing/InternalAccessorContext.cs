@@ -54,11 +54,11 @@ internal sealed class InternalAccessorContext : IAccessorContext
     public IReadOnlyDictionary<IAccessor, ShardingDescriptor?>? CurrentAccessors { get; private set; }
 
 
-    public IDispatcherAccessors GetReadAccessors(ISpecification<IAccessor>? specification = null)
-        => GetAccessors(specification ?? new ReadAccessAccessorSpecification());
+    //public IDispatcherAccessors GetReadAccessors(ISpecification<IAccessor>? specification = null)
+    //    => GetAccessors(specification ?? new ReadAccessAccessorSpecification());
 
-    public IDispatcherAccessors GetWriteAccessors(ISpecification<IAccessor>? specification = null)
-        => GetAccessors(specification ?? new WriteAccessAccessorSpecification());
+    //public IDispatcherAccessors GetWriteAccessors(ISpecification<IAccessor>? specification = null)
+    //    => GetAccessors(specification ?? new WriteAccessAccessorSpecification());
 
     public IDispatcherAccessors GetAccessors(ISpecification<IAccessor> specification)
     {
@@ -127,20 +127,20 @@ internal sealed class InternalAccessorContext : IAccessorContext
 
         foreach (var accessor in accessors)
         {
-            if (accessor.AccessorDescriptor?.Sharded is null)
+            if (accessor.ShardingDescriptor is null)
             {
                 shardingAccessors.Add(accessor, null);
             }
             else
             {
                 // 尝试对存取器分库
-                ShardingContext.ShardDatabase(accessor, out var descriptor);
+                //ShardingContext.ShardDatabase(accessor, out var descriptor);
 
                 // 如果分库，则尝试迁移表
                 if (Options.Access.AutoMigration)
                     Migrator.Migrate(accessor);
 
-                shardingAccessors.TryAdd(accessor, descriptor);
+                shardingAccessors.TryAdd(accessor, accessor.ShardingDescriptor);
             }
         }
 

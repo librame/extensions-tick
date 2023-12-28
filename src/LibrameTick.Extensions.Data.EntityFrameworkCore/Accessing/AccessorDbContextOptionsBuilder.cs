@@ -23,8 +23,10 @@ namespace Librame.Extensions.Data.Accessing;
 /// </summary>
 public class AccessorDbContextOptionsBuilder
 {
-    //private readonly CoreOptionsExtension? _coreOptionsExtension;
-    private readonly RelationalOptionsExtension? _relationalOptionsExtension;
+    //private readonly CoreOptionsExtension? _coreOptions;
+    //private readonly RelationalOptionsExtension? _relationalOptions;
+
+    private readonly Type? _contextType;
 
 
     /// <summary>
@@ -33,13 +35,22 @@ public class AccessorDbContextOptionsBuilder
     /// <param name="parentBuilder">给定的 <see cref="DbContextOptionsBuilder"/>。</param>
     public AccessorDbContextOptionsBuilder(DbContextOptionsBuilder parentBuilder)
     {
+        var builderType = parentBuilder.GetType();
+        if (builderType.IsGenericType && builderType.GenericTypeArguments.Length > 0)
+        {
+            var argumentType = builderType.GenericTypeArguments[0];
+            if (typeof(DbContext).IsAssignableFrom(argumentType))
+            {
+                _contextType = argumentType;
+            }
+        }
+
         ParentBuilder = parentBuilder;
 
-        //_coreOptionsExtension = parentBuilder.Options.FindExtension<CoreOptionsExtension>();
-        _relationalOptionsExtension = parentBuilder.Options.Extensions
-            .WhereAre<IDbContextOptionsExtension, RelationalOptionsExtension>(p => p.Info.IsDatabaseProvider)?.FirstOrDefault();
+        //_coreOptions = parentBuilder.Options.FindExtension<CoreOptionsExtension>();
+        //_relationalOptions = RelationalOptionsExtension.Extract(parentBuilder.Options);
 
-        //if (_coreOptionsExtension?.MaxPoolSize > 0)
+        //if (_coreOptions?.MaxPoolSize > 0)
         //    WithOption(e => e.WithPooling(true));
     }
 
@@ -48,6 +59,12 @@ public class AccessorDbContextOptionsBuilder
     /// 父级 <see cref="DbContextOptionsBuilder"/>。
     /// </summary>
     protected virtual DbContextOptionsBuilder ParentBuilder { get; }
+
+    /// <summary>
+    /// 数据库上下文。
+    /// </summary>
+    public virtual Type? ContextType
+        => _contextType;
 
 
     /// <summary>
@@ -126,59 +143,48 @@ public class AccessorDbContextOptionsBuilder
 
 
     /// <summary>
-    /// 分片规则特性。
+    /// 分片规则特性（可以在此配置，也可以在 <see cref="DataContext"/> 派生类型上标注）。
     /// </summary>
-    /// <typeparam name="TStrategy">指定的分片策略类型。</typeparam>
-    /// <param name="suffixFormatter">给定带分片策略参数的后缀格式化器（支持的参数可参考指定的分片策略类型）。</param>
-    /// <param name="configureAction">给定的分片命名特性配置动作（可选）。</param>
-    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithSharding<TStrategy>(string suffixFormatter,
-        Action<ShardingAttribute>? configureAction = null)
-        => WithSharding(suffixFormatter, configureAction, typeof(TStrategy));
-
-    /// <summary>
-    /// 分片规则特性。
-    /// </summary>
-    /// <remarks>
-    /// <para>如果要使用分库，此为必选项，可设置分库的规则。</para>
-    /// </remarks>
     /// <param name="suffixFormatter">给定带分片策略参数的后缀格式化器（支持的参数可参考指定的分片策略类型）。</param>
     /// <param name="strategyTypes">给定要引用的分片策略类型集合。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithSharding(string suffixFormatter, params Type[] strategyTypes)
-        => WithSharding(suffixFormatter, configureAction: null, strategyTypes);
+        => WithSharding(new ShardingDatabaseAttribute(suffixFormatter, strategyTypes) { SourceType = ContextType });
 
     /// <summary>
-    /// 分片规则特性。
+    /// 分片规则特性（可以在此配置，也可以在 <see cref="DataContext"/> 派生类型上标注）。
     /// </summary>
-    /// <remarks>
-    /// <para>如果要使用分库，此为必选项，可设置分库的规则。</para>
-    /// </remarks>
-    /// <param name="suffixFormatter">给定带分片策略参数的后缀格式化器（支持的参数可参考指定的分片策略类型）。</param>
-    /// <param name="configureAction">给定的分片命名特性配置动作。</param>
-    /// <param name="strategyTypes">给定要引用的分片策略类型集合。</param>
+    /// <param name="databaseAttribute">给定的 <see cref="ShardingDatabaseAttribute"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
-    public virtual AccessorDbContextOptionsBuilder WithSharding(string suffixFormatter,
-        Action<ShardingAttribute>? configureAction, params Type[] strategyTypes)
-    {
-        var attribute = ShardingAttribute.ParseFromConnectionString(ParentBuilder.Options.ContextType,
-            suffixFormatter, strategyTypes, _relationalOptionsExtension?.ConnectionString);
-
-        configureAction?.Invoke(attribute);
-
-        return WithSharding(attribute);
-    }
+    public virtual AccessorDbContextOptionsBuilder WithSharding(ShardingDatabaseAttribute databaseAttribute)
+        => WithOption(e => e.WithSharding(databaseAttribute));
 
     /// <summary>
-    /// 分片规则特性。
+    /// 分片规则特性（可以在此配置，也可以在 <see cref="DataContext"/> 派生类型上标注）。
     /// </summary>
-    /// <remarks>
-    /// <para>如果要使用分库，此为必选项，可设置分库的规则。</para>
-    /// </remarks>
     /// <param name="sharding">给定的 <see cref="ShardingAttribute"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithSharding(ShardingAttribute sharding)
         => WithOption(e => e.WithSharding(sharding));
+
+
+    /// <summary>
+    /// 使用指定的初始分片值来生成分库名称。
+    /// </summary>
+    /// <typeparam name="TValue">指定的分片值类型。</typeparam>
+    /// <param name="valueFactory">给定的值工厂方法。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+    public virtual AccessorDbContextOptionsBuilder WithShardingValue<TValue>(Func<TValue> valueFactory)
+        => WithOption(e => e.WithShardingValue(new SingleShardingValue<TValue>(valueFactory)));
+
+    /// <summary>
+    /// 使用指定的分片值来生成分库名称。
+    /// </summary>
+    /// <typeparam name="TValue">指定的分片值类型。</typeparam>
+    /// <param name="shardingValue">给定的 <see cref="IShardingValue{TValue}"/>。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
+    public virtual AccessorDbContextOptionsBuilder WithShardingValue<TValue>(IShardingValue<TValue> shardingValue)
+        => WithOption(e => e.WithShardingValue(shardingValue));
 
 
     /// <summary>

@@ -12,12 +12,12 @@
 
 namespace Librame.Extensions.Data.Sharding;
 
-public interface IShardingSource
-{
-    object Create(IDataContext context,
-        [DynamicallyAccessedMembers(IEntityType.DynamicallyAccessedMemberTypes)] Type type);
+///// <summary>
+///// 
+///// </summary>
+//public interface IShardingSource
+//{
+//    object Create(IDataContext context, Type type);
 
-    object Create(IDataContext context,
-        string name,
-        [DynamicallyAccessedMembers(IEntityType.DynamicallyAccessedMemberTypes)] Type type);
-}
+//    object Create(IDataContext context, string name, Type type);
+//}

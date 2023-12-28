@@ -42,19 +42,19 @@ public interface IAccessorContext
     IReadOnlyDictionary<IAccessor, ShardingDescriptor?>? CurrentAccessors { get; }
 
 
-    /// <summary>
-    /// 获取指定规约的读取调度器存取器集合。
-    /// </summary>
-    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回 <see cref="IDispatcherAccessors"/>。</returns>
-    IDispatcherAccessors GetReadAccessors(ISpecification<IAccessor>? specification = null);
+    ///// <summary>
+    ///// 获取指定规约的读取调度器存取器集合。
+    ///// </summary>
+    ///// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="ReadAccessAccessorSpecification"/> 规约）。</param>
+    ///// <returns>返回 <see cref="IDispatcherAccessors"/>。</returns>
+    //IDispatcherAccessors GetReadAccessors(ISpecification<IAccessor>? specification = null);
 
-    /// <summary>
-    /// 获取指定规约的写入调度器存取器集合。
-    /// </summary>
-    /// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
-    /// <returns>返回 <see cref="IDispatcherAccessors"/>。</returns>
-    IDispatcherAccessors GetWriteAccessors(ISpecification<IAccessor>? specification = null);
+    ///// <summary>
+    ///// 获取指定规约的写入调度器存取器集合。
+    ///// </summary>
+    ///// <param name="specification">给定的 <see cref="ISpecification{IAccessor}"/>（可选；默认使用 <see cref="WriteAccessAccessorSpecification"/> 规约）。</param>
+    ///// <returns>返回 <see cref="IDispatcherAccessors"/>。</returns>
+    //IDispatcherAccessors GetWriteAccessors(ISpecification<IAccessor>? specification = null);
 
     /// <summary>
     /// 获取指定规约的调度器存取器集合。

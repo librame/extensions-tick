@@ -15,7 +15,7 @@ namespace Librame.Extensions.Data.Accessing;
 /// <summary>
 /// 定义 <see cref="AccessorDbContextOptionsExtension"/> 与 <see cref="AccessorDescriptor"/> 静态扩展。
 /// </summary>
-public static class AccessorDbContextOptionsExtensionAccessorDescriptorExtensions
+public static class AccessorDescriptorExtensions
 {
 
     /// <summary>
@@ -32,11 +32,12 @@ public static class AccessorDbContextOptionsExtensionAccessorDescriptorExtension
         var algorithms = extension.Algorithm ?? accessor.CoreOptions.Algorithm;
 
         var name = string.IsNullOrEmpty(extension.Name)
-            ? accessor.CurrentContext.GetType().Name.TrimEnd(nameof(DbContext))
+            ? accessor.CurrentContext.ContextType.Name.TrimEnd(nameof(DbContext))
             : extension.Name;
 
-        return new AccessorDescriptor(accessor, extension.AccessorType!, name, extension.Group, extension.Partition,
-            extension.Access, extension.Dispatching, priority, algorithms, extension.Sharding, extension.LoaderHost);
+        return new AccessorDescriptor(accessor, extension.AccessorType!, name,
+            extension.Group, extension.Partition, extension.Access, extension.Dispatching,
+            priority, algorithms, extension.Sharding, extension.ShardingValues, extension.LoaderHost);
     }
 
 }

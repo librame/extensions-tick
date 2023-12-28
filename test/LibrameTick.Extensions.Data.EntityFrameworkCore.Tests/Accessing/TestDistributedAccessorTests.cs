@@ -1,6 +1,6 @@
-﻿using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Data.Storing;
+﻿using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Dispatchers;
+using Librame.Extensions.IdGenerators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -24,7 +24,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseSqlServer("Data Source=.;Initial Catalog=librame_distributed_extensions;Integrated Security=true;TrustServerCertificate=true;",
                     a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithDispatching(DispatchingMode.Striping).WithPartition(1).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithLocalhostLoader());
+                opts.UseAccessor(b => b.WithDispatching(DispatchingMode.Striping).WithPartition(1).WithLocalhostLoader());
             });
 
             services.AddDbContext<TestMySqlDbContext>(opts =>
@@ -32,7 +32,7 @@ namespace Librame.Extensions.Data.Accessing
                 opts.UseMySql(MySqlConnectionStringHelper.Validate("server=localhost;port=3306;database=librame_distributed_extensions;user=root;password=123456;", out var version), version,
                     a => a.MigrationsAssembly(modelAssemblyName));
 
-                opts.UseAccessor(b => b.WithDispatching(DispatchingMode.Striping).WithPartition(2).WithSharding<DateTimeOffsetShardingStrategy>("%ww").WithLocalhostLoader());
+                opts.UseAccessor(b => b.WithDispatching(DispatchingMode.Striping).WithPartition(2).WithLocalhostLoader());
             });
 
             var builder = services.AddLibrame()

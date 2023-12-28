@@ -24,6 +24,29 @@ public static class TypeExtensions
 
 
     /// <summary>
+    /// 枚举成员绑定标志（包含 <see cref="BindingFlags.Public"/>、<see cref="BindingFlags.Static"/>）。
+    /// </summary>
+    public const BindingFlags EnumFlags = BindingFlags.Public | BindingFlags.Static;
+
+    /// <summary>
+    /// 非公共成员标志（包含 <see cref="BindingFlags.Instance"/>、<see cref="BindingFlags.NonPublic"/>）。
+    /// </summary>
+    public const BindingFlags NonPublicMemberFlags = BindingFlags.Instance | BindingFlags.NonPublic;
+
+    /// <summary>
+    /// 所有成员绑定标志（包含 <see cref="BindingFlags.Instance"/>、<see cref="BindingFlags.Public"/>、<see cref="BindingFlags.NonPublic"/>）。
+    /// </summary>
+    public const BindingFlags AllMemberFlags
+        = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+    /// <summary>
+    /// 带有静态的所有成员绑定标志（包含 <see cref="BindingFlags.Instance"/>、<see cref="BindingFlags.Public"/>、<see cref="BindingFlags.NonPublic"/>、<see cref="BindingFlags.Static"/>）。
+    /// </summary>
+    public const BindingFlags AllMemberFlagsWithStatic
+        = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+
+
+    /// <summary>
     /// 转为仅包含类型完整名与程序集简单名称的简单字符串。
     /// </summary>
     /// <remarks>
@@ -44,8 +67,8 @@ public static class TypeExtensions
     /// <param name="currentType">给定的当前类型。</param>
     /// <param name="compareType">给定的比较类型。</param>
     /// <returns>返回布尔值。</returns>
-    public static bool IsSameType(this Type currentType, Type compareType)
-        => currentType.AssemblyQualifiedName == compareType.AssemblyQualifiedName;
+    public static bool IsSameType(this Type currentType, [NotNullWhen(true)] Type? compareType)
+        => currentType.AssemblyQualifiedName?.Equals(compareType?.AssemblyQualifiedName, StringComparison.Ordinal) == true;
 
     /// <summary>
     /// 是相同类型或可空类型。
@@ -82,82 +105,6 @@ public static class TypeExtensions
 
 
     /// <summary>
-    /// 尝试获取指定名称字段（支持私有字段）。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <param name="name">给定的字段名称。</param>
-    /// <param name="field">输出获取的 <see cref="FieldInfo"/>。</param>
-    /// <returns>返回是否存在的布尔值。</returns>
-    public static bool TryGetField(this Type type, string name,
-        [MaybeNullWhen(false)] out FieldInfo field)
-    {
-        field = type.GetTypeInfo().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-        return field is not null;
-    }
-
-    /// <summary>
-    /// 尝试获取包含静态在内的指定名称字段（支持私有字段）。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <param name="name">给定的字段名称。</param>
-    /// <param name="field">输出获取的 <see cref="FieldInfo"/>。</param>
-    /// <returns>返回是否存在的布尔值。</returns>
-    public static bool TryGetFieldWithStatic(this Type type, string name,
-        [MaybeNullWhen(false)] out FieldInfo field)
-    {
-        field = type.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-
-        return field is not null;
-    }
-
-
-    /// <summary>
-    /// 获取所有字段成员集合（私有字段包含属性实现）。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <param name="name">给定的字段名称。</param>
-    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
-    public static FieldInfo? GetAllField(this Type type, string name)
-        => type.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-    /// <summary>
-    /// 获取所有字段成员集合（私有字段包含属性实现）。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
-    public static FieldInfo[] GetAllFields(this Type type)
-        => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-
-    /// <summary>
-    /// 获取包含静态在内的所有字段成员集合（私有字段包含属性实现）。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <param name="name">给定的字段名称。</param>
-    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
-    public static FieldInfo? GetAllFieldWithStatic(this Type type, string name)
-        => type.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-
-    /// <summary>
-    /// 获取包含静态在内的所有字段成员集合（私有字段包含属性实现）。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
-    public static FieldInfo[] GetAllFieldsWithStatic(this Type type)
-        => type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-
-
-    /// <summary>
-    /// 获取枚举字段成员集合。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <returns>返回 <see cref="FieldInfo"/> 数组。</returns>
-    public static FieldInfo[] GetEnumFields(this Type type)
-        => type.GetFields(BindingFlags.Public | BindingFlags.Static);
-
-
-    /// <summary>
     /// 尝试获取指定类型的私有构造函数。
     /// </summary>
     /// <param name="type">给定的类型。</param>
@@ -167,8 +114,7 @@ public static class TypeExtensions
     public static bool TryGetPrivateConstructor(this Type type, bool isUnique,
         [MaybeNullWhen(false)] out ConstructorInfo info)
     {
-        info = type.GetConstructor(BindingFlags.CreateInstance
-            | BindingFlags.Instance | BindingFlags.NonPublic, types: Type.EmptyTypes);
+        info = type.GetConstructor(NonPublicMemberFlags, types: Type.EmptyTypes);
 
         return info is not null && (!isUnique || type.GetConstructors().Length is 1);
     }

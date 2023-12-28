@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Data.Sharding;
+
 namespace Librame.Extensions.Setting;
 
 /// <summary>
@@ -20,19 +22,75 @@ public class ShardingDatabaseSettingRoot : ISettingRoot
     /// <summary>
     /// 分库设置集合。
     /// </summary>
-    public List<ShardingDatabaseSetting> Databases { get; set; } = new();
+    public List<ShardingDatabaseSetting> Databases { get; set; } = [];
 
 
     /// <summary>
-    /// 尝试获取指定存取器类型的分库设置。
+    /// 获取或创建分库设置。
     /// </summary>
-    /// <param name="accessorType">给定的存取器类型。</param>
+    /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
+    /// <param name="shardedName">给定的分库名称。</param>
+    /// <param name="sourceId">给定的来源标识。</param>
+    /// <param name="source">给定的来源（暂不支持持久化）。</param>
+    /// <param name="createdAction">给定的已创建方法。</param>
+    /// <returns>返回包含 <see cref="ShardingDatabaseSetting"/> 与 <see cref="ShardingItemSetting"/> 的元组。</returns>
+    public virtual (ShardingDatabaseSetting databaseSetting, ShardingItemSetting itemSetting) GetOrCreate(
+        ShardingDescriptor descriptor, string shardedName, string? sourceId, object? source, Action? createdAction)
+    {
+        if (TryGet(descriptor.SourceType, out var database))
+        {
+            if (!database.TryGetItem(shardedName, out var item))
+            {
+                var lastName = database.Items.LastOrDefault()?.CurrentName;
+
+                item = ShardingItemSetting.Create(shardedName, lastName, sourceId, source);
+                database.Items.Add(item);
+
+                createdAction?.Invoke();
+            }
+
+            return (database, item);
+        }
+        else
+        {
+            var item = ShardingItemSetting.Create(shardedName, lastName: null, sourceId, source);
+
+            database = new ShardingDatabaseSetting(descriptor);
+            database.Items.Add(item);
+
+            Databases.Add(database);
+
+            createdAction?.Invoke();
+
+            return (database, item);
+        }
+    }
+
+
+    /// <summary>
+    /// 添加分库设置。
+    /// </summary>
+    /// <param name="database">给定的 <see cref="ShardingDatabaseSetting"/>。</param>
+    /// <returns>返回是否添加的布尔值。</returns>
+    public virtual bool TryAdd(ShardingDatabaseSetting database)
+    {
+        if (Databases.Any(p => p.Equals(database)))
+            return false;
+
+        Databases.Add(database);
+        return true;
+    }
+
+    /// <summary>
+    /// 尝试获取指定数据上下文类型的分库设置。
+    /// </summary>
+    /// <param name="contextType">给定的数据上下文类型。</param>
     /// <param name="result">输出 <see cref="ShardingDatabaseSetting"/>。</param>
     /// <returns>返回是否存在的布尔值。</returns>
-    public virtual bool TryGetDatabase(Type accessorType,
-        [MaybeNullWhen(false)] out ShardingDatabaseSetting result)
+    public virtual bool TryGet(Type contextType,
+        [NotNullWhen(true)] out ShardingDatabaseSetting? result)
     {
-        result = Databases.SingleOrDefault(p => p.SourceType == accessorType);
+        result = Databases.SingleOrDefault(p => p.SourceType == contextType);
         return result is not null;
     }
 

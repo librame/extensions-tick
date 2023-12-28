@@ -79,7 +79,7 @@ public class TransactionDispatcher<TSource> : BaseDispatcher<TSource>
         Func<IDispatcher<TSource>, bool>? breakFunc = null, bool isTraversal = true,
         CancellationToken cancellationToken = default)
     {
-        using (var transaction = new TransactionScope())
+        using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
         {
             try
             {
@@ -145,7 +145,7 @@ public class TransactionDispatcher<TSource> : BaseDispatcher<TSource>
     {
         var result = Array.Empty<TResult>();
 
-        using (var transaction = new TransactionScope())
+        using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
         {
             try
             {

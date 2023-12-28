@@ -12,14 +12,12 @@
 
 namespace Librame.Extensions.Data.Sharding;
 
-/// <summary>
-/// 定义一个可处理 <see cref="IDataContext"/> 的分片初始化器接口。
-/// </summary>
-public interface IShardingInitializer
-{
-    /// <summary>
-    /// 初始化数据上下文。
-    /// </summary>
-    /// <param name="context">给定的 <see cref="IDataContext"/>。</param>
-    void Initialize(IDataContext context);
-}
+///// <summary>
+///// 定义 <see cref="ShardingDescriptor"/> 静态扩展。
+///// </summary>
+//public static class ShardingDescriptorExtensions
+//{
+
+    
+
+//}

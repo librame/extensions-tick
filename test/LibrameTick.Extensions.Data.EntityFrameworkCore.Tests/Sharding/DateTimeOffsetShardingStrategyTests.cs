@@ -1,22 +1,22 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace Librame.Extensions.Data.Sharding
 {
     public class DateTimeOffsetShardingStrategyTests
     {
 
-        //[Fact]
-        //public void AllTest()
-        //{
-        //    var sharded = new ShardingDescriptor("sharding", "%qq");
-        //    var original = sharded.ToString();
+        [Fact]
+        public void AllTest()
+        {
+            var strategry = new DateTimeOffsetShardingStrategy(() => DateTimeOffset.Now);
 
-        //    var strategy = new DateTimeOffsetShardingStrategy();
-        //    strategy.FormatSuffix(sharded);
-
-        //    var format = sharded.ToString();
-        //    Assert.NotEqual(original, format);
-        //}
+            foreach (var key in strategry.AllKeys)
+            {
+                var value = strategry.Format(key, shardingValue: null); // Use Default DateTime
+                Assert.True(value.IsDigit());
+            }
+        }
 
     }
 }

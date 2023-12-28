@@ -12,9 +12,8 @@
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.ChangeTracking;
-global using Microsoft.EntityFrameworkCore.Diagnostics;
+global using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 global using Microsoft.EntityFrameworkCore.Infrastructure;
-global using Microsoft.EntityFrameworkCore.Internal;
 global using Microsoft.EntityFrameworkCore.Metadata;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -32,7 +31,6 @@ global using System.ComponentModel.DataAnnotations.Schema;
 global using System.Data;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Globalization;
-global using System.IO;
 global using System.Linq;
 global using System.Linq.Expressions;
 global using System.Reflection;

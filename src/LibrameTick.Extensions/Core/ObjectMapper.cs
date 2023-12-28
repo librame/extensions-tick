@@ -92,12 +92,12 @@ public static class ObjectMapper
         outputType ??= output.GetType();
 
         // 映射所有字段（私有字段包含属性实现）
-        foreach (var outField in outputType.GetAllFields())
+        foreach (var outField in outputType.GetFields(TypeExtensions.AllMemberFlags))
         {
             if (outField.FieldType.IsSameOrNullableType(outputType))
                 continue; // 排除自引用类型
 
-            var inField = inputType.GetAllField(outField.Name);
+            var inField = inputType.GetField(outField.Name, TypeExtensions.AllMemberFlags);
             if (inField is not null && outField.FieldType.IsSameOrNullableType(inField.FieldType))
             {
                 var value = inField.GetValue(input);

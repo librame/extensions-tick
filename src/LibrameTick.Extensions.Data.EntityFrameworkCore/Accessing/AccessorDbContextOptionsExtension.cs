@@ -36,6 +36,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     private float _priority;
     private AlgorithmOptions? _algorithm;
     private ShardingAttribute? _sharding;
+    private List<IShardingValue>? _shardingValues;
     private string? _loaderHost;
     private Type? _accessorType;
 
@@ -66,6 +67,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         _priority = copyFrom.Priority;
         _algorithm = copyFrom.Algorithm;
         _sharding = copyFrom.Sharding;
+        _shardingValues = copyFrom.ShardingValues;
         _loaderHost = copyFrom._loaderHost;
         _accessorType = copyFrom.AccessorType;
     }
@@ -131,12 +133,14 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     public AlgorithmOptions? Algorithm => _algorithm;
 
     /// <summary>
-    /// 分片规则特性。
+    /// 分库规则特性。
     /// </summary>
-    /// <remarks>
-    /// <para>如果要使用分库，此为必选项，可设置分库的规则。</para>
-    /// </remarks>
     public ShardingAttribute? Sharding => _sharding;
+
+    /// <summary>
+    /// 分库值集合。
+    /// </summary>
+    public List<IShardingValue>? ShardingValues => _shardingValues;
 
     /// <summary>
     /// 负载器主机。
@@ -280,7 +284,7 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
     }
 
     /// <summary>
-    /// 使用指定的分片特性创建一个选项扩展实例副本。
+    /// 使用指定的分库特性创建一个选项扩展实例副本。
     /// </summary>
     /// <param name="sharding">给定的 <see cref="ShardingAttribute"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
@@ -289,6 +293,24 @@ public class AccessorDbContextOptionsExtension : IDbContextOptionsExtension
         var clone = Clone();
 
         clone._sharding = sharding;
+
+        return clone;
+    }
+
+    /// <summary>
+    /// 使用指定的分片值来生成分库名称。
+    /// </summary>
+    /// <typeparam name="TValue">指定的分片值类型。</typeparam>
+    /// <param name="shardingValue">给定的 <see cref="IShardingValue{TValue}"/>。</param>
+    /// <returns>返回 <see cref="AccessorDbContextOptionsExtension"/> 副本。</returns>
+    public virtual AccessorDbContextOptionsExtension WithShardingValue<TValue>(IShardingValue<TValue> shardingValue)
+    {
+        var clone = Clone();
+
+        if (clone._shardingValues is null)
+            clone._shardingValues = [shardingValue];
+        else
+            clone._shardingValues.Add(shardingValue);
 
         return clone;
     }

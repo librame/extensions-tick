@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Dispatchers;
 using Librame.Extensions.Setting;
 
@@ -22,9 +21,9 @@ namespace Librame.Extensions.Data.Sharding;
 public interface IShardingContext
 {
     /// <summary>
-    /// 调度器工厂。
+    /// 分片查找器。
     /// </summary>
-    IDispatcherFactory DispatcherFactory { get; }
+    IShardingFinder Finder { get; }
 
     /// <summary>
     /// 设置提供程序。
@@ -37,42 +36,44 @@ public interface IShardingContext
     IShardingStrategyProvider StrategyProvider { get; }
 
     /// <summary>
-    /// 对象跟踪器。
+    /// 调度器工厂。
     /// </summary>
-    IShardingTracker Tracker { get; }
+    IDispatcherFactory DispatcherFactory { get; }
 
 
     /// <summary>
-    /// 对存取器的数据库分片。
+    /// 初始化数据上下文。
     /// </summary>
-    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
-    /// <param name="descriptor">输出 <see cref="ShardingDescriptor"/>。</param>
-    /// <param name="shardedAction">给定已分片的动作（可选）。</param>
-    /// <returns>返回 <see cref="ShardingDatabaseSetting"/>。</returns>
-    ShardingDatabaseSetting ShardDatabase(IAccessor accessor, out ShardingDescriptor descriptor,
-        Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null);
-
-    /// <summary>
-    /// 对存取器的数据库分片。
-    /// </summary>
-    /// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
-    /// <param name="shardedAction">给定已分片的动作（可选）。</param>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="ShardingDatabaseSetting"/> 与 <see cref="ShardingDescriptor"/> 元组的异步操作。</returns>
-    Task<(ShardingDatabaseSetting databaseSetting, ShardingDescriptor descriptor)> ShardDatabaseAsync(IAccessor accessor,
-        Action<ShardingDescriptor, ShardingDatabaseSetting>? shardedAction = null, CancellationToken cancellationToken = default);
+    /// <param name="context">给定的 <see cref="IDataContext"/>。</param>
+    IShardingContext Initialize(IDataContext context);
 
 
     /// <summary>
-    /// 对实体的数据表分片。
+    /// 对存取器分库。
     /// </summary>
-    /// <param name="entityType">给定的实体类型。</param>
-    /// <param name="entity">给定的实体对象。</param>
-    /// <param name="defaultTableName">给定的默认表名。</param>
-    /// <param name="descriptor">输出 <see cref="ShardingDescriptor"/>。</param>
-    /// <param name="shardedAction">给定已分片的动作（可选）。</param>
-    /// <returns>返回 <see cref="ShardingTableSetting"/>。</returns>
-    ShardingTableSetting ShardTable(Type entityType, object? entity, string? defaultTableName,
-        out ShardingDescriptor descriptor, Action<ShardingDescriptor, ShardingTableSetting>? shardedAction = null);
+    /// <param name="context">给定的 <see cref="IDataContext"/>。</param>
+    /// <returns>返回分库的连接字符串。</returns>
+    string? ShardingDatabase(IDataContext context);
+
+    /// <summary>
+    /// 对存取器的表集合分表。
+    /// </summary>
+    /// <param name="context">给定的 <see cref="IDataContext"/>。</param>
+    /// <returns>返回需要分表的字典集合。</returns>
+    Dictionary<ShardingDescriptor, List<ShardingItemSetting>>? ShardingTables(IDataContext context);
+
+
+    ///// <summary>
+    ///// 对实体的数据表分片。
+    ///// </summary>
+    ///// <param name="accessor">给定的 <see cref="IAccessor"/>。</param>
+    ///// <param name="entityType">给定的实体类型。</param>
+    ///// <param name="entity">给定的实体对象。</param>
+    ///// <param name="originalName">给定的原始名称。</param>
+    ///// <param name="descriptor">输出 <see cref="ShardingDescriptor"/>。</param>
+    ///// <param name="shardedAction">给定已分片的动作（可选）。</param>
+    ///// <returns>返回 <see cref="ShardingTableSetting"/>。</returns>
+    //ShardingTableSetting ShardTable(IAccessor accessor, Type entityType, object? entity, string originalName,
+    //    out ShardingDescriptor descriptor, Action<ShardingDescriptor, ShardingTableSetting>? shardedAction = null);
 
 }

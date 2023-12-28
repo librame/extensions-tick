@@ -34,6 +34,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <param name="priority">给定的优先级。</param>
     /// <param name="algorithm">给定的算法选项。</param>
     /// <param name="sharded">给定的分库特性。</param>
+    /// <param name="shardingValues">给定的分片值集合。</param>
     /// <param name="loaderHost">给定的负载器主机。</param>
     public AccessorDescriptor(IAccessor accessor,
         Type serviceType,
@@ -46,6 +47,7 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
         float priority,
         AlgorithmOptions algorithm,
         ShardingAttribute? sharded,
+        List<IShardingValue>? shardingValues,
         string? loaderHost)
     {
         Accessor = accessor;
@@ -58,7 +60,8 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
         //Pooling = pooling;
         Priority = priority;
         Algorithm = algorithm;
-        Sharded = sharded;
+        Sharding = sharded;
+        ShardingValues = shardingValues;
         LoaderHost = loaderHost;
     }
 
@@ -116,7 +119,12 @@ public class AccessorDescriptor : IEquatable<AccessorDescriptor>
     /// <summary>
     /// 分库特性。
     /// </summary>
-    public ShardingAttribute? Sharded { get; init; }
+    public ShardingAttribute? Sharding { get; init; }
+
+    /// <summary>
+    /// 分片值集合。
+    /// </summary>
+    public List<IShardingValue>? ShardingValues { get; init; }
 
     /// <summary>
     /// 负载器主机。
