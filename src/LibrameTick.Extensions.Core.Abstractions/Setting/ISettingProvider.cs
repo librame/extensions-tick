@@ -15,47 +15,19 @@ namespace Librame.Extensions.Setting;
 /// <summary>
 /// 定义一个设置提供程序接口。
 /// </summary>
-/// <typeparam name="TSettingRoot">指定实现 <see cref="ISettingRoot"/> 的设置根类型。</typeparam>
-public interface ISettingProvider<TSettingRoot>
-    where TSettingRoot : ISettingRoot
+/// <typeparam name="TSetting">指定的设置类型。</typeparam>
+public interface ISettingProvider<TSetting>
+    where TSetting : class, ISetting
 {
     /// <summary>
-    /// 设置根类型。
+    /// 当前设置。
     /// </summary>
-    Type RootType { get; }
+    TSetting CurrentSetting { get; }
 
 
     /// <summary>
-    /// 存在设置。
+    /// 保存变化（默认直接返回当前设置）。
     /// </summary>
-    /// <returns>返回布尔值。</returns>
-    bool Exist();
-
-
-    /// <summary>
-    /// 生成设置。
-    /// </summary>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    TSettingRoot Generate();
-
-
-    /// <summary>
-    /// 加载或保存新生成的设置。
-    /// </summary>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    TSettingRoot LoadOrSave();
-
-    /// <summary>
-    /// 加载设置。
-    /// </summary>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    TSettingRoot Load();
-
-
-    /// <summary>
-    /// 保存设置。
-    /// </summary>
-    /// <param name="root">给定的 <typeparamref name="TSettingRoot"/>。</param>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    TSettingRoot Save(TSettingRoot root);
+    /// <returns>返回 <typeparamref name="TSetting"/>。</returns>
+    TSetting SaveChanges();
 }

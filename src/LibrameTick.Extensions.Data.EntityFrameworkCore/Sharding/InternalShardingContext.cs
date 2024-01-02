@@ -17,7 +17,7 @@ using Librame.Extensions.Setting;
 namespace Librame.Extensions.Data.Sharding;
 
 internal sealed class InternalShardingContext(IShardingFinder finder,
-    IShardingSettingProvider settingProvider,
+    IShardingSettingManager settingProvider,
     IShardingStrategyProvider strategyProvider,
     IDispatcherFactory dispatcherFactory)
     : AbstractShardingContext(finder, settingProvider, strategyProvider, dispatcherFactory)
@@ -37,7 +37,7 @@ internal sealed class InternalShardingContext(IShardingFinder finder,
         var shardingDatabaseName = descriptor.GenerateShardingName(newShardingValues: null);
         var newConnectionString = initialConnectionString.Replace(initialDatabaseName, shardingDatabaseName);
 
-        SettingProvider.GetOrCreateDatabase(descriptor, shardingDatabaseName, newConnectionString, context);
+        SettingManager.GetOrCreateDatabase(descriptor, shardingDatabaseName, newConnectionString, context);
 
         return newConnectionString;
     }
@@ -51,7 +51,7 @@ internal sealed class InternalShardingContext(IShardingFinder finder,
         var descriptorEntities = GetShardingEntities(context.Services, descriptors);
         if (descriptorEntities is null || descriptorEntities.Count < 1) return null;
 
-        var setting = SettingProvider.TableRoot;
+        var setting = SettingManager.TableProvider.CurrentSetting;
 
         var descriptorSettings = new Dictionary<ShardingDescriptor, List<ShardingItemSetting>>();
         foreach (var descriptor in descriptorEntities)
@@ -82,7 +82,7 @@ internal sealed class InternalShardingContext(IShardingFinder finder,
 
         if (descriptorSettings.Count > 0)
         {
-            SettingProvider.SaveTableRoot();
+            SettingManager.TableProvider.SaveChanges();
         }
 
         return descriptorSettings;

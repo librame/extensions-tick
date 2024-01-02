@@ -13,57 +13,63 @@
 namespace Librame.Extensions.Setting;
 
 /// <summary>
-/// 定义抽象实现 <see cref="ISettingProvider{TSettingRoot}"/> 的设置提供程序。
+/// 定义抽象实现 <see cref="ISettingProvider{TSetting}"/> 的设置提供程序。
 /// </summary>
-public abstract class AbstractSettingProvider<TSettingRoot> : ISettingProvider<TSettingRoot>
-    where TSettingRoot : ISettingRoot
+/// <typeparam name="TSetting">指定的设置类型。</typeparam>
+public abstract class AbstractSettingProvider<TSetting> : ISettingProvider<TSetting>
+    where TSetting : class, ISetting
 {
-    /// <summary>
-    /// 设置类型。
-    /// </summary>
-    public Type RootType => typeof(TSettingRoot);
+    private readonly IConfigurationBuilder _settingBuilder;
+    private readonly IOptionsMonitor<TSetting> _optionsMonitor;
 
 
     /// <summary>
-    /// 存在设置。
+    /// 构造一个 <see cref="AbstractSettingProvider{TSetting}"/>。
     /// </summary>
-    /// <returns>返回布尔值。</returns>
-    public abstract bool Exist();
-
-
-    /// <summary>
-    /// 生成设置。
-    /// </summary>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    public abstract TSettingRoot Generate();
-
-
-    /// <summary>
-    /// 加载或保存新生成的设置。
-    /// </summary>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    public virtual TSettingRoot LoadOrSave()
+    /// <param name="cache">给定的 <see cref="IOptionsMonitorCache{TSetting}"/>。</param>
+    /// <param name="settingName">给定的设置名称。</param>
+    /// <param name="settingBuilder">给定的 <see cref="IConfigurationBuilder"/>。</param>
+    /// <param name="postAction">给定的后置配置 <typeparamref name="TSetting"/> 动作。</param>
+    /// <param name="setupOptions">给定的安装 <see cref="SettingOptions"/> 动作。</param>
+    protected AbstractSettingProvider(IOptionsMonitorCache<TSetting> cache,
+        string? settingName, IConfigurationBuilder settingBuilder,
+        Action<TSetting>? postAction, Action<SettingOptions>? setupOptions)
     {
-        if (!Exist())
-        {
-            var setting = Generate();
+        var options = new SettingOptions();
+        setupOptions?.Invoke(options);
 
-            return Save(setting);
-        }
+        var configurationRoot = settingBuilder.Build();
+        options.SetupConfigurationRoot?.Invoke(configurationRoot);
 
-        return Load();
+        var configureOptions = options.GetConfigureOptions<TSetting>(settingName, configurationRoot);
+        var postConfigureOptions = SettingOptions.GetPostConfigureOptions(settingName, postAction);
+
+        var factory = new OptionsFactory<TSetting>(configureOptions, postConfigureOptions);
+        var sources = SettingOptions.GetOptionsChangeTokenSources<TSetting>(settingName, configurationRoot);
+
+        _optionsMonitor = new OptionsMonitor<TSetting>(factory, sources, cache);
+        _settingBuilder = settingBuilder;
     }
 
-    /// <summary>
-    /// 加载设置。
-    /// </summary>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    public abstract TSettingRoot Load();
 
     /// <summary>
-    /// 保存设置。
+    /// 设置构建器。
     /// </summary>
-    /// <param name="root">给定的 <typeparamref name="TSettingRoot"/>。</param>
-    /// <returns>返回 <typeparamref name="TSettingRoot"/>。</returns>
-    public abstract TSettingRoot Save(TSettingRoot root);
+    protected IConfigurationBuilder SettingBuilder
+        => _settingBuilder;
+
+    /// <summary>
+    /// 当前设置。
+    /// </summary>
+    public TSetting CurrentSetting
+        => _optionsMonitor.CurrentValue;
+
+
+    /// <summary>
+    /// 保存变化（默认直接返回当前设置）。
+    /// </summary>
+    /// <returns>返回 <typeparamref name="TSetting"/>。</returns>
+    public virtual TSetting SaveChanges()
+        => CurrentSetting;
+
 }

@@ -114,7 +114,6 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
             .AddDevice()
             .AddNetwork()
             .AddPlugins()
-            .AddSetting()
             .AddStorage();
     }
 
@@ -158,13 +157,6 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
         return builder;
     }
 
-    private static CoreExtensionBuilder AddSetting(this CoreExtensionBuilder builder)
-    {
-        builder.TryAddOrReplaceService(typeof(ISettingValues<>), implementationType: typeof(InternalSettingValues<>));
-
-        return builder;
-    }
-
     private static CoreExtensionBuilder AddStorage(this CoreExtensionBuilder builder)
     {
         builder.TryAddOrReplaceService<IStorableFileManager, InternalStorableFileManager>();
@@ -178,29 +170,27 @@ public static class CoreExtensionBuilderServiceCollectionExtensions
     /// <summary>
     /// 添加设置提供程序。
     /// </summary>
-    /// <typeparam name="TBuidler">指定的扩展构建器类型。</typeparam>
-    /// <typeparam name="TProvider">指定的设置提供程序类型（推荐从诸如 <see cref="AbstractJsonFileSettingProvider{TSetting}"/> 等类型继承实现）。</typeparam>
-    /// <param name="builder">给定的 <typeparamref name="TBuidler"/>。</param>
-    /// <returns>返回 <typeparamref name="TBuidler"/>。</returns>
-    public static TBuidler AddSettingProvider<TBuidler, TProvider>(this TBuidler builder)
-        where TBuidler : IExtensionBuilder
+    /// <typeparam name="TProvider">指定的设置提供程序类型（推荐从诸如 <see cref="BaseSettingProvider{TSetting}"/> 等类型继承实现）。</typeparam>
+    /// <param name="builder">给定的 <see cref="IExtensionBuilder"/>。</param>
+    /// <returns>返回 <see cref="IExtensionBuilder"/>。</returns>
+    public static IExtensionBuilder AddSettingProvider<TProvider>(this IExtensionBuilder builder)
         => builder.AddSettingProvider(typeof(TProvider));
 
-    private static readonly Type _iSettingProviderType = typeof(ISettingProvider<>);
+    private static readonly Type _settingProviderType = typeof(ISettingProvider<>);
     /// <summary>
     /// 添加设置提供程序。
     /// </summary>
     /// <typeparam name="TBuidler">指定的扩展构建器类型。</typeparam>
     /// <param name="builder">给定的 <typeparamref name="TBuidler"/>。</param>
-    /// <param name="providerType">给定的设置提供程序类型（推荐从诸如 <see cref="AbstractJsonFileSettingProvider{TSetting}"/> 等类型继承实现）。</param>
+    /// <param name="providerType">给定的设置提供程序类型（推荐从诸如 <see cref="BaseSettingProvider{TSetting}"/> 等类型继承实现）。</param>
     /// <returns>返回 <typeparamref name="TBuidler"/>。</returns>
     public static TBuidler AddSettingProvider<TBuidler>(this TBuidler builder, Type providerType)
         where TBuidler : IExtensionBuilder
     {
-        if (!providerType.IsImplementedType(_iSettingProviderType, out var resultType))
-            throw new ArgumentException($"Invalid setting provider type, the required interface '{_iSettingProviderType}' was not implemented.");
+        if (!providerType.IsImplementedType(_settingProviderType, out var resultType))
+            throw new ArgumentException($"Invalid setting provider type, the required interface '{_settingProviderType}' was not implemented.");
 
-        var serviceType = _iSettingProviderType.MakeGenericType(resultType.GetGenericArguments()[0]);
+        var serviceType = _settingProviderType.MakeGenericType(resultType.GetGenericArguments()[0]);
         builder.TryAddOrReplaceService(serviceType, implementationType: providerType);
 
         return builder;

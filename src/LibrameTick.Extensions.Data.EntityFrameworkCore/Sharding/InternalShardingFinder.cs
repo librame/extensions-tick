@@ -14,9 +14,6 @@ namespace Librame.Extensions.Data.Sharding;
 
 internal sealed class InternalShardingFinder : IShardingFinder
 {
-    //[UnsafeAccessor(UnsafeAccessorKind.Field, Name = "_options")]
-    //private static extern ref DbContextOptions GetOptions(DbContext context);
-
     private readonly ConcurrentDictionary<Type, IReadOnlyList<ShardingDescriptor>?> _cacheTables = new();
 
 

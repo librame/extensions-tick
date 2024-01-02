@@ -15,17 +15,17 @@ using Librame.Extensions.Data.Sharding;
 namespace Librame.Extensions.Setting;
 
 /// <summary>
-/// 定义抽象分片设置。
+/// 定义分片设置。
 /// </summary>
-public abstract class AbstractShardingSetting : IShardingInfo, IEquatable<AbstractShardingSetting>
+public class ShardingSetting : ISetting, IShardingInfo, IEquatable<ShardingSetting>
 {
     private ShardingKey? _key;
 
 
     /// <summary>
-    /// 构造一个 <see cref="AbstractShardingSetting"/> 用于反序列化。
+    /// 构造一个 <see cref="ShardingSetting"/> 用于反序列化。
     /// </summary>
-    protected AbstractShardingSetting()
+    public ShardingSetting()
     {
         BaseName = string.Empty;
         SuffixFormatter = string.Empty;
@@ -36,25 +36,25 @@ public abstract class AbstractShardingSetting : IShardingInfo, IEquatable<Abstra
     }
 
     /// <summary>
-    /// 使用 <see cref="ShardingDescriptor"/> 构造一个 <see cref="AbstractShardingSetting"/>。
+    /// 使用 <see cref="ShardingDescriptor"/> 构造一个 <see cref="ShardingSetting"/>。
     /// </summary>
     /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
-    protected AbstractShardingSetting(ShardingDescriptor descriptor)
+    public ShardingSetting(ShardingDescriptor descriptor)
         : this(descriptor.Attribute)
     {
     }
 
     /// <summary>
-    /// 使用 <see cref="AbstractShardingSetting"/> 构造一个 <see cref="AbstractShardingSetting"/>。
+    /// 使用 <see cref="ShardingSetting"/> 构造一个 <see cref="ShardingSetting"/>。
     /// </summary>
-    /// <param name="setting">给定的 <see cref="AbstractShardingSetting"/>。</param>
-    protected AbstractShardingSetting(AbstractShardingSetting setting)
+    /// <param name="setting">给定的 <see cref="ShardingSetting"/>。</param>
+    public ShardingSetting(ShardingSetting setting)
         : this((IShardingInfo)setting)
     {
         Items = setting.Items;
     }
 
-    private AbstractShardingSetting(IShardingInfo info)
+    private ShardingSetting(IShardingInfo info)
     {
         Kind = info.Kind;
         BaseName = info.BaseName;
@@ -143,19 +143,19 @@ public abstract class AbstractShardingSetting : IShardingInfo, IEquatable<Abstra
     /// <summary>
     /// 通过比较 <see cref="IShardingInfo"/> 与后缀格式化器来判定指定分片设置的相等性。
     /// </summary>
-    /// <param name="other">给定要比较的 <see cref="AbstractShardingSetting"/>。</param>
+    /// <param name="other">给定要比较的 <see cref="ShardingSetting"/>。</param>
     /// <returns>返回是否相等的布尔值。</returns>
-    public virtual bool Equals([NotNullWhen(true)] AbstractShardingSetting? other)
+    public virtual bool Equals([NotNullWhen(true)] ShardingSetting? other)
         => ((IShardingInfo)this).Equals(other)
         && SuffixFormatter.Equals(other.SuffixFormatter, StringComparison.Ordinal);
 
     /// <summary>
-    /// 比较相等，通过调用 <see cref="Equals(AbstractShardingSetting?)"/> 实现。
+    /// 比较相等，通过调用 <see cref="Equals(ShardingSetting?)"/> 实现。
     /// </summary>
     /// <param name="obj">给定要比较的对象。</param>
     /// <returns>返回是否相等的布尔值。</returns>
     public override bool Equals([NotNullWhen(true)] object? obj)
-        => Equals(obj as AbstractShardingSetting);
+        => Equals(obj as ShardingSetting);
 
 
     /// <summary>

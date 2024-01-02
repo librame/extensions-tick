@@ -3,23 +3,23 @@ using Xunit;
 
 namespace Librame.Extensions.Network
 {
-    //public class InternalHttpEndpointsInvokerTests
-    //{
-    //    [Fact]
-    //    public void InvokeTest()
-    //    {
-    //        var services = new ServiceCollection();
+    public class InternalHttpEndpointsInvokerTests
+    {
+        //[Fact]
+        //public void InvokeTest()
+        //{
+        //    var services = new ServiceCollection();
 
-    //        services.AddLibrameCore(options =>
-    //        {
-    //            options.Request.BaseUrl = "https://test";
+        //    services.AddLibrame(options =>
+        //    {
+        //        options.Request.BaseUrl = "https://test";
 
-    //            options.Request.AddEndpoint("/path", opts =>
-    //            {
-    //                opts.Parameters = "username=?;password=?";
-    //            });
-    //        });
-    //    }
+        //        options.Request.AddEndpoint("/path", opts =>
+        //        {
+        //            opts.Parameters = "username=?;password=?";
+        //        });
+        //    });
+        //}
 
-    //}
+    }
 }

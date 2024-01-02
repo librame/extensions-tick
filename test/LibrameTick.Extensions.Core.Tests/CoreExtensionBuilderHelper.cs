@@ -1,4 +1,5 @@
-﻿using Librame.Extensions.Setting;
+﻿using Librame.Extensions.Proxy;
+using Librame.Extensions.Setting;
 using Librame.Extensions.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -29,13 +30,12 @@ namespace Librame.Extensions.Core
 
                     opts.WebFile.FileProviders.Add(fileProvider);
                 })
-                .AddSettingProvider<CoreExtensionBuilder, TestJsonFileSettingProvider>();
+                .AddSettingProvider(typeof(TestJsonFileSettingProvider));
+
+                _builder.Services.AddSingleton<ITestProxyService, TestProxyService>();
             }
 
-            if (_services is null)
-            {
-                _services = _builder.Services.BuildServiceProvider();
-            }
+            _services ??= _builder.Services.BuildServiceProvider();
         }
 
 

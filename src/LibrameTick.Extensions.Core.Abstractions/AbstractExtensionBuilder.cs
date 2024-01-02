@@ -63,7 +63,7 @@ public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensi
     protected AbstractExtensionBuilder(IServiceCollection services)
     {
         Services = services;
-        ServiceCharacteristics = new ServiceCharacteristicCollection();
+        ServiceCharacteristics = [];
         ReplacedServices = new Dictionary<Type, Type>();
     }
 
@@ -75,11 +75,9 @@ public abstract class AbstractExtensionBuilder : AbstractExtensionInfo, IExtensi
     /// </exception>
     /// <param name="parentBuilder">给定的父级 <see cref="IExtensionBuilder"/>。</param>
     protected AbstractExtensionBuilder(IExtensionBuilder parentBuilder)
+        : this(parentBuilder.Services)
     {
         ParentBuilder = parentBuilder;
-        Services = parentBuilder.Services;
-        ServiceCharacteristics = new ServiceCharacteristicCollection();
-        ReplacedServices = new Dictionary<Type, Type>();
     }
 
 

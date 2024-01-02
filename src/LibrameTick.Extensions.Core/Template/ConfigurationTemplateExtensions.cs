@@ -44,7 +44,7 @@ public static class ConfigurationTemplateExtensions
 
     private static void EnableTemplate(ConfigurationTemplateOptions options)
     {
-        ArgumentNullException.ThrowIfNull(options.Source, nameof(options.Source));
+        ArgumentNullException.ThrowIfNull(options.Source);
 
         var source = options.Source;
 

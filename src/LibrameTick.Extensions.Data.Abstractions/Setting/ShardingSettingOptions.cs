@@ -17,7 +17,7 @@ namespace Librame.Extensions.Setting;
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的设置选项。
 /// </summary>
-public class SettingOptions : IOptions
+public class ShardingSettingOptions : IOptions
 {
     /// <summary>
     /// 分栏文件名。

@@ -33,17 +33,17 @@ public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
 
         if (descriptorSettings is null) return;
 
-        //var descriptors = ParseShardingDescriptors(context.DataContext, shardingTables);
-
         // 创建所需分表类型与映射对象
         CreateShardedTypes(context.DataContext, descriptorSettings);
 
-        // 将分表类型与映射对象附加到上下文
-        AddContext(context.DataContext, descriptorSettings);
+        // 将分表类型与映射对象重置到上下文
+        ResetContext(context.DataContext, descriptorSettings);
+
+        var model = context.DataContext.Model;
     }
 
 
-    private static void AddContext(DataContext context,
+    private static void ResetContext(DataContext context,
         Dictionary<ShardingDescriptor, List<ShardingItemSetting>> descriptorSettings)
     {
         if (context.Model is not Model model)

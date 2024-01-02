@@ -17,6 +17,7 @@ namespace Librame.Extensions;
 /// </summary>
 public static class ExpressionExtensions
 {
+
     /// <summary>
     /// 作为属性表达式的名称。
     /// </summary>
@@ -42,28 +43,65 @@ public static class ExpressionExtensions
         };
     }
 
-    /// <summary>
-    /// 如果指定类型实例的属性值。
-    /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <typeparam name="TValue">指定的属性值类型。</typeparam>
-    /// <param name="propertyExpression">给定的属性表达式。</param>
-    /// <param name="source">给定要获取属性值的类型实例。</param>
-    /// <returns>返回属性值。</returns>
-    public static TValue? AsPropertyValue<T, TValue>(this Expression<Func<T, TValue>> propertyExpression, T source)
-    {
-        var name = propertyExpression.AsPropertyName();
 
-        try
-        {
-            var pi = typeof(T).GetRuntimeProperty(name);
-            return (TValue?)pi?.GetValue(source);
-        }
-        catch (AmbiguousMatchException)
-        {
-            return default;
-        }
+    #region GetMember
+
+    /// <summary>
+    /// 通过表达式获取字段值。
+    /// </summary>
+    /// <typeparam name="TSource">指定折来源类型。</typeparam>
+    /// <typeparam name="TField">指定的字段类型。</typeparam>
+    /// <param name="fieldName">给定的字段名称。</param>
+    /// <param name="source">给定的来源实例。</param>
+    /// <returns>返回字段值。</returns>
+    public static TField GetFieldValueByExpression<TSource, TField>(this string fieldName, TSource source)
+        => fieldName.GetFieldFuncByExpression<TSource, TField>()(source);
+
+    /// <summary>
+    /// 通过表达式获取属性值。
+    /// </summary>
+    /// <typeparam name="TSource">指定折来源类型。</typeparam>
+    /// <typeparam name="TProperty">指定的属性类型。</typeparam>
+    /// <param name="propertyName">给定的属性名称。</param>
+    /// <param name="source">给定的来源实例。</param>
+    /// <returns>返回属性值。</returns>
+    public static TProperty GetPropertyValueByExpression<TSource, TProperty>(this string propertyName, TSource source)
+        => propertyName.GetPropertyFuncByExpression<TSource, TProperty>()(source);
+
+
+    /// <summary>
+    /// 通过表达式获取字段方法。
+    /// </summary>
+    /// <typeparam name="TSource">指定折来源类型。</typeparam>
+    /// <typeparam name="TField">指定的字段类型。</typeparam>
+    /// <param name="fieldName">给定的字段名称。</param>
+    /// <returns>返回字段方法。</returns>
+    public static Func<TSource, TField> GetFieldFuncByExpression<TSource, TField>(this string fieldName)
+        => GetMemberFunc<TSource, TField>(p => Expression.Field(p, fieldName));
+
+    /// <summary>
+    /// 通过表达式获取属性方法。
+    /// </summary>
+    /// <typeparam name="TSource">指定折来源类型。</typeparam>
+    /// <typeparam name="TProperty">指定的属性类型。</typeparam>
+    /// <param name="propertyName">给定的属性名称。</param>
+    /// <returns>返回属性方法。</returns>
+    public static Func<TSource, TProperty> GetPropertyFuncByExpression<TSource, TProperty>(this string propertyName)
+        => GetMemberFunc<TSource, TProperty>(p => Expression.Property(p, propertyName));
+
+    private static Func<TSource, TMember> GetMemberFunc<TSource, TMember>(Func<ParameterExpression, MemberExpression> memberFunc)
+    {
+        var sourceType = typeof(TSource);
+
+        var parameter = Expression.Parameter(sourceType, "p");
+        var member = memberFunc(parameter);
+
+        var lambda = Expression.Lambda<Func<TSource, TMember>>(member, parameter);
+
+        return lambda.Compile();
     }
+
+    #endregion
 
 
     #region CreatePropertyExpression
@@ -193,7 +231,7 @@ public static class ExpressionExtensions
         if (propertyInfo is null)
             throw new ArgumentException($"The property '{type}' with the specified name '{propertyName}' was not found.");
 
-        var method = propertyInfo.PropertyType.GetRuntimeMethod(callMethodName, new Type[] { propertyType });
+        var method = propertyInfo.PropertyType.GetRuntimeMethod(callMethodName, [propertyType]);
         if (method is null)
             throw new ArgumentException($"The method '{type}' with the specified name '{propertyName}' was not found.");
 
@@ -332,7 +370,7 @@ public static class ExpressionExtensions
     /// <param name="parameterType">给定的对象参数类型（可选；默认使用对象参数获取类型）。</param>
     /// <returns>返回创建的对象。</returns>
     public static object NewByExpression(this Type type, object parameter, Type? parameterType = null)
-        => type.NewByExpression(new object[] { parameter }, new Type[] { parameterType ?? parameter.GetType() });
+        => type.NewByExpression([parameter], [parameterType ?? parameter.GetType()]);
 
     /// <summary>
     /// 通过表达式使用单个参数新建对象。

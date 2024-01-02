@@ -28,6 +28,24 @@ public class ShardingTableAttribute(string suffixFormatter, params Type[] strate
 
 
     /// <summary>
+    /// 格式化引用键。
+    /// </summary>
+    /// <param name="entityType">给定已标记的实体类型。</param>
+    /// <param name="baseTableName">给定的基础数据表名称（即分片基础名称）。</param>
+    /// <returns>返回 <see cref="ShardingAttribute"/>。</returns>
+    public virtual ShardingAttribute FormatKey(Type entityType, string? baseTableName)
+    {
+        if (BaseName.Contains(DefaultTableKey))
+        {
+            ChangeBaseName(str =>
+                str.Replace(DefaultTableKey, baseTableName ?? entityType.Name.AsPluralize()));
+        }
+
+        return this;
+    }
+
+
+    /// <summary>
     /// 从已标记的类型解析分表特性。
     /// </summary>
     /// <typeparam name="TEntity">指定已标记的实体类型。</typeparam>
@@ -45,19 +63,12 @@ public class ShardingTableAttribute(string suffixFormatter, params Type[] strate
     /// <returns>返回 <see cref="ShardingAttribute"/> 或 NULL。</returns>
     public static ShardingAttribute? GetTable(Type entityType, string? baseTableName)
     {
-        if (!entityType.TryGetAttribute<ShardingAttribute>(out var attribute))
-        {
-            if (!entityType.TryGetAttribute<ShardingTableAttribute>(out var tableAttribute))
-                return null;
+        // 支持继承特性
+        if (!entityType.TryGetAttributeWithInherit<ShardingAttribute>(out var attribute))
+            return null;
 
-            attribute = tableAttribute;
-        }
-
-        if (attribute.BaseName.Contains(DefaultTableKey))
-        {
-            attribute.ChangeBaseName(str =>
-                str.Replace(DefaultTableKey, baseTableName ?? entityType.Name.AsPluralize()));
-        }
+        if (attribute is ShardingTableAttribute tableAttribute)
+            tableAttribute.FormatKey(entityType, baseTableName);
 
         attribute.SourceType ??= entityType;
 

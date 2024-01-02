@@ -12,9 +12,9 @@
 
 namespace Librame.Extensions.Setting;
 
-/// <summary>
-/// 定义一个设置根接口。
-/// </summary>
-public interface ISettingRoot : ISetting
-{
-}
+///// <summary>
+///// 定义一个设置根接口。
+///// </summary>
+//public interface ISettingRoot : ISetting
+//{
+//}

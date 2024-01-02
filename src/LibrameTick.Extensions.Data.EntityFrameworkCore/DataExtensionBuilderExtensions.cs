@@ -74,9 +74,9 @@ public static class DataExtensionBuilderExtensions
 
     private static DataExtensionBuilder AddSetting(this DataExtensionBuilder builder)
     {
-        builder.AddSettingProvider<DataExtensionBuilder, DatabaseJsonFileSettingProvider>();
-        builder.AddSettingProvider<DataExtensionBuilder, TableJsonFileSettingProvider>();
-        builder.TryAddOrReplaceService<IShardingSettingProvider, InternalShardingSettingProvider>();
+        //builder.AddSettingProvider<DataExtensionBuilder, DatabaseJsonFileSettingProvider>();
+        //builder.AddSettingProvider<DataExtensionBuilder, TableJsonFileSettingProvider>();
+        builder.TryAddOrReplaceService<IShardingSettingManager, InternalShardingSettingManager>();
 
         return builder;
     }

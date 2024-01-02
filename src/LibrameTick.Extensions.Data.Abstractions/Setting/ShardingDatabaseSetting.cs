@@ -17,91 +17,80 @@ namespace Librame.Extensions.Setting;
 /// <summary>
 /// 定义分库设置。
 /// </summary>
-public sealed class ShardingDatabaseSetting : AbstractShardingSetting
+public class ShardingDatabaseSetting : ISetting
 {
     /// <summary>
-    /// 构造一个默认 <see cref="ShardingDatabaseSetting"/>。
+    /// 分片设置集合。
     /// </summary>
-    public ShardingDatabaseSetting()
-    {
-    }
+    public List<ShardingSetting> Databases { get; set; } = [];
+
 
     /// <summary>
-    /// 使用 <see cref="ShardingDescriptor"/> 构造一个 <see cref="ShardingDatabaseSetting"/>。
+    /// 获取或创建分库设置。
     /// </summary>
     /// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
-    public ShardingDatabaseSetting(ShardingDescriptor descriptor)
-        : base(descriptor)
+    /// <param name="shardedName">给定的分库名称。</param>
+    /// <param name="sourceId">给定的来源标识。</param>
+    /// <param name="source">给定的来源（暂不支持持久化）。</param>
+    /// <param name="createdAction">给定的已创建方法。</param>
+    /// <returns>返回包含 <see cref="ShardingDatabaseSetting"/> 与 <see cref="ShardingItemSetting"/> 的元组。</returns>
+    public virtual (ShardingSetting databaseSetting, ShardingItemSetting itemSetting) GetOrCreate(
+        ShardingDescriptor descriptor, string shardedName, string? sourceId, object? source, Action? createdAction)
     {
+        if (TryGet(descriptor.SourceType, out var database))
+        {
+            if (!database.TryGetItem(shardedName, out var item))
+            {
+                var lastName = database.Items.LastOrDefault()?.CurrentName;
+
+                item = ShardingItemSetting.Create(shardedName, lastName, sourceId, source);
+                database.Items.Add(item);
+
+                createdAction?.Invoke();
+            }
+
+            return (database, item);
+        }
+        else
+        {
+            var item = ShardingItemSetting.Create(shardedName, lastName: null, sourceId, source);
+
+            database = new ShardingSetting(descriptor);
+            database.Items.Add(item);
+
+            Databases.Add(database);
+
+            createdAction?.Invoke();
+
+            return (database, item);
+        }
+    }
+
+
+    /// <summary>
+    /// 添加分库设置。
+    /// </summary>
+    /// <param name="database">给定的 <see cref="ShardingSetting"/>。</param>
+    /// <returns>返回是否添加的布尔值。</returns>
+    public virtual bool TryAdd(ShardingSetting database)
+    {
+        if (Databases.Any(p => p.Equals(database)))
+            return false;
+
+        Databases.Add(database);
+        return true;
     }
 
     /// <summary>
-    /// 使用 <see cref="AbstractShardingSetting"/> 构造一个 <see cref="ShardingDatabaseSetting"/>。
+    /// 尝试获取指定数据上下文类型的分库设置。
     /// </summary>
-    /// <param name="setting">给定的 <see cref="AbstractShardingSetting"/>。</param>
-    public ShardingDatabaseSetting(AbstractShardingSetting setting)
-        : base(setting)
+    /// <param name="contextType">给定的数据上下文类型。</param>
+    /// <param name="result">输出 <see cref="ShardingDatabaseSetting"/>。</param>
+    /// <returns>返回是否存在的布尔值。</returns>
+    public virtual bool TryGet(Type contextType, [NotNullWhen(true)] out ShardingSetting? result)
     {
+        result = Databases.SingleOrDefault(p => p.SourceType == contextType);
+        return result is not null;
     }
-
-
-    ///// <summary>
-    ///// 获取或新增分片项设置。
-    ///// </summary>
-    ///// <param name="shardedName">给定的分片名称。</param>
-    ///// <param name="originalName">给定的原始名称。</param>
-    ///// <param name="accessorId">给定的存取器标识。</param>
-    ///// <param name="addAction">给定新增后的动作（可选）。</param>
-    ///// <returns>返回 <see cref="ShardingItemSetting"/>。</returns>
-    //public virtual ShardingItemSetting GetOrAddItem(string shardedName, string originalName,
-    //    string accessorId, Action? addAction = null)
-    //{
-    //    if (!TryGetItem(shardedName, out var item))
-    //    {
-    //        item = ShardingItemSetting.Create(shardedName, originalName, accessorId);
-    //        Items.Add(item);
-
-    //        addAction?.Invoke();
-    //    }
-    //    //else
-    //    //{
-    //    //    item.IsNeedSharding = false;
-    //    //}
-
-    //    return item;
-    //}
-
-
-    ///// <summary>
-    ///// 使用分片描述符创建分库设置。
-    ///// </summary>
-    ///// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
-    ///// <param name="shardedName">给定的分片名称。</param>
-    ///// <param name="originalName">给定的原始名称。</param>
-    ///// <param name="connectionString">给定的连接字符串。</param>
-    ///// <returns>返回 <see cref="ShardingDatabaseSetting"/>。</returns>
-    //public static ShardingDatabaseSetting Create(ShardingDescriptor descriptor,
-    //    string shardedName, string originalName, string connectionString)
-    //    => Create(descriptor, shardedName, originalName, connectionString, out _);
-
-    ///// <summary>
-    ///// 使用分片描述符创建分库设置。
-    ///// </summary>
-    ///// <param name="descriptor">给定的 <see cref="ShardingDescriptor"/>。</param>
-    ///// <param name="shardedName">给定的分片名称。</param>
-    ///// <param name="lastName">给定的原始名称。</param>
-    ///// <param name="connectionString">给定的连接字符串。</param>
-    ///// <param name="result">输出 <see cref="ShardingItemSetting"/>。</param>
-    ///// <returns>返回 <see cref="ShardingDatabaseSetting"/>。</returns>
-    //public static ShardingDatabaseSetting Create(ShardingDescriptor descriptor,
-    //    string shardedName, string lastName, string connectionString, out ShardingItemSetting result)
-    //{
-    //    var setting = new ShardingDatabaseSetting(descriptor);
-
-    //    result = ShardingItemSetting.Create(shardedName, lastName, connectionString);
-    //    setting.Items.Add(result);
-
-    //    return setting;
-    //}
 
 }

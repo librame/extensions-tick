@@ -12,6 +12,7 @@
 
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.Configuration.Json;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.FileProviders.Internal;
@@ -31,6 +32,7 @@ global using System.Net;
 global using System.Net.Http;
 global using System.Net.Http.Headers;
 global using System.Reflection;
+global using System.Runtime.CompilerServices;
 global using System.Text;
 global using System.Text.Json.Serialization;
 global using System.Threading;

@@ -35,6 +35,8 @@ public sealed class DataContextServices(DataContext context, DbContextOptions op
     private readonly DataContext _context = context;
     private readonly DbContextOptions _options = options;
 
+    private ShardingDescriptor? _initialShardingDescriptor;
+
 
     /// <summary>
     /// 分片上下文。
@@ -105,16 +107,21 @@ public sealed class DataContextServices(DataContext context, DbContextOptions op
     {
         get
         {
-            // 默认优先使用配置分片规则，其次使用分片标注特性
-            var attribute = ContextAccessorOptions?.Sharding
-                ?? ShardingDatabaseAttribute.GetDatabase(_context.ContextType, InitialDatabaseName);
+            if (_initialShardingDescriptor is null)
+            {
+                // 默认优先使用配置分片规则，其次使用分片标注特性
+                var attribute = ContextAccessorOptions?.Sharding ??
+                    ShardingDatabaseAttribute.GetDatabase(_context.ContextType, InitialDatabaseName);
 
-            if (attribute is null) return null;
+                if (attribute is null) return null;
 
-            var shardingValues = ContextAccessorOptions?.ShardingValues
-                ?? _context.ContextType.GetImplementedShardingValues().ToList();
+                var shardingValues = ContextAccessorOptions?.ShardingValues
+                    ?? _context.ContextType.GetImplementedShardingValues().ToList();
 
-            return new ShardingDescriptor(ShardingContext.StrategyProvider, attribute, shardingValues);
+                _initialShardingDescriptor = new ShardingDescriptor(ShardingContext.StrategyProvider, attribute, shardingValues);
+            }
+            
+            return _initialShardingDescriptor;
         }
     }
 

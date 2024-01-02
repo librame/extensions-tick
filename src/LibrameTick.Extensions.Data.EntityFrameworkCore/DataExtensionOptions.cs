@@ -67,9 +67,9 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     public ShardingOptions Sharding { get; set; } = new();
 
     /// <summary>
-    /// 设置选项。
+    /// 分片设置选项。
     /// </summary>
-    public SettingOptions Setting { get; set; } = new();
+    public ShardingSettingOptions Setting { get; set; } = new();
 
     /// <summary>
     /// 存储选项。

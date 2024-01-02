@@ -24,8 +24,7 @@ namespace Librame.Extensions.Data.Accessing;
 public class AccessorDbContextOptionsBuilder
 {
     //private readonly CoreOptionsExtension? _coreOptions;
-    //private readonly RelationalOptionsExtension? _relationalOptions;
-
+    private readonly RelationalOptionsExtension? _relationalOptions;
     private readonly Type? _contextType;
 
 
@@ -48,7 +47,8 @@ public class AccessorDbContextOptionsBuilder
         ParentBuilder = parentBuilder;
 
         //_coreOptions = parentBuilder.Options.FindExtension<CoreOptionsExtension>();
-        //_relationalOptions = RelationalOptionsExtension.Extract(parentBuilder.Options);
+        _relationalOptions = parentBuilder.Options.Extensions.OfType<RelationalOptionsExtension>().FirstOrDefault();
+        //RelationalOptionsExtension.Extract(parentBuilder.Options);
 
         //if (_coreOptions?.MaxPoolSize > 0)
         //    WithOption(e => e.WithPooling(true));
@@ -157,7 +157,14 @@ public class AccessorDbContextOptionsBuilder
     /// <param name="databaseAttribute">给定的 <see cref="ShardingDatabaseAttribute"/>。</param>
     /// <returns>返回 <see cref="AccessorDbContextOptionsBuilder"/>。</returns>
     public virtual AccessorDbContextOptionsBuilder WithSharding(ShardingDatabaseAttribute databaseAttribute)
-        => WithOption(e => e.WithSharding(databaseAttribute));
+    {
+        var connectionString = _relationalOptions?.Connection?.ConnectionString ?? _relationalOptions?.ConnectionString;
+            
+        if (ContextType is not null)
+            databaseAttribute.FormatKey(ContextType, connectionString.ParseDatabaseFromConnectionString());
+
+        return WithOption(e => e.WithSharding(databaseAttribute));
+    }
 
     /// <summary>
     /// 分片规则特性（可以在此配置，也可以在 <see cref="DataContext"/> 派生类型上标注）。

@@ -19,7 +19,7 @@ namespace Librame.Extensions
             var propertyName = expression.AsPropertyName();
             Assert.Equal(bodyName, propertyName);
 
-            var utf8Name = expression.AsPropertyValue(EncodingExtensions.UTF8Encoding);
+            var utf8Name = expression.Compile()(EncodingExtensions.UTF8Encoding);
             Assert.Equal("utf-8", utf8Name);
 
             // p => p.BodyName
@@ -34,7 +34,7 @@ namespace Librame.Extensions
 
             var codePageName = nameof(Encoding.CodePage);
 
-            var codePage = expression.AsPropertyValue(EncodingExtensions.UTF8Encoding);
+            var codePage = expression.Compile()(EncodingExtensions.UTF8Encoding);
             var orginalCodePage = 65001;
 
             // p => p.CodePage > orginalCodePage

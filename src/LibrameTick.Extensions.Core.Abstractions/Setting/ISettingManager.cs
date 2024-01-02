@@ -12,12 +12,7 @@
 
 namespace Librame.Extensions.Setting;
 
-internal sealed class InternalShardingSettingProvider : AbstractShardingSettingProvider
-{
-    public InternalShardingSettingProvider(ISettingProvider<ShardingDatabaseSettingRoot> databaseSettingProvider,
-        ISettingProvider<ShardingTableSettingRoot> tableSettingProvider)
-        : base(databaseSettingProvider, tableSettingProvider)
-    {
-    }
+//public interface ISettingManager
+//{
 
-}
+//}

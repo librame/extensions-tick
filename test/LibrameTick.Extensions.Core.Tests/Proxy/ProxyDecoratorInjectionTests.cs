@@ -1,5 +1,4 @@
 ﻿using Librame.Extensions.Core;
-using Librame.Extensions.Setting;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -16,18 +15,18 @@ namespace Librame.Extensions.Proxy
         public void AllTest()
         {
             // 拦截容器已注册实例
-            var decorator = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<IProxyDecorator<ISettingProvider<TestSetting>>>();
+            var decorator = CoreExtensionBuilderHelper.CurrentServices.GetRequiredService<IProxyDecorator<ITestProxyService>>();
 
-            var info = decorator.ProxySource.Generate();
-            Assert.NotNull(info);
+            var name = decorator.ProxySource.GetName();
+            Assert.NotNull(name);
             Assert.Contains("pre invoked", PreActionMessage);
             Assert.Contains("post invoked", PostActionMessage);
 
             PreActionMessage = null;
             PostActionMessage = null;
 
-            info = decorator.Only(p => p.Generate());
-            Assert.NotNull(info);
+            name = decorator.Only(p => p.GetName());
+            Assert.NotNull(name);
             Assert.Contains("pre invoked", PreActionMessage);
             Assert.Contains("post invoked", PostActionMessage);
         }

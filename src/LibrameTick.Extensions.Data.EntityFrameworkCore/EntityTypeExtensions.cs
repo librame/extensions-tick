@@ -30,8 +30,7 @@ public static class EntityTypeExtensions
     /// <param name="entityType">给定的 <see cref="IMutableEntityType"/>。</param>
     /// <returns>返回 <see cref="ShardingAttribute"/>。</returns>
     public static ShardingAttribute? GetShardingAttribute(this IReadOnlyEntityType entityType)
-        => ShardingTableAttribute.GetTable(entityType.ClrType,
-            entityType.GetTableName() ?? entityType.ClrType.Name.AsPluralize());
+        => ShardingTableAttribute.GetTable(entityType.ClrType, entityType.GetTableName());
 
 
     /// <summary>

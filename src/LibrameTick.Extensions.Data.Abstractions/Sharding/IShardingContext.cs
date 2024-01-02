@@ -28,7 +28,7 @@ public interface IShardingContext
     /// <summary>
     /// 设置提供程序。
     /// </summary>
-    IShardingSettingProvider SettingProvider { get; }
+    IShardingSettingManager SettingManager { get; }
 
     /// <summary>
     /// 策略提供程序。

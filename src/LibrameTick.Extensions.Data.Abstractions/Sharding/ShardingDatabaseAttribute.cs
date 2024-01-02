@@ -28,6 +28,24 @@ public class ShardingDatabaseAttribute(string suffixFormatter, params Type[] str
 
 
     /// <summary>
+    /// 格式化引用键。
+    /// </summary>
+    /// <param name="contextType">给定已标记的数据库上下文类型。</param>
+    /// <param name="baseDatabaseName">给定的基础数据库名称（即分片基础名称）。</param>
+    /// <returns>返回 <see cref="ShardingAttribute"/>。</returns>
+    public virtual ShardingAttribute FormatKey(Type contextType, string? baseDatabaseName)
+    {
+        if (BaseName.Contains(DefaultDatabaseKey))
+        {
+            ChangeBaseName(str => str.Replace(DefaultDatabaseKey,
+                baseDatabaseName ?? contextType.Name.TrimEnd("Context")));
+        }
+
+        return this;
+    }
+
+
+    /// <summary>
     /// 从已标记的类型解析分库特性。
     /// </summary>
     /// <param name="contextType">给定已标记的数据库上下文类型。</param>
@@ -35,19 +53,12 @@ public class ShardingDatabaseAttribute(string suffixFormatter, params Type[] str
     /// <returns>返回 <see cref="ShardingAttribute"/> 或 NULL。</returns>
     public static ShardingAttribute? GetDatabase(Type contextType, string? baseDatabaseName)
     {
-        if (!contextType.TryGetAttribute<ShardingAttribute>(out var attribute))
-        {
-            if (!contextType.TryGetAttribute<ShardingDatabaseAttribute>(out var databaseAttribute))
-                return null;
+        // 支持继承特性
+        if (!contextType.TryGetAttributeWithInherit<ShardingAttribute>(out var attribute))
+            return null;
 
-            attribute = databaseAttribute;
-        }
-
-        if (attribute.BaseName.Contains(DefaultDatabaseKey))
-        {
-            attribute.ChangeBaseName(str =>
-                str.Replace(DefaultDatabaseKey, baseDatabaseName ?? contextType.Name.TrimEnd("Context")));
-        }
+        if (attribute is ShardingDatabaseAttribute databaseAttribute)
+            databaseAttribute.FormatKey(contextType, baseDatabaseName);
 
         attribute.SourceType ??= contextType;
 

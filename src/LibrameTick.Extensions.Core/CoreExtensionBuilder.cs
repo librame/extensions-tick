@@ -16,7 +16,6 @@ using Librame.Extensions.Dispatchers;
 using Librame.Extensions.Network;
 using Librame.Extensions.Plugins;
 using Librame.Extensions.Proxy;
-using Librame.Extensions.Setting;
 using Librame.Extensions.Storage;
 
 namespace Librame.Extensions.Core;
@@ -56,9 +55,6 @@ public class CoreExtensionBuilder : AbstractExtensionBuilder<CoreExtensionBuilde
 
         // Plugins
         ServiceCharacteristics.AddSingleton<IPluginResolver>();
-
-        // Settings
-        ServiceCharacteristics.AddSingleton(typeof(ISettingValues<>));
 
         // Storage
         ServiceCharacteristics.AddSingleton<IStorableFileManager>();

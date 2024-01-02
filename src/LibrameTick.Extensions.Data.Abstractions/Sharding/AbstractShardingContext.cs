@@ -27,16 +27,16 @@ public abstract class AbstractShardingContext : IShardingContext
     /// 构造一个 <see cref="AbstractShardingContext"/>。
     /// </summary>
     /// <param name="finder">给定的 <see cref="IShardingFinder"/>。</param>
-    /// <param name="settingProvider">给定的 <see cref="IShardingSettingProvider"/>。</param>
+    /// <param name="settingManager">给定的 <see cref="IShardingSettingManager"/>。</param>
     /// <param name="strategyProvider">给定的 <see cref="IShardingStrategyProvider"/>。</param>
     /// <param name="dispatcherFactory">给定的 <see cref="IDispatcherFactory"/>。</param>
     protected AbstractShardingContext(IShardingFinder finder,
-        IShardingSettingProvider settingProvider,
+        IShardingSettingManager settingManager,
         IShardingStrategyProvider strategyProvider,
         IDispatcherFactory dispatcherFactory)
     {
         Finder = finder;
-        SettingProvider = settingProvider;
+        SettingManager = settingManager;
         StrategyProvider = strategyProvider;
         DispatcherFactory = dispatcherFactory;
     }
@@ -48,9 +48,9 @@ public abstract class AbstractShardingContext : IShardingContext
     public IShardingFinder Finder { get; init; }
 
     /// <summary>
-    /// 设置提供程序。
+    /// 设置管理器。
     /// </summary>
-    public IShardingSettingProvider SettingProvider { get; init; }
+    public IShardingSettingManager SettingManager { get; init; }
 
     /// <summary>
     /// 策略提供程序。

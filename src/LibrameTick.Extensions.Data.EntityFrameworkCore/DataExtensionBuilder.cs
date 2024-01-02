@@ -55,7 +55,7 @@ public class DataExtensionBuilder : AbstractExtensionBuilder<DataExtensionBuilde
         ServiceCharacteristics.AddScope<IAccessorInitializer>();
 
         // Setting
-        ServiceCharacteristics.AddSingleton<IShardingSettingProvider>();
+        ServiceCharacteristics.AddSingleton<IShardingSettingManager>();
 
         // Sharding
         ServiceCharacteristics.AddSingleton<IShardingFinder>();
