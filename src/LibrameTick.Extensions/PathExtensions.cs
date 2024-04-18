@@ -341,7 +341,7 @@ public static class PathExtensions
         if (regex.IsMatch(path))
         {
             var match = regex.Match(path);
-            return path.Substring(0, match.Index);
+            return path[..match.Index];
         }
 
         return path;

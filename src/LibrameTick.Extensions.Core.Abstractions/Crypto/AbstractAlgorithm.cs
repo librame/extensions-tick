@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义抽象实现 <see cref="IAlgorithm"/> 的算法类。

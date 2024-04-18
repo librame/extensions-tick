@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义用于值转换器的加密提供程序。

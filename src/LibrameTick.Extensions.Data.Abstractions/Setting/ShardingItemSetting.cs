@@ -25,7 +25,7 @@ public class ShardingItemSetting : IEquatable<ShardingItemSetting>
     /// <summary>
     /// 上次分片名称。
     /// </summary>
-    public string? LastName { get; set; }
+    public string? LastName { get; set; } = string.Empty;
 
     /// <summary>
     /// 来源标识。
@@ -51,7 +51,7 @@ public class ShardingItemSetting : IEquatable<ShardingItemSetting>
 
 
     /// <summary>
-    /// 改变经过分片的源。
+    /// 改变已分片源。
     /// </summary>
     /// <param name="sharded">给定已分片对象（暂不支持持久化）。</param>
     /// <param name="shardedType">给定已分片类型。</param>

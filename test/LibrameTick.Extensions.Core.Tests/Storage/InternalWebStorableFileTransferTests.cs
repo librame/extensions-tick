@@ -28,12 +28,12 @@ namespace Librame.Extensions.Storage
         }
 
         [Fact]
-        public void UploadFileAsync()
+        public async void UploadFileAsync()
         {
             var url = "https://domain.com/api/upload";
             var filePath = @"d:\_never.txt";
 
-            Assert.ThrowsAsync<FileNotFoundException>(() =>
+            await Assert.ThrowsAsync<FileNotFoundException>(() =>
             {
                 return _transmission.UploadFileAsync(url, filePath);
             });

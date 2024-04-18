@@ -25,8 +25,8 @@ internal sealed class InternalModelCreator : IModelCreator
         if (dataExtensionOptions.Access.AutoMapping && !string.IsNullOrEmpty(migrationsAssembly))
             modelBuilder.CreateAssembliesModels(migrationsAssembly);
 
-        // 支持数据审计
-        if (dataExtensionOptions.Audit.Enabling)
+        // 支持保存数据审计
+        if (dataExtensionOptions.Audit.SaveAudits)
             modelBuilder.CreateAuditingModels(dataContext);
     }
 

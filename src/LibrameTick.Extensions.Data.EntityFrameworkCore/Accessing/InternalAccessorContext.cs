@@ -123,7 +123,7 @@ internal sealed class InternalAccessorContext : IAccessorContext
     private IReadOnlyDictionary<IAccessor, ShardingDescriptor?> ShardingAccessors(IEnumerable<IAccessor> accessors)
     {
         var shardingAccessors = new Dictionary<IAccessor, ShardingDescriptor?>(
-            PropertyEqualityComparer<IAccessor>.Create(s => s.AccessorId));
+            KeyEqualityComparer<IAccessor>.CreateBy(s => s.AccessorId));
 
         foreach (var accessor in accessors)
         {

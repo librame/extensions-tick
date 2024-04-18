@@ -119,9 +119,9 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
         if (newConnectionString.Equals(RelationalConnection.ConnectionString, StringComparison.Ordinal))
             return this;
 
-        TryCreateDatabase();
-
         RelationalConnection.ConnectionString = newConnectionString;
+
+        TryCreateDatabase();
 
         return this;
     }
@@ -138,9 +138,9 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
         if (newConnectionString.Equals(RelationalConnection.ConnectionString, StringComparison.Ordinal))
             return this;
 
-        await TryCreateDatabaseAsync(cancellationToken);
-
         RelationalConnection.ConnectionString = newConnectionString;
+
+        await TryCreateDatabaseAsync(cancellationToken);
 
         return this;
     }

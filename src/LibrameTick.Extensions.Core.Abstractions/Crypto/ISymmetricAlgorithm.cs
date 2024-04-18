@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+using Librame.Extensions.Dependencies.Cryptography;
+
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义对称算法接口。
@@ -24,17 +26,17 @@ public interface ISymmetricAlgorithm : IAlgorithm
     /// 加密 AES。
     /// </summary>
     /// <param name="buffer">给定待加密的字节数组。</param>
-    /// <param name="options">给定的 <see cref="KeyNonceOptions"/>（可选；默认使用选项配置）。</param>
+    /// <param name="options">给定的 <see cref="CommonKeyNonce"/>（可选；默认使用选项配置）。</param>
     /// <returns>返回字节数组。</returns>
-    byte[] EncryptAes(byte[] buffer, KeyNonceOptions? options = null);
+    byte[] EncryptAes(byte[] buffer, CommonKeyNonce? options = null);
 
     /// <summary>
     /// 解密 AES。
     /// </summary>
     /// <param name="buffer">给定的字节数组。</param>
-    /// <param name="options">给定的 <see cref="KeyNonceOptions"/>（可选；默认使用选项配置）。</param>
+    /// <param name="options">给定的 <see cref="CommonKeyNonce"/>（可选；默认使用选项配置）。</param>
     /// <returns>返回字节数组。</returns>
-    byte[] DecryptAes(byte[] buffer, KeyNonceOptions? options = null);
+    byte[] DecryptAes(byte[] buffer, CommonKeyNonce? options = null);
 
     #endregion
 
@@ -45,17 +47,17 @@ public interface ISymmetricAlgorithm : IAlgorithm
     /// 加密 AES-CCM。
     /// </summary>
     /// <param name="buffer">给定待加密的字节数组。</param>
-    /// <param name="options">给定的 <see cref="KeyNonceTagOptions"/>（可选；默认使用选项配置）。</param>
+    /// <param name="options">给定的 <see cref="CommonKeyNonceTag"/>（可选；默认使用选项配置）。</param>
     /// <returns>返回经过加密的字节数组。</returns>
-    byte[] EncryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null);
+    byte[] EncryptAesCcm(byte[] buffer, CommonKeyNonceTag? options = null);
 
     /// <summary>
     /// 解密 AES-CCM。
     /// </summary>
     /// <param name="buffer">给定的字节数组。</param>
-    /// <param name="options">给定的 <see cref="KeyNonceTagOptions"/>（可选；默认使用选项配置）。</param>
+    /// <param name="options">给定的 <see cref="CommonKeyNonceTag"/>（可选；默认使用选项配置）。</param>
     /// <returns>返回经过解密的字节数组。</returns>
-    byte[] DecryptAesCcm(byte[] buffer, KeyNonceTagOptions? options = null);
+    byte[] DecryptAesCcm(byte[] buffer, CommonKeyNonceTag? options = null);
 
     #endregion
 
@@ -66,17 +68,17 @@ public interface ISymmetricAlgorithm : IAlgorithm
     /// 加密 AES-GCM。
     /// </summary>
     /// <param name="buffer">给定待加密的字节数组。</param>
-    /// <param name="options">给定的 <see cref="KeyNonceTagOptions"/>（可选；默认使用选项配置）。</param>
+    /// <param name="options">给定的 <see cref="CommonKeyNonceTag"/>（可选；默认使用选项配置）。</param>
     /// <returns>返回经过加密的字节数组。</returns>
-    byte[] EncryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null);
+    byte[] EncryptAesGcm(byte[] buffer, CommonKeyNonceTag? options = null);
 
     /// <summary>
     /// 解密 AES-GCM。
     /// </summary>
     /// <param name="buffer">给定的字节数组。</param>
-    /// <param name="options">给定的 <see cref="KeyNonceTagOptions"/>（可选；默认使用选项配置）。</param>
+    /// <param name="options">给定的 <see cref="CommonKeyNonceTag"/>（可选；默认使用选项配置）。</param>
     /// <returns>返回经过解密的字节数组。</returns>
-    byte[] DecryptAesGcm(byte[] buffer, KeyNonceTagOptions? options = null);
+    byte[] DecryptAesGcm(byte[] buffer, CommonKeyNonceTag? options = null);
 
     #endregion
 

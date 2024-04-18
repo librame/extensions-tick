@@ -78,6 +78,37 @@ public static class EnumerableExtensions
     }
 
     /// <summary>
+    /// 将两个元素组合为集合。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="item">给定的类型实例。</param>
+    /// <param name="other">给定的另一个实例。</param>
+    /// <returns>返回 <see cref="IEnumerable{T}"/>。</returns>
+    public static IEnumerable<T> Combine<T>(T item, T other)
+    {
+        yield return item;
+        yield return other;
+    }
+
+    /// <summary>
+    /// 将单个元素与其他的元素集合拼接为一个完整的集合。
+    /// </summary>
+    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <param name="item">给定的类型实例。</param>
+    /// <param name="others">给定的 <see cref="IEnumerable{T}"/>。</param>
+    /// <returns>返回 <see cref="IEnumerable{T}"/>。</returns>
+    public static IEnumerable<T> Combine<T>(T item, IEnumerable<T> others)
+    {
+        yield return item;
+
+        foreach (var other in others)
+        {
+            yield return other;
+        }
+    }
+
+
+    /// <summary>
     /// 将可枚举集合转为异步可枚举集合。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>

@@ -11,13 +11,14 @@
 #endregion
 
 using Librame.Extensions.Core;
+using Librame.Extensions.Dependencies.Cryptography;
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的算法选项。
 /// </summary>
-public class AlgorithmOptions : CkiOptions
+public class AlgorithmOptions : DependencyKeyring
 {
     /// <summary>
     /// 构造一个 <see cref="AlgorithmOptions"/>。

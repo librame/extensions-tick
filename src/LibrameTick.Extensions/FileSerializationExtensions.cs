@@ -17,6 +17,12 @@ namespace Librame.Extensions;
 /// </summary>
 public static class FileSerializationExtensions
 {
+    /// <summary>
+    /// 当前扩展依赖。
+    /// </summary>
+    public static Dependencies.IExtensionsDependency Dependency
+        => Dependencies.ExtensionsDependencyInstantiator.Instance;
+
 
     #region Binary
 
@@ -26,7 +32,7 @@ public static class FileSerializationExtensions
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="obj">给定的对象实例（可选；默认使用对象类型创建实例）。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
     /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
     /// <param name="customReadFuncs">给定的自定义字段类型读取方法字典集合（可选）。</param>
     /// <returns>返回 <typeparamref name="T"/>。</returns>
@@ -41,7 +47,7 @@ public static class FileSerializationExtensions
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="objType">给定要读取的对象类型。</param>
     /// <param name="obj">给定的对象实例（可选；默认使用对象类型创建实例）。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
     /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
     /// <param name="customReadFuncs">给定的自定义字段类型读取方法字典集合（可选）。</param>
     /// <returns>返回对象。</returns>
@@ -50,7 +56,7 @@ public static class FileSerializationExtensions
         Dictionary<Type, Func<BinaryReader, object, object>>? customReadFuncs = null)
     {
         using (var input = File.Open(filePath, FileMode.Open))
-        using (var reader = new BinaryReader(input, encoding ?? EncodingExtensions.UTF8Encoding))
+        using (var reader = new BinaryReader(input, encoding ?? Dependency.Encoding))
         {
             return DeserializeBinaryCore(reader, objType, obj, flags, customReadFuncs);
         }
@@ -61,9 +67,7 @@ public static class FileSerializationExtensions
         Dictionary<Type, Func<BinaryReader, object, object>>? customReadFuncs = null)
     {
         obj ??= Activator.CreateInstance(objType);
-
-        if (obj is null)
-            throw new ArgumentNullException(nameof(obj));
+        ArgumentNullException.ThrowIfNull(obj);
 
         var fields = flags is null
             ? objType.GetFields(TypeExtensions.AllMemberFlagsWithStatic)
@@ -87,7 +91,7 @@ public static class FileSerializationExtensions
                     return reader.ReadByte();
 
                 case "System.Byte[]":
-                    return reader.ReadString().FromBase64String();
+                    return Convert.FromBase64String(reader.ReadString());
 
                 case "System.Char":
                     return reader.ReadChar();
@@ -149,7 +153,7 @@ public static class FileSerializationExtensions
     /// </summary>
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="obj">给定要写入文件的对象。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
     /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
     /// <param name="customWriteActions">给定的自定义字段类型写入动作字典集合（可选）。</param>
     public static void SerializeBinaryFile(this string filePath, object obj,
@@ -157,7 +161,7 @@ public static class FileSerializationExtensions
         Dictionary<Type, Action<BinaryWriter, object?>>? customWriteActions = null)
     {
         using (var output = File.Open(filePath, FileMode.Create))
-        using (var writer = new BinaryWriter(output, encoding ?? EncodingExtensions.UTF8Encoding))
+        using (var writer = new BinaryWriter(output, encoding ?? Dependency.Encoding))
         {
             SerializeBinaryCore(writer, obj, objType: null, flags, customWriteActions);
         }
@@ -194,7 +198,7 @@ public static class FileSerializationExtensions
                 case "System.Byte[]":
                     var bytes = (byte[]?)fieldValue;
                     if (bytes is not null && bytes.Length > 0)
-                        writer.Write(bytes.AsBase64String());
+                        writer.Write(Convert.ToBase64String(bytes));
                     break;
 
                 case "System.Char":
@@ -285,13 +289,13 @@ public static class FileSerializationExtensions
     /// </summary>
     /// <typeparam name="T">指定的反序列化类型。</typeparam>
     /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
     /// <returns>返回反序列化对象。</returns>
     public static T? DeserializeJsonFile<T>(this string filePath, Encoding? encoding = null,
         JsonSerializerOptions? options = null)
     {
-        var json = File.ReadAllText(filePath, encoding ?? EncodingExtensions.UTF8Encoding);
+        var json = File.ReadAllText(filePath, encoding ?? Dependency.Encoding);
         return JsonSerializer.Deserialize<T>(json, options);
     }
 
@@ -300,13 +304,13 @@ public static class FileSerializationExtensions
     /// </summary>
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="returnType">给定的反序列化对象类型。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
     /// <returns>返回反序列化对象。</returns>
     public static object? DeserializeJsonFile(this string filePath, Type returnType, Encoding? encoding = null,
         JsonSerializerOptions? options = null)
     {
-        var json = File.ReadAllText(filePath, encoding ?? EncodingExtensions.UTF8Encoding);
+        var json = File.ReadAllText(filePath, encoding ?? Dependency.Encoding);
         return json.FromJson(returnType, options);
     }
 
@@ -316,7 +320,7 @@ public static class FileSerializationExtensions
     /// </summary>
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="value">给定的对象值。</param>
-    /// <param name="encoding">给定的 <see cref="Encoding"/>（可选；默认为 <see cref="EncodingExtensions.UTF8Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="JsonExtensions.DefaultSerializerOptions"/>）。</param>
     /// <param name="autoCreateDirectory">自动创建目录（可选；默认启用）。</param>
     /// <returns>返回 JSON 字符串。</returns>
@@ -331,7 +335,7 @@ public static class FileSerializationExtensions
             dir!.CreateDirectory();
         }
 
-        File.WriteAllText(filePath, json, encoding ?? EncodingExtensions.UTF8Encoding);
+        File.WriteAllText(filePath, json, encoding ?? Dependency.Encoding);
         return json;
     }
 

@@ -23,6 +23,11 @@ public interface ISavingChangesContext
     DataContext DataContext { get; }
 
     /// <summary>
+    /// 数据扩展选项。
+    /// </summary>
+    DataExtensionOptions DataOptions { get; }
+
+    /// <summary>
     /// 变化的实体入口集合。
     /// </summary>
     IReadOnlyList<EntityEntry> ChangesEntities { get; }

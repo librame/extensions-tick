@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Crypto;
+using Librame.Extensions.Dependencies;
 using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
 using Librame.Extensions.Network;

@@ -10,53 +10,59 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies.Cryptography;
 
 /// <summary>
-/// 定义实现 <see cref="Core.IOptions"/> 的 HMACHASH 选项。
+/// 定义继承 <see cref="AbstractKey"/> 的 HMAC HASH 密钥环。
 /// </summary>
-public class HmacHashOptions : Core.IOptions
+public class HmacHashKeyring : AbstractKey
 {
     /// <summary>
     /// MD5 密钥。
     /// </summary>
-    public KeyOptions Md5 { get; set; } = new();
+    [JsonPropertyOrder(1)]
+    public CommonKey Md5 { get; set; } = new();
 
     /// <summary>
     /// SHA1 密钥。
     /// </summary>
-    public KeyOptions Sha1 { get; set; } = new();
+    [JsonPropertyOrder(2)]
+    public CommonKey Sha1 { get; set; } = new();
 
     /// <summary>
     /// SHA256 密钥。
     /// </summary>
-    public KeyOptions Sha256 { get; set; } = new();
+    [JsonPropertyOrder(3)]
+    public CommonKey Sha256 { get; set; } = new();
 
     /// <summary>
     /// SHA384 密钥。
     /// </summary>
-    public KeyOptions Sha384 { get; set; } = new();
+    [JsonPropertyOrder(4)]
+    public CommonKey Sha384 { get; set; } = new();
 
     /// <summary>
     /// SHA512 密钥。
     /// </summary>
-    public KeyOptions Sha512 { get; set; } = new();
+    [JsonPropertyOrder(5)]
+    public CommonKey Sha512 { get; set; } = new();
 
 
     /// <summary>
-    /// 生成 HMACHASH 所有密钥。
+    /// 生成所有密钥。
     /// </summary>
     public virtual void GenerateAll()
     {
-        Md5.Generate(64);
-        Sha1.Generate(64);
-        Sha256.Generate(64);
-        Sha384.Generate(128);
-        Sha512.Generate(128);
+        Md5.Generate(MD5.HashSizeInBits); // 64
+        Sha1.Generate(SHA1.HashSizeInBits); // 64
+        Sha256.Generate(SHA256.HashSizeInBits); // 64
+        Sha384.Generate(SHA384.HashSizeInBits); // 128
+        Sha512.Generate(SHA512.HashSizeInBits); // 128
     }
 
+
     /// <summary>
-    /// 填充 HMACHASH 所有密钥。
+    /// 填充所有密钥。
     /// </summary>
     /// <param name="md5Key">给定的 MD5 密钥。</param>
     /// <param name="sha1Key">给定的 SHA1 密钥。</param>
@@ -74,31 +80,16 @@ public class HmacHashOptions : Core.IOptions
     }
 
     /// <summary>
-    /// 填充 HMACHASH 所有密钥。
+    /// 填充所有密钥。
     /// </summary>
-    /// <param name="options">给定的 <see cref="HmacHashOptions"/>。</param>
-    public virtual void PopulateAll(HmacHashOptions options)
+    /// <param name="keyring">给定的 <see cref="HmacHashKeyring"/>。</param>
+    public virtual void PopulateAll(HmacHashKeyring keyring)
     {
-        Md5.Populate(options.Md5);
-        Sha1.Populate(options.Sha1);
-        Sha256.Populate(options.Sha256);
-        Sha384.Populate(options.Sha384);
-        Sha512.Populate(options.Sha512);
+        Md5.Populate(keyring.Md5);
+        Sha1.Populate(keyring.Sha1);
+        Sha256.Populate(keyring.Sha256);
+        Sha384.Populate(keyring.Sha384);
+        Sha512.Populate(keyring.Sha512);
     }
-
-
-    /// <summary>
-    /// 获取哈希码。
-    /// </summary>
-    /// <returns>返回 32 位整数。</returns>
-    public override int GetHashCode()
-        => ToString().GetHashCode();
-
-    /// <summary>
-    /// 转换为字符串。
-    /// </summary>
-    /// <returns>返回字符串。</returns>
-    public override string ToString()
-        => $"[{nameof(Md5)}]{Md5};[{nameof(Sha1)}]{Sha1};[{nameof(Sha256)}]{Sha256};[{nameof(Sha384)}]{Sha384};[{nameof(Sha512)}]{Sha512}";
 
 }

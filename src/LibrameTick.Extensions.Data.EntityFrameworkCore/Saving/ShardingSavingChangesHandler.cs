@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Setting;
 
@@ -21,6 +20,23 @@ namespace Librame.Extensions.Data.Saving;
 /// </summary>
 public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
 {
+    private static Func<DbContext, object, EntityEntry>? _addFunc;
+
+    private static Func<Model, SortedDictionary<string, EntityType>>? _entityTypesFunc;
+    private static Func<Model, Dictionary<Type, (ConfigurationSource ConfigurationSource, SortedSet<EntityType> Types)>>? _sharedTypesFunc;
+
+    private static Func<Model, IList<IModelFinalizedConvention>?>? _modelFinalizedConventionsFunc;
+
+    private static Func<RuntimeModelConvention, IEntityType, RuntimeModel, RuntimeEntityType>? _createRuntimeEntityTypeFunc;
+
+    private static Func<EntityType, SortedDictionary<IReadOnlyList<IReadOnlyProperty>, Key>>? _entityKeysFunc;
+
+    private static Func<TypeBase, SortedSet<TypeBase>>? _directlyDerivedTypesFunc;
+
+    private static Action<EntityType, ConfigurationSource>? _updateBaseTypeConfigurationSourceAction;
+
+    private static FieldInfo? _baseTypeInfo;
+
 
     /// <summary>
     /// 预处理保存上下文。
@@ -33,55 +49,78 @@ public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
 
         if (descriptorSettings is null) return;
 
-        // 创建所需分表类型与映射对象
-        CreateShardedTypes(context.DataContext, descriptorSettings);
-
-        // 将分表类型与映射对象重置到上下文
-        ResetContext(context.DataContext, descriptorSettings);
-
-        var model = context.DataContext.Model;
+        // 将分表类型与映射对象添加到上下文
+        AddContext(context.DataContext, descriptorSettings);
     }
 
-
-    private static void ResetContext(DataContext context,
+    private static void AddContext(DataContext context,
         Dictionary<ShardingDescriptor, List<ShardingItemSetting>> descriptorSettings)
     {
-        if (context.Model is not Model model)
-            return; // 如果不支持动态添加/移除分表类型，则直接退出
 
 #pragma warning disable EF1001 // Internal EF Core API usage.
 
-        var dbSetMethod = context.ContextType.GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!;
-        var shardedEntityTypes = new List<EntityType>();
+        var model = (RuntimeModel)context.Model;
+        var relationalModel = (RelationalModel)context.Model.GetRelationalModel();
 
-        foreach (var descriptor in descriptorSettings)
+        var modelSource = (DataModelSource)context.GetService<IModelSource>();
+        var mutableModel = modelSource.CurrentMutableModel;
+        if (mutableModel is null) return;
+
+        var stateManager = context.GetDependencies().StateManager;
+
+        var typeMappingSource = (IRelationalTypeMappingSource)context.GetService<ProviderConventionSetBuilderDependencies>().TypeMappingSource;
+        var annotationProvider = context.GetService<RelationalModelRuntimeInitializerDependencies>().RelationalAnnotationProvider;
+
+        _addFunc ??= "Add".GetMethodFuncByExpression<DbContext, object, EntityEntry>();
+
+        _entityTypesFunc ??= "_entityTypes".GetFieldFuncByExpression<Model, SortedDictionary<string, EntityType>>();
+        _sharedTypesFunc ??= "_sharedTypes".GetFieldFuncByExpression<Model, Dictionary<Type, (ConfigurationSource ConfigurationSource, SortedSet<EntityType> Types)>>();
+        _modelFinalizedConventionsFunc ??= "_modelFinalizedConventions".GetFieldFuncByExpression<Model, IList<IModelFinalizedConvention>?>();
+        _createRuntimeEntityTypeFunc ??= "Create".GetMethodFuncByExpression<RuntimeModelConvention, IEntityType, RuntimeModel, RuntimeEntityType>();
+
+        _entityKeysFunc ??= "_keys".GetFieldFuncByExpression<EntityType, SortedDictionary<IReadOnlyList<IReadOnlyProperty>, Key>>();
+
+        var runtimeModelConvention = _modelFinalizedConventionsFunc(mutableModel)?.OfType<RuntimeModelConvention>().FirstOrDefault();
+        if (runtimeModelConvention is null) return;
+
+        var entityTypes = _entityTypesFunc(mutableModel);
+        var sharedTypes = _sharedTypesFunc(mutableModel);
+
+        var dbSetMethod = context.ContextType.GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!;
+
+        foreach (var (descriptor, settings) in descriptorSettings)
         {
-            foreach (var setting in descriptor.Value)
+            foreach (var setting in settings)
             {
+                var srcEntityType = mutableModel.FindEntityType(descriptor.SourceType)!;
+
+                var configurationSource = (srcEntityType.IsOwned()
+                    ? mutableModel.FindIsOwnedConfigurationSource(descriptor.SourceType)
+                    : mutableModel.FindIsSharedConfigurationSource(descriptor.SourceType)
+                    ) ?? ConfigurationSource.Explicit;
+
                 var shardedType = setting.ShardedType!.UnderlyingSystemType;
 
-                // 注册分表类型
-                var shardedEntityType = model.CopyEntityType(descriptor.Key.SourceType, shardedType, shardedEntityTypes);
-                if (shardedEntityType is not null)
-                    shardedEntityTypes.Add(shardedEntityType);
+                var shardedEntityType = new EntityType(shardedType, mutableModel, srcEntityType.IsOwned(), configurationSource);
 
-                // 添加分表类型对象
-                var shardedSet = dbSetMethod.MakeGenericMethod(shardedType).Invoke(context, null)!;
-                var shardedSetType = shardedSet.GetType();
+                SetBaseType(shardedEntityType, srcEntityType, configurationSource);
 
-                var addParameterTypes = new Type[] { shardedType };
-                var shardingAddMethod = shardedSetType.GetMethod(nameof(DbSet<ShardingItemSetting>.Add), addParameterTypes)!;
+                AddMutableModel(shardedEntityType, entityTypes, sharedTypes, mutableModel);
 
-                shardingAddMethod.Invoke(shardedSet, new object[] { setting.Sharded! });
+                var entityKeys = _entityKeysFunc(shardedEntityType);
 
-                // 移除旧来源类型对象
-                var sourceSet = dbSetMethod.MakeGenericMethod(descriptor.Key.SourceType).Invoke(context, null)!;
-                var sourceSetType = sourceSet.GetType();
+                AddPrimaryKey(shardedEntityType, srcEntityType, entityKeys);
 
-                var removeParameterTypes = new Type[] { descriptor.Key.SourceType };
-                var sourceRemoveMethod = sourceSetType.GetMethod(nameof(DbSet<ShardingItemSetting>.Remove), removeParameterTypes)!;
+                relationalModel.PopulateTable(shardedEntityType, srcEntityType, configurationSource, annotationProvider, typeMappingSource);
 
-                sourceRemoveMethod.Invoke(sourceSet, new object[] { setting.Source! });
+                // Create RuntimeEntityType
+                var shardedRuntimeEntityType = _createRuntimeEntityTypeFunc(runtimeModelConvention, shardedEntityType, model);
+
+                shardedRuntimeEntityType.PopulateTable(shardedEntityType, srcEntityType, runtimeModelConvention);
+
+                var entry = _addFunc(context, setting.Sharded!);
+
+                var props = shardedEntityType.GetFlattenedProperties();
             }
         }
 
@@ -90,78 +129,94 @@ public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
     }
 
 
-    private static void CreateShardedTypes(DataContext context,
-        Dictionary<ShardingDescriptor, List<ShardingItemSetting>> descriptorSettings)
+#pragma warning disable EF1001 // Internal EF Core API usage.
+
+    private static void AddPrimaryKey(EntityType newEntityType, EntityType srcEntityType,
+        SortedDictionary<IReadOnlyList<IReadOnlyProperty>, Key> entityKeys)
     {
-        // 创建临时分表类型并缓存数据以便保存到数据库
-        var now = context.CurrentServices.CoreOptions.Clock.GetNow();
+        //mutableModel.Builder.Entity(shardedType, configurationSource ?? ConfigurationSource.Explicit);
 
-        var shardingAssemblyName = context.ContextType.Assembly.GetName().Name;
-        shardingAssemblyName = $"{shardingAssemblyName}_Sharding_{now.Ticks}";
+        var srcKey = srcEntityType.FindPrimaryKey();
+        if (srcKey is null) return;
 
-        var moduleBuilder = shardingAssemblyName.BuildModule(out _);
+        var newKeyProperties = newEntityType.GetProperties()
+            .Where(p => srcKey.Properties.Any(op => op.Name == p.Name))
+            .ToArray();
 
-        foreach (var descriptor in descriptorSettings)
-        {
-            foreach (var setting in descriptor.Value)
-            {
-                var shardedType = moduleBuilder.CopyType(descriptor.Key.SourceType, setting.CurrentName);
-                var sharded = ObjectMapper.NewByMapAllPublicProperties(setting.Source!, shardedType);
-
-                setting.ChangeSharded(sharded, shardedType);
-            }
-        }
+        var newKey = new Key(newKeyProperties, newEntityType.GetConfigurationSource());
+        entityKeys.Add(newKeyProperties, newKey);
     }
 
-    //private static IDictionary<string, List<ShardingSavingDescriptor>> ParseShardingDescriptors(
-    //    DataContext context, IReadOnlyList<ShardingTableSetting> shardingTables)
-    //{
-    //    // 解析实体配置的所需分表设置描述符集合
-    //    var pairs = new Dictionary<string, List<ShardingSavingDescriptor>>();
+    private static EntityType? AddMutableModel(EntityType newEntityType, SortedDictionary<string, EntityType> entityTypes,
+        Dictionary<Type, (ConfigurationSource ConfigurationSource, SortedSet<EntityType> Types)> sharedTypes, Model model)
+    {
+        var entityTypeName = newEntityType.Name;
+        if (entityTypes.ContainsKey(entityTypeName))
+        {
+            throw new InvalidOperationException(CoreStrings.DuplicateEntityType(newEntityType.DisplayName()));
+        }
 
-    //    var dbModel = context.Model.GetRelationalModel();
-    //    var dbTableNames = dbModel.Tables.Select(static s => s.Name).ToArray();
+        if (newEntityType.HasSharedClrType)
+        {
+            if (entityTypes.Any(et => !et.Value.HasSharedClrType && et.Value.ClrType == newEntityType.ClrType))
+            {
+                throw new InvalidOperationException(
+                    CoreStrings.ClashingNonSharedType(newEntityType.Name, model.GetDisplayName(newEntityType.ClrType)));
+            }
 
-    //    foreach (var table in shardingTables)
-    //    {
-    //        if (table.ShardedType is null)
-    //            continue;
+            if (sharedTypes.TryGetValue(newEntityType.ClrType, out var existingTypes))
+            {
+                var newConfigurationSource = newEntityType.GetConfigurationSource().Max(existingTypes.ConfigurationSource);
+                existingTypes.Types.Add(newEntityType);
+                sharedTypes[newEntityType.ClrType] = (newConfigurationSource, existingTypes.Types);
+            }
+            else
+            {
+                var types = new SortedSet<EntityType>(TypeBaseNameComparer.Instance) { newEntityType };
+                sharedTypes.Add(newEntityType.ClrType, (newEntityType.GetConfigurationSource(), types));
+            }
+        }
+        else if (sharedTypes.ContainsKey(newEntityType.ClrType))
+        {
+            throw new InvalidOperationException(CoreStrings.ClashingSharedType(newEntityType.DisplayName()));
+        }
 
-    //        foreach (var item in table.Items)
-    //        {
-    //            if (!dbTableNames.Contains(item.ThisShardedName))
-    //            {
-    //                var descriptor = new ShardingSavingDescriptor(item.ThisShardedName, item.Source!, table.ShardedType);
-    //                if (pairs.TryGetValue(item.ThisShardedName, out var value))
-    //                {
-    //                    value.Add(descriptor);
-    //                }
-    //                else
-    //                {
-    //                    pairs.Add(item.ThisShardedName, new List<ShardingSavingDescriptor> { descriptor });
-    //                }
-    //            }
-    //        }
-    //    }
+        entityTypes.Add(entityTypeName, newEntityType);
 
-    //    return pairs;
-    //}
+        return newEntityType;
 
-    //private static List<ShardingTableSetting>? ParseShardingTables(IShardingContext shardingContext,
-    //    IEnumerable<EntityEntry> entityEntries)
-    //{
-    //    if (!entityEntries.Any())
-    //        return null;
+        //return (EntityType?)model.ConventionDispatcher.OnEntityTypeAdded(entityType.Builder)?.Metadata;
+    }
 
-    //    var tables = new List<ShardingTableSetting>();
+    private static EntityType? SetBaseType(EntityType newEntityType, EntityType srcEntityType,
+        ConfigurationSource configurationSource)
+    {
+        //PropertyBase propertyBase = (from p in srcEntityType.GetMembers()
+        //                             select p.Name).SelectMany(FindMembersInHierarchy).FirstOrDefault();
+        //if (propertyBase is not null)
+        //{
+        //    PropertyBase propertyBase2 = newBaseType.FindMembersInHierarchy(propertyBase.Name).Single();
+        //    throw new InvalidOperationException(CoreStrings.DuplicatePropertiesOnBase(DisplayName(), newBaseType.DisplayName(), propertyBase.DeclaringType.DisplayName(), propertyBase.Name, propertyBase2.DeclaringType.DisplayName(), propertyBase2.Name));
+        //}
 
-    //    foreach (var entry in entityEntries)
-    //    {
-    //        var table = shardingContext.ShardTable(entry.Metadata.ClrType, entry.Entity);
-    //        tables.Add(table);
-    //    }
+        _directlyDerivedTypesFunc ??= "_directlyDerivedTypes".GetFieldFuncByExpression<TypeBase, SortedSet<TypeBase>>();
 
-    //    return tables;
-    //}
+        _updateBaseTypeConfigurationSourceAction ??= "UpdateBaseTypeConfigurationSource".GetMethodActionByExpression<EntityType, ConfigurationSource>();
+
+        _baseTypeInfo ??= typeof(TypeBase).GetField("_baseType", TypeExtensions.AllMemberFlagsWithStatic);
+        _baseTypeInfo?.SetValue(newEntityType, srcEntityType);
+
+        var srcDirectlyDerivedTypes = _directlyDerivedTypesFunc(srcEntityType);
+        srcDirectlyDerivedTypes.Add(newEntityType);
+
+        _updateBaseTypeConfigurationSourceAction(newEntityType, configurationSource);
+        srcEntityType?.UpdateConfigurationSource(configurationSource);
+
+        return newEntityType;
+
+        //return (EntityType)Model.ConventionDispatcher.OnEntityTypeBaseTypeChanged(Builder, newBaseType, baseType);
+    }
+
+#pragma warning restore EF1001 // Internal EF Core API usage.
 
 }

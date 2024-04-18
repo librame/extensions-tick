@@ -7,6 +7,27 @@ namespace Librame.Extensions
     public class PathExtensionsTests
     {
 
+        //[Fact]
+        //public void GetDirectoryTest()
+        //{
+        //    // D:\xxx\test\LibrameTick.Extensions.Tests\bin\Debug\net8.0
+        //    var dir = Environment.CurrentDirectory;
+
+        //    // D:\xxx\test\LibrameTick.Extensions.Tests\bin\Debug\net8.0
+        //    dir = Directory.GetCurrentDirectory();
+
+        //    // D:\xxx\test\LibrameTick.Extensions.Tests\bin\Debug\net8.0\
+        //    dir = AppDomain.CurrentDomain.BaseDirectory;
+
+        //    // D:\xxx\test\LibrameTick.Extensions.Tests\bin\Debug\net8.0\
+        //    dir = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+
+        //    // D:\xxx\test\LibrameTick.Extensions.Tests\bin\Debug\net8.0\testhost.exe
+        //    //dir = Process.GetCurrentProcess().MainModule?.FileName;
+
+        //    Assert.NotEmpty(dir);
+        //}
+
         [Fact]
         public void CreateDirectoryTest()
         {

@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义抽象实现 <see cref="IAsymmetricAlgorithm"/> 的非对称算法。
@@ -49,7 +49,7 @@ public abstract class AbstractAsymmetricAlgorithm : AbstractAlgorithm, IAsymmetr
         if (options is null)
             options = Options.Rsa;
 
-        if (!(options.Provider is IRsaSigningCredentialsProvider rsaProvider))
+        if (options.Provider is not IRsaSigningCredentialsProvider rsaProvider)
             throw new NotSupportedException($"{nameof(options)}.{nameof(options.Provider)} unimplemented {nameof(IRsaSigningCredentialsProvider)}.");
 
         var rsa = rsaProvider.LoadRsa();

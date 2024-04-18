@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义实现 <see cref="IEncryptionProvider{String}"/> 用于字符串的加密提供程序。

@@ -47,57 +47,352 @@ public static class ExpressionExtensions
     #region GetMember
 
     /// <summary>
-    /// 通过表达式获取字段值。
+    /// 通过表达式获取调用无参数方法的动作（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回无参数方法的动作。</returns>
+    public static Action<TSrc> GetMethodActionByExpression<TSrc>(this string methodName, Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Action<TSrc>>(typeof(TSrc), genericTypesFunc, []);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的动作（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg">指定要调用方法的参数类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的动作。</returns>
+    public static Action<TSrc, TArg> GetMethodActionByExpression<TSrc, TArg>(this string methodName,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Action<TSrc, TArg>>(typeof(TSrc), genericTypesFunc, [typeof(TArg)]);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的动作（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的动作。</returns>
+    public static Action<TSrc, TArg0, TArg1> GetMethodActionByExpression<TSrc, TArg0, TArg1>(this string methodName,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Action<TSrc, TArg0, TArg1>>(typeof(TSrc), genericTypesFunc, [typeof(TArg0), typeof(TArg1)]);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的动作（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TArg2">指定要调用方法的参数2类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的动作。</returns>
+    public static Action<TSrc, TArg0, TArg1, TArg2> GetMethodActionByExpression<TSrc, TArg0, TArg1, TArg2>(this string methodName,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Action<TSrc, TArg0, TArg1, TArg2>>(typeof(TSrc), genericTypesFunc,
+            [typeof(TArg0), typeof(TArg1), typeof(TArg2)]);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的动作（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TArg2">指定要调用方法的参数2类型。</typeparam>
+    /// <typeparam name="TArg3">指定要调用方法的参数3类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的动作。</returns>
+    public static Action<TSrc, TArg0, TArg1, TArg2, TArg3> GetMethodActionByExpression<TSrc, TArg0, TArg1, TArg2, TArg3>(
+        this string methodName, Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Action<TSrc, TArg0, TArg1, TArg2, TArg3>>(typeof(TSrc), genericTypesFunc,
+            [typeof(TArg0), typeof(TArg1), typeof(TArg2), typeof(TArg3)]);
+
+
+    /// <summary>
+    /// 通过表达式获取调用无参数方法的结果值（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TResult">指定的方法结果类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="source">给定的来源实例（如果调用静态方法，此实例可为 NULL）。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回结果值。</returns>
+    public static TResult GetMethodValueByExpression<TSrc, TResult>(this string methodName, TSrc? source,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodFuncByExpression<TSrc, TResult>(genericTypesFunc)(source!);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的结果值（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg">指定要调用方法的参数类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="source">给定的来源实例（如果调用静态方法，此实例可为 NULL）。</param>
+    /// <param name="arg">给定的方法参数。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回结果值。</returns>
+    public static TResult GetMethodValueByExpression<TSrc, TArg, TResult>(this string methodName, TSrc? source, TArg arg,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodFuncByExpression<TSrc, TArg, TResult>(genericTypesFunc)(source!, arg);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的结果值（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="source">给定的来源实例（如果调用静态方法，此实例可为 NULL）。</param>
+    /// <param name="arg0">给定的方法参数0。</param>
+    /// <param name="arg1">给定的方法参数1。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回结果值。</returns>
+    public static TResult GetMethodValueByExpression<TSrc, TArg0, TArg1, TResult>(this string methodName,
+        TSrc? source, TArg0 arg0, TArg1 arg1, Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodFuncByExpression<TSrc, TArg0, TArg1, TResult>(genericTypesFunc)(source!, arg0, arg1);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的结果值（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TArg2">指定要调用方法的参数2类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="source">给定的来源实例（如果调用静态方法，此实例可为 NULL）。</param>
+    /// <param name="arg0">给定的方法参数0。</param>
+    /// <param name="arg1">给定的方法参数1。</param>
+    /// <param name="arg2">给定的方法参数2。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回结果值。</returns>
+    public static TResult GetMethodValueByExpression<TSrc, TArg0, TArg1, TArg2, TResult>(this string methodName,
+        TSrc? source, TArg0 arg0, TArg1 arg1, TArg2 arg2, Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodFuncByExpression<TSrc, TArg0, TArg1, TArg2, TResult>(genericTypesFunc)(source!, arg0, arg1, arg2);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的结果值（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TArg2">指定要调用方法的参数2类型。</typeparam>
+    /// <typeparam name="TArg3">指定要调用方法的参数3类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="source">给定的来源实例（如果调用静态方法，此实例可为 NULL）。</param>
+    /// <param name="arg0">给定的方法参数0。</param>
+    /// <param name="arg1">给定的方法参数1。</param>
+    /// <param name="arg2">给定的方法参数2。</param>
+    /// <param name="arg3">给定的方法参数3。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回结果值。</returns>
+    public static TResult GetMethodValueByExpression<TSrc, TArg0, TArg1, TArg2, TArg3, TResult>(this string methodName,
+        TSrc? source, TArg0 arg0, TArg1 arg1, TArg2 arg2, TArg3 arg3, Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodFuncByExpression<TSrc, TArg0, TArg1, TArg2, TArg3, TResult>(genericTypesFunc)(source!, arg0, arg1, arg2, arg3);
+
+
+    /// <summary>
+    /// 通过表达式获取调用无参数方法的方法（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回无参方法的方法。</returns>
+    public static Func<TSrc, TResult> GetMethodFuncByExpression<TSrc, TResult>(this string methodName,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Func<TSrc, TResult>>(typeof(TSrc), genericTypesFunc, []);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的方法（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg">指定要调用方法的参数类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的方法。</returns>
+    public static Func<TSrc, TArg, TResult> GetMethodFuncByExpression<TSrc, TArg, TResult>(this string methodName,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Func<TSrc, TArg, TResult>>(typeof(TSrc), genericTypesFunc, [typeof(TArg)]);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的方法（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的方法。</returns>
+    public static Func<TSrc, TArg0, TArg1, TResult> GetMethodFuncByExpression<TSrc, TArg0, TArg1, TResult>(this string methodName,
+        Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Func<TSrc, TArg0, TArg1, TResult>>(typeof(TSrc), genericTypesFunc,
+            [typeof(TArg0), typeof(TArg1)]);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的方法（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TArg2">指定要调用方法的参数2类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的方法。</returns>
+    public static Func<TSrc, TArg0, TArg1, TArg2, TResult> GetMethodFuncByExpression<TSrc, TArg0, TArg1, TArg2, TResult>(
+        this string methodName, Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Func<TSrc, TArg0, TArg1, TArg2, TResult>>(typeof(TSrc), genericTypesFunc,
+            [typeof(TArg0), typeof(TArg1), typeof(TArg2)]);
+
+    /// <summary>
+    /// 通过表达式获取调用带参数方法的方法（支持非公开与静态方法成员。如果调用泛型方法定义，则参数类型集合前N个参数依次对应泛型方法形参类型）。
+    /// </summary>
+    /// <typeparam name="TSrc">指定要调用方法的来源类型。</typeparam>
+    /// <typeparam name="TArg0">指定要调用方法的参数0类型。</typeparam>
+    /// <typeparam name="TArg1">指定要调用方法的参数1类型。</typeparam>
+    /// <typeparam name="TArg2">指定要调用方法的参数2类型。</typeparam>
+    /// <typeparam name="TArg3">指定要调用方法的参数3类型。</typeparam>
+    /// <typeparam name="TResult">指定的返回值类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <returns>返回带参数方法的方法。</returns>
+    public static Func<TSrc, TArg0, TArg1, TArg2, TArg3, TResult> GetMethodFuncByExpression<TSrc, TArg0, TArg1, TArg2, TArg3, TResult>(
+        this string methodName, Func<Type[], Type[]>? genericTypesFunc = null)
+        => methodName.GetMethodByExpression<Func<TSrc, TArg0, TArg1, TArg2, TArg3, TResult>>(typeof(TSrc), genericTypesFunc,
+            [typeof(TArg0), typeof(TArg1), typeof(TArg2), typeof(TArg3)]);
+
+    /// <summary>
+    /// 通过表达式获取调用方法（支持非公开与静态方法成员，也支持调用泛型方法定义）。
+    /// </summary>
+    /// <typeparam name="TResult">指定调用方法的结果类型。</typeparam>
+    /// <param name="methodName">给定的方法名称。</param>
+    /// <param name="souceType">给定要调用方法的来源类型。</param>
+    /// <param name="genericTypesFunc">给定要调用泛型方法的实际参数类型集合（如果是非泛型方法，此参数可为空；传入参数为泛型参数定义集合）。</param>
+    /// <param name="argumentTypes">给定要调用方法的参数类型集合。</param>
+    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
+    /// <exception cref="ArgumentException">
+    /// The method with the specified name was not found.
+    /// </exception>
+    public static TResult GetMethodByExpression<TResult>(this string methodName, Type souceType, Func<Type[], Type[]>? genericTypesFunc,
+        params Type[] argumentTypes)
+    {
+        var srcPara = Expression.Parameter(souceType, "p");
+
+        var argParas = argumentTypes.Length > 0
+            ? argumentTypes.Select((s, i) => Expression.Parameter(s, $"a{i}")).ToArray()
+            : Array.Empty<ParameterExpression>();
+
+        var method = souceType.GetMethod(methodName, TypeExtensions.AllMemberFlagsWithStatic, argumentTypes)
+            ?? souceType.GetMethods(TypeExtensions.AllMemberFlagsWithStatic)
+                .Where(p => p.Name == methodName && p.IsGenericMethodDefinition)
+                .FirstOrDefault() // 尝试查找首个同名的泛型方法定义
+            ?? throw new ArgumentException($"The method with the specified name '{methodName}' was not found.");
+
+        // 泛型方法定义需手动注入泛型参数
+        if (method.IsGenericMethodDefinition)
+        {
+            ArgumentNullException.ThrowIfNull(genericTypesFunc);
+
+            var genericTypes = genericTypesFunc(method.GetGenericArguments());
+            method = method.MakeGenericMethod(genericTypes);
+        }
+
+        var methodCall = method.IsStatic
+            ? Expression.Call(method, argParas)
+            : Expression.Call(srcPara, method, argParas);
+
+        var lambda = Expression.Lambda<TResult>(methodCall, EnumerableExtensions.Combine(srcPara, argParas));
+        return lambda.Compile();
+    }
+
+
+    /// <summary>
+    /// 通过表达式获取字段值（支持非公开与静态字段成员）。
     /// </summary>
     /// <typeparam name="TSource">指定折来源类型。</typeparam>
     /// <typeparam name="TField">指定的字段类型。</typeparam>
     /// <param name="fieldName">给定的字段名称。</param>
-    /// <param name="source">给定的来源实例。</param>
+    /// <param name="source">给定的来源实例（如果调用静态字段，此实例可为 NULL）。</param>
     /// <returns>返回字段值。</returns>
-    public static TField GetFieldValueByExpression<TSource, TField>(this string fieldName, TSource source)
-        => fieldName.GetFieldFuncByExpression<TSource, TField>()(source);
+    public static TField GetFieldValueByExpression<TSource, TField>(this string fieldName, TSource? source)
+        => fieldName.GetFieldFuncByExpression<TSource, TField>()(source!);
 
     /// <summary>
-    /// 通过表达式获取属性值。
+    /// 通过表达式获取属性值（支持非公开与静态属性成员）。
     /// </summary>
     /// <typeparam name="TSource">指定折来源类型。</typeparam>
     /// <typeparam name="TProperty">指定的属性类型。</typeparam>
     /// <param name="propertyName">给定的属性名称。</param>
-    /// <param name="source">给定的来源实例。</param>
+    /// <param name="source">给定的来源实例（如果调用静态属性，此实例可为 NULL）。</param>
     /// <returns>返回属性值。</returns>
-    public static TProperty GetPropertyValueByExpression<TSource, TProperty>(this string propertyName, TSource source)
-        => propertyName.GetPropertyFuncByExpression<TSource, TProperty>()(source);
+    public static TProperty GetPropertyValueByExpression<TSource, TProperty>(this string propertyName, TSource? source)
+        => propertyName.GetPropertyFuncByExpression<TSource, TProperty>()(source!);
 
 
     /// <summary>
-    /// 通过表达式获取字段方法。
+    /// 通过表达式获取字段方法（支持非公开与静态字段成员）。
     /// </summary>
     /// <typeparam name="TSource">指定折来源类型。</typeparam>
     /// <typeparam name="TField">指定的字段类型。</typeparam>
     /// <param name="fieldName">给定的字段名称。</param>
     /// <returns>返回字段方法。</returns>
     public static Func<TSource, TField> GetFieldFuncByExpression<TSource, TField>(this string fieldName)
-        => GetMemberFunc<TSource, TField>(p => Expression.Field(p, fieldName));
+        => GetMemberFunc<TSource, TField>(fieldName, MemberTypes.Field);
 
     /// <summary>
-    /// 通过表达式获取属性方法。
+    /// 通过表达式获取属性方法（支持非公开与静态属性成员）。
     /// </summary>
     /// <typeparam name="TSource">指定折来源类型。</typeparam>
     /// <typeparam name="TProperty">指定的属性类型。</typeparam>
     /// <param name="propertyName">给定的属性名称。</param>
     /// <returns>返回属性方法。</returns>
     public static Func<TSource, TProperty> GetPropertyFuncByExpression<TSource, TProperty>(this string propertyName)
-        => GetMemberFunc<TSource, TProperty>(p => Expression.Property(p, propertyName));
+        => GetMemberFunc<TSource, TProperty>(propertyName, MemberTypes.Property);
 
-    private static Func<TSource, TMember> GetMemberFunc<TSource, TMember>(Func<ParameterExpression, MemberExpression> memberFunc)
+    private static Func<TSource, TMember> GetMemberFunc<TSource, TMember>(string memberName, MemberTypes memberType)
     {
-        var sourceType = typeof(TSource);
+        var srcType = typeof(TSource);
+        var srcPara = Expression.Parameter(srcType, "p");
 
-        var parameter = Expression.Parameter(sourceType, "p");
-        var member = memberFunc(parameter);
+        MemberExpression? memberExpression;
 
-        var lambda = Expression.Lambda<Func<TSource, TMember>>(member, parameter);
+        if (memberType == MemberTypes.Field)
+        {
+            var field = srcType.GetField(memberName, TypeExtensions.AllMemberFlagsWithStatic)
+                ?? throw new ArgumentException($"The field with the specified name '{memberName}' was not found.");
 
+            memberExpression = field.IsStatic
+                ? Expression.Field(expression: null, field)
+                : Expression.Field(srcPara, field);
+        }
+        else if (memberType == MemberTypes.Property)
+        {
+            var property = srcType.GetProperty(memberName, TypeExtensions.AllMemberFlagsWithStatic)
+                ?? throw new ArgumentException($"The property with the specified name '{memberName}' was not found.");
+
+            var isStatic = ((property.GetMethod ?? property.SetMethod)?.IsStatic) ?? false;
+
+            memberExpression = isStatic
+                ? Expression.Property(expression: null, property)
+                : Expression.Property(srcPara, property);
+        }
+        else
+        {
+            throw new NotSupportedException($"Unsupported member type '{memberType}'.");
+        }
+
+        var lambda = Expression.Lambda<Func<TSource, TMember>>(memberExpression, srcPara);
         return lambda.Compile();
     }
 
@@ -116,7 +411,7 @@ public static class ExpressionExtensions
     /// <returns>返回 Lambda 表达式。</returns>
     public static Expression<Func<T, bool>> CreateGreaterThanPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
-        => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
+        => propertyName.CreatePropertyMethodExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
             Expression.GreaterThan);
 
     /// <summary>
@@ -129,7 +424,7 @@ public static class ExpressionExtensions
     /// <returns>返回 Lambda 表达式。</returns>
     public static Expression<Func<T, bool>> CreateGreaterThanOrEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
-        => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
+        => propertyName.CreatePropertyMethodExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
             Expression.GreaterThanOrEqual);
 
     /// <summary>
@@ -142,7 +437,7 @@ public static class ExpressionExtensions
     /// <returns>返回 Lambda 表达式。</returns>
     public static Expression<Func<T, bool>> CreateLessThanPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
-        => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
+        => propertyName.CreatePropertyMethodExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
             Expression.LessThan);
 
     /// <summary>
@@ -155,7 +450,7 @@ public static class ExpressionExtensions
     /// <returns>返回 Lambda 表达式。</returns>
     public static Expression<Func<T, bool>> CreateLessThanOrEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
-        => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
+        => propertyName.CreatePropertyMethodExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
             Expression.LessThanOrEqual);
 
     /// <summary>
@@ -168,7 +463,7 @@ public static class ExpressionExtensions
     /// <returns>返回 Lambda 表达式。</returns>
     public static Expression<Func<T, bool>> CreateNotEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
-        => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
+        => propertyName.CreatePropertyMethodExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
             Expression.NotEqual);
 
     /// <summary>
@@ -181,11 +476,11 @@ public static class ExpressionExtensions
     /// <returns>返回 Lambda 表达式。</returns>
     public static Expression<Func<T, bool>> CreateEqualPropertyExpression<T>(this string propertyName,
         object value, Type? propertyType = null)
-        => propertyName.CreatePropertyExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
+        => propertyName.CreatePropertyMethodExpression<T, BinaryExpression>(propertyType ?? value.GetType(), value,
             Expression.Equal);
 
     /// <summary>
-    /// 创建用于比较属性值的 Lambda 表达式（例：p => p.PropertyName.CompareTo(value)）。
+    /// 创建用于比较属性值特定方法的 Lambda 表达式（例：p => p.PropertyName.CompareTo(value)）。
     /// </summary>
     /// <typeparam name="T">指定的实体类型。</typeparam>
     /// <typeparam name="TExpression">指定的表达式类型。</typeparam>
@@ -194,7 +489,7 @@ public static class ExpressionExtensions
     /// <param name="value">给定的参考值。</param>
     /// <param name="compareToFunc">给定的对比方法。</param>
     /// <returns>返回 Lambda 表达式。</returns>
-    public static Expression<Func<T, bool>> CreatePropertyExpression<T, TExpression>(this string propertyName,
+    public static Expression<Func<T, bool>> CreatePropertyMethodExpression<T, TExpression>(this string propertyName,
         Type propertyType, object? value, Func<MemberExpression, ConstantExpression, TExpression> compareToFunc)
         where TExpression : Expression
     {
@@ -210,7 +505,7 @@ public static class ExpressionExtensions
     }
 
     /// <summary>
-    /// 创建用于比较属性值的 Lambda 表达式（例：p => p.PropertyName.CallMethodName(value)）。
+    /// 创建用于比较属性值特定方法的 Lambda 表达式（例：p => p.PropertyName.CallMethodName(value)）。
     /// </summary>
     /// <typeparam name="T">指定的实体类型。</typeparam>
     /// <param name="propertyName">给定的属性名。</param>
@@ -218,7 +513,7 @@ public static class ExpressionExtensions
     /// <param name="value">给定的参考值。</param>
     /// <param name="callMethodName">给定要调用的方法名。</param>
     /// <returns>返回 Lambda 表达式。</returns>
-    public static Expression<Func<T, bool>> CreatePropertyExpression<T>(this string propertyName,
+    public static Expression<Func<T, bool>> CreatePropertyMethodExpression<T>(this string propertyName,
         Type propertyType, object? value, string callMethodName)
     {
         var type = typeof(T);
@@ -227,11 +522,11 @@ public static class ExpressionExtensions
         var property = Expression.Property(p, propertyName);
         var constant = Expression.Constant(value, propertyType);
 
-        var propertyInfo = type.GetRuntimeProperty(propertyName);
+        var propertyInfo = type.GetProperty(propertyName, TypeExtensions.AllMemberFlagsWithStatic);
         if (propertyInfo is null)
             throw new ArgumentException($"The property '{type}' with the specified name '{propertyName}' was not found.");
 
-        var method = propertyInfo.PropertyType.GetRuntimeMethod(callMethodName, [propertyType]);
+        var method = propertyInfo.PropertyType.GetMethod(callMethodName, TypeExtensions.AllMemberFlagsWithStatic, [propertyType]);
         if (method is null)
             throw new ArgumentException($"The method '{type}' with the specified name '{propertyName}' was not found.");
 

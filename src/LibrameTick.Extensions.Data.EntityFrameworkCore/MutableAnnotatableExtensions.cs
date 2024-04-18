@@ -24,6 +24,11 @@ public static class MutableAnnotatableExtensions
     ///// </summary>
     //public const string InitialTableAnnotationName = RelationalAnnotationNames.Prefix + "InitialTableName";
 
+    ///// <summary>
+    ///// 可变模型。
+    ///// </summary>
+    //public const string MutableModelAnnotationName = "MutableModel";
+
     /// <summary>
     /// 分片注释名称。
     /// </summary>
@@ -45,6 +50,23 @@ public static class MutableAnnotatableExtensions
     ///// <param name="initialTableName">给定的初始表名。</param>
     //public static void SetInitialTableName(this IMutableAnnotatable annotatable, string initialTableName)
     //    => annotatable.SetAnnotation(InitialTableAnnotationName, initialTableName);
+
+
+    ///// <summary>
+    ///// 获取可变模型。
+    ///// </summary>
+    ///// <param name="model">给定的 <see cref="IModel"/>。</param>
+    ///// <returns>返回 <see cref="Model"/>。</returns>
+    //public static Model? GetMutableModel(this IModel model)
+    //    => (Model?)model.FindRuntimeAnnotationValue(MutableModelAnnotationName);
+
+    ///// <summary>
+    ///// 设置可变模型。
+    ///// </summary>
+    ///// <param name="model">给定的 <see cref="IModel"/>。</param>
+    ///// <param name="mutableModel">给定的可变 <see cref="Model"/>。</param>
+    //public static void SetMutableModel(this IModel model, Model mutableModel)
+    //    => model.AddRuntimeAnnotation(MutableModelAnnotationName, mutableModel);
 
 
     /// <summary>

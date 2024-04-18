@@ -11,7 +11,7 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Crypto;
+using Librame.Extensions.Dependencies;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;

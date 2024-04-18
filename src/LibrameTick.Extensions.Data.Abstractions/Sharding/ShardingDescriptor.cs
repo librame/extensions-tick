@@ -54,6 +54,11 @@ public sealed class ShardingDescriptor(IShardingStrategyProvider strategyProvide
         }
     }
 
+    /// <summary>
+    /// 基础名称。
+    /// </summary>
+    public string BaseName => Attribute.BaseName;
+
 
     /// <summary>
     /// 生成分片名称。

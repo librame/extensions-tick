@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义继承 <see cref="AbstractSigningCredentialsProvider"/> 的 RSA 签名证书提供程序。

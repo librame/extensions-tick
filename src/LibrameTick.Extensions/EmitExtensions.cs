@@ -13,7 +13,7 @@
 namespace Librame.Extensions;
 
 /// <summary>
-/// Emit 静态扩展。
+/// 定义 Emit 静态扩展。
 /// </summary>
 public static class EmitExtensions
 {
@@ -23,233 +23,23 @@ public static class EmitExtensions
     private static readonly Regex _regBackingField = new("(?<__backingFieldName>k__BackingField)$");
 
 
-    //#region TValue
-
-    ///// <summary>
-    ///// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    ///// </summary>
-    ///// <param name="sourceTypes">给定的来源类型集合。</param>
-    ///// <param name="newTypeNameFunc">给定的新类型名称方法。</param>
-    ///// <param name="assemblyName">给定的程序集名称。</param>
-    ///// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    ///// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    ///// <returns>返回新类型集合副本。</returns>
-    //public static IDictionary<Type, TValue> BuildCopyFromTypes<TValue>(this IDictionary<Type, TValue> sourceTypes,
-    //    Func<Type, string> newTypeNameFunc, string assemblyName,
-    //    AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-    //    IEnumerable<CustomAttributeBuilder>? attributes = null)
-    //    => sourceTypes.BuildCopyFromTypes(newTypeNameFunc, assemblyName, out _, access, attributes);
-
-    ///// <summary>
-    ///// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    ///// </summary>
-    ///// <param name="sourceTypes">给定的来源类型集合。</param>
-    ///// <param name="assemblyName">给定的程序集名称。</param>
-    ///// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    ///// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    ///// <returns>返回新类型集合副本。</returns>
-    //public static IDictionary<Type, TValue> BuildCopyFromTypes<TValue>(this IDictionary<Type, IEnumerable<(string, TValue)>> sourceTypes,
-    //    string assemblyName, AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-    //    IEnumerable<CustomAttributeBuilder>? attributes = null)
-    //    => sourceTypes.BuildCopyFromTypes(assemblyName, out _, access, attributes);
-
-
-    ///// <summary>
-    ///// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    ///// </summary>
-    ///// <param name="sourceTypes">给定的来源类型集合。</param>
-    ///// <param name="newTypeNameFunc">给定的新类型名称方法。</param>
-    ///// <param name="assemblyName">给定的程序集名称。</param>
-    ///// <param name="moduleBuilder">输出 <see cref="ModuleBuilder"/>。</param>
-    ///// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    ///// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    ///// <returns>返回新类型集合副本。</returns>
-    //public static IDictionary<Type, TValue> BuildCopyFromTypes<TValue>(this IDictionary<Type, TValue> sourceTypes,
-    //    Func<Type, string> newTypeNameFunc, string assemblyName, out ModuleBuilder moduleBuilder,
-    //    AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-    //    IEnumerable<CustomAttributeBuilder>? attributes = null)
-    //{
-    //    moduleBuilder = assemblyName.BuildModule(out _, access, attributes);
-
-    //    return moduleBuilder.BuildCopyFromTypes(sourceTypes, newTypeNameFunc);
-    //}
-
-    ///// <summary>
-    ///// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    ///// </summary>
-    ///// <param name="sourceTypes">给定的来源类型集合。</param>
-    ///// <param name="assemblyName">给定的程序集名称。</param>
-    ///// <param name="moduleBuilder">输出 <see cref="ModuleBuilder"/>。</param>
-    ///// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    ///// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    ///// <returns>返回新类型集合副本。</returns>
-    //public static IDictionary<Type, TValue> BuildCopyFromTypes<TValue>(this IDictionary<Type, IEnumerable<(string, TValue)>> sourceTypes,
-    //    string assemblyName, out ModuleBuilder moduleBuilder,
-    //    AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-    //    IEnumerable<CustomAttributeBuilder>? attributes = null)
-    //{
-    //    moduleBuilder = assemblyName.BuildModule(out _, access, attributes);
-
-    //    return moduleBuilder.BuildCopyFromTypes(sourceTypes);
-    //}
-
-
-    ///// <summary>
-    ///// 从来源类型集合生成指定名称的新类型副本集合。
-    ///// </summary>
-    ///// <param name="moduleBuilder">给定的 <see cref="ModuleBuilder"/>。</param>
-    ///// <param name="sourceTypes">给定的来源类型集合。</param>
-    ///// <param name="newTypeNameFunc">给定的新类型名称方法。</param>
-    ///// <returns>返回新类型集合副本。</returns>
-    //public static IDictionary<Type, TValue> BuildCopyFromTypes<TValue>(this ModuleBuilder moduleBuilder,
-    //    IDictionary<Type, TValue> sourceTypes, Func<Type, string> newTypeNameFunc)
-    //{
-    //    var dict = new Dictionary<Type, TValue>();
-
-    //    foreach (var sourceType in sourceTypes)
-    //    {
-    //        var newTypeName = newTypeNameFunc(sourceType.Key);
-
-    //        var newType = moduleBuilder.CreateType(sourceType.Key, newTypeName);
-    //        dict.Add(newType, sourceType.Value);
-    //    }
-
-    //    return dict;
-    //}
-
-    ///// <summary>
-    ///// 从来源类型与新名称的字典集合生成指定名称的新类型副本集合。
-    ///// </summary>
-    ///// <param name="moduleBuilder">给定的 <see cref="ModuleBuilder"/>。</param>
-    ///// <param name="sourceTypes">给定的来源类型集合。</param>
-    ///// <returns>返回新类型集合副本。</returns>
-    //public static IDictionary<Type, TValue> BuildCopyFromTypes<TValue>(this ModuleBuilder moduleBuilder,
-    //    IDictionary<Type, IEnumerable<(string, TValue)>> sourceTypes)
-    //{
-    //    var dict = new Dictionary<Type, TValue>();
-
-    //    foreach (var sourceType in sourceTypes)
-    //    {
-    //        foreach (var (newTypeName, value) in sourceType.Value)
-    //        {
-    //            var newType = moduleBuilder.CreateType(sourceType.Key, newTypeName);
-    //            dict.Add(newType, value);
-    //        }
-    //    }
-
-    //    return dict;
-    //}
-
-    //#endregion
-
-
     /// <summary>
-    /// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    /// </summary>
-    /// <param name="sourceTypes">给定的来源类型集合。</param>
-    /// <param name="newTypeNameFunc">给定的新类型名称方法。</param>
-    /// <param name="assemblyName">给定的程序集名称。</param>
-    /// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    /// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    /// <returns>返回新类型集合副本。</returns>
-    public static IReadOnlyCollection<Type> BuildCopyFromTypes(this IEnumerable<Type> sourceTypes,
-        Func<Type, string> newTypeNameFunc, string assemblyName,
-        AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-        IEnumerable<CustomAttributeBuilder>? attributes = null)
-        => sourceTypes.BuildCopyFromTypes(newTypeNameFunc, assemblyName, out _, access, attributes);
-
-    /// <summary>
-    /// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    /// </summary>
-    /// <param name="sourceTypes">给定的来源类型集合。</param>
-    /// <param name="assemblyName">给定的程序集名称。</param>
-    /// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    /// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    /// <returns>返回新类型集合副本。</returns>
-    public static IReadOnlyCollection<Type> BuildCopyFromTypes(this IDictionary<Type, IEnumerable<string>> sourceTypes,
-        string assemblyName, AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-        IEnumerable<CustomAttributeBuilder>? attributes = null)
-        => sourceTypes.BuildCopyFromTypes(assemblyName, out _, access, attributes);
-
-
-    /// <summary>
-    /// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    /// </summary>
-    /// <param name="sourceTypes">给定的来源类型集合。</param>
-    /// <param name="newTypeNameFunc">给定的新类型名称方法。</param>
-    /// <param name="assemblyName">给定的程序集名称。</param>
-    /// <param name="moduleBuilder">输出 <see cref="ModuleBuilder"/>。</param>
-    /// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    /// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    /// <returns>返回新类型集合副本。</returns>
-    public static IReadOnlyCollection<Type> BuildCopyFromTypes(this IEnumerable<Type> sourceTypes,
-        Func<Type, string> newTypeNameFunc, string assemblyName, out ModuleBuilder moduleBuilder,
-        AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-        IEnumerable<CustomAttributeBuilder>? attributes = null)
-    {
-        moduleBuilder = assemblyName.BuildModule(out _, access, attributes);
-
-        return moduleBuilder.BuildCopyFromTypes(sourceTypes, newTypeNameFunc).AsReadOnlyCollection();
-    }
-
-    /// <summary>
-    /// 创建程序集，并从来源类型集合生成指定名称的新类型副本集合。
-    /// </summary>
-    /// <param name="sourceTypes">给定的来源类型集合。</param>
-    /// <param name="assemblyName">给定的程序集名称。</param>
-    /// <param name="moduleBuilder">输出 <see cref="ModuleBuilder"/>。</param>
-    /// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
-    /// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
-    /// <returns>返回新类型集合副本。</returns>
-    public static IReadOnlyCollection<Type> BuildCopyFromTypes(this IDictionary<Type, IEnumerable<string>> sourceTypes,
-        string assemblyName, out ModuleBuilder moduleBuilder,
-        AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
-        IEnumerable<CustomAttributeBuilder>? attributes = null)
-    {
-        moduleBuilder = assemblyName.BuildModule(out _, access, attributes);
-
-        return moduleBuilder.BuildCopyFromTypes(sourceTypes).AsReadOnlyCollection();
-    }
-
-
-    /// <summary>
-    /// 从来源类型集合生成指定名称的新类型副本集合。
+    /// 根据来源类型复制出新类型集合。
     /// </summary>
     /// <param name="moduleBuilder">给定的 <see cref="ModuleBuilder"/>。</param>
-    /// <param name="sourceTypes">给定的来源类型集合。</param>
-    /// <param name="newTypeNameFunc">给定的新类型名称方法。</param>
-    /// <returns>返回新类型集合副本。</returns>
-    public static IEnumerable<Type> BuildCopyFromTypes(this ModuleBuilder moduleBuilder,
-        IEnumerable<Type> sourceTypes, Func<Type, string> newTypeNameFunc)
+    /// <param name="sourceType">给定的来源类型。</param>
+    /// <param name="newTypeNames">给定的新类型名称。</param>
+    /// <returns>返回新类型集合。</returns>
+    public static IEnumerable<Type> CopyTypes(this ModuleBuilder moduleBuilder, Type sourceType, IEnumerable<string> newTypeNames)
     {
-        foreach (var sourceType in sourceTypes)
+        foreach (var name in newTypeNames)
         {
-            var newTypeName = newTypeNameFunc(sourceType);
-
-            yield return moduleBuilder.CopyType(sourceType, newTypeName);
+            yield return moduleBuilder.CopyType(sourceType, name);
         }
     }
 
     /// <summary>
-    /// 从来源类型与新名称的字典集合生成指定名称的新类型副本集合。
-    /// </summary>
-    /// <param name="moduleBuilder">给定的 <see cref="ModuleBuilder"/>。</param>
-    /// <param name="sourceTypes">给定的来源类型集合。</param>
-    /// <returns>返回新类型集合副本。</returns>
-    public static IEnumerable<Type> BuildCopyFromTypes(this ModuleBuilder moduleBuilder,
-        IDictionary<Type, IEnumerable<string>> sourceTypes)
-    {
-        foreach (var type in sourceTypes)
-        {
-            foreach (var newTypeName in type.Value)
-            {
-                yield return moduleBuilder.CopyType(type.Key, newTypeName);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 从来源类型复制一个具有相同成员的新类型。
+    /// 根据来源类型复制出新类型。
     /// </summary>
     /// <param name="moduleBuilder">给定的 <see cref="ModuleBuilder"/>。</param>
     /// <param name="sourceType">给定的来源类型。</param>
@@ -258,7 +48,7 @@ public static class EmitExtensions
     public static Type CopyType(this ModuleBuilder moduleBuilder, Type sourceType, string newTypeName)
     {
         var typeBuilder = moduleBuilder.DefineType(newTypeName, sourceType.Attributes,
-                sourceType.BaseType, sourceType.GetInterfaces());
+            sourceType.BaseType, sourceType.GetInterfaces());
 
         var sourceTypeInfo = sourceType.GetTypeInfo();
 
@@ -458,35 +248,79 @@ public static class EmitExtensions
 
 
     /// <summary>
-    /// 使用指定的程序集名称构建模块构建器。
+    /// 根据来源类型派生出新类型集合。
+    /// </summary>
+    /// <param name="moduleBuilder">给定的 <see cref="ModuleBuilder"/>。</param>
+    /// <param name="sourceType">给定的来源类型。</param>
+    /// <param name="newTypeNames">给定的新类型名称。</param>
+    /// <returns>返回新类型集合。</returns>
+    public static IEnumerable<Type> DeriveTypes(this ModuleBuilder moduleBuilder, Type sourceType, IEnumerable<string> newTypeNames)
+    {
+        foreach (var name in newTypeNames)
+        {
+            yield return moduleBuilder.DeriveType(sourceType, name);
+        }
+    }
+
+    /// <summary>
+    /// 根据来源类型派生出新类型。
+    /// </summary>
+    /// <param name="moduleBuilder">给定的 <see cref="ModuleBuilder"/>。</param>
+    /// <param name="sourceType">给定的来源类型。</param>
+    /// <param name="newTypeName">给定的新类型名称。</param>
+    /// <returns>返回新类型。</returns>
+    public static Type DeriveType(this ModuleBuilder moduleBuilder, Type sourceType, string newTypeName)
+    {
+        var typeBuilder = moduleBuilder.DefineType(newTypeName, sourceType.Attributes, sourceType);
+        
+        return typeBuilder.CreateType();
+    }
+
+
+    #region DefineDynamicModule
+
+    /// <summary>
+    /// 使用指定的程序集名称定义动态模块。
     /// </summary>
     /// <param name="assemblyName">给定的程序集名称。</param>
-    /// <param name="assemblyBuilder">输出 <see cref="AssemblyBuilder"/>。</param>
     /// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
     /// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
     /// <returns>返回 <see cref="ModuleBuilder"/>。</returns>
-    public static ModuleBuilder BuildModule(this string assemblyName,
-        out AssemblyBuilder assemblyBuilder,
+    public static ModuleBuilder DefineDynamicModule(this string assemblyName,
         AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
         IEnumerable<CustomAttributeBuilder>? attributes = null)
-        => new AssemblyName(assemblyName).BuildModule(out assemblyBuilder, access, attributes);
+        => new AssemblyName(assemblyName).DefineDynamicModule(access, attributes);
 
     /// <summary>
-    /// 使用指定的程序集名称构建模块构建器。
+    /// 使用指定的程序集名称定义动态模块。
+    /// </summary>
+    /// <param name="name">给定的 <see cref="AssemblyName"/>。</param>
+    /// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
+    /// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
+    /// <returns>返回 <see cref="ModuleBuilder"/>。</returns>
+    public static ModuleBuilder DefineDynamicModule(this AssemblyName name,
+        AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
+        IEnumerable<CustomAttributeBuilder>? attributes = null)
+        => name.DefineDynamicModule(out _, access, attributes);
+
+    /// <summary>
+    /// 使用指定的程序集名称定义动态模块。
     /// </summary>
     /// <param name="name">给定的 <see cref="AssemblyName"/>。</param>
     /// <param name="assemblyBuilder">输出 <see cref="AssemblyBuilder"/>。</param>
     /// <param name="access">给定的 <see cref="AssemblyBuilderAccess"/>（可选；默认 <see cref="AssemblyBuilderAccess.Run"/>）。</param>
     /// <param name="attributes">给定的 <see cref="IEnumerable{CustomAttributeBuilder}"/>（可选）。</param>
     /// <returns>返回 <see cref="ModuleBuilder"/>。</returns>
-    public static ModuleBuilder BuildModule(this AssemblyName name,
+    public static ModuleBuilder DefineDynamicModule(this AssemblyName name,
         out AssemblyBuilder assemblyBuilder,
         AssemblyBuilderAccess access = AssemblyBuilderAccess.Run,
         IEnumerable<CustomAttributeBuilder>? attributes = null)
     {
         assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(name, access, attributes);
-
+        
         return assemblyBuilder.DefineDynamicModule($"{name.Name}.dll");
     }
+
+    #endregion
 
 }

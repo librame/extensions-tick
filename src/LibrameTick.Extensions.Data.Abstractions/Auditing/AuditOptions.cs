@@ -21,14 +21,14 @@ namespace Librame.Extensions.Data.Auditing;
 public class AuditOptions : IOptions
 {
     /// <summary>
-    /// 启用审计（默认启用）。
+    /// 启用审计（可自动生成每次变化实体的审计数据；默认启用）。
     /// </summary>
     public bool Enabling { get; set; } = true;
 
     /// <summary>
-    /// 保存审计集合（默认启用）。
+    /// 保存审计集合（可将自动生成的变化实体数据保存到选项设定的保存审计集合动作中；默认未启用）。
     /// </summary>
-    public bool SaveAudits { get; set; } = true;
+    public bool SaveAudits { get; set; } = false;
 
 
     /// <summary>

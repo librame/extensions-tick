@@ -10,17 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies.Cryptography;
 
 /// <summary>
-/// 定义继承 <see cref="KeyOptions"/> 的密钥、初始向量（IV）选项。
+/// 定义继承 <see cref="CommonKey"/> 的公共密钥与初始向量（IV）。
 /// </summary>
-public class KeyNonceOptions : KeyOptions
+public class CommonKeyNonce : CommonKey
 {
     /// <summary>
     /// 初始向量（IV）。
     /// </summary>
-    public byte[]? Nonce { get; set; }
+    public byte[] Nonce { get; set; } = [];
 
     /// <summary>
     /// 初始向量（IV）最大尺寸（通常以位为单位）。
@@ -37,9 +37,10 @@ public class KeyNonceOptions : KeyOptions
     {
         base.Generate(keyMaxSize);
 
-        Nonce = RandomExtensions.GenerateByteArray(GetKeyByteArrayLength(nonceMaxSize));
+        Nonce = GenerateRandomNumberByteArray(nonceMaxSize);
         NonceMaxSize = nonceMaxSize;
     }
+
 
     /// <summary>
     /// 填充指定密钥、初始向量（IV）。
@@ -54,14 +55,14 @@ public class KeyNonceOptions : KeyOptions
         base.Populate(key, keyMaxSize);
 
         Nonce = nonce;
-        NonceMaxSize = nonceMaxSize is null ? GetKeyMaxSize(nonce) : nonceMaxSize.Value;
+        NonceMaxSize = GetByteArrayBitSize(nonce, nonceMaxSize);
     }
 
     /// <summary>
     /// 填充指定密钥、初始向量（IV）。
     /// </summary>
-    /// <param name="options">给定的 <see cref="KeyNonceOptions"/>。</param>
-    public virtual void Populate(KeyNonceOptions options)
+    /// <param name="options">给定的 <see cref="CommonKeyNonce"/>。</param>
+    public virtual void Populate(CommonKeyNonce options)
     {
         base.Populate(options);
 
@@ -75,13 +76,14 @@ public class KeyNonceOptions : KeyOptions
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => ToString().GetHashCode();
+        => HashCode.Combine(Key, Nonce);
+
 
     /// <summary>
-    /// 转换为字符串。
+    /// 转为字符串。
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{nameof(NonceMaxSize)}:{NonceMaxSize},{nameof(Nonce)}:{Nonce?.AsBase64String()},{base.ToString()}";
+        => $"{nameof(NonceMaxSize)}:{NonceMaxSize},{nameof(Nonce)}:{ToByteArrayString(Nonce)},{base.ToString()}";
 
 }

@@ -34,6 +34,12 @@ public class ShardingOptions : IOptions
     /// </summary>
     public Func<DateTimeOffset> DefaultDateTimeOffsetFactory { get; set; } = () => DateTimeOffset.Now;
 
+    /// <summary>
+    /// 默认分片程序集名称工厂方法。
+    /// </summary>
+    public Func<Type, string> DefaultShardingAssemblyNameFactory { get; set; }
+        = contextType => $"{contextType.Assembly.GetName().Name}_Sharding_{DateTime.Now.Ticks}";
+
 
     /// <summary>
     /// 附加的分片策略集合（默认已集成 <see cref="CultureInfoShardingStrategy"/>、<see cref="DateTimeShardingStrategy"/>、<see cref="DateTimeOffsetShardingStrategy"/>、<see cref="ModShardingStrategy"/> 等分片策略）。

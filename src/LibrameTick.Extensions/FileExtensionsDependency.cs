@@ -10,15 +10,12 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions;
 
 /// <summary>
-/// 定义继承 <see cref="IAutokeyProvider"/> 的文件型自动密钥提供程序接口。
+/// 定义文件静态扩展依赖。
 /// </summary>
-public interface IFileAutokeyProvider : IAutokeyProvider
+public static class FileExtensionsDependency
 {
-    /// <summary>
-    /// 文件路径。
-    /// </summary>
-    string FilePath { get; }
+
 }

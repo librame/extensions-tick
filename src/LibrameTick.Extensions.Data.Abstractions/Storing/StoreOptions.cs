@@ -20,6 +20,11 @@ namespace Librame.Extensions.Data.Storing;
 public class StoreOptions : IOptions
 {
     /// <summary>
+    /// 启用分表（功能未实现，默认禁用）。
+    /// </summary>
+    public bool EnablingSharding { get; private set; } = true;
+
+    /// <summary>
     /// 映射关系（默认启用）。
     /// </summary>
     public bool MapRelationship { get; set; } = true;

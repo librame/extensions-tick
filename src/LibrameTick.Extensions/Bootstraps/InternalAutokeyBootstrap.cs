@@ -10,25 +10,23 @@
 
 #endregion
 
-using Librame.Extensions.Crypto;
-
 namespace Librame.Extensions.Bootstraps;
 
-internal sealed class InternalAutokeyBootstrap : AbstsractBootstrap, IAutokeyBootstrap
-{
-    public IAutokeyProvider Provider
-        => new JsonFileAutokeyProvider();
+//internal sealed class InternalAutokeyBootstrap : AbstsractBootstrap, IAutokeyBootstrap
+//{
+//    public IKeyringProvider Provider
+//        => new JsonFileAutokeyProvider();
 
 
-    public Autokey Get()
-    {
-        // 如果不存在 JSON 文件格式的自动密钥
-        if (!Provider.Exist())
-            return Autokey.Fixed(); // 则直接使用固定的自动密钥
+//    public Autokey Get()
+//    {
+//        // 如果不存在 JSON 文件格式的自动密钥
+//        if (!Provider.Exist())
+//            return Autokey.Fixed(); // 则直接使用固定的自动密钥
 
-        // 支持加载独立配置的自动密钥
-        return Provider.Load();
-        //return Provider.LoadOrSaveAutokey();
-    }
+//        // 支持加载独立配置的自动密钥
+//        return Provider.Load();
+//        //return Provider.LoadOrSaveAutokey();
+//    }
 
-}
+//}

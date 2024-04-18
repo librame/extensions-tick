@@ -17,6 +17,12 @@ namespace Librame.Extensions.JsonConverters;
 /// </summary>
 public class JsonStringEncryptionConverter : JsonConverter<string>
 {
+    /// <summary>
+    /// 当前算法管理器。
+    /// </summary>
+    public static Dependencies.IExtensionsDependency Dependency
+        => Dependencies.ExtensionsDependencyInstantiator.Instance;
+
 
     /// <summary>
     /// 读取 JSON。
@@ -26,7 +32,7 @@ public class JsonStringEncryptionConverter : JsonConverter<string>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
     /// <returns>返回字符串。</returns>
     public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        => reader.GetBytesFromBase64().FromAes().AsEncodingString();
+        => Dependency.Encoding.GetString(reader.GetBytesFromBase64().FromAes());
 
     /// <summary>
     /// 写入 JSON。
@@ -35,6 +41,6 @@ public class JsonStringEncryptionConverter : JsonConverter<string>
     /// <param name="value">给定的字符串。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
     public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
-        => writer.WriteStringValue(value.FromEncodingString().AsAes().AsBase64String());
+        => writer.WriteBase64StringValue(Dependency.Encoding.GetBytes(value).AsAes());
 
 }

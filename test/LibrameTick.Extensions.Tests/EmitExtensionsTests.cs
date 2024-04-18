@@ -1,7 +1,7 @@
 ﻿using Librame.Extensions.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection.Emit;
 using Xunit;
 
 namespace Librame.Extensions
@@ -11,32 +11,58 @@ namespace Librame.Extensions
         public string Name { get; set; } = nameof(TestEmit);
     }
 
+    public class TestEmitDerived : TestEmit
+    {
+    }
+
 
     public class EmitExtensionsTests
     {
-        [Fact]
-        public void BuildCopyFromTypesTest()
+        private readonly Type _sourceType = typeof(TestEmit);
+
+        private readonly ModuleBuilder _moduleBuilder;
+
+
+        public EmitExtensionsTests()
         {
-            var sourceTypes = new Dictionary<Type, IEnumerable<string>>
-            {
-                { typeof(TestEmit), new List<string> { "TestEmit_01", "TestEmit_02" } }
-            };
-
-            var testEmit = new TestEmit();
-
             var newAssemblyName = typeof(EmitExtensionsTests).Assembly.GetName().Name;
             newAssemblyName = $"{newAssemblyName}_Sharding_{DateTimeOffset.UtcNow.UtcTicks}";
 
-            var copyTypes = sourceTypes.BuildCopyFromTypes(newAssemblyName);
-            for (var i = 0; i < copyTypes.Count; i++)
+            _moduleBuilder = newAssemblyName.DefineDynamicModule();
+        }
+
+
+        [Fact]
+        public void CopyTypeTest()
+        {
+            var source = new TestEmit();
+
+            var copyTypeNames = new List<string>
             {
-                var copyType = copyTypes.ElementAt(i);
-                var copyValue = ObjectMapper.NewByMapAllPublicProperties(testEmit, copyType);
+                "TestEmit_01",
+                "TestEmit_02"
+            };
+
+            foreach (var newTypeName in copyTypeNames)
+            {
+                var copyType = _moduleBuilder.CopyType(_sourceType, newTypeName);
+                var copyValue = ObjectMapper.NewByMapAllPublicProperties(source, copyType);
 
                 var copyName = copyType.GetProperty(nameof(TestEmit.Name))?.GetValue(copyValue);
-                Assert.NotNull(copyName);
-                Assert.Equal(testEmit.Name, copyName);
+                Assert.Equal(source.Name, copyName);
             }
+        }
+
+        [Fact]
+        public void DeriveTypeTest()
+        {
+            var autoDeriveType = _moduleBuilder.DeriveType(_sourceType, "TestEmitDerived_01");
+            var dfltDeriveType = typeof(TestEmitDerived);
+
+            var props1 = autoDeriveType.GetProperties();
+            var props2 = dfltDeriveType.GetProperties();
+
+            Assert.Equal(props1.Length, props2.Length);
         }
 
     }

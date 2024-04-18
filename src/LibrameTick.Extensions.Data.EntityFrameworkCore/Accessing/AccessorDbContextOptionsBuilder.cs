@@ -11,10 +11,13 @@
 #endregion
 
 using Librame.Extensions.Core;
-using Librame.Extensions.Crypto;
+using Librame.Extensions.Dependencies;
+using Librame.Extensions.Data.Resets;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Device;
 using Librame.Extensions.Dispatchers;
+using Microsoft.EntityFrameworkCore.Update;
+using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace Librame.Extensions.Data.Accessing;
 
@@ -43,6 +46,10 @@ public class AccessorDbContextOptionsBuilder
                 _contextType = argumentType;
             }
         }
+
+        parentBuilder.ReplaceService<IModelSource, DataModelSource>();
+        parentBuilder.ReplaceService<ICommandBatchPreparer, CommandBatchPreparerReset>();
+        parentBuilder.ReplaceService<IRowKeyValueFactoryFactory, RowKeyValueFactoryFactoryReset>();
 
         ParentBuilder = parentBuilder;
 

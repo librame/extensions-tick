@@ -16,13 +16,6 @@ namespace Librame.Extensions
         }
 
         [Fact]
-        public void Base64StringTest()
-        {
-            var base64 = _data.AsBase64String();
-            Assert.True(_data.SequenceEqual(base64.FromBase64String()));
-        }
-
-        [Fact]
         public void HexStringTest()
         {
             var hex = _data.AsHexString();

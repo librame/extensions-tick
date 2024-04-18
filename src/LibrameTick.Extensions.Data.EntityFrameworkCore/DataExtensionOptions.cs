@@ -33,10 +33,6 @@ public class DataExtensionOptions : AbstractExtensionOptions<DataExtensionOption
     public DataExtensionOptions()
     {
         ShardingDirectory = Directories.ResourceDirectory.CombineDirectory("shardings");
-
-        // 先审计再分片（审计表也可能需要分表）
-        SavingChangesHandlers.Add(new AuditingSavingChangesHandler());
-        SavingChangesHandlers.Add(new ShardingSavingChangesHandler());
     }
 
 

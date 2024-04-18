@@ -71,15 +71,13 @@ public static class ModelBuilderBaseDbContextExtensions
     public static ModelBuilder CreateAuditingModels(this ModelBuilder modelBuilder,
         DataContext dbContext)
     {
-        var limitableMaxLength = 250;
-        //dbContext.BaseDependencies.DataExtOptions.Store.LimitableMaxLengthOfProperty;
-        var mapRelationship = true;
-        //dbContext.BaseDependencies.DataExtOptions.Store.MapRelationship;
+        var options = dbContext.CurrentServices.DataOptions;
+
+        var limitableMaxLength = options.Store.LimitableMaxLengthOfProperty;
+        var mapRelationship = options.Store.MapRelationship;
 
         modelBuilder.Entity<Audit>(b =>
         {
-            //b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
-
             b.HasIndex(static i => new { i.TableName, i.EntityId }).HasDatabaseName();
 
             b.HasKey(static k => k.Id);
@@ -97,8 +95,6 @@ public static class ModelBuilderBaseDbContextExtensions
 
         modelBuilder.Entity<AuditDetail>(b =>
         {
-            //b.ToTableWithSharding(dbContext.BaseDependencies.ShardingContext);
-
             b.HasIndex(static i => new { i.AuditId, i.DetailName }).HasDatabaseName();
 
             b.HasKey(static k => k.Id);

@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Crypto;
+using Librame.Extensions.Dependencies;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.ValueConversion;
 

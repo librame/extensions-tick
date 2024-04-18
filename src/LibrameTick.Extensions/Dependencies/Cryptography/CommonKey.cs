@@ -10,17 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies.Cryptography;
 
 /// <summary>
-/// 定义一个实现 <see cref="Core.IOptions"/> 的密钥选项。
+/// 定义继承 <see cref="AbstractKey"/> 的公共密钥。
 /// </summary>
-public class KeyOptions : Core.IOptions
+public class CommonKey : AbstractKey
 {
     /// <summary>
     /// 密钥。
     /// </summary>
-    public byte[]? Key { get; set; }
+    public byte[] Key { get; set; } = [];
 
     /// <summary>
     /// 密钥最大尺寸（通常以位为单位）。
@@ -29,31 +29,15 @@ public class KeyOptions : Core.IOptions
 
 
     /// <summary>
-    /// 获取密钥最大尺寸（默认以位为单位）。
-    /// </summary>
-    /// <param name="key">给定的密钥。</param>
-    /// <returns>返回 32 位整数。</returns>
-    public virtual int GetKeyMaxSize(byte[] key)
-        => key.Length * 8;
-
-    /// <summary>
-    /// 获取密钥最大尺寸的字节数组长度。
-    /// </summary>
-    /// <param name="keyMaxSize">给定的密钥最大尺寸。</param>
-    /// <returns>返回 32 位整数。</returns>
-    public virtual int GetKeyByteArrayLength(int keyMaxSize)
-        => keyMaxSize / 8;
-
-
-    /// <summary>
     /// 生成新密钥。
     /// </summary>
     /// <param name="keyMaxSize">给定的密钥最大尺寸（默认以位为单位）。</param>
     public virtual void Generate(int keyMaxSize)
     {
-        Key = RandomExtensions.GenerateByteArray(GetKeyByteArrayLength(keyMaxSize));
+        Key = GenerateRandomNumberByteArray(keyMaxSize);
         KeyMaxSize = keyMaxSize;
     }
+
 
     /// <summary>
     /// 填充指定密钥。
@@ -63,14 +47,14 @@ public class KeyOptions : Core.IOptions
     public virtual void Populate(byte[] key, int? keyMaxSize = null)
     {
         Key = key;
-        KeyMaxSize = keyMaxSize is null ? GetKeyMaxSize(key) : keyMaxSize.Value;
+        KeyMaxSize = GetByteArrayBitSize(key, keyMaxSize);
     }
 
     /// <summary>
     /// 填充指定密钥。
     /// </summary>
-    /// <param name="options">给定的 <see cref="KeyOptions"/>。</param>
-    public virtual void Populate(KeyOptions options)
+    /// <param name="options">给定的 <see cref="CommonKey"/>。</param>
+    public virtual void Populate(CommonKey options)
     {
         Key = options.Key;
         KeyMaxSize = options.KeyMaxSize;
@@ -82,13 +66,14 @@ public class KeyOptions : Core.IOptions
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => ToString().GetHashCode();
+        => Key.GetHashCode();
+
 
     /// <summary>
-    /// 转换为字符串。
+    /// 转为字符串。
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{nameof(KeyMaxSize)}:{KeyMaxSize},{nameof(Key)}:{Key?.AsBase64String()}";
+        => $"{nameof(KeyMaxSize)}:{KeyMaxSize},{nameof(Key)}:{ToByteArrayString(Key)}";
 
 }

@@ -22,9 +22,6 @@ namespace Librame.Extensions.Data.Storing;
 [ShardingTable("%dto:d6", typeof(DateTimeOffsetShardingStrategy))]
 public class Audit : AbstractCreationIdentifier<long, string>, IShardingValue<DateTimeOffset>
 {
-    private readonly List<AuditDetail> _details = [];
-
-
     /// <summary>
     /// 表名。
     /// </summary>
@@ -53,16 +50,7 @@ public class Audit : AbstractCreationIdentifier<long, string>, IShardingValue<Da
     /// <summary>
     /// 审计明细集合。
     /// </summary>
-    public virtual IEnumerable<AuditDetail> Details
-        => _details;
-
-
-    /// <summary>
-    /// 添加审计明细。
-    /// </summary>
-    /// <param name="detail">给定的 <see cref="AuditDetail"/>。</param>
-    public virtual void AddDetail(AuditDetail detail)
-        => _details.Add(detail);
+    public virtual List<AuditDetail> Details { get; set; } = [];
 
 
     /// <summary>

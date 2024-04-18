@@ -61,12 +61,12 @@ public static class Bootstrapper
         => Container.Resolve(key, static key => new TImplementation());
 
 
-    /// <summary>
-    /// 获取自动密钥引导程序（默认使用内置自动密钥）。
-    /// </summary>
-    /// <returns>返回 <see cref="ILockerBootstrap"/>。</returns>
-    public static IAutokeyBootstrap GetAutokey()
-        => GetBootstrap<IAutokeyBootstrap, InternalAutokeyBootstrap>();
+    ///// <summary>
+    ///// 获取自动密钥引导程序（默认使用内置自动密钥）。
+    ///// </summary>
+    ///// <returns>返回 <see cref="ILockerBootstrap"/>。</returns>
+    //public static IAutokeyBootstrap GetAutokey()
+    //    => GetBootstrap<IAutokeyBootstrap, InternalAutokeyBootstrap>();
 
     /// <summary>
     /// 获取时钟引导程序（默认使用内置本地时钟）。
@@ -82,11 +82,11 @@ public static class Bootstrapper
     public static IDirectoryStructureBootstrap GetDirectories()
         => GetBootstrap<IDirectoryStructureBootstrap, InternalDirectoyStructureBootstrap>();
 
-    /// <summary>
-    /// 获取锁定器引导程序（默认使用内置本地锁定器）。
-    /// </summary>
-    /// <returns>返回 <see cref="ILockerBootstrap"/>。</returns>
-    public static ILockerBootstrap GetLocker()
-        => GetBootstrap<ILockerBootstrap, InternalLockerBootstrap>();
+    ///// <summary>
+    ///// 获取锁定器引导程序（默认使用内置本地锁定器）。
+    ///// </summary>
+    ///// <returns>返回 <see cref="ILockerBootstrap"/>。</returns>
+    //public static ILockerBootstrap GetLocker()
+    //    => GetBootstrap<ILockerBootstrap, InternalLockerBootstrap>();
 
 }

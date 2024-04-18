@@ -22,6 +22,8 @@ internal sealed class InternalShardingContext(IShardingFinder finder,
     IDispatcherFactory dispatcherFactory)
     : AbstractShardingContext(finder, settingProvider, strategyProvider, dispatcherFactory)
 {
+    private static Func<StateManager, IKey?, IIdentityMap?>? _findIdentityMapFunc;
+
 
     public override string? ShardingDatabase(IDataContext context)
     {
@@ -51,32 +53,46 @@ internal sealed class InternalShardingContext(IShardingFinder finder,
         var descriptorEntities = GetShardingEntities(context.Services, descriptors);
         if (descriptorEntities is null || descriptorEntities.Count < 1) return null;
 
-        var setting = SettingManager.TableProvider.CurrentSetting;
+        return SaveShardingSettings(context, descriptorEntities);
+    }
+
+    private Dictionary<ShardingDescriptor, List<ShardingItemSetting>> SaveShardingSettings(
+        IDataContext context, Dictionary<ShardingDescriptor, List<object>> descriptorEntities)
+    {
+        ModuleBuilder? moduleBuilder = null;
+        var tableSetting = SettingManager.TableProvider.CurrentSetting;
 
         var descriptorSettings = new Dictionary<ShardingDescriptor, List<ShardingItemSetting>>();
-        foreach (var descriptor in descriptorEntities)
+        foreach (var (descriptor, entities) in descriptorEntities)
         {
-            var itemSettings = new List<ShardingItemSetting>();
+            var settings = new List<ShardingItemSetting>();
 
-            foreach (var entity in descriptor.Value)
+            foreach (var entity in entities)
             {
                 var isSharded = false;
 
-                var shardingName = descriptor.Key.GenerateShardingName(entity);
+                var shardingName = descriptor.GenerateShardingName(entity);
                 var identifier = (entity as IObjectIdentifier)?.GetObjectId().ToString();
 
-                var (_, itemSetting) = setting.GetOrCreate(descriptor.Key,
+                var (_, setting) = tableSetting.GetOrCreate(descriptor,
                     shardingName, identifier, entity, () => isSharded = true);
 
                 if (isSharded)
                 {
-                    itemSettings.Add(itemSetting);
+                    moduleBuilder ??= CreateShardingModuleBuilder(context);
+
+                    var shardedType = moduleBuilder.DeriveType(descriptor.SourceType, shardingName);
+                    var sharded = ObjectMapper.NewByMapAllPublicProperties(entity, shardedType);
+
+                    setting.ChangeSharded(sharded, shardedType);
+
+                    settings.Add(setting);
                 }
             }
 
-            if (itemSettings.Count > 0)
+            if (settings.Count > 0)
             {
-                descriptorSettings.Add(descriptor.Key, itemSettings);
+                descriptorSettings.Add(descriptor, settings);
             }
         }
 
@@ -88,31 +104,43 @@ internal sealed class InternalShardingContext(IShardingFinder finder,
         return descriptorSettings;
     }
 
-
     private static Dictionary<ShardingDescriptor, List<object>>? GetShardingEntities(
         IDataContextServices services, IReadOnlyList<ShardingDescriptor> descriptors)
     {
 
 #pragma warning disable EF1001 // Internal EF Core API usage.
 
-        var stateManager = services.GetContextService<IStateManager>();
+        _findIdentityMapFunc ??= "FindIdentityMap".GetMethodFuncByExpression<StateManager, IKey?, IIdentityMap?>();
+
+        var stateManager = (StateManager)services.GetContextService<IStateManager>();
 
         // 只针对新增数据处理分表
         var addedEntities = stateManager.GetEntriesForState(added: true).ToList();
         if (addedEntities.Count < 1) return null;
 
         var descriptorEntities = new Dictionary<ShardingDescriptor, List<object>>(
-            PropertyEqualityComparer<ShardingDescriptor>.Create(p => p.Attribute.ToString()));
+            KeyEqualityComparer<ShardingDescriptor>.CreateBy(p => p.Attribute.ToString()));
 
         foreach (var descriptor in descriptors)
         {
-            var shardingEntities = addedEntities.Where(p => p.EntityType.ClrType == descriptor.SourceType)
-                .Select(s => s.Entity)
-                .ToList();
-
+            var shardingEntities = addedEntities.Where(p => p.EntityType.ClrType == descriptor.SourceType).ToList();
             if (shardingEntities.Count > 0)
             {
-                descriptorEntities.Add(descriptor, shardingEntities);
+                descriptorEntities.Add(descriptor, shardingEntities.Select(s => s.Entity).ToList());
+
+                // 从上下文中移除要分表的新增数据的标识集合
+                var entityType = shardingEntities.First().EntityType;
+                foreach (var key in entityType.GetKeys())
+                {
+                    var identityMap = _findIdentityMapFunc(stateManager, key);
+                    identityMap?.Clear();
+                }
+
+                // 从上下文中移除要分表的新增数据集合
+                foreach (var entity in shardingEntities)
+                {
+                    entity.SetEntityState(EntityState.Detached);
+                }
             }
         }
 
@@ -120,6 +148,22 @@ internal sealed class InternalShardingContext(IShardingFinder finder,
 
 #pragma warning restore EF1001 // Internal EF Core API usage.
 
+    }
+
+    private static ModuleBuilder CreateShardingModuleBuilder(IDataContext context)
+    {
+        string shardingAssemblyName;
+
+        if (context.Services is DataContextServices services)
+        {
+            shardingAssemblyName = services.DataOptions.Sharding.DefaultShardingAssemblyNameFactory(context.ContextType);
+        }
+        else
+        {
+            shardingAssemblyName = $"{context.ContextType.Assembly.GetName().Name}_Sharding_{DateTime.Now.Ticks}";
+        }
+
+        return shardingAssemblyName.DefineDynamicModule();
     }
 
 }

@@ -10,17 +10,17 @@
 
 #endregion
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies.Cryptography;
 
 /// <summary>
-/// 定义实现 <see cref="KeyNonceOptions"/> 的密钥、初始向量（IV）、验证标记选项。
+/// 定义实现 <see cref="CommonKeyNonce"/> 的公共密钥、初始向量（IV）与验证标记。
 /// </summary>
-public class KeyNonceTagOptions : KeyNonceOptions
+public class CommonKeyNonceTag : CommonKeyNonce
 {
     /// <summary>
     /// 验证标记。
     /// </summary>
-    public byte[]? Tag { get; set; }
+    public byte[] Tag { get; set; } = [];
 
     /// <summary>
     /// 验证标记最大大小（通常以位为单位）。
@@ -38,9 +38,10 @@ public class KeyNonceTagOptions : KeyNonceOptions
     {
         base.Generate(keyMaxSize, nonceMaxSize);
 
-        Tag = RandomExtensions.GenerateByteArray(GetKeyByteArrayLength(tagMaxSize));
+        Tag = GenerateRandomNumberByteArray(tagMaxSize);
         TagMaxSize = tagMaxSize;
     }
+
 
     /// <summary>
     /// 填充指定密钥、初始向量（IV）、验证标记。
@@ -57,14 +58,14 @@ public class KeyNonceTagOptions : KeyNonceOptions
         base.Populate(key, nonce, keyMaxSize, nonceMaxSize);
 
         Tag = tag;
-        TagMaxSize = tagMaxSize is null ? GetKeyMaxSize(tag) : tagMaxSize.Value;
+        TagMaxSize = GetByteArrayBitSize(tag, tagMaxSize);
     }
 
     /// <summary>
     /// 填充指定密钥、初始向量（IV）、验证标记。
     /// </summary>
-    /// <param name="options">给定的 <see cref="KeyNonceTagOptions"/>。</param>
-    public virtual void Populate(KeyNonceTagOptions options)
+    /// <param name="options">给定的 <see cref="CommonKeyNonceTag"/>。</param>
+    public virtual void Populate(CommonKeyNonceTag options)
     {
         base.Populate(options);
 
@@ -78,13 +79,14 @@ public class KeyNonceTagOptions : KeyNonceOptions
     /// </summary>
     /// <returns>返回 32 位整数。</returns>
     public override int GetHashCode()
-        => ToString().GetHashCode();
+        => HashCode.Combine(Key, Nonce, Tag);
+
 
     /// <summary>
     /// 转换为字符串。
     /// </summary>
     /// <returns>返回字符串。</returns>
     public override string ToString()
-        => $"{nameof(TagMaxSize)}:{TagMaxSize},{nameof(Tag)}:{Tag?.AsBase64String()},{base.ToString()}";
+        => $"{nameof(TagMaxSize)}:{TagMaxSize},{nameof(Tag)}:{ToByteArrayString(Tag)},{base.ToString()}";
 
 }

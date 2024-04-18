@@ -17,8 +17,8 @@ namespace Librame.Extensions.Setting;
 /// </summary>
 public static class ConfigurationBuilderSettingExtensions
 {
-    private static Func<PhysicalFileProvider, PhysicalFilesWatcher>? _filesWatcher;
-    private static Func<PhysicalFilesWatcher, FileSystemWatcher>? _systemWatcher;
+    private static Func<PhysicalFileProvider, PhysicalFilesWatcher>? _filesWatcherFunc;
+    private static Func<PhysicalFilesWatcher, FileSystemWatcher>? _systemWatcherFunc;
 
 
     /// <summary>
@@ -36,11 +36,11 @@ public static class ConfigurationBuilderSettingExtensions
         if (provider is PhysicalFileProvider fileProvider)
         {
             // 使用 UnsafeAccessor 访问私有成员对象为 null
-            _filesWatcher ??= "FileWatcher".GetPropertyFuncByExpression<PhysicalFileProvider, PhysicalFilesWatcher>();
-            _systemWatcher ??= "_fileWatcher".GetFieldFuncByExpression<PhysicalFilesWatcher, FileSystemWatcher>();
+            _filesWatcherFunc ??= "FileWatcher".GetPropertyFuncByExpression<PhysicalFileProvider, PhysicalFilesWatcher>();
+            _systemWatcherFunc ??= "_fileWatcher".GetFieldFuncByExpression<PhysicalFilesWatcher, FileSystemWatcher>();
 
-            var filesWatcher = _filesWatcher(fileProvider);
-            var systemWatcher = _systemWatcher(filesWatcher);
+            var filesWatcher = _filesWatcherFunc(fileProvider);
+            var systemWatcher = _systemWatcherFunc(filesWatcher);
 
             result = (source, provider, systemWatcher);
             return true;

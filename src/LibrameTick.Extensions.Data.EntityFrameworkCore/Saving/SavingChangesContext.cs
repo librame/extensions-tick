@@ -29,6 +29,7 @@ public sealed class SavingChangesContext : ISavingChangesContext
         var states = dataContext.CurrentServices.GetContextService<IStateManager>();
 
         DataContext = dataContext;
+        DataOptions = dataContext.CurrentServices.DataOptions;
         
         ChangesEntities = states.GetEntriesForState(added: true, modified: true, deleted: true)
             .Select(static s => new EntityEntry(s))
@@ -40,6 +41,11 @@ public sealed class SavingChangesContext : ISavingChangesContext
     /// 数据上下文。
     /// </summary>
     public DataContext DataContext { get; init; }
+
+    /// <summary>
+    /// 数据扩展选项。
+    /// </summary>
+    public DataExtensionOptions DataOptions { get; init; }
 
     /// <summary>
     /// 变化的实体入口集合。
@@ -54,8 +60,20 @@ public sealed class SavingChangesContext : ISavingChangesContext
     /// </summary>
     public void Preprocess()
     {
-        // 按照添加的先后顺序执行
-        var handlers = DataContext.CurrentServices.DataOptions.SavingChangesHandlers;
+        var handlers = DataOptions.SavingChangesHandlers;
+
+        // 先审计
+        if (DataOptions.Audit.Enabling && !handlers.OfType<AuditingSavingChangesHandler>().Any())
+        {
+            handlers.Insert(0, new AuditingSavingChangesHandler());
+        }
+
+        // 最后分片（审计表也需要分表）
+        if (DataOptions.Store.EnablingSharding && !handlers.OfType<ShardingSavingChangesHandler>().Any())
+        {
+            handlers.Add(new ShardingSavingChangesHandler());
+        }
+
         foreach (var handler in handlers)
         {
             handler.PreHandling(this);

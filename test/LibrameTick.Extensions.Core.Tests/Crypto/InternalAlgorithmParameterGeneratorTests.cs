@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace Librame.Extensions.Crypto
+namespace Librame.Extensions.Dependencies
 {
     public class InternalAlgorithmParameterGeneratorTests
     {

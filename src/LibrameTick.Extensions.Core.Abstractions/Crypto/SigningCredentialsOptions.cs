@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Core;
 
-namespace Librame.Extensions.Crypto;
+namespace Librame.Extensions.Dependencies;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的签名证书选项。

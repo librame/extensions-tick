@@ -46,7 +46,7 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
     }
 
 
-    private List<Audit>? ParseEntities(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
+    private static List<Audit>? ParseEntities(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
         IReadOnlyList<EntityEntry>? entityEntries)
     {
         if (entityEntries is null)
@@ -77,7 +77,7 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
         return audits;
     }
 
-    private void PopulateDetails(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
+    private static void PopulateDetails(IIdGeneratorFactory idGenerator, DataExtensionOptions options,
         Audit audit, EntityEntry entityEntry)
     {
         foreach (var property in entityEntry.CurrentValues.Properties)
@@ -105,7 +105,7 @@ public sealed class AuditingSavingChangesHandler : AbstractSavingChangesHandler
             else
                 detail.Audit = audit;
 
-            audit.AddDetail(detail);
+            audit.Details.Add(detail);
         }
     }
 

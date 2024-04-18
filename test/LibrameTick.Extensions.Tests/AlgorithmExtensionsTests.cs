@@ -1,22 +1,63 @@
+using Librame.Extensions.Dependencies.Cryptography;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Xunit;
 
 namespace Librame.Extensions
 {
     public class AlgorithmExtensionsTests
     {
+        private const string _plaintext = nameof(AlgorithmExtensionsTests);
+
+
+        [Fact]
+        public void FormatStringTest()
+        {
+            // Encoding
+            var buffer = _plaintext.FromEncodingString();
+            Assert.Equal(_plaintext, buffer.AsEncodingString());
+
+            // Base16
+            var hex = buffer.AsHexString();
+            Assert.Equal(buffer, hex.FromHexString());
+
+            // Base32
+            var base32 = buffer.AsBase32String();
+            Assert.Equal(buffer, base32.FromBase32String());
+
+            // Base64
+            var base64 = buffer.AsBase64String();
+            Assert.Equal(buffer, base64.FromBase64String());
+
+            // Base64 Sortable
+            var base64Sort = base64.AsSortableBase64String();
+            Assert.Equal(base64, base64Sort.FromSortableBase64String());
+
+            // Image Base64
+            var imgBase64 = buffer.AsImageBase64String("image/jpeg");
+            Assert.Equal(buffer, imgBase64.FromImageBase64String().bytes);
+        }
+
 
         #region Hash
 
         [Fact]
-        public void AsHashBase64StringTest()
+        public void HashBase64StringTest()
         {
-            var sha256 = nameof(AlgorithmExtensionsTests).AsSha256Base64String();
+            var md5 = _plaintext.AsMd5Base64String();
+            Assert.NotEmpty(md5);
+
+            var sha1 = _plaintext.AsSha1Base64String();
+            Assert.NotEmpty(sha1);
+
+            var sha256 = _plaintext.AsSha256Base64String();
             Assert.NotEmpty(sha256);
 
-            var sha384 = nameof(AlgorithmExtensionsTests).AsSha384Base64String();
+            var sha384 = _plaintext.AsSha384Base64String();
             Assert.True(sha384.Length > sha256.Length);
 
-            var sha512 = nameof(AlgorithmExtensionsTests).AsSha512Base64String();
+            var sha512 = _plaintext.AsSha512Base64String();
             Assert.True(sha512.Length > sha384.Length);
         }
 
@@ -26,19 +67,37 @@ namespace Librame.Extensions
         #region HMAC Hash
 
         [Fact]
-        public void AsHmacHashBase64StringTest()
+        public void HmacHashBase64StringTest()
         {
-            var hmacMd5 = nameof(AlgorithmExtensionsTests).AsHmacMd5Base64String();
+            var hmacMd5 = _plaintext.AsHmacMd5Base64String();
             Assert.NotEmpty(hmacMd5);
 
-            var hmacSha256 = nameof(AlgorithmExtensionsTests).AsHmacSha256Base64String();
+            var hmacSha1 = _plaintext.AsHmacSha1Base64String();
+            Assert.NotEmpty(hmacSha1);
+
+            var hmacSha256 = _plaintext.AsHmacSha256Base64String();
             Assert.NotEmpty(hmacSha256);
 
-            var hmacSha384 = nameof(AlgorithmExtensionsTests).AsHmacSha384Base64String();
+            var hmacSha384 = _plaintext.AsHmacSha384Base64String();
             Assert.True(hmacSha384.Length > hmacSha256.Length);
 
-            var hmacSha512 = nameof(AlgorithmExtensionsTests).AsHmacSha512Base64String();
+            var hmacSha512 = _plaintext.AsHmacSha512Base64String();
             Assert.True(hmacSha512.Length > hmacSha384.Length);
+        }
+
+        #endregion
+
+
+        #region DES
+
+        [Fact]
+        public void DesTest()
+        {
+            var ciphertext = _plaintext.As3DesWithBase64String();
+            Assert.NotEmpty(ciphertext);
+
+            var plaintext = ciphertext.From3DesWithBase64String();
+            Assert.Equal(_plaintext, plaintext);
         }
 
         #endregion
@@ -47,15 +106,13 @@ namespace Librame.Extensions
         #region AES
 
         [Fact]
-        public void AsAesAndFromAesTest()
+        public void AesTest()
         {
-            var str = nameof(AlgorithmExtensionsTests);
-
-            var ciphertext = str.AsAesWithBase64String();
+            var ciphertext = _plaintext.AsAesWithBase64String();
             Assert.NotEmpty(ciphertext);
 
             var plaintext = ciphertext.FromAesWithBase64String();
-            Assert.Equal(str, plaintext);
+            Assert.Equal(_plaintext, plaintext);
         }
 
         #endregion
@@ -64,15 +121,13 @@ namespace Librame.Extensions
         #region AES-CCM
 
         [Fact]
-        public void AsAesCcmAndFromAesCcmTest()
+        public void AesCcmTest()
         {
-            var str = nameof(AlgorithmExtensionsTests);
-
-            var ciphertext = str.AsAesCcmWithBase64String();
+            var ciphertext = _plaintext.AsAesCcmWithBase64String();
             Assert.NotEmpty(ciphertext);
 
             var plaintext = ciphertext.FromAesCcmWithBase64String();
-            Assert.Equal(str, plaintext);
+            Assert.Equal(_plaintext, plaintext);
         }
 
         #endregion
@@ -81,15 +136,50 @@ namespace Librame.Extensions
         #region AES-GCM
 
         [Fact]
-        public void AsAesGcmAndFromAesGcmTest()
+        public void AesGcmTest()
         {
-            var str = nameof(AlgorithmExtensionsTests);
-
-            var ciphertext = str.AsAesGcmWithBase64String();
+            var ciphertext = _plaintext.AsAesGcmWithBase64String();
             Assert.NotEmpty(ciphertext);
 
             var plaintext = ciphertext.FromAesGcmWithBase64String();
-            Assert.Equal(str, plaintext);
+            Assert.Equal(_plaintext, plaintext);
+        }
+
+        #endregion
+
+
+        #region ECDSA
+
+        [Fact]
+        public void EcdsaTest()
+        {
+            //var ciphertext = _plaintext.SignEcdsaWithBase64String();
+            //Assert.NotEmpty(ciphertext);
+
+            var publicKeyProvider = new CertificateFilePersistenceProvider(X509ContentType.Cert, password: null,
+                "D:\\Repositories\\extensions-tick\\test\\LibrameTick.Extensions.Tests\\bin\\Debug\\net8.0\\LibrameTick.Extensions.cer",
+                Encoding.UTF8, () => null!);
+
+            var publicCert = (ECDsaCng)publicKeyProvider.Current.GetECDsaPublicKey()!;
+            var str = publicCert.SignData(_plaintext.FromEncodingString()).AsBase64String();
+
+            var result = str.VerifyEcdsaWithBase64String(_plaintext);
+            Assert.True(result);
+        }
+
+        #endregion
+
+
+        #region Password
+
+        [Fact]
+        public void PasswordTest()
+        {
+            var ciphertext = _plaintext.AsPasswordHash();
+            Assert.NotEmpty(ciphertext);
+
+            var result = ciphertext.VerifyPasswordHash(_plaintext);
+            Assert.True(result);
         }
 
         #endregion

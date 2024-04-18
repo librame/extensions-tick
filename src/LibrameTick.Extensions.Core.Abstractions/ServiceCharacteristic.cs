@@ -15,7 +15,7 @@ namespace Librame.Extensions.Core;
 /// <summary>
 /// 服务特征。
 /// </summary>
-public class ServiceCharacteristic : IEquatable<ServiceCharacteristic>
+public sealed class ServiceCharacteristic : IEquatable<ServiceCharacteristic>
 {
     /// <summary>
     /// 构造一个 <see cref="ServiceCharacteristic"/>。
@@ -58,10 +58,25 @@ public class ServiceCharacteristic : IEquatable<ServiceCharacteristic>
     /// <summary>
     /// 比较相等。
     /// </summary>
+    /// <param name="obj">给定的对象。</param>
+    /// <returns>返回布尔值。</returns>
+    public override bool Equals(object? obj)
+        => Equals(obj as ServiceCharacteristic);
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
     /// <param name="other">给定的 <see cref="ServiceCharacteristic"/>。</param>
     /// <returns>返回布尔值。</returns>
     public bool Equals(ServiceCharacteristic? other)
-        => other is not null && ServiceType == other.ServiceType;
+        => other?.ServiceType == ServiceType;
+
+    /// <summary>
+    /// 比较相等。
+    /// </summary>
+    /// <returns>返回布尔值。</returns>
+    public override int GetHashCode()
+        => ServiceType.GetHashCode();
 
 
     /// <summary>
@@ -72,7 +87,7 @@ public class ServiceCharacteristic : IEquatable<ServiceCharacteristic>
     /// <param name="addImplementationType">添加实现类型。如果启用，则在默认添加服务类型的基础上，再添加实现类型（可选；默认不添加；此项对添加服务集合无效）。</param>
     /// <returns>返回 <see cref="ServiceCharacteristic"/>。</returns>
     public static ServiceCharacteristic Singleton(Type serviceType, bool replaceIfExists = false, bool addImplementationType = false)
-        => new ServiceCharacteristic(serviceType, replaceIfExists, addImplementationType);
+        => new(serviceType, replaceIfExists, addImplementationType);
 
     /// <summary>
     /// 域例服务。
@@ -82,7 +97,7 @@ public class ServiceCharacteristic : IEquatable<ServiceCharacteristic>
     /// <param name="addImplementationType">添加实现类型。如果启用，则在默认添加服务类型的基础上，再添加实现类型（可选；默认不添加；此项对添加服务集合无效）。</param>
     /// <returns>返回 <see cref="ServiceCharacteristic"/>。</returns>
     public static ServiceCharacteristic Scope(Type serviceType, bool replaceIfExists = false, bool addImplementationType = false)
-        => new ServiceCharacteristic(serviceType, replaceIfExists, addImplementationType, ServiceLifetime.Scoped);
+        => new(serviceType, replaceIfExists, addImplementationType, ServiceLifetime.Scoped);
 
     /// <summary>
     /// 瞬例服务。
@@ -92,6 +107,6 @@ public class ServiceCharacteristic : IEquatable<ServiceCharacteristic>
     /// <param name="addImplementationType">添加实现类型。如果启用，则在默认添加服务类型的基础上，再添加实现类型（可选；默认不添加；此项对添加服务集合无效）。</param>
     /// <returns>返回 <see cref="ServiceCharacteristic"/>。</returns>
     public static ServiceCharacteristic Transient(Type serviceType, bool replaceIfExists = false, bool addImplementationType = false)
-        => new ServiceCharacteristic(serviceType, replaceIfExists, addImplementationType, ServiceLifetime.Transient);
+        => new(serviceType, replaceIfExists, addImplementationType, ServiceLifetime.Transient);
 
 }
