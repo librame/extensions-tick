@@ -11,7 +11,7 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Specifications;
+using Librame.Extensions.Specification;
 
 namespace Librame.Extensions.Data.Storing;
 

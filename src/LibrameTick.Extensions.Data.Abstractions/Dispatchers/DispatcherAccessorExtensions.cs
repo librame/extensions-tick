@@ -11,8 +11,9 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Infrastructure.Dispatching;
 
-namespace Librame.Extensions.Dispatchers;
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义 <see cref="IDispatcher{IAccessor}"/> 静态扩展。

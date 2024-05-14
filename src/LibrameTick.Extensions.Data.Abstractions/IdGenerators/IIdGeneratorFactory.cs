@@ -10,9 +10,9 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Infrastructure;
 
-namespace Librame.Extensions.IdGenerators;
+namespace Librame.Extensions.IdGeneration;
 
 /// <summary>
 /// 定义标识生成器工厂接口。

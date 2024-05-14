@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
 /// 定义实现 <see cref="IEncryptionProvider{ByteArray}"/> 用于字节数组的加密提供程序。

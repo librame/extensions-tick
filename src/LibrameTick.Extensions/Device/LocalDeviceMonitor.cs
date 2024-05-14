@@ -10,32 +10,26 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Device;
 
 /// <summary>
 /// 定义实现 <see cref="IDeviceMonitor"/> 的本机设备监视器。
 /// </summary>
-public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
+/// <remarks>
+/// 构造一个 <see cref="LocalDeviceMonitor"/>。
+/// </remarks>
+/// <param name="options">给定的 <see cref="DeviceMonitoringOptions"/>。</param>
+public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : AbstractDisposable, IDeviceMonitor
 {
     private Ping? _ping;
 
 
     /// <summary>
-    /// 构造一个 <see cref="LocalDeviceMonitor"/>。
-    /// </summary>
-    /// <param name="options">给定的 <see cref="DeviceMonitoringOptions"/>。</param>
-    public LocalDeviceMonitor(DeviceMonitoringOptions options)
-    {
-        Options = options;
-    }
-
-
-    /// <summary>
     /// 设备监视器选项。
     /// </summary>
-    public DeviceMonitoringOptions Options { get; init; }
+    public DeviceMonitoringOptions Options { get; init; } = options;
 
 
     /// <summary>
@@ -46,8 +40,7 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
     /// <returns>返回 <see cref="PingReply"/>。</returns>
     public PingReply SendPing(string hostNameOrAddress, int? timeout = null)
     {
-        if (_ping is null)
-            _ping = new Ping();
+        _ping ??= new Ping();
 
         return timeout is null
             ? _ping.Send(hostNameOrAddress)
@@ -64,8 +57,7 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
     public Task<PingReply> SendPingAsync(string hostNameOrAddress, int? timeout = null,
         CancellationToken cancellationToken = default)
     {
-        if (_ping is null)
-            _ping = new Ping();
+        _ping ??= new Ping();
 
         return timeout is null
             ? _ping.SendPingAsync(hostNameOrAddress)
@@ -94,7 +86,7 @@ public class LocalDeviceMonitor : AbstractDisposable, IDeviceMonitor
     /// </summary>
     /// <returns>返回 <see cref="INetworkDeviceInfo"/>。</returns>
     public INetworkDeviceInfo GetNetwork()
-        => NetworkDevice.GetInfo(Options.NetworkCollectCount, Options.NetworkCollectInterval, Options.HasInterfaceFunc);
+        => NetworkDevice.GetInfo(Options);
 
     /// <summary>
     /// 异步获取网络设备信息。

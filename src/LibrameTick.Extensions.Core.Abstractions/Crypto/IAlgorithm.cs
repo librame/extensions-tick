@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
 /// 定义一个算法接口。

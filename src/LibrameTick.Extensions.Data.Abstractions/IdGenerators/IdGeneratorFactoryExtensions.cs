@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Core;
 
-namespace Librame.Extensions.IdGenerators;
+namespace Librame.Extensions.IdGeneration;
 
 /// <summary>
 /// <see cref="IIdGeneratorFactory"/> 静态扩展。

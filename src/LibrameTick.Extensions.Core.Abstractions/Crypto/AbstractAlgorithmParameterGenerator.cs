@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
 /// 抽象实现 <see cref="IAlgorithmParameterGenerator"/>。

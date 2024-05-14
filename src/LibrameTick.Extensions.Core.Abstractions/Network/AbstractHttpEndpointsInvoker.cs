@@ -10,7 +10,8 @@
 
 #endregion
 
-using Librame.Extensions.Dependencies;
+using Librame.Extensions.Cryptography;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Network;
 

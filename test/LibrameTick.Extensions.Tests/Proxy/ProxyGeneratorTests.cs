@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using Librame.Extensions.Infrastructure.Proxy;
+using Xunit;
 
 namespace Librame.Extensions.Proxy
 {

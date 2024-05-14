@@ -11,8 +11,9 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Infrastructure.Dispatching;
 
-namespace Librame.Extensions.Dispatchers;
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义一个表示数据访问的镜像调度器存取器集合，默认通过 <see cref="BaseDispatcher{IAccessor}"/> 与 <see cref="TransactionDispatcher{IAccessor}"/> 实现（支持针对读取异常切换与分布式写入事务遍历等功能）。

@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure.Proxy;
+
 namespace Librame.Extensions.Proxy;
 
 internal class ProxyDecoratorInjection<TInterface> : IProxyDecorator<TInterface>

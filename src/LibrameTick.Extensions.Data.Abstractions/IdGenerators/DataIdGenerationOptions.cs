@@ -10,9 +10,9 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Infrastructure;
 
-namespace Librame.Extensions.IdGenerators;
+namespace Librame.Extensions.IdGeneration;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的数据标识生成选项。

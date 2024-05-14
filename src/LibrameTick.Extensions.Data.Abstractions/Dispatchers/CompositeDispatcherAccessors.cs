@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Dispatchers;
+using Librame.Extensions.Infrastructure.Dispatching;
+
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义一个表示数据访问的复合调度器存取器集合。

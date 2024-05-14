@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Core;
 
-namespace Librame.Extensions.Dispatchers;
+namespace Librame.Extensions.Dispatching;
 
 internal sealed class InternalDispatcherFactory : AbstractDispatcherFactory
 {

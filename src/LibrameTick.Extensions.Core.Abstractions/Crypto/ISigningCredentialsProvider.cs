@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
 /// 定义签名证书提供程序接口。

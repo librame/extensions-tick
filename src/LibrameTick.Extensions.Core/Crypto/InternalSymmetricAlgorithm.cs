@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Core;
 
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 internal sealed class InternalSymmetricAlgorithm : AbstractSymmetricAlgorithm
 {

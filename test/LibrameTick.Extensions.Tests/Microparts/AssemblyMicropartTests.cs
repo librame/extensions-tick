@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Librame.Extensions.Core;
+using Librame.Extensions.Infrastructure;
+using Librame.Extensions.Infrastructure.Filtration;
 using Xunit;
 
 namespace Librame.Extensions.Microparts
@@ -9,16 +11,16 @@ namespace Librame.Extensions.Microparts
         [Fact]
         public void AllTest()
         {
-            var options = new AssemblyOptions();
+            var options = new AssemblyFiltrationOptions();
             //options.AssemblyLoadPath = PathExtensions.CurrentDirectory;
 
             // 设定筛选器
-            var librameFiltering = new AssemblyFilteringDescriptor("LibrameFiltering");
+            var librameFiltering = new AssemblyFiltrationDescriptor("LibrameFiltering");
 
             // 包含 Librame
-            librameFiltering.Filters.Add(new FilteringRegex("Librame", FilteringMode.Inclusive));
+            librameFiltering.Filters.Add(new FiltrationRegex("Librame", FiltrationMode.Inclusive));
             // 排除 Tests
-            librameFiltering.Filters.Add(new FilteringRegex("Tests", FilteringMode.Exclusive));
+            librameFiltering.Filters.Add(new FiltrationRegex("Tests", FiltrationMode.Exclusive));
 
             options.FilteringDescriptors.Add(librameFiltering);
 

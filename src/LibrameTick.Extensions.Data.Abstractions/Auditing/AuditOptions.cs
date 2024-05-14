@@ -10,8 +10,8 @@
 
 #endregion
 
-using Librame.Extensions.Core;
 using Librame.Extensions.Data.Storing;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Data.Auditing;
 

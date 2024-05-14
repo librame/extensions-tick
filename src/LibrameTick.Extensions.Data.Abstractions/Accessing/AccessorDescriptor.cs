@@ -10,9 +10,9 @@
 
 #endregion
 
-using Librame.Extensions.Dependencies;
+using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Infrastructure.Dispatching;
 
 namespace Librame.Extensions.Data.Accessing;
 

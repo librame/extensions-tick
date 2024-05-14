@@ -11,8 +11,9 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Infrastructure.Dispatching;
 
-namespace Librame.Extensions.Dispatchers;
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义一个表示数据访问的默认调度器存取器集合。

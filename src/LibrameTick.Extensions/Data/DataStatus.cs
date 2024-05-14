@@ -104,8 +104,8 @@ namespace Librame.Extensions.Data
         /// </summary>
         [Display(Name = nameof(Obsolete), GroupName = "StateGroup", ResourceType = typeof(DataStatusResource))]
         Obsolete = 2048
-        
+
         #endregion
-        
+
     }
 }

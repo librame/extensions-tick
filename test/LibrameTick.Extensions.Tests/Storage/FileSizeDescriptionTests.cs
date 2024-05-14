@@ -1,4 +1,5 @@
 ﻿using System;
+using Librame.Extensions.Infrastructure.Storage;
 using Xunit;
 
 namespace Librame.Extensions.Storage

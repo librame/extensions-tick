@@ -15,9 +15,11 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Data;
 using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Specifications;
+using Librame.Extensions.Infrastructure.Core;
+using Librame.Extensions.Infrastructure.Dispatching;
+using Librame.Extensions.Infrastructure.Specification;
 
-namespace Librame.Extensions.Dispatchers;
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义一个实现 <see cref="IAccessor"/> 的基础调度器存取器集合。

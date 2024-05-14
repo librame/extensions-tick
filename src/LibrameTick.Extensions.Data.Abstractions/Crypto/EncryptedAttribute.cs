@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
 /// 定义表示此属性已加密的特性。

@@ -12,9 +12,11 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Data.Sharding;
+using Librame.Extensions.Infrastructure.Core;
 using Librame.Extensions.Device;
-using Librame.Extensions.Dispatchers;
-using Librame.Extensions.Specifications;
+using Librame.Extensions.Dispatching;
+using Librame.Extensions.Specification;
+using Librame.Extensions.Infrastructure.Specification;
 
 namespace Librame.Extensions.Data.Accessing;
 

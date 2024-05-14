@@ -17,7 +17,7 @@ using Librame.Extensions.Data.Saving;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Device;
-using Librame.Extensions.IdGenerators;
+using Librame.Extensions.IdGeneration;
 using Librame.Extensions.Setting;
 
 namespace Librame.Extensions.Data;

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using Xunit;
 
-namespace Librame.Extensions.Dependencies
+namespace Librame.Extensions.Infrastructure
 {
     public class InternalAsymmetricAlgorithmTests
     {

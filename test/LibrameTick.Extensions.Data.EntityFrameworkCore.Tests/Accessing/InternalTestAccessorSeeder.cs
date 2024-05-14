@@ -1,5 +1,5 @@
 ﻿using Librame.Extensions.Core;
-using Librame.Extensions.IdGenerators;
+using Librame.Extensions.IdGeneration;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading;

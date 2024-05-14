@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Cryptography;
+
 namespace Librame.Extensions.Storage;
 
 /// <summary>

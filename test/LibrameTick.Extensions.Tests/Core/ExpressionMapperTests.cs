@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Librame.Extensions.Infrastructure.Mapping;
 using Xunit;
 
 namespace Librame.Extensions.Core.Tests

@@ -10,9 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
-
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的签名证书选项。

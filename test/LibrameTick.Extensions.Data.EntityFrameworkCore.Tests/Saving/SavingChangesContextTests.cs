@@ -1,7 +1,7 @@
 ﻿using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
-using Librame.Extensions.IdGenerators;
+using Librame.Extensions.IdGeneration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;

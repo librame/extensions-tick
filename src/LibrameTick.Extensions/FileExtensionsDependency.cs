@@ -12,10 +12,10 @@
 
 namespace Librame.Extensions;
 
-/// <summary>
-/// 定义文件静态扩展依赖。
-/// </summary>
-public static class FileExtensionsDependency
-{
+///// <summary>
+///// 定义文件静态扩展依赖。
+///// </summary>
+//public static class FileExtensionsDependency
+//{
 
-}
+//}

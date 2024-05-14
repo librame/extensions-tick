@@ -55,7 +55,7 @@ public static class ExceptionExtensions
         exception.WriteDebug();
 
         if (!string.IsNullOrWhiteSpace(outputMessage))
-            return ExpressionExtensions.New<TOutputException>(new object[] { outputMessage });
+            return ExpressionExtensions.New<TOutputException>([outputMessage]);
 
         return ExpressionExtensions.New<TOutputException>();
     }
@@ -78,26 +78,6 @@ public static class ExceptionExtensions
 #endif
 
         return error;
-    }
-
-    /// <summary>
-    /// 获取系统错误消息。
-    /// </summary>
-    /// <param name="errorCode">给定的错误代码。</param>
-    /// <returns>返回错误消息字符串。</returns>
-    public static string GetSystemErrorMessage(this int errorCode)
-    {
-        if (errorCode > 0)
-        {
-            var tempPtr = IntPtr.Zero;
-            var msg = string.Empty;
-
-            Core.DllInterop.FormatMessage(0x1300, ref tempPtr, errorCode, 0, ref msg, 255, ref tempPtr);
-
-            return msg;
-        }
-
-        return errorCode.ToString();
     }
 
 }

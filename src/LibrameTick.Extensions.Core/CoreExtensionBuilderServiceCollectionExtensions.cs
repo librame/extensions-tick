@@ -12,13 +12,14 @@
 
 using Librame.Extensions;
 using Librame.Extensions.Core;
-using Librame.Extensions.Dependencies;
+using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Device;
-using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Dispatching;
 using Librame.Extensions.Network;
 using Librame.Extensions.Proxy;
 using Librame.Extensions.Setting;
 using Librame.Extensions.Storage;
+using Librame.Extensions.Infrastructure.Proxy;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

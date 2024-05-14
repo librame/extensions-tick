@@ -12,9 +12,10 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Specifications;
+using Librame.Extensions.Infrastructure.Dispatching;
+using Librame.Extensions.Infrastructure.Specification;
 
-namespace Librame.Extensions.Dispatchers;
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义一个表示数据访问的分割调度器存取器集合，默认通过 <see cref="TransactionDispatcher{IAccessor}"/> 实现（支持针对读取与写入的分布式事务遍历等功能）。

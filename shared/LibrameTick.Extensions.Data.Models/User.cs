@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Dependencies;
+using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Data.Sharding;
 using System;
 using System.Globalization;

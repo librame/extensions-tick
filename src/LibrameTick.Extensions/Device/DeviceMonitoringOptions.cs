@@ -10,7 +10,8 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Infrastructure;
+using Librame.Extensions.Infrastructure.Dependency;
 
 namespace Librame.Extensions.Device;
 
@@ -40,6 +41,12 @@ public class DeviceMonitoringOptions : IOptions
     /// </summary>
     public TimeSpan NetworkCollectInterval { get; set; }
         = TimeSpan.FromMilliseconds(300);
+
+    /// <summary>
+    /// 创建时间方法（默认使用本地当前时间）。
+    /// </summary>
+    public Func<DateTimeOffset> CreateTimeFunc { get; set; }
+        = DependencyRegistration.CurrentContext.Clocks.GetNow;
 
     /// <summary>
     /// 含有网络接口方法（默认不包含 VMware 虚拟网卡）。

@@ -1,7 +1,4 @@
-using Librame.Extensions.Dependencies.Cryptography;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using Librame.Extensions.Cryptography;
 using Xunit;
 
 namespace Librame.Extensions
@@ -148,22 +145,43 @@ namespace Librame.Extensions
         #endregion
 
 
+        #region RSA
+
+        [Fact]
+        public void RsaTest()
+        {
+            // Encrypt & Decrypt Bytes
+            var buffer = 256.GenerateByteArray();
+
+            var pubEncrypt = buffer.AsPublicRsa();
+            var pvtDecrypt = pubEncrypt.FromPrivateRsa();
+            Assert.Equal(buffer, pvtDecrypt);
+
+            // Encrypt & Decrypt
+            var ciphertext = _plaintext.AsPublicRsaWithBase64String();
+            Assert.NotEmpty(ciphertext);
+
+            var plaintext = ciphertext.FromPrivateRsaWithBase64String();
+            Assert.Equal(_plaintext, plaintext);
+
+            // Sign
+            var sig = _plaintext.SignDataPrivateRsaWithBase64String();
+            var result = sig.VerifyDataPublicRsaWithBase64String(_plaintext);
+            Assert.True(result);
+        }
+
+        #endregion
+
+
         #region ECDSA
 
         [Fact]
         public void EcdsaTest()
         {
-            //var ciphertext = _plaintext.SignEcdsaWithBase64String();
-            //Assert.NotEmpty(ciphertext);
-
-            var publicKeyProvider = new CertificateFilePersistenceProvider(X509ContentType.Cert, password: null,
-                "D:\\Repositories\\extensions-tick\\test\\LibrameTick.Extensions.Tests\\bin\\Debug\\net8.0\\LibrameTick.Extensions.cer",
-                Encoding.UTF8, () => null!);
-
-            var publicCert = (ECDsaCng)publicKeyProvider.Current.GetECDsaPublicKey()!;
-            var str = publicCert.SignData(_plaintext.FromEncodingString()).AsBase64String();
-
-            var result = str.VerifyEcdsaWithBase64String(_plaintext);
+            var ciphertext = _plaintext.SignDataPrivateEcdsaWithBase64String();
+            Assert.NotEmpty(ciphertext);
+            
+            var result = ciphertext.VerifyDataPublicEcdsaWithBase64String(_plaintext);
             Assert.True(result);
         }
 
@@ -175,10 +193,10 @@ namespace Librame.Extensions
         [Fact]
         public void PasswordTest()
         {
-            var ciphertext = _plaintext.AsPasswordHash();
+            var ciphertext = _plaintext.AsPassword();
             Assert.NotEmpty(ciphertext);
 
-            var result = ciphertext.VerifyPasswordHash(_plaintext);
+            var result = ciphertext.VerifyPassword(_plaintext);
             Assert.True(result);
         }
 

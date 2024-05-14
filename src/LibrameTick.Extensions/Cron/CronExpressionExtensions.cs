@@ -10,7 +10,8 @@
 
 #endregion
 
-using Librame.Extensions.Core;
+using Librame.Extensions.Infrastructure;
+using Librame.Extensions.Infrastructure.Mapping;
 using System;
 
 namespace Librame.Extensions.Cron;
@@ -40,14 +41,14 @@ public static class CronExpressionExtensions
 
 
     private static Dictionary<CronSyntax, int> InitialCronSyntaxs()
-        => EnumExtensions.GetEnumItems<CronSyntax, int>(static val => val.Value);
+        => EnumMappingExtensions.GetEnumItems<CronSyntax, int>(static val => val.Value);
 
     private static Dictionary<string, int> InitialDaysOfWeek()
-        => EnumExtensions.GetEnumItems<DayOfWeek, string, int>(static key => key.Name[..3].ToUpperInvariant(),
+        => EnumMappingExtensions.GetEnumItems<DayOfWeek, string, int>(static key => key.Name[..3].ToUpperInvariant(),
             static val => val.Value + 1);
 
     private static Dictionary<string, int> InitialMonthsOfDate()
-        => EnumExtensions.GetEnumItems<MonthOfDate, string, int>(static key => key.Name[..3].ToUpperInvariant(),
+        => EnumMappingExtensions.GetEnumItems<MonthOfDate, string, int>(static key => key.Name[..3].ToUpperInvariant(),
             static val => val.Value);
 
 

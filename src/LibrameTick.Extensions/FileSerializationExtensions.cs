@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure.Dependency;
+
 namespace Librame.Extensions;
 
 /// <summary>
@@ -20,8 +22,8 @@ public static class FileSerializationExtensions
     /// <summary>
     /// 当前扩展依赖。
     /// </summary>
-    public static Dependencies.IExtensionsDependency Dependency
-        => Dependencies.ExtensionsDependencyInstantiator.Instance;
+    public static IDependencyContext Dependency
+        => DependencyRegistration.CurrentContext;
 
 
     #region Binary
@@ -32,7 +34,7 @@ public static class FileSerializationExtensions
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="obj">给定的对象实例（可选；默认使用对象类型创建实例）。</param>
-    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
     /// <param name="customReadFuncs">给定的自定义字段类型读取方法字典集合（可选）。</param>
     /// <returns>返回 <typeparamref name="T"/>。</returns>
@@ -47,7 +49,7 @@ public static class FileSerializationExtensions
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="objType">给定要读取的对象类型。</param>
     /// <param name="obj">给定的对象实例（可选；默认使用对象类型创建实例）。</param>
-    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
     /// <param name="customReadFuncs">给定的自定义字段类型读取方法字典集合（可选）。</param>
     /// <returns>返回对象。</returns>
@@ -153,7 +155,7 @@ public static class FileSerializationExtensions
     /// </summary>
     /// <param name="filePath">给定的文件路径。</param>
     /// <param name="obj">给定要写入文件的对象。</param>
-    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
+    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <param name="flags">给定要写入成员的 <see cref="BindingFlags"/>（可选；默认包含静态在内的所有字段和属性成员集合）。</param>
     /// <param name="customWriteActions">给定的自定义字段类型写入动作字典集合（可选）。</param>
     public static void SerializeBinaryFile(this string filePath, object obj,
@@ -277,66 +279,6 @@ public static class FileSerializationExtensions
                     throw new NotSupportedException($"The current type '{fieldType}' of writing is not supported.");
             }
         }
-    }
-
-    #endregion
-
-
-    #region JSON
-
-    /// <summary>
-    /// 反序列化 JSON 文件（支持枚举类型）。
-    /// </summary>
-    /// <typeparam name="T">指定的反序列化类型。</typeparam>
-    /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
-    /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
-    /// <returns>返回反序列化对象。</returns>
-    public static T? DeserializeJsonFile<T>(this string filePath, Encoding? encoding = null,
-        JsonSerializerOptions? options = null)
-    {
-        var json = File.ReadAllText(filePath, encoding ?? Dependency.Encoding);
-        return JsonSerializer.Deserialize<T>(json, options);
-    }
-
-    /// <summary>
-    /// 反序列化 JSON 文件（支持枚举类型）。
-    /// </summary>
-    /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="returnType">给定的反序列化对象类型。</param>
-    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
-    /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选）。</param>
-    /// <returns>返回反序列化对象。</returns>
-    public static object? DeserializeJsonFile(this string filePath, Type returnType, Encoding? encoding = null,
-        JsonSerializerOptions? options = null)
-    {
-        var json = File.ReadAllText(filePath, encoding ?? Dependency.Encoding);
-        return json.FromJson(returnType, options);
-    }
-
-
-    /// <summary>
-    /// 序列化 JSON 文件（支持枚举类型）。
-    /// </summary>
-    /// <param name="filePath">给定的文件路径。</param>
-    /// <param name="value">给定的对象值。</param>
-    /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="Dependencies.IExtensionsDependency.Encoding"/>）。</param>
-    /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="JsonExtensions.DefaultSerializerOptions"/>）。</param>
-    /// <param name="autoCreateDirectory">自动创建目录（可选；默认启用）。</param>
-    /// <returns>返回 JSON 字符串。</returns>
-    public static string SerializeJsonFile(this string filePath, object value, Encoding? encoding = null,
-        JsonSerializerOptions? options = null, bool autoCreateDirectory = true)
-    {
-        var json = value.AsJson(options);
-
-        if (autoCreateDirectory)
-        {
-            var dir = Path.GetDirectoryName(filePath);
-            dir!.CreateDirectory();
-        }
-
-        File.WriteAllText(filePath, json, encoding ?? Dependency.Encoding);
-        return json;
     }
 
     #endregion

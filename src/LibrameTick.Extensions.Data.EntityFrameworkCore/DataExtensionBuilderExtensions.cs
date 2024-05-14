@@ -17,7 +17,7 @@ using Librame.Extensions.Data.Accessing;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Data.Storing;
 using Librame.Extensions.Data.ValueConversion;
-using Librame.Extensions.IdGenerators;
+using Librame.Extensions.IdGeneration;
 using Librame.Extensions.Setting;
 
 namespace Microsoft.Extensions.DependencyInjection;

@@ -203,8 +203,8 @@ public static class PathExtensions
             if (compareFileSize && length1 == length2)
                 return true; // 如果启用比较文件大小，则大小相等表示文件相等
 
-            var buffer1 = FileBufferSize.RentByteArray();
-            var buffer2 = FileBufferSize.RentByteArray();
+            var buffer1 = ArrayPool<byte>.Shared.Rent(FileBufferSize);
+            var buffer2 = ArrayPool<byte>.Shared.Rent(FileBufferSize);
 
             var offset1 = 0L;
             var offset2 = 0L;
@@ -217,8 +217,8 @@ public static class PathExtensions
                 // 如果同顺序读取指定长度内容不相同，则直接返回不相等
                 if (!buffer1.SequenceEqualByReadOnlySpan(buffer2))
                 {
-                    buffer1.ReturnArray();
-                    buffer2.ReturnArray();
+                    ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
+                    ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
 
                     return false;
                 }
@@ -230,8 +230,8 @@ public static class PathExtensions
                 offset2 += curLength2;
             }
 
-            buffer1.ReturnArray();
-            buffer2.ReturnArray();
+            ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
+            ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
 
             return true;
         }

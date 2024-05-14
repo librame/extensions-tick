@@ -1,4 +1,4 @@
-﻿using Librame.Extensions.IdGenerators;
+﻿using Librame.Extensions.IdGeneration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using Xunit;

@@ -13,9 +13,9 @@
 using Librame.Extensions.Bootstraps;
 using Librame.Extensions.Network;
 using Librame.Extensions.Storage;
-using Librame.Extensions.Dependencies;
+using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Device;
-using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Infrastructure.Dispatching;
 
 namespace Librame.Extensions.Core;
 

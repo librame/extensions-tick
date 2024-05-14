@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Dispatching;
 using Librame.Extensions.Setting;
 
 namespace Librame.Extensions.Data.Sharding;

@@ -12,7 +12,7 @@
 
 using Librame.Extensions.Data.Accessing;
 
-namespace Librame.Extensions.Specifications;
+namespace Librame.Extensions.Specification;
 
 /// <summary>
 /// 定义一个实现 <see cref="AccessAccessorSpecification"/> 且支持读取与读写模式的数据访问存取器规约。

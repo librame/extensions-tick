@@ -10,13 +10,13 @@
 
 #endregion
 
-using Librame.Extensions.Dependencies;
+using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Device;
-using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Dispatching;
 using Librame.Extensions.Network;
 using Librame.Extensions.Plugins;
-using Librame.Extensions.Proxy;
 using Librame.Extensions.Storage;
+using Librame.Extensions.Infrastructure.Proxy;
 
 namespace Librame.Extensions.Core;
 

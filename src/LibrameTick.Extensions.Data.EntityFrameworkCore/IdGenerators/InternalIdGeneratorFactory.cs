@@ -12,8 +12,9 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Data;
+using Librame.Extensions.Infrastructure;
 
-namespace Librame.Extensions.IdGenerators;
+namespace Librame.Extensions.IdGeneration;
 
 internal sealed class InternalIdGeneratorFactory : IIdGeneratorFactory
 {

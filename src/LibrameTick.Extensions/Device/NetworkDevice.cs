@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Bootstraps;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Device;
 
@@ -26,20 +26,28 @@ public static class NetworkDevice
         => p.AddressFamily == AddressFamily.InterNetwork
         || p.AddressFamily == AddressFamily.InterNetworkV6;
 
-    private readonly static IClockBootstrap _clock = Bootstrapper.GetClock();
-
     private static IEnumerable<NetworkInterface>? _hostInterfaces = null;
 
 
     /// <summary>
     /// 获取网络设备信息。
     /// </summary>
+    /// <param name="options">给定的 <see cref="DeviceMonitoringOptions"/>。</param>
+    /// <returns>返回 <see cref="INetworkDeviceInfo"/>。</returns>
+    public static INetworkDeviceInfo GetInfo(DeviceMonitoringOptions options)
+        => GetInfo(options.NetworkCollectCount, options.NetworkCollectInterval, options.CreateTimeFunc,
+            options.HasInterfaceFunc);
+
+    /// <summary>
+    /// 获取网络设备信息。
+    /// </summary>
     /// <param name="collectCount">给定用于提升准确性的重复采集次数。</param>
     /// <param name="collectInterval">给定的单次采集间隔。</param>
+    /// <param name="createTimeFunc">给定的产生时间方法。</param>
     /// <param name="hasInterfaceFunc">给定含有网络接口的方法。</param>
     /// <returns>返回 <see cref="INetworkDeviceInfo"/>。</returns>
     public static INetworkDeviceInfo GetInfo(int collectCount, TimeSpan collectInterval,
-        Func<NetworkInterface, bool>? hasInterfaceFunc)
+        Func<DateTimeOffset> createTimeFunc, Func<NetworkInterface, bool>? hasInterfaceFunc)
     {
         if (collectCount < 1)
             collectCount = 1; // 至少重复采集一次（除开首次）
@@ -47,17 +55,17 @@ public static class NetworkDevice
         if (collectInterval == TimeSpan.Zero)
             collectInterval = TimeSpan.FromMilliseconds(300);
 
-        if (_hostInterfaces is null)
-            _hostInterfaces = GetHostInterfaces(hasInterfaceFunc);
+        _hostInterfaces ??= GetHostInterfaces(hasInterfaceFunc);
 
-        var infos = GetInfos(collectCount, collectInterval).ToArray();
+        var infos = GetInfos(createTimeFunc, collectCount, collectInterval).ToArray();
 
         return new CompositeNetworkDeviceInfo(infos);
     }
 
-    private static IEnumerable<INetworkDeviceInfo> GetInfos(int collectCount, TimeSpan collectInterval)
+    private static IEnumerable<INetworkDeviceInfo> GetInfos(Func<DateTimeOffset> createTimeFunc,
+        int collectCount, TimeSpan collectInterval)
     {
-        var lastTraffics = _hostInterfaces!.Select(s => GetTraffic(s)).ToArray();
+        var lastTraffics = _hostInterfaces!.Select(s => GetTraffic(createTimeFunc, s)).ToArray();
 
         // 需要多次计算以提高网络利用率准确性
         var receivedRates = new Dictionary<string, float>(lastTraffics.Length);
@@ -70,7 +78,7 @@ public static class NetworkDevice
             for (var j = 0; j < lastTraffics.Length; j++)
             {
                 var info = _hostInterfaces!.ElementAt(j);
-                var curTraffic = GetTraffic(info, lastTraffics[j]);
+                var curTraffic = GetTraffic(createTimeFunc, info, lastTraffics[j]);
 
                 if (!receivedRates.ContainsKey(info.Id))
                     receivedRates.Add(info.Id, curTraffic.ReceivedRate);
@@ -100,13 +108,14 @@ public static class NetworkDevice
         }
     }
 
-    private static NetworkTraffic GetTraffic(NetworkInterface info, NetworkTraffic? lastTraffic = null)
+    private static NetworkTraffic GetTraffic(Func<DateTimeOffset> createTimeFunc, NetworkInterface info,
+        NetworkTraffic? lastTraffic = null)
     {
         var statistics = info.GetIPStatistics();
 
         return lastTraffic is null
-            ? new NetworkTraffic(_clock.GetUtcNow(), statistics.BytesReceived, statistics.BytesSent)
-            : new NetworkTraffic(_clock.GetUtcNow(), statistics.BytesReceived, statistics.BytesSent, lastTraffic.Value);
+            ? new NetworkTraffic(createTimeFunc(), statistics.BytesReceived, statistics.BytesSent)
+            : new NetworkTraffic(createTimeFunc(), statistics.BytesReceived, statistics.BytesSent, lastTraffic.Value);
     }
 
     private static IEnumerable<NetworkInterface> GetHostInterfaces(Func<NetworkInterface, bool>? hasInterfaceFunc)

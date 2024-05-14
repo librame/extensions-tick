@@ -18,6 +18,12 @@ namespace Librame.Extensions.Device;
 public interface IDeviceMonitor : IDisposable
 {
     /// <summary>
+    /// 设备监视器选项。
+    /// </summary>
+    DeviceMonitoringOptions Options { get; }
+
+
+    /// <summary>
     /// 发送 PING。
     /// </summary>
     /// <param name="hostNameOrAddress">给定的主机名或 IP 地址。</param>

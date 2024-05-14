@@ -10,12 +10,14 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.Cron;
 
 /// <summary>
 /// 定义一个 CRON 选项。
 /// </summary>
-public class CronOptions : Core.IOptions
+public class CronOptions : IOptions
 {
     /// <summary>
     /// 所有特殊整数标记（默认为 99）。

@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Dispatchers;
+using Librame.Extensions.Infrastructure.Dispatching;
+
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义抽象实现 <see cref="IDispatcherFactory"/> 的调度器工厂。

@@ -1,4 +1,5 @@
 ﻿using System;
+using Librame.Extensions.Infrastructure;
 using Xunit;
 
 namespace Librame.Extensions.Core

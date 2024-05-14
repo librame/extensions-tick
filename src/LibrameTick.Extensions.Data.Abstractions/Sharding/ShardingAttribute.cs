@@ -10,8 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Core;
-
 namespace Librame.Extensions.Data.Sharding;
 
 /// <summary>
@@ -26,7 +24,7 @@ namespace Librame.Extensions.Data.Sharding;
 /// <param name="strategyTypes">给定要引用的分片策略类型集合。</param>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
 public class ShardingAttribute(ShardingKind kind, string baseName
-    , string suffixFormatter, params Type[] strategyTypes) : Attribute, IShardingInfo, IValidatable<ShardingAttribute>
+    , string suffixFormatter, params Type[] strategyTypes) : Attribute, IShardingInfo, IValidation<ShardingAttribute>
 {
     /// <summary>
     /// 默认连接符。

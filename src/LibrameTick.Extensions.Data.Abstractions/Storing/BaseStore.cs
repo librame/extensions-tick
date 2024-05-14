@@ -12,9 +12,11 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Dispatchers;
-using Librame.Extensions.IdGenerators;
-using Librame.Extensions.Specifications;
+using Librame.Extensions.Dispatching;
+using Librame.Extensions.IdGeneration;
+using Librame.Extensions.Infrastructure.Dispatching;
+using Librame.Extensions.Infrastructure.Specification;
+using Librame.Extensions.Specification;
 
 namespace Librame.Extensions.Data.Storing;
 

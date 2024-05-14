@@ -11,8 +11,8 @@
 #endregion
 
 using Librame.Extensions.Data.Sharding;
-using Librame.Extensions.Dispatchers;
-using Librame.Extensions.Specifications;
+using Librame.Extensions.Dispatching;
+using Librame.Extensions.Infrastructure.Specification;
 
 namespace Librame.Extensions.Data.Accessing;
 

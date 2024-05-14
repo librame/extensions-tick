@@ -11,8 +11,9 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
+using Librame.Extensions.Infrastructure.Dispatching;
 
-namespace Librame.Extensions.Dispatchers;
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义一个实现 <see cref="IAccessor"/> 的调度器存取器集合接口。

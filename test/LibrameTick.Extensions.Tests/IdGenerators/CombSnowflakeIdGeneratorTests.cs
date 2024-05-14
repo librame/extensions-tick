@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Xunit;
 
-namespace Librame.Extensions.IdGenerators
+namespace Librame.Extensions.IdGeneration
 {
     public class CombSnowflakeIdGeneratorTests
     {

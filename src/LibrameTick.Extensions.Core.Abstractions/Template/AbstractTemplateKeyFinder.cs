@@ -11,7 +11,7 @@
 #endregion
 
 using Librame.Extensions.Bootstraps;
-using Librame.Extensions.Core;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Template;
 

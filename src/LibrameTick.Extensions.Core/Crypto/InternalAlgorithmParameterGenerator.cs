@@ -10,7 +10,7 @@
 
 #endregion
 
-namespace Librame.Extensions.Dependencies;
+namespace Librame.Extensions.Infrastructure;
 
 internal sealed class InternalAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
 {

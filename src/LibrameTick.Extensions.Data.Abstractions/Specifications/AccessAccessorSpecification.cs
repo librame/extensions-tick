@@ -11,9 +11,10 @@
 #endregion
 
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Dispatchers;
+using Librame.Extensions.Infrastructure.Dispatching;
+using Librame.Extensions.Infrastructure.Specification;
 
-namespace Librame.Extensions.Specifications;
+namespace Librame.Extensions.Specification;
 
 /// <summary>
 /// 定义一个实现 <see cref="AbstractSpecification{IAccessor}"/> 的数据访问存取器规约。

@@ -113,6 +113,6 @@ public readonly struct NetworkTraffic
     /// <param name="newSendRate">给定的新发送速率。</param>
     /// <returns>返回 <see cref="ProcessorTimes"/>。</returns>
     public NetworkTraffic WithRate(float newReceivedRate, float newSendRate)
-        => new NetworkTraffic(CreateTime, ReceivedLength, SendLength, newReceivedRate, newSendRate);
+        => new(CreateTime, ReceivedLength, SendLength, newReceivedRate, newSendRate);
 
 }

@@ -10,7 +10,9 @@
 
 #endregion
 
-namespace Librame.Extensions.Dispatchers;
+using Librame.Extensions.Infrastructure.Dispatching;
+
+namespace Librame.Extensions.Dispatching;
 
 /// <summary>
 /// 定义一个 <see cref="IDispatcher{TSource}"/> 工厂。

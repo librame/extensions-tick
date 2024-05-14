@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Librame.Extensions.Cryptography;
 using Xunit;
 
 namespace Librame.Extensions
