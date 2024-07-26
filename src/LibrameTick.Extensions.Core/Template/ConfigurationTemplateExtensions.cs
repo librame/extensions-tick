@@ -31,7 +31,7 @@ public static class ConfigurationTemplateExtensions
         Action<ConfigurationTemplateOptions>? setupOptions = null)
         where TConfiguration : IConfiguration
     {
-        var options = Templater.DefaultConfigurationOptions;
+        var options = Templating.DefaultConfigurationOptions;
 
         options.Source = source;
 

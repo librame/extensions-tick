@@ -291,7 +291,7 @@ public static class ExpressionExtensions
 
         var argParas = argumentTypes.Length > 0
             ? argumentTypes.Select((s, i) => Expression.Parameter(s, $"a{i}")).ToArray()
-            : Array.Empty<ParameterExpression>();
+            : [];
 
         var method = souceType.GetMethod(methodName, TypeExtensions.AllMemberFlagsWithStatic, argumentTypes)
             ?? souceType.GetMethods(TypeExtensions.AllMemberFlagsWithStatic)

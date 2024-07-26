@@ -12,6 +12,7 @@
 
 using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Microparts;
+using Librame.Extensions.Serialization;
 
 namespace Librame.Extensions.Device;
 

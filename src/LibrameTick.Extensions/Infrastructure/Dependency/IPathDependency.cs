@@ -18,6 +18,15 @@ namespace Librame.Extensions.Infrastructure.Dependency;
 public interface IPathDependency : IDependency
 {
     /// <summary>
+    /// 获取或设置操作系统下路径比较方式。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="StringComparison"/>。
+    /// </value>
+    StringComparison OSComparison { get; set; }
+
+
+    /// <summary>
     /// 获取初始路径。默认通常为 <see cref="Environment.CurrentDirectory"/> 取得的当前目录（如：...\Publish\bin\Debug\net8.0）。
     /// </summary>
     string InitialPath { get; }
@@ -36,15 +45,15 @@ public interface IPathDependency : IDependency
     /// <summary>
     /// 延迟获取配置路径。
     /// </summary>
-    Lazy<DirectoryInfo> ConfigPath { get; init; }
+    Lazy<DirectoryInfo> ConfigPath { get; }
 
     /// <summary>
     /// 延迟获取报告路径。
     /// </summary>
-    Lazy<DirectoryInfo> ReportPath { get; init; }
+    Lazy<DirectoryInfo> ReportPath { get; }
 
     /// <summary>
     /// 延迟获取资源路径。
     /// </summary>
-    Lazy<DirectoryInfo> ResourcePath { get; init; }
+    Lazy<DirectoryInfo> ResourcePath { get; }
 }

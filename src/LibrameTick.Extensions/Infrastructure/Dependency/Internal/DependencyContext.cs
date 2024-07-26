@@ -14,7 +14,7 @@ namespace Librame.Extensions.Infrastructure.Dependency.Internal;
 
 internal sealed class DependencyContext : IDependencyContext
 {
-    private DependencyContext()
+    internal DependencyContext()
     {
         StartTimeUtc = DateTimeOffset.UtcNow;
         StartTime = StartTimeUtc.ToLocalTime();
@@ -56,9 +56,5 @@ internal sealed class DependencyContext : IDependencyContext
 
     public bool Equals(IDependencyContext? other)
         => Id.Equals(other?.Id, StringComparison.Ordinal);
-
-
-    public static IDependencyContext CreateContext()
-        => new DependencyContext();
 
 }

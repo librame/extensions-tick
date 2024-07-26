@@ -31,7 +31,12 @@ internal sealed class PathDependency : IPathDependency
         ConfigPath = new(() => Directory.CreateDirectory(Path.Combine(basePath, "_configs")));
         ReportPath = new(() => Directory.CreateDirectory(Path.Combine(basePath, "_reports")));
         ResourcePath = new(() => Directory.CreateDirectory(Path.Combine(basePath, "_resources")));
+
+        OSComparison = GetOSComparison();
     }
+
+
+    public StringComparison OSComparison { get; set; }
 
 
     public string InitialPath { get; init; }
@@ -71,6 +76,15 @@ internal sealed class PathDependency : IPathDependency
         }
 
         return (path, binPath);
+    }
+
+
+    private static StringComparison GetOSComparison()
+    {
+        return RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
+                || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)
+            ? StringComparison.Ordinal
+            : StringComparison.OrdinalIgnoreCase;
     }
 
 }

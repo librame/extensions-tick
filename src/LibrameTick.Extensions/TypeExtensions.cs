@@ -68,16 +68,17 @@ public static class TypeExtensions
     /// <param name="compareType">给定的比较类型。</param>
     /// <returns>返回布尔值。</returns>
     public static bool IsSameType(this Type currentType, [NotNullWhen(true)] Type? compareType)
-        => currentType.AssemblyQualifiedName?.Equals(compareType?.AssemblyQualifiedName, StringComparison.Ordinal) == true;
+        => currentType.GetHashCode() == compareType?.GetHashCode();
+        // => currentType.AssemblyQualifiedName?.Equals(compareType?.AssemblyQualifiedName, StringComparison.Ordinal) == true;
 
     /// <summary>
-    /// 是相同类型或可空类型。
+    /// 是相同类型或可空泛型。
     /// </summary>
     /// <param name="currentType">给定的当前类型。</param>
     /// <param name="compareType">给定的比较类型。</param>
     /// <returns>返回布尔值。</returns>
-    public static bool IsSameOrNullableType(this Type currentType, Type compareType)
-        => currentType.IsSameType(compareType) || (compareType.IsNullableType() && compareType.UnderlyingSystemType == currentType);
+    public static bool IsSameOrNullableUnderlyingType(this Type currentType, Type compareType)
+        => currentType.IsSameType(compareType) || (compareType.IsNullableOrTypeDefinition() && compareType.UnderlyingSystemType == currentType);
 
     /// <summary>
     /// 是具实类型（即非抽象或接口、可实例化的类型）。
@@ -88,12 +89,27 @@ public static class TypeExtensions
         => type.IsClass && !type.IsAbstract;
 
     /// <summary>
-    /// 是可空泛类型。
+    /// 是可空值类型或可空值类型定义。
+    /// </summary>
+    /// <remarks>
+    /// 注：可空类型通常是针对值类型而言；而可空引用类型一种编译器特性，并没有一个单独的类型表示，它们与普通引用类型是相同的。
+    /// </remarks>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>
+    /// 返回 TRUE 表示是可空值类型或可空值类型定义，反之则返回 FLASE。
+    /// </returns>
+    public static bool IsNullableOrTypeDefinition(this Type type)
+        => type.IsGenericType && type.GetGenericTypeDefinition() == _nullableGenericTypeDefinition;
+
+    /// <summary>
+    /// 是可空值类型但不是可空值类型定义。
     /// </summary>
     /// <param name="type">给定的类型。</param>
-    /// <returns>返回布尔值。</returns>
-    public static bool IsNullableType(this Type type)
-        => type.IsGenericType && type.GetGenericTypeDefinition() == _nullableGenericTypeDefinition;
+    /// <returns>
+    /// 返回 TRUE 表示是可空值类型但不是可空值类型定义，反之则返回 FLASE。
+    /// </returns>
+    public static bool IsNullable(this Type type)
+        => type.IsGenericType && !type.IsGenericTypeDefinition && type.GetGenericTypeDefinition() == _nullableGenericTypeDefinition;
 
     /// <summary>
     /// 是字符串类型。

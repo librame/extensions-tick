@@ -52,11 +52,11 @@ public static class ExpressionMapper<TInput, TOutput>
         // 映射所有公共属性
         foreach (var outProp in outputType.GetProperties())
         {
-            if (!outProp.CanWrite || outProp.PropertyType.IsSameOrNullableType(outputType))
+            if (!outProp.CanWrite || outProp.PropertyType.IsSameOrNullableUnderlyingType(outputType))
                 continue; // 排除自引用类型
 
             var inProp = inputType.GetProperty(outProp.Name);
-            if (inProp is not null && outProp.PropertyType.IsSameOrNullableType(inProp.PropertyType))
+            if (inProp is not null && outProp.PropertyType.IsSameOrNullableUnderlyingType(inProp.PropertyType))
             {
                 var propertyExpression = Expression.Property(parameterExpression, inProp);
                 var memberBinding = Expression.Bind(outProp, propertyExpression);
@@ -66,7 +66,7 @@ public static class ExpressionMapper<TInput, TOutput>
         }
 
         var memberInitExpression = Expression.MemberInit(Expression.New(outputType),
-            memberAssignments.ToArray());
+            [.. memberAssignments]);
 
         var lambda = Expression.Lambda<Func<TInput, TOutput>>(memberInitExpression, [parameterExpression]);
 
@@ -85,11 +85,11 @@ public static class ExpressionMapper<TInput, TOutput>
         // 映射所有字段（私有字段包含属性实现）
         foreach (var outField in outputType.GetFields(TypeExtensions.AllMemberFlags))
         {
-            if (outField.FieldType.IsSameOrNullableType(outputType))
+            if (outField.FieldType.IsSameOrNullableUnderlyingType(outputType))
                 continue; // 排除自引用类型
 
             var inField = inputType.GetField(outField.Name, TypeExtensions.AllMemberFlags);
-            if (inField is not null && outField.FieldType.IsSameOrNullableType(inField.FieldType))
+            if (inField is not null && outField.FieldType.IsSameOrNullableUnderlyingType(inField.FieldType))
             {
                 var propertyExpression = Expression.Field(parameterExpression, inField);
                 var memberBinding = Expression.Bind(outField, propertyExpression);
@@ -99,7 +99,7 @@ public static class ExpressionMapper<TInput, TOutput>
         }
 
         var memberInitExpression = Expression.MemberInit(Expression.New(outputType),
-            memberAssignments.ToArray());
+            [.. memberAssignments]);
 
         var lambda = Expression.Lambda<Func<TInput, TOutput>>(memberInitExpression, [parameterExpression]);
         return lambda.Compile();

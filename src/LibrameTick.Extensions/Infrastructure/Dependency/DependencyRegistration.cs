@@ -19,6 +19,9 @@ namespace Librame.Extensions.Infrastructure.Dependency;
 /// </summary>
 public static class DependencyRegistration
 {
+
+    #region Context
+
     private static IDependencyContext? _context;
 
     /// <summary>
@@ -28,18 +31,45 @@ public static class DependencyRegistration
     {
         get
         {
-            _context ??= InternalExtensionsDependencyContext.CreateContext();
-            return _context;
+            if (_context is not IDependencyContext context)
+            {
+                context = CreateContext();
+            }
+
+            return context;
         }
     }
 
 
+    private static IDependencyContext CreateContext()
+    {
+        var context = new InternalExtensionsDependencyContext();
+
+        return Interlocked.CompareExchange(ref _context, context, null) ?? context;
+    }
+
+
     /// <summary>
-    /// 注册创建 <see cref="IDependencyContext"/> 实例方法。
+    /// 注册创建依赖上下文实例的方法。
     /// </summary>
     /// <param name="contextFunc">给定的 <see cref="IDependencyContext"/>。</param>
     public static void RegisterContext(Func<IDependencyContext> contextFunc)
-        => _context = contextFunc();
+    {
+        // 仅注册一次
+        _context ??= contextFunc();
+    }
+
+    /// <summary>
+    /// 注册依赖上下文实例。
+    /// </summary>
+    /// <param name="context">给定的 <see cref="IDependencyContext"/>。</param>
+    public static void RegisterContext(IDependencyContext context)
+    {
+        // 仅注册一次
+        _context ??= context;
+    }
+
+    #endregion
 
 
     #region Initializer

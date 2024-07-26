@@ -22,7 +22,7 @@ public static class EnumMapper<TEnum>
     private static readonly IReadOnlyCollection<EnumMappingDescriptor<TEnum>> _cache = InitialFunc();
 
 
-    private static IReadOnlyCollection<EnumMappingDescriptor<TEnum>> InitialFunc()
+    private static ReadOnlyCollection<EnumMappingDescriptor<TEnum>> InitialFunc()
     {
         var enumType = typeof(TEnum);
 

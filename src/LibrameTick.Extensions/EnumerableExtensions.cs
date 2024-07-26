@@ -37,14 +37,9 @@ public static class EnumerableExtensions
     /// <param name="left">给定的左边数组。</param>
     /// <param name="right">给定的右边数组。</param>
     /// <returns>返回布尔值。</returns>
-    public static bool SequenceEqualByReadOnlySpan<T>(this T[]? left, T[]? right)
+    public static bool SequenceEqualByReadOnlySpan<T>(this T[] left, T[] right)
         where T : IEquatable<T>
-    {
-        if (left == null || right == null)
-            return false;
-
-        return new ReadOnlySpan<T>(left).SequenceEqual(right);
-    }
+        => new ReadOnlySpan<T>(left).SequenceEqual(right);
 
     /// <summary>
     /// 比较两个数组序列是否相等。
@@ -54,14 +49,9 @@ public static class EnumerableExtensions
     /// <param name="right">给定的右边数组。</param>
     /// <param name="comparer">给定的相等比较器（可选）。</param>
     /// <returns>返回布尔值。</returns>
-    public static bool SequenceEqualByReadOnlySpan<T>(this T[]? left, T[]? right,
+    public static bool SequenceEqualByReadOnlySpan<T>(this T[] left, T[] right,
         IEqualityComparer<T>? comparer = null)
-    {
-        if (left == null || right == null)
-            return false;
-
-        return new ReadOnlySpan<T>(left).SequenceEqual(right, comparer);
-    }
+        => new ReadOnlySpan<T>(left).SequenceEqual(right, comparer);
 
 
     #region AsEnumerable

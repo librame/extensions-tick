@@ -13,7 +13,7 @@ namespace Librame.Extensions.Template
                 builder.AddAppSettingsJsonFile();
             });
 
-            var finder = Templater.GetConfigurationTemplateKeyFinder();
+            var finder = Templating.GetConfigurationTemplateKeyFinder();
             Assert.NotEmpty(finder.AllNames);
 
             foreach (var section in configuration.GetChildren())

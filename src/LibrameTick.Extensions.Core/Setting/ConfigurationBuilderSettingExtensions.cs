@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Serialization;
+
 namespace Librame.Extensions.Setting;
 
 /// <summary>

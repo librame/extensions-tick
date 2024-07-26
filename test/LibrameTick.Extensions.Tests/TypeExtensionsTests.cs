@@ -20,8 +20,8 @@ namespace Librame.Extensions
         [Fact]
         public void IsNullableTypeTest()
         {
-            Assert.True(typeof(bool?).IsNullableType());
-            Assert.False(typeof(bool).IsNullableType());
+            Assert.True(typeof(bool?).IsNullableOrTypeDefinition());
+            Assert.False(typeof(bool).IsNullableOrTypeDefinition());
         }
 
 

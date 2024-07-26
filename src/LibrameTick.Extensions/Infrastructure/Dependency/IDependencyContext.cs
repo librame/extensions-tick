@@ -48,17 +48,17 @@ public interface IDependencyContext : IEquatable<IDependencyContext>
     string BasePath { get; set; }
 
     /// <summary>
-    /// 获取路径管理器。如果 <see cref="BasePath"/> 发生变化，此路径管理器下的相关路径将不会发生任何变化。
+    /// 获取路径依赖。如果 <see cref="BasePath"/> 发生变化，此路径依赖下的相关路径不会发生任何变化。
     /// </summary>
     IPathDependency Paths { get; set; }
 
     /// <summary>
-    /// 获取锁管理器。
+    /// 获取锁依赖。
     /// </summary>
     ILockDependency Locks { get; set; }
 
     /// <summary>
-    /// 获取时钟管理器。
+    /// 获取时钟依赖。
     /// </summary>
     IClockDependency Clocks { get; set; }
 }
