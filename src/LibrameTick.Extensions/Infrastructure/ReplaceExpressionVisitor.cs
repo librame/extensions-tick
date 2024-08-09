@@ -20,7 +20,8 @@ namespace Librame.Extensions.Infrastructure;
 /// </remarks>
 /// <param name="oldValue">给定的旧表达式。</param>
 /// <param name="newValue">给定的新表达式。</param>
-public sealed class ReplaceExpressionVisitor(Expression oldValue, Expression newValue) : ExpressionVisitor
+public sealed class ReplaceExpressionVisitor(Expression oldValue, Expression newValue)
+    : ExpressionVisitor
 {
     private readonly Expression _oldValue = oldValue;
     private readonly Expression _newValue = newValue;
@@ -33,9 +34,8 @@ public sealed class ReplaceExpressionVisitor(Expression oldValue, Expression new
     /// <returns>返回 <see cref="Expression"/>。</returns>
     public override Expression? Visit(Expression? node)
     {
-        if (node == _oldValue)
-            return _newValue;
-        
+        if (node == _oldValue) return _newValue;
+
         return base.Visit(node);
     }
 

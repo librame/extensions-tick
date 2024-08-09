@@ -35,6 +35,6 @@ public class JsonStringReducedTypeConverter : JsonConverter<Type>
     /// <param name="value">给定的 <see cref="Type"/>。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>。</param>
     public override void Write(Utf8JsonWriter writer, Type value, JsonSerializerOptions options)
-        => writer.WriteStringValue(value.AsSimpleString());
+        => writer.WriteStringValue(value.GetFriendlyName());
 
 }

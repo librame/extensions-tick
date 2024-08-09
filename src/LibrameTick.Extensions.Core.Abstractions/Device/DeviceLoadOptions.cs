@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Microparts;
 
 namespace Librame.Extensions.Device;

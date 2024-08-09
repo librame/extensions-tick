@@ -30,8 +30,8 @@ public static class ProcessorDevice
     /// </summary>
     /// <param name="collectCount">给定用于提升准确性的重复采集次数。</param>
     /// <param name="collectInterval">给定的单次采集间隔。</param>
-    /// <returns>返回 <see cref="IProcessorDeviceInfo"/>。</returns>
-    public static IProcessorDeviceInfo GetInfo(int collectCount, TimeSpan collectInterval)
+    /// <returns>返回 <see cref="ProcessorDeviceInfo"/>。</returns>
+    public static ProcessorDeviceInfo GetInfo(int collectCount, TimeSpan collectInterval)
     {
         if (collectCount < 1)
             collectCount = 1; // 至少重复采集一次（除开首次）
@@ -43,13 +43,13 @@ public static class ProcessorDevice
         var values = new float[collectCount];
 
         // 初次因缺少上次时间对比，利用率为默认值
-        var lastTimes = GetTimes();
+        var lastTimes = GetMoment();
 
         for (var i = 0; i < collectCount; i++)
         {
             Thread.Sleep(collectInterval);
 
-            var curTimes = GetTimes(lastTimes);
+            var curTimes = GetMoment(lastTimes);
             values[i] = curTimes.UsageRate;
 
             lastTimes = curTimes;
@@ -63,21 +63,21 @@ public static class ProcessorDevice
         // 逻辑处理器数
         var count = Environment.ProcessorCount;
 
-        return new ProcessorDeviceInfo(realTimes, count);
+        return ProcessorDeviceInfo.Create(realTimes, count);
     }
 
-    private static ProcessorTimes GetTimes(ProcessorTimes? lastTimes = null)
+    private static ProcessorMoment GetMoment(ProcessorMoment? lastTimes = null)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            return GetLinuxTimes(lastTimes);
+            return GetLinuxMoment(lastTimes);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return GetWindowsTimes(lastTimes);
+            return GetWindowsMoment(lastTimes);
 
-        return default;
+        throw new NotSupportedException("Unsupported OS.");
     }
 
-    private static ProcessorTimes GetLinuxTimes(ProcessorTimes? lastTimes)
+    private static ProcessorMoment GetLinuxMoment(ProcessorMoment? lastMoment)
     {
         ulong ulIdleTime = 0;
         ulong ulLoadTime = 0;
@@ -102,33 +102,32 @@ public static class ProcessorDevice
             throw ex.WriteDebugAs<PlatformNotSupportedException>($"{RuntimeInformation.OSArchitecture} {Environment.OSVersion.Platform} {Environment.OSVersion}");
         }
 
-        return lastTimes is null
-            ? new ProcessorTimes(ulIdleTime, ulLoadTime)
-            : new ProcessorTimes(ulIdleTime, ulLoadTime, lastTimes.Value);
+        return lastMoment is null
+            ? ProcessorMoment.Create(ulIdleTime, ulLoadTime)
+            : ProcessorMoment.Create(ulIdleTime, ulLoadTime, lastMoment);
     }
 
-    private static ProcessorTimes GetWindowsTimes(ProcessorTimes? lastTimes)
+    private static ProcessorMoment GetWindowsMoment(ProcessorMoment? lastMoment)
     {
-        DllInterop.FileTime idleTime;
-        DllInterop.FileTime kernelTime;
-        DllInterop.FileTime userTime;
+        if (!DllInterop.GetSystemTimes(out DllInterop.FileTime idleTime,
+            out DllInterop.FileTime kernelTime, out DllInterop.FileTime userTime))
+        {
+            throw new Exception("Failed to get system information.");
+        }
 
-        if (!DllInterop.GetSystemTimes(out idleTime, out kernelTime, out userTime))
-            return default;
-
-        return GetWindowsTimes(idleTime, kernelTime, userTime, lastTimes);
+        return GetWindowsMoment(idleTime, kernelTime, userTime, lastMoment);
     }
 
-    private static ProcessorTimes GetWindowsTimes(DllInterop.FileTime idleTime, DllInterop.FileTime kernelTime,
-        DllInterop.FileTime userTime, ProcessorTimes? lastTimes)
+    private static ProcessorMoment GetWindowsMoment(DllInterop.FileTime idleTime, DllInterop.FileTime kernelTime,
+        DllInterop.FileTime userTime, ProcessorMoment? lastMoment)
     {
         var ulIdleTime = ((ulong)idleTime.HighTime << 32) | idleTime.LowTime;
         var ulKernelTime = ((ulong)kernelTime.HighTime << 32) | kernelTime.LowTime;
         var ulUserTime = ((ulong)userTime.HighTime << 32) | userTime.LowTime;
 
-        return lastTimes is null
-            ? new ProcessorTimes(ulIdleTime, ulKernelTime + ulUserTime)
-            : new ProcessorTimes(ulIdleTime, ulKernelTime + ulUserTime, lastTimes.Value);
+        return lastMoment is null
+            ? ProcessorMoment.Create(ulIdleTime, ulKernelTime + ulUserTime)
+            : ProcessorMoment.Create(ulIdleTime, ulKernelTime + ulUserTime, lastMoment);
     }
 
 }

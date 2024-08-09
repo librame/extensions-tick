@@ -10,75 +10,82 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
+using Librame.Extensions;
+using Librame.Extensions.Serialization;
 
 namespace Librame.Extensions.Device;
 
 /// <summary>
 /// 定义一个实现 <see cref="IDiskDeviceInfo"/> 的复合磁盘设备信息。
 /// </summary>
-public readonly struct CompositeDiskDeviceInfo : IDiskDeviceInfo, IComposable<IDiskDeviceInfo>
+public sealed class CompositeDiskDeviceInfo : StaticDefaultInitializer<CompositeDiskDeviceInfo>,
+    IDiskDeviceInfo, IComposable<IDiskDeviceInfo>
 {
-    private readonly IEnumerable<IDiskDeviceInfo> _infos;
-    private readonly DriveType[] _driveTypes;
-
+    /// <summary>
+    /// 磁盘设备信息数组。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="List{DiskDeviceInfo}"/>。
+    /// </value>
+    [BinaryExpressionMapping]
+    public List<DiskDeviceInfo> Infos { get; set; } = [];
 
     /// <summary>
-    /// 构造一个 <see cref="CompositeDiskDeviceInfo"/>。
+    /// 磁盘类型数组。
     /// </summary>
-    /// <param name="infos">给定的 <see cref="IEnumerable{IDiskDeviceInfo}"/>。</param>
-    public CompositeDiskDeviceInfo(IEnumerable<IDiskDeviceInfo> infos)
-    {
-        _infos = infos;
-        _driveTypes = _infos.Select(static s => s.DriveType).Distinct().ToArray();
-    }
+    /// <value>
+    /// 返回 <see cref="List{DriveType}"/>。
+    /// </value>
+    public List<DriveType> DriveTypes { get; set; } = [];
+
+    /// <summary>
+    /// 复合磁盘设备数量。
+    /// </summary>
+    /// <value>
+    /// 返回整数。
+    /// </value>
+    public int Count { get; set; }
 
 
     /// <summary>
     /// 磁盘名称。
     /// </summary>
-    public string Name => string.Join(',', _infos.Select(static s => s.Name));
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// 磁盘根目录。
     /// </summary>
-    public string RootPath => string.Join(',', _infos.Select(static s => s.RootPath));
+    public string RootPath { get; set; } = string.Empty;
 
     /// <summary>
     /// 驱动器类型（多个驱动器类型相同则返回同类型，反之返回未知）。
     /// </summary>
-    public DriveType DriveType => _driveTypes.Length == 1 ? _driveTypes.First() : DriveType.Unknown;
+    public DriveType DriveType { get; set; } = DriveType.Unknown;
 
     /// <summary>
     /// 文件系统。
     /// </summary>
-    public string FileSystem => string.Join(',', _infos.Select(static s => s.FileSystem));
+    public string FileSystem { get; set; } = string.Empty;
 
     /// <summary>
     /// 磁盘剩余容量（以字节为单位）。
     /// </summary>
-    public long FreeSpace => _infos.Select(static s => s.FreeSpace).Sum();
+    public long FreeSpace { get; set; }
 
     /// <summary>
     /// 磁盘总容量（以字节为单位）。
     /// </summary>
-    public long TotalSize => _infos.Select(static s => s.TotalSize).Sum();
+    public long TotalSize { get; set; }
 
     /// <summary>
     /// 磁盘已用容量（以字节为单位）。
     /// </summary>
-    public long UsedSize => TotalSize - FreeSpace;
+    public long UsedSize { get; set; }
 
     /// <summary>
     /// 磁盘利用率（通常以百分比数值表示）。
     /// </summary>
-    public float UsageRate => TotalSize == 0 ? 0f : (float)UsedSize / TotalSize * 100;
-
-
-    /// <summary>
-    /// 复合的磁盘设备数。
-    /// </summary>
-    public int Count => _infos.Count();
+    public float UsageRate { get; set; }
 
 
     /// <summary>
@@ -86,9 +93,47 @@ public readonly struct CompositeDiskDeviceInfo : IDiskDeviceInfo, IComposable<ID
     /// </summary>
     /// <returns>返回 <see cref="IEnumerator{IDiskDeviceInfo}"/>。</returns>
     public IEnumerator<IDiskDeviceInfo> GetEnumerator()
-        => _infos.GetEnumerator();
+        => Infos.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator()
         => GetEnumerator();
+
+
+    /// <summary>
+    /// 创建复合磁盘设备信息。
+    /// </summary>
+    /// <param name="infos">给定的 <see cref="IDiskDeviceInfo"/> 数组。</param>
+    /// <returns>返回 <see cref="CompositeDiskDeviceInfo"/>。</returns>
+    public static CompositeDiskDeviceInfo Create(params DiskDeviceInfo[] infos)
+        => Create((IEnumerable<DiskDeviceInfo>)infos);
+
+    /// <summary>
+    /// 创建复合磁盘设备信息。
+    /// </summary>
+    /// <param name="infos">给定的 <see cref="IEnumerable{DiskDeviceInfo}"/>。</param>
+    /// <returns>返回 <see cref="CompositeDiskDeviceInfo"/>。</returns>
+    public static CompositeDiskDeviceInfo Create(IEnumerable<DiskDeviceInfo> infos)
+    {
+        var driveTypes = infos.Select(static s => s.DriveType).Distinct().ToList();
+        var freeSpaces = infos.Select(static s => s.FreeSpace).Sum();
+        var totalSizes = infos.Select(static s => s.TotalSize).Sum();
+
+        return new()
+        {
+            Infos = infos.ToList(),
+            DriveTypes = driveTypes,
+            Count = infos.Count(),
+
+            // Composite properties
+            Name = string.Join(',', infos.Select(static s => s.Name)),
+            RootPath = string.Join(',', infos.Select(static s => s.RootPath)),
+            DriveType = driveTypes.Count == 1 ? driveTypes.First() : DriveType.Unknown,
+            FileSystem = string.Join(',', infos.Select(static s => s.FileSystem)),
+            FreeSpace = freeSpaces,
+            TotalSize = totalSizes,
+            UsedSize = totalSizes - freeSpaces,
+            UsageRate = totalSizes == 0 ? 0f : (float)(totalSizes - freeSpaces) / totalSizes * 100
+        };
+    }
 
 }

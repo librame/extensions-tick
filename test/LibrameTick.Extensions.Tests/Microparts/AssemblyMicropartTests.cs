@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Librame.Extensions.Core;
-using Librame.Extensions.Infrastructure;
-using Librame.Extensions.Infrastructure.Filtration;
+using Librame.Extensions.Filtration;
 using Xunit;
 
 namespace Librame.Extensions.Microparts

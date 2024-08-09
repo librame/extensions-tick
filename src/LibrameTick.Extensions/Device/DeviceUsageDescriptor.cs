@@ -62,7 +62,7 @@ public class DeviceUsageDescriptor
                 + ToPriority(Memory) * 1;
     }
 
-    private float ToPriority(float usage)
+    private static float ToPriority(float usage)
         => Convert.ToSingle(Math.Round(usage / 100, 2));
 
 }

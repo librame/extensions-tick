@@ -10,8 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
-
 namespace Librame.Extensions.Device;
 
 /// <summary>
@@ -66,67 +64,104 @@ public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Abstra
 
 
     /// <summary>
+    /// 获取支持的所有设备信息。
+    /// </summary>
+    /// <returns>返回 <see cref="LocalDeviceInfo"/>。</returns>
+    public LocalDeviceInfo GetAll()
+    {
+        return new()
+        {
+            Processor = GetProcessor(),
+            Memory = GetMemory(),
+            Disks = GetDisks(),
+            Networks = GetNetworks()
+        };
+    }
+
+    /// <summary>
+    /// 异步获取支持的所有设备信息。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="LocalDeviceInfo"/> 的异步操作。</returns>
+    public async Task<LocalDeviceInfo> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var processor = await GetProcessorAsync(cancellationToken);
+        var memory = await GetMemoryAsync(cancellationToken);
+        var disks = await GetDisksAsync(cancellationToken);
+        var networks = await GetNetworksAsync(cancellationToken);
+
+        return new()
+        {
+            Processor = processor,
+            Memory = memory,
+            Disks = disks,
+            Networks = networks
+        };
+    }
+
+
+    /// <summary>
     /// 获取处理器设备信息。
     /// </summary>
-    /// <returns>返回 <see cref="IProcessorDeviceInfo"/>。</returns>
-    public IProcessorDeviceInfo GetProcessor()
+    /// <returns>返回 <see cref="ProcessorDeviceInfo"/>。</returns>
+    public ProcessorDeviceInfo GetProcessor()
         => ProcessorDevice.GetInfo(Options.ProcessorCollectCount, Options.ProcessorCollectInterval);
 
     /// <summary>
     /// 异步获取处理器设备信息。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="IProcessorDeviceInfo"/> 的异步操作。</returns>
-    public Task<IProcessorDeviceInfo> GetProcessorAsync(CancellationToken cancellationToken = default)
+    /// <returns>返回一个包含 <see cref="ProcessorDeviceInfo"/> 的异步操作。</returns>
+    public Task<ProcessorDeviceInfo> GetProcessorAsync(CancellationToken cancellationToken = default)
         => cancellationToken.SimpleTask(GetProcessor);
-
-
-    /// <summary>
-    /// 获取网络设备信息。
-    /// </summary>
-    /// <returns>返回 <see cref="INetworkDeviceInfo"/>。</returns>
-    public INetworkDeviceInfo GetNetwork()
-        => NetworkDevice.GetInfo(Options);
-
-    /// <summary>
-    /// 异步获取网络设备信息。
-    /// </summary>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="INetworkDeviceInfo"/> 的异步操作。</returns>
-    public Task<INetworkDeviceInfo> GetNetworkAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(GetNetwork);
 
 
     /// <summary>
     /// 获取内存设备信息。
     /// </summary>
-    /// <returns>返回 <see cref="IMemoryDeviceInfo"/>。</returns>
-    public IMemoryDeviceInfo GetMemory()
+    /// <returns>返回 <see cref="MemoryDeviceInfo"/>。</returns>
+    public MemoryDeviceInfo GetMemory()
         => MemoryDevice.GetInfo();
 
     /// <summary>
     /// 异步获取内存设备信息。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="IMemoryDeviceInfo"/> 的异步操作。</returns>
-    public Task<IMemoryDeviceInfo> GetMemoryAsync(CancellationToken cancellationToken = default)
+    /// <returns>返回一个包含 <see cref="MemoryDeviceInfo"/> 的异步操作。</returns>
+    public Task<MemoryDeviceInfo> GetMemoryAsync(CancellationToken cancellationToken = default)
         => cancellationToken.SimpleTask(GetMemory);
 
 
     /// <summary>
-    /// 获取磁盘设备信息。
+    /// 获取复合磁盘设备信息。
     /// </summary>
-    /// <returns>返回 <see cref="IDiskDeviceInfo"/>。</returns>
-    public IDiskDeviceInfo GetDisk()
-        => DiskDevice.GetInfo();
+    /// <returns>返回 <see cref="CompositeDiskDeviceInfo"/>。</returns>
+    public CompositeDiskDeviceInfo GetDisks()
+        => DiskDevice.GetInfos();
 
     /// <summary>
-    /// 异步获取磁盘设备信息。
+    /// 异步获取复合磁盘设备信息。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="IDiskDeviceInfo"/> 的异步操作。</returns>
-    public Task<IDiskDeviceInfo> GetDiskAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(GetDisk);
+    /// <returns>返回一个包含 <see cref="CompositeDiskDeviceInfo"/> 的异步操作。</returns>
+    public Task<CompositeDiskDeviceInfo> GetDisksAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.SimpleTask(GetDisks);
+
+
+    /// <summary>
+    /// 获取复合网络设备信息。
+    /// </summary>
+    /// <returns>返回 <see cref="CompositeNetworkDeviceInfo"/>。</returns>
+    public CompositeNetworkDeviceInfo GetNetworks()
+        => NetworkDevice.GetInfos(Options);
+
+    /// <summary>
+    /// 异步获取复合网络设备信息。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="CompositeNetworkDeviceInfo"/> 的异步操作。</returns>
+    public Task<CompositeNetworkDeviceInfo> GetNetworksAsync(CancellationToken cancellationToken = default)
+        => cancellationToken.SimpleTask(GetNetworks);
 
 
     /// <summary>

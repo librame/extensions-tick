@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure.Persistence;
+using Librame.Extensions.Persistence;
 
 namespace Librame.Extensions.Cryptography;
 

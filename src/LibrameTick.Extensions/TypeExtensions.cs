@@ -21,6 +21,7 @@ public static class TypeExtensions
 
     private static readonly Type _memberGetDelegateTypeDefinition = typeof(MemberGetDelegate<>);
     private static readonly Type _nullableGenericTypeDefinition = typeof(Nullable<>);
+    private static readonly Type _listTypeDefinition = typeof(IList<>);
 
 
     /// <summary>
@@ -47,15 +48,64 @@ public static class TypeExtensions
 
 
     /// <summary>
-    /// 转为仅包含类型完整名与程序集简单名称的简单字符串。
+    /// 获取类型的程序集友好名称。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <returns>返回名称字符串。</returns>
+    /// <exception cref="ArgumentException">
+    /// 如果类型程序集名称为空，则抛出异常。
+    /// </exception>
+    public static string GetAssemblyFriendlyName(this Type type)
+        => type.Assembly.GetName().Name ?? throw new ArgumentException($"The type '{type}' assembly name is null.");
+
+    /// <summary>
+    /// 获取类型的友好名称。
     /// </summary>
     /// <remarks>
-    /// 如字符串类型：System.String, System.Runtime。
+    /// 支持泛型类型，如字符串类型：System.String, System.Runtime。
     /// </remarks>
     /// <param name="type">给定的类型。</param>
+    /// <param name="formatNonGenericTypeNameFunc">给定用于格式化非泛型类型的友好名称方法（可选）。</param>
+    /// <param name="formatGenericTypeNameFunc">给定用于格式化泛型中单个参数类型的友好名称方法（可选）。</param>
     /// <returns>返回字符串。</returns>
-    public static string AsSimpleString(this Type type)
-        => $"{type.FullName}, {type.GetAssemblySimpleName()}";
+    public static string GetFriendlyName(this Type type,
+        Func<Type, string>? formatNonGenericTypeNameFunc = null,
+        Func<Type, string>? formatGenericTypeNameFunc = null)
+    {
+        formatNonGenericTypeNameFunc ??= FormatNonGenericTypeName;
+        formatGenericTypeNameFunc ??= FormatGenericTypeName;
+
+        if (!type.IsGenericType)
+        {
+            return formatGenericTypeNameFunc(type);
+        }
+        
+        var sb = new StringBuilder();
+        var argTypes = type.GenericTypeArguments;
+
+        sb.Append(formatGenericTypeNameFunc(type));
+        sb.Append('[');
+
+        for (var i = 0; i < argTypes.Length; i++)
+        {
+            sb.Append(argTypes[i].GetFriendlyName());
+            if (i < argTypes.Length - 1)
+            {
+                sb.Append(',');
+            }
+        }
+
+        sb.Append(']');
+
+        return sb.ToString();
+
+
+        static string FormatNonGenericTypeName(Type currentType)
+            => currentType.FullName ?? currentType.Name;
+
+        static string FormatGenericTypeName(Type currentType)
+            => $"{currentType.Namespace}.{currentType.Name}";
+    }
 
 
     /// <summary>
@@ -72,13 +122,13 @@ public static class TypeExtensions
         // => currentType.AssemblyQualifiedName?.Equals(compareType?.AssemblyQualifiedName, StringComparison.Ordinal) == true;
 
     /// <summary>
-    /// 是相同类型或可空泛型。
+    /// 是相同类型或可空泛型的参数类型。
     /// </summary>
     /// <param name="currentType">给定的当前类型。</param>
     /// <param name="compareType">给定的比较类型。</param>
     /// <returns>返回布尔值。</returns>
-    public static bool IsSameOrNullableUnderlyingType(this Type currentType, Type compareType)
-        => currentType.IsSameType(compareType) || (compareType.IsNullableOrTypeDefinition() && compareType.UnderlyingSystemType == currentType);
+    public static bool IsSameOrNullableArgumentType(this Type currentType, Type compareType)
+        => currentType.IsSameType(compareType) || (compareType.IsNullableOrTypeDefinition() && compareType.GenericTypeArguments.First() == currentType);
 
     /// <summary>
     /// 是具实类型（即非抽象或接口、可实例化的类型）。
@@ -112,6 +162,15 @@ public static class TypeExtensions
         => type.IsGenericType && !type.IsGenericTypeDefinition && type.GetGenericTypeDefinition() == _nullableGenericTypeDefinition;
 
     /// <summary>
+    /// 指定类型是否已实现列表类型。
+    /// </summary>
+    /// <param name="type">给定的类型。</param>
+    /// <param name="resultType">输出泛型实参类型。</param>
+    /// <returns>返回是否可以分配的布尔值。</returns>
+    public static bool IsImplementedList(this Type type, [MaybeNullWhen(false)] out Type resultType)
+        => type.IsImplementedType(_listTypeDefinition, out resultType);
+
+    /// <summary>
     /// 是字符串类型。
     /// </summary>
     /// <param name="type">给定的类型。</param>
@@ -134,15 +193,6 @@ public static class TypeExtensions
 
         return info is not null && (!isUnique || type.GetConstructors().Length is 1);
     }
-
-
-    /// <summary>
-    /// 获取指定类型的程序集简单名称。
-    /// </summary>
-    /// <param name="type">给定的类型。</param>
-    /// <returns>返回名称字符串。</returns>
-    public static string? GetAssemblySimpleName(this Type type)
-        => type.Assembly.GetName().Name;
 
 
     /// <summary>

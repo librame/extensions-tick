@@ -10,8 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure.Dispatching;
-
 namespace Librame.Extensions.Dispatching;
 
 /// <summary>

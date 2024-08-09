@@ -11,13 +11,12 @@
 #endregion
 
 using Librame.Extensions.Infrastructure;
-using Librame.Extensions.Infrastructure.Mapping;
-using System;
+using Librame.Extensions.Mapping;
 
 namespace Librame.Extensions.Cron;
 
 /// <summary>
-/// 定义 <see cref="CronExpressionOffset"/> 的静态扩展。
+/// 定义 <see cref="DefaultCronExpressionOffset"/> 的静态扩展。
 /// </summary>
 public static class CronExpressionExtensions
 {
@@ -74,7 +73,7 @@ public static class CronExpressionExtensions
     public static DateTime? GetNextOccurrenceTime(this string cronExpression, DateTime baseTime,
         out CronDescriptor result, CronOptions? options = null)
     {
-        var cron = new CronExpression(cronExpression, options ?? new());
+        var cron = new DefaultCronExpression(cronExpression, options ?? new());
         result = cron.Descriptor;
 
         return cron.GetNextOccurrenceTime(baseTime);
@@ -103,7 +102,7 @@ public static class CronExpressionExtensions
     public static DateTimeOffset? GetNextOccurrenceTime(this string cronExpression,
         DateTimeOffset baseTimeOffset, out CronDescriptor result, CronOptions? options = null)
     {
-        var cron = new CronExpressionOffset(cronExpression, options ?? new());
+        var cron = new DefaultCronExpressionOffset(cronExpression, options ?? new());
         result = cron.Descriptor;
 
         return cron.GetNextOccurrenceTime(baseTimeOffset);
@@ -134,7 +133,7 @@ public static class CronExpressionExtensions
     public static List<DateTime?> GetNextOccurrenceTimes(this string cronExpression,
         DateTime baseTime, int count, out CronDescriptor result, CronOptions? options = null)
     {
-        var cron = new CronExpression(cronExpression, options ?? new());
+        var cron = new DefaultCronExpression(cronExpression, options ?? new());
         result = cron.Descriptor;
 
         return cron.GetNextOccurrenceTimes(baseTime, count).ToList();
@@ -165,7 +164,7 @@ public static class CronExpressionExtensions
     public static List<DateTimeOffset?> GetNextOccurrenceTimes(this string cronExpression,
         DateTimeOffset baseTimeOffset, int count, out CronDescriptor result, CronOptions? options = null)
     {
-        var cron = new CronExpressionOffset(cronExpression, options ?? new());
+        var cron = new DefaultCronExpressionOffset(cronExpression, options ?? new());
         result = cron.Descriptor;
 
         return cron.GetNextOccurrenceTimes(baseTimeOffset, count).ToList();

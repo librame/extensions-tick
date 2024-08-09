@@ -10,8 +10,9 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
-using Librame.Extensions.Infrastructure.Dependency;
+using Librame.Extensions.Dependency;
+using InternalBinaryChildrenInvoker = Librame.Extensions.Serialization.Internal.BinaryChildrenInvoker;
+using InternalBinaryConverterResolver = Librame.Extensions.Serialization.Internal.BinaryConverterResolver;
 using InternalBinaryConverters = Librame.Extensions.Serialization.Internal.BinaryConverters;
 using InternalBinaryTypeResolver = Librame.Extensions.Serialization.Internal.BinaryTypeResolver;
 
@@ -22,6 +23,11 @@ namespace Librame.Extensions.Serialization;
 /// </summary>
 public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializerOptions>
 {
+    private readonly string _useVersionKey = $"[{nameof(UseVersion)}]";
+
+    private MemberTypes _memberTypes = MemberTypes.Property;
+
+
     /// <summary>
     /// 构造一个 <see cref="BinarySerializerOptions"/> 默认实例。
     /// </summary>
@@ -29,10 +35,13 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     {
         Converters = InternalBinaryConverters.InitializeConverters();
         Encoding = DependencyRegistration.CurrentContext.Encoding;
-        MemberType = MemberTypes.Property;
-        TypeResolver = new InternalBinaryTypeResolver();
-        OrderByMembers = (member, index, count)
+
+        OrderByMembersFunc = (member, index, count)
             => member.GetCustomAttribute<BinaryOrderAttribute>()?.Id ?? (index + 1);
+        CascadeChildrenInvokeFunc = InternalBinaryChildrenInvoker.CascadeInvoke;
+
+        TypeResolver = new InternalBinaryTypeResolver(this);
+        ConverterResolver = new InternalBinaryConverterResolver(this);
     }
 
     /// <summary>
@@ -41,11 +50,16 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// <param name="options">The options.</param>
     public BinarySerializerOptions(BinarySerializerOptions options)
     {
-        Converters = new List<IBinaryConverter>(options.Converters);
+        Converters = new(options.Converters);
         Encoding = options.Encoding;
-        MemberType = MemberTypes.Property;
+        UseVersion = options.UseVersion;
+
+        MemberType = options.MemberType;
+        OrderByMembersFunc = options.OrderByMembersFunc;
+        CascadeChildrenInvokeFunc = options.CascadeChildrenInvokeFunc;
+
         TypeResolver = options.TypeResolver;
-        OrderByMembers = options.OrderByMembers;
+        ConverterResolver = options.ConverterResolver;
     }
 
 
@@ -53,9 +67,17 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// 获取转换器列表。
     /// </summary>
     /// <value>
-    /// 返回 <see cref="IList{BinaryConverter}"/>。
+    /// 返回 <see cref="List{BinaryConverter}"/>。
     /// </value>
     public List<IBinaryConverter> Converters { get; init; }
+
+    /// <summary>
+    /// 获取或设置要序列化类型成员的版本。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="BinarySerializerVersion"/>。
+    /// </value>
+    public BinarySerializerVersion? UseVersion { get; set; }
 
     /// <summary>
     /// 获取或设置字符编码。
@@ -66,15 +88,12 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     public Encoding Encoding { get; set; }
 
     /// <summary>
-    /// 获取或设置支持类型序列化的成员类型。
+    /// 获取或设置转换器解析器。
     /// </summary>
-    /// <remarks>
-    /// 当前仅支持序列化 <see cref="MemberTypes.Property"/>（默认）或 <see cref="MemberTypes.Field"/>，设置其他类型将抛出异常。
-    /// </remarks>
     /// <value>
-    /// 返回 <see cref="MemberTypes"/>。
+    /// 返回 <see cref="IBinaryConverterResolver"/>。
     /// </value>
-    public MemberTypes MemberType { get; set; }
+    public IBinaryConverterResolver ConverterResolver { get; set; }
 
     /// <summary>
     /// 获取或设置类型解析器。
@@ -90,67 +109,128 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// <value>
     /// 返回排序方法。
     /// </value>
-    public Func<MemberInfo, int, int, int> OrderByMembers { get; set; }
+    public Func<MemberInfo, int, int, int> OrderByMembersFunc { get; set; }
+
+    /// <summary>
+    /// 获取或设置级联子级成员调用方法。传入参数依次为 <see cref="BinaryMemberMapping"/>、父级对象、级联子级成员信息列表。
+    /// </summary>
+    public Func<BinaryMemberMapping, object, List<BinaryMemberInfo>, object> CascadeChildrenInvokeFunc { get; set; }
+
+    /// <summary>
+    /// 获取或设置支持类型序列化的成员类型。
+    /// </summary>
+    /// <remarks>
+    /// 当前仅支持序列化 <see cref="MemberTypes.Property"/>（默认）或 <see cref="MemberTypes.Field"/>，设置其他类型将抛出异常。
+    /// </remarks>
+    /// <value>
+    /// 返回 <see cref="MemberTypes"/>。
+    /// </value>
+    public MemberTypes MemberType
+    {
+        get => _memberTypes;
+        set
+        {
+            if (value != MemberTypes.Property && value != MemberTypes.Field)
+            {
+                throw new NotSupportedException($"Resolving member type '{Enum.GetName(value)}' other than field and property is not supported.");
+            }
+            
+            _memberTypes = value;
+        }
+    }
 
 
     /// <summary>
-    /// 获取指定类型的二进制转换器。
+    /// 过滤不满足解析类型成员的方法。
     /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="named">给定的 <see cref="BinaryConverterAttribute"/>。</param>
-    /// <returns>返回 <see cref="BinaryConverter{T}"/>。</returns>
-    public BinaryConverter<T>? GetBinaryConverter<T>(BinaryConverterAttribute? named)
+    /// <param name="member">给定的 <see cref="MemberInfo"/>。</param>
+    /// <returns>返回满足条件的布尔值。</returns>
+    public bool FilterMembers(MemberInfo member)
     {
-        var typeToConvert = typeof(T);
+        var isUnfiltered = member.MemberType == MemberType && !member.IsIgnoreAttributeDefined();
 
-        if (named?.Type is not null)
+        // 未指定序列化版本，只过滤标注忽略自定义特性的成员
+        if (UseVersion is null) return isUnfiltered;
+
+        var memberVersion = member.GetCustomAttribute<BinaryVersionAttribute>();
+
+        // 如果未标注版本自定义特性的成员将不会被过滤
+        if (memberVersion is null) return isUnfiltered;
+
+        // 根据版本比较方法过滤不满足条件的成员
+        return UseVersion.Comparison switch
         {
-            typeToConvert = named.Type;
-        }
+            BinaryVersionComparison.Equals => memberVersion.Version == UseVersion.Version,
+            BinaryVersionComparison.GreaterThan => memberVersion.Version > UseVersion.Version,
+            BinaryVersionComparison.GreaterThanOrEquals => memberVersion.Version >= UseVersion.Version,
+            BinaryVersionComparison.LessThan => memberVersion.Version < UseVersion.Version,
+            BinaryVersionComparison.LessThanOrEquals => memberVersion.Version <= UseVersion.Version,
+            _ => isUnfiltered
+        };
+    }
 
-        return (BinaryConverter<T>?)GetBinaryConverter(typeToConvert, named?.Name);
+
+    /// <summary>
+    /// 读取版本信息。
+    /// </summary>
+    /// <param name="reader">给定的 <see cref="BinaryReader"/>。</param>
+    /// <returns>返回 <see cref="BinarySerializerVersion"/>。</returns>
+    public BinarySerializerVersion? ReadVersion(BinaryReader reader)
+        => TryReadVersion(reader, out var version) ? version : null;
+
+    /// <summary>
+    /// 写入版本信息。
+    /// </summary>
+    /// <param name="writer">给定的 <see cref="BinaryWriter"/>。</param>
+    public void WriteVersion(BinaryWriter writer)
+    {
+        writer.Write(_useVersionKey);
+        writer.Write(UseVersion is not null);
+
+        if (UseVersion is not null)
+        {
+            writer.Write(UseVersion.Version);
+            writer.Write(Enum.GetName(UseVersion.Comparison) ?? UseVersion.Comparison.ToString());
+        }
     }
 
     /// <summary>
-    /// 获取指定类型的二进制转换器。
+    /// 尝试读取版本信息。
     /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="name">给定的转换器名称（可选）。</param>
-    /// <returns>返回 <see cref="BinaryConverter{T}"/>。</returns>
-    public BinaryConverter<T>? GetBinaryConverter<T>(string? name = null)
-        => (BinaryConverter<T>?)GetBinaryConverter(typeof(T), name);
-
-    /// <summary>
-    /// 获取指定类型的二进制转换器。
-    /// </summary>
-    /// <param name="typeToConvert">给定要转换的类型。</param>
-    /// <param name="named">给定的 <see cref="BinaryConverterAttribute"/>。</param>
-    /// <returns>返回 <see cref="IBinaryConverter"/>。</returns>
-    public IBinaryConverter? GetBinaryConverter(Type typeToConvert, BinaryConverterAttribute? named)
+    /// <param name="reader">给定的 <see cref="BinaryReader"/>。</param>
+    /// <param name="version">输出可能存在的 <see cref="BinarySerializerVersion"/>。</param>
+    /// <returns>返回是否成功读取的布尔值。</returns>
+    public bool TryReadVersion(BinaryReader reader,
+        [NotNullWhen(true)] out BinarySerializerVersion? version)
     {
-        if (named?.Type is not null)
+        string? str;
+        bool has;
+
+        try
         {
-            typeToConvert = named.Type;
+            // Try read version key
+            str = reader.ReadString();
+
+            // Try read version is not null
+            has = reader.ReadBoolean();
+        }
+        catch
+        {
+            str = null;
+            has = false;
         }
 
-        return GetBinaryConverter(typeToConvert, named?.Name);
-    }
-
-    /// <summary>
-    /// 获取指定类型的二进制转换器。
-    /// </summary>
-    /// <param name="typeToConvert">给定要转换的类型。</param>
-    /// <param name="name">给定的转换器名称（可选）。</param>
-    /// <returns>返回 <see cref="IBinaryConverter"/>。</returns>
-    public IBinaryConverter? GetBinaryConverter(Type typeToConvert, string? name = null)
-    {
-        var converters = Converters.Where(c => c.TargetType == typeToConvert);
-        if (name is not null)
+        if (_useVersionKey.Equals(str, StringComparison.Ordinal) && has)
         {
-            converters = converters.Where(c => c.CurrentName == name);
+            var number = reader.ReadDouble();
+            var comparison = Enum.Parse<BinaryVersionComparison>(reader.ReadString());
+
+            version = new(number, comparison);
+            return true;
         }
 
-        return converters.FirstOrDefault();
+        version = null;
+        return false;
     }
 
 }

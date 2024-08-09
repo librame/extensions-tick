@@ -12,8 +12,7 @@
 
 using Librame.Extensions.Collections;
 using Librame.Extensions.Data.Accessing;
-using Librame.Extensions.Infrastructure.Dispatching;
-using Librame.Extensions.Infrastructure.Specification;
+using Librame.Extensions.Specification;
 
 namespace Librame.Extensions.Dispatching;
 

@@ -15,9 +15,9 @@ namespace Librame.Extensions.Infrastructure;
 /// <summary>
 /// 定义线程安全的静态默认初始化器。
 /// </summary>
-/// <typeparam name="TInit">指定的初始化类型。</typeparam>
-public class StaticDefaultInitializer<TInit>
-    where TInit : class, new()
+/// <typeparam name="TDefault">指定的初始化类型。</typeparam>
+public class StaticDefaultInitializer<TDefault>
+    where TDefault : class, new()
 {
     /// <summary>
     /// 构造一个 <see cref="StaticDefaultInitializer{T}"/> 默认实例。
@@ -31,30 +31,30 @@ public class StaticDefaultInitializer<TInit>
     }
 
 
-    private static TInit? s_instance;
+    private static TDefault? s_instance;
 
     /// <summary>
     /// 获取默认实例。
     /// </summary>
     /// <value>
-    /// 返回 <typeparamref name="TInit"/> 实例。
+    /// 返回 <typeparamref name="TDefault"/> 实例。
     /// </value>
-    public static TInit Default
+    public static TDefault Default
     {
         get
         {
-            if (s_instance is not TInit instance)
+            if (s_instance is not TDefault instance)
             {
                 instance = GetOrCreateDefaultInstance();
             }
-
+            
             return instance;
         }
     }
 
-    private static TInit GetOrCreateDefaultInstance()
+    private static TDefault GetOrCreateDefaultInstance()
     {
-        var instance = new TInit();
+        var instance = new TDefault();
 
         return Interlocked.CompareExchange(ref s_instance, instance, null) ?? instance;
     }

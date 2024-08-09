@@ -10,8 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
-
 namespace Librame.Extensions.IdGeneration;
 
 /// <summary>
@@ -47,7 +45,7 @@ public class DataIdGenerationOptions : IOptions
 
 
     /// <summary>
-    /// 添加实现 <see cref="IIdGenerator{TId}"/> 的自定义标识生成器（推荐从 <see cref="AbstractIdGenerator{TId}"/> 派生）。
+    /// 添加实现 <see cref="IIdGenerator{TId}"/> 的自定义标识生成器（推荐从 <see cref="IdGenerator{TId}"/> 派生）。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <param name="idGenerator">给定的 <see cref="IIdGenerator{TId}"/>。</param>
@@ -57,7 +55,7 @@ public class DataIdGenerationOptions : IOptions
         => _customIdGenerators.Add(new TypeNamedKey(idGenerator.GetType(), named), idGenerator);
 
     /// <summary>
-    /// 添加实现 <see cref="IIdGenerator{TId}"/> 的自定义标识生成器（推荐从 <see cref="AbstractIdGenerator{TId}"/> 派生）。
+    /// 添加实现 <see cref="IIdGenerator{TId}"/> 的自定义标识生成器（推荐从 <see cref="IdGenerator{TId}"/> 派生）。
     /// </summary>
     /// <typeparam name="TId">指定的标识类型。</typeparam>
     /// <param name="idGenerator">给定的 <see cref="IIdGenerator{TId}"/>。</param>

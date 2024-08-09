@@ -26,8 +26,11 @@ public static class MemoryDevice
     /// <summary>
     /// 获取内存设备信息。
     /// </summary>
-    /// <returns>返回 <see cref="IMemoryDeviceInfo"/>。</returns>
-    public static IMemoryDeviceInfo GetInfo()
+    /// <returns>返回 <see cref="MemoryDeviceInfo"/>。</returns>
+    /// <exception cref="NotSupportedException">
+    /// 不支持的操作系统的异常。
+    /// </exception>
+    public static MemoryDeviceInfo GetInfo()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             return GetLinuxInfo();
@@ -35,34 +38,37 @@ public static class MemoryDevice
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return GetWindowsInfo();
 
-        return default(MemoryDeviceInfo);
+        throw new NotSupportedException("Unsupported OS.");
     }
 
     private static MemoryDeviceInfo GetLinuxInfo()
     {
-        var info = new DllInterop.LinuxSysinfo();
+        var sysinfo = new DllInterop.LinuxSysinfo();
+        if (DllInterop.sysinfo(ref sysinfo) != 0)
+        {
+            throw new Exception("Failed to get system information.");
+        }
 
-        if (DllInterop.sysinfo(ref info) != 0)
-            return default;
-
-        var usedPercentage = ((float)info.totalram - info.freeram) / info.totalram * 100;
-
-        return new MemoryDeviceInfo(info.totalram, info.freeram, usedPercentage, info.totalswap, info.freeswap);
+        return MemoryDeviceInfo.Create(sysinfo);
     }
 
     private static MemoryDeviceInfo GetWindowsInfo()
     {
         // 检查 Windows 内核版本，是否为旧系统（https://en.wikipedia.org/wiki/List_of_Microsoft_Windows_versions）
         if (Environment.OSVersion.Version.Major < 5)
-            return default;
+        {
+            throw new NotSupportedException("Unsupported Windows OS kernel version.");
+        }
 
         var status = new DllInterop.MemoryStatusExE();
         status.Init();
 
         if (!DllInterop.GlobalMemoryStatusEx(ref status))
-            return default;
+        {
+            throw new Exception("Failed to get system information.");
+        }
 
-        return new MemoryDeviceInfo(status);
+        return MemoryDeviceInfo.Create(status);
     }
 
 }

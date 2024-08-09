@@ -10,15 +10,14 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
-using Librame.Extensions.Infrastructure.Dependency;
+using Librame.Extensions.Dependency;
 
 namespace Librame.Extensions.IdGeneration;
 
 /// <summary>
 /// 定义 MongoDB 字符串型标识生成器（可生成长度 24 位且包含数字、字母的字符串标识）。
 /// </summary>
-public class MongoIdGenerator : AbstractClockIdGenerator<string>
+public class MongoIdGenerator : ClockIdGenerator<string>
 {
     private int _location = Environment.TickCount;
 

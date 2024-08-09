@@ -15,44 +15,44 @@ namespace Librame.Extensions.Serialization;
 /// <summary>
 /// 定义抽象实现 <see cref="IBinaryConverter"/> 的泛型二进制转换器。
 /// </summary>
-/// <typeparam name="T">指定要转换的目标类型。</typeparam>
-public abstract class BinaryConverter<T> : IBinaryConverter
+/// <typeparam name="TConverted">指定被转换的类型。</typeparam>
+public abstract class BinaryConverter<TConverted> : IBinaryConverter
 {
     /// <summary>
-    /// 获取要转换的目标类型。
+    /// 获取被转换的类型。
     /// </summary>
     /// <value>
-    /// 返回类型实例。
+    /// 返回 <see cref="Type"/>。
     /// </value>
-    public virtual Type TargetType => typeof(T);
+    public virtual Type BeConvertedType => typeof(TConverted);
 
     /// <summary>
-    /// 获取当前转换器类型。
+    /// 获取转换器类型。
     /// </summary>
     /// <value>
-    /// 返回类型实例。
+    /// 返回 <see cref="Type"/>。
     /// </value>
-    public virtual Type CurrentType => GetType();
+    public virtual Type ConverterType => GetType();
 
     /// <summary>
-    /// 获取当前转换器名称。
+    /// 获取转换器名称。
     /// </summary>
     /// <value>
     /// 返回名称字符串。
     /// </value>
-    public virtual string CurrentName => CurrentType.Name;
+    public virtual string ConverterName => ConverterType.Name;
 
     /// <summary>
-    /// 获取是否处理空值。
+    /// 是否处理空值。
     /// </summary>
     /// <remarks>
     /// 因可空值类型与引用类型（可空引用类型只是编译器特性，实际是引用类型本身）可以为空，所以需要被处理。
     /// </remarks>
     /// <value>
-    /// 返回是否处理空值的布尔值。
+    /// 返回是否处理的布尔值。
     /// </value>
     public virtual bool HandleNull
-        => TargetType.IsNullable() || TargetType.IsClass;
+        => BeConvertedType.IsNullable() || BeConvertedType.IsClass;
 
 
     /// <summary>
@@ -60,14 +60,14 @@ public abstract class BinaryConverter<T> : IBinaryConverter
     /// </summary>
     /// <returns>返回 <see cref="MethodInfo"/>。</returns>
     public virtual MethodInfo GetReadMethod()
-        => CurrentType.GetMethod(nameof(Read))!;
+        => ConverterType.GetMethod(nameof(Read))!;
 
     /// <summary>
     /// 获取写入方法。
     /// </summary>
     /// <returns>返回 <see cref="MethodInfo"/>。</returns>
     public virtual MethodInfo GetWriteMethod()
-        => CurrentType.GetMethod(nameof(Write))!;
+        => ConverterType.GetMethod(nameof(Write))!;
 
 
     /// <summary>
@@ -78,7 +78,7 @@ public abstract class BinaryConverter<T> : IBinaryConverter
     /// 返回能转换的布尔值。
     /// </returns>
     public virtual bool CanConvert(Type typeToConvert)
-        => typeToConvert == TargetType;
+        => typeToConvert == BeConvertedType;
 
 
     /// <summary>
@@ -87,8 +87,8 @@ public abstract class BinaryConverter<T> : IBinaryConverter
     /// <param name="reader">给定的 <see cref="BinaryReader"/>。</param>
     /// <param name="typeToConvert">给定要转换的类型。</param>
     /// <param name="member">给定的 <see cref="BinaryMemberInfo"/>。</param>
-    /// <returns>返回 <typeparamref name="T"/>。注：此处 ? 表示为虚可空类型，实际是否为可空类型由 <typeparamref name="T"/> 决定。</returns>
-    public virtual T? Read(BinaryReader reader, Type typeToConvert, BinaryMemberInfo member)
+    /// <returns>返回 <typeparamref name="TConverted"/>。注：此处 ? 表示为虚可空类型，实际是否为可空类型由 <typeparamref name="TConverted"/> 决定。</returns>
+    public virtual TConverted? Read(BinaryReader reader, Type typeToConvert, BinaryMemberInfo member)
     {
         if (!CanConvert(typeToConvert))
         {
@@ -110,8 +110,8 @@ public abstract class BinaryConverter<T> : IBinaryConverter
     /// </summary>
     /// <param name="reader">给定的 <see cref="BinaryReader"/>。</param>
     /// <param name="member">给定的 <see cref="BinaryMemberInfo"/>。</param>
-    /// <returns>返回 <typeparamref name="T"/>。</returns>
-    protected abstract T ReadCore(BinaryReader reader, BinaryMemberInfo member);
+    /// <returns>返回 <typeparamref name="TConverted"/>。</returns>
+    protected abstract TConverted ReadCore(BinaryReader reader, BinaryMemberInfo member);
 
 
     /// <summary>
@@ -119,9 +119,9 @@ public abstract class BinaryConverter<T> : IBinaryConverter
     /// </summary>
     /// <param name="writer">给定的 <see cref="BinaryWriter"/>。</param>
     /// <param name="typeToConvert">给定要转换的类型。</param>
-    /// <param name="value">给定要写入的 <typeparamref name="T"/>。注：此处 ? 表示为虚可空类型，实际是否为可空类型由 <typeparamref name="T"/> 决定。</param>
+    /// <param name="value">给定要写入的 <typeparamref name="TConverted"/>。注：此处 ? 表示为虚可空类型，实际是否为可空类型由 <typeparamref name="TConverted"/> 决定。</param>
     /// <param name="member">给定的 <see cref="BinaryMemberInfo"/>。</param>
-    public virtual void Write(BinaryWriter writer, Type typeToConvert, T? value, BinaryMemberInfo member)
+    public virtual void Write(BinaryWriter writer, Type typeToConvert, TConverted? value, BinaryMemberInfo member)
     {
         if (!CanConvert(typeToConvert))
         {
@@ -143,7 +143,7 @@ public abstract class BinaryConverter<T> : IBinaryConverter
     /// 通过写入器写入指定类型实例核心。
     /// </summary>
     /// <param name="writer">给定的 <see cref="BinaryWriter"/>。</param>
-    /// <param name="value">给定要写入的 <typeparamref name="T"/>。</param>
+    /// <param name="value">给定要写入的 <typeparamref name="TConverted"/>。</param>
     /// <param name="member">给定的 <see cref="BinaryMemberInfo"/>。</param>
-    protected abstract void WriteCore(BinaryWriter writer, T value, BinaryMemberInfo member);
+    protected abstract void WriteCore(BinaryWriter writer, TConverted value, BinaryMemberInfo member);
 }

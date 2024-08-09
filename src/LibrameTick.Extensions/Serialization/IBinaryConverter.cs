@@ -18,34 +18,34 @@ namespace Librame.Extensions.Serialization;
 public interface IBinaryConverter
 {
     /// <summary>
-    /// 获取要转换的目标类型。
+    /// 获取被转换的类型。
     /// </summary>
     /// <value>
-    /// 返回类型实例。
+    /// 返回 <see cref="Type"/>。
     /// </value>
-    Type TargetType { get; }
+    Type BeConvertedType { get; }
 
     /// <summary>
-    /// 获取当前转换器类型。
+    /// 获取转换器类型。
     /// </summary>
     /// <value>
-    /// 返回类型实例。
+    /// 返回 <see cref="Type"/>。
     /// </value>
-    Type CurrentType { get; }
+    Type ConverterType { get; }
 
     /// <summary>
-    /// 获取当前转换器名称。
+    /// 获取转换器名称。
     /// </summary>
     /// <value>
     /// 返回名称字符串。
     /// </value>
-    string CurrentName { get; }
+    string ConverterName { get; }
 
     /// <summary>
-    /// 获取是否处理空值。
+    /// 是否处理空值。
     /// </summary>
     /// <value>
-    /// 返回是否处理空值的布尔值。
+    /// 返回是否处理的布尔值。
     /// </value>
     bool HandleNull { get; }
 

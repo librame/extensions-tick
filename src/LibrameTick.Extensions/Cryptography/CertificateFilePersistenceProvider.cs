@@ -10,12 +10,12 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure.Persistence;
+using Librame.Extensions.Persistence;
 
 namespace Librame.Extensions.Cryptography;
 
 /// <summary>
-/// 定义继承 <see cref="AbstractFilePersistenceProvider{X509Certificate2}"/> 的数字证书文件持久化提供程序。
+/// 定义继承 <see cref="FilePersistenceProvider{X509Certificate2}"/> 的数字证书文件持久化提供程序。
 /// </summary>
 /// <param name="contentType">给定的内容类型。</param>
 /// <param name="password">给定的安全密码。</param>
@@ -23,7 +23,7 @@ namespace Librame.Extensions.Cryptography;
 /// <param name="initialFunc">给定的实例初始方法。</param>
 public class CertificateFilePersistenceProvider(X509ContentType contentType, SecureString? password,
     string filePath, Func<X509Certificate2> initialFunc)
-    : AbstractFilePersistenceProvider<X509Certificate2>(isWatching: false, filePath, encoding: null, initialFunc)
+    : FilePersistenceProvider<X509Certificate2>(isWatching: false, filePath, encoding: null, initialFunc)
 {
     /// <summary>
     /// 获取内容类型。

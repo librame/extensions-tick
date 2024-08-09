@@ -19,6 +19,11 @@ namespace Librame.Extensions.Data.Accessing;
 public enum AccessMode
 {
     /// <summary>
+    /// 未知访问模式。
+    /// </summary>
+    Unknown = 0,
+
+    /// <summary>
     /// 对数据源存取器的读访问。可以从数据源存取器中读取数据。结合 Write 进行读写访问。
     /// </summary>
     Read = 1,
@@ -31,5 +36,5 @@ public enum AccessMode
     /// <summary>
     /// 对数据源存取器的读/写访问。数据可以写入数据源存取器，也可以从数据源存取器中读取数据。
     /// </summary>
-    ReadWrite = 4
+    ReadWrite = Read | Write
 }

@@ -12,22 +12,17 @@
 
 namespace Librame.Extensions.Serialization.Internal;
 
-internal sealed class BinaryTypeResolver : IBinaryTypeResolver
+internal sealed class BinaryTypeResolver(BinarySerializerOptions options) : IBinaryTypeResolver
 {
-    private readonly Type _ignoreTypeAttribute = typeof(BinaryIgnoreAttribute);
+    public BinarySerializerOptions Options { get; init; } = options;
 
 
-    public BinaryMemberInfo[] ResolveMembers(Type inputType, BinarySerializerOptions options)
+    public BinaryMemberInfo[] ResolveMembers(Type inputType)
     {
-        if (options.MemberType != MemberTypes.Field && options.MemberType != MemberTypes.Property)
-        {
-            throw new NotSupportedException($"Resolving member type '{Enum.GetName(options.MemberType)}' other than field and property is not supported.");
-        }
-
         var infos = inputType.GetMembers();
 
-        var members = infos.Where(m => m.MemberType == options.MemberType && !m.IsDefined(_ignoreTypeAttribute, inherit: false))
-            .Select((m, i) => new BinaryMemberInfo(m, options, options.OrderByMembers(m, i, infos.Length)))
+        var members = infos.Where(Options.FilterMembers)
+            .Select((m, i) => new BinaryMemberInfo(m, Options, Options.OrderByMembersFunc(m, i, infos.Length)))
             .OrderBy(m => m.OrderId)
             .ToArray();
 

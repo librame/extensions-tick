@@ -50,7 +50,7 @@ public interface INetworkDeviceInfo : IDeviceUsage<float>
     /// <summary>
     /// 接口类型。
     /// </summary>
-    NetworkInterfaceType NetworkType { get; }
+    NetworkInterfaceType InterfaceType { get; }
 
     /// <summary>
     /// 链接速度（每字节/秒为单位）。
@@ -75,20 +75,20 @@ public interface INetworkDeviceInfo : IDeviceUsage<float>
     /// <summary>
     /// 分配的多播地址。
     /// </summary>
-    IReadOnlyCollection<IPAddress> MulticastAddresses { get; }
+    List<IPAddress> MulticastAddresses { get; }
 
     /// <summary>
     /// 分配的单播地址。
     /// </summary>
-    IReadOnlyCollection<IPAddress> UnicastAddresses { get; }
+    List<IPAddress> UnicastAddresses { get; }
 
     /// <summary>
     /// 网关地址。
     /// </summary>
-    IReadOnlyCollection<IPAddress> GatewayAddresses { get; }
+    List<IPAddress> GatewayAddresses { get; }
 
     /// <summary>
     /// 域名系统 (DNS) 服务器地址。
     /// </summary>
-    IReadOnlyCollection<IPAddress> DnsAddresses { get; }
+    List<IPAddress> DnsAddresses { get; }
 }

@@ -1,4 +1,4 @@
-﻿using Librame.Extensions.Infrastructure.Mapping;
+﻿using Librame.Extensions.Mapping;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;

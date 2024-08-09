@@ -16,7 +16,7 @@ using Librame.Extensions.Dispatching;
 using Librame.Extensions.Network;
 using Librame.Extensions.Plugins;
 using Librame.Extensions.Storage;
-using Librame.Extensions.Infrastructure.Proxy;
+using Librame.Extensions.Proxy;
 
 namespace Librame.Extensions.Core;
 

@@ -99,7 +99,7 @@ public sealed class ShardingSavingChangesHandler : AbstractSavingChangesHandler
                     : mutableModel.FindIsSharedConfigurationSource(descriptor.SourceType)
                     ) ?? ConfigurationSource.Explicit;
 
-                var shardedType = setting.ShardedType!.UnderlyingSystemType;
+                var shardedType = setting.ShardedType!.GenericTypeArguments.First();
 
                 var shardedEntityType = new EntityType(shardedType, mutableModel, srcEntityType.IsOwned(), configurationSource);
 

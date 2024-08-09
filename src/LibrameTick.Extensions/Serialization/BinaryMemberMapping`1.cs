@@ -47,7 +47,7 @@ public class BinaryMemberMapping<T>(IBinaryConverter converter, BinaryMemberInfo
     {
         ArgumentNullException.ThrowIfNull(ReadAction);
 
-        ReadAction.DynamicInvoke(instance, Converter, reader, MemberType, MemberInfo);
+        ReadAction.DynamicInvoke(instance, Converter, reader, MemberType, Member);
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class BinaryMemberMapping<T>(IBinaryConverter converter, BinaryMemberInfo
     {
         ArgumentNullException.ThrowIfNull(WriteAction);
 
-        WriteAction.DynamicInvoke(instance, Converter, writer, MemberType, MemberInfo);
+        WriteAction.DynamicInvoke(instance, Converter, writer, MemberType, Member);
     }
 
 }

@@ -10,8 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
-
 namespace Librame.Extensions.Drawing.Verification;
 
 internal sealed class InternalCaptchaGenerator : AbstractDisposable, ICaptchaGenerator

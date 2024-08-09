@@ -20,25 +20,24 @@ namespace Librame.Extensions.Device;
 /// </remarks>
 public static class DiskDevice
 {
-    private readonly static Func<DriveInfo, bool> _isValidDiskFunc = p
-            => p.DriveType == DriveType.Fixed
-            && p.TotalSize > 0
-            && p.DriveFormat != "overlay";
+    private readonly static Func<DriveInfo, bool> _isValidDiskFunc = p => p.DriveType == DriveType.Fixed
+        && p.TotalSize > 0
+        && p.DriveFormat != "overlay";
 
 
     /// <summary>
-    /// 获取磁盘设备信息。
+    /// 获取复合磁盘设备信息。
     /// </summary>
-    /// <returns>返回 <see cref="IDiskDeviceInfo"/>。</returns>
-    public static IDiskDeviceInfo GetInfo()
+    /// <returns>返回 <see cref="CompositeDiskDeviceInfo"/>。</returns>
+    public static CompositeDiskDeviceInfo GetInfos()
     {
         var infos = DriveInfo.GetDrives()
             .Where(_isValidDiskFunc)
-            .Select(static s => (IDiskDeviceInfo)new DiskDeviceInfo(s))
+            .Select(static s => DiskDeviceInfo.Create(s))
             .DistinctBy(static ks => ks.Name)
             .ToArray();
 
-        return new CompositeDiskDeviceInfo(infos);
+        return CompositeDiskDeviceInfo.Create(infos);
     }
 
 }

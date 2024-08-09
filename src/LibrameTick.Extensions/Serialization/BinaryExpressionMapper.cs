@@ -19,103 +19,159 @@ namespace Librame.Extensions.Serialization;
 public static class BinaryExpressionMapper<T>
 {
     private static readonly Type _actionGenericTypeDefinition = typeof(Action<,,,,>);
-    private static readonly Type _binaryMemberInfoType = typeof(BinaryMemberInfo);
-    private static readonly Type _binaryReaderType = typeof(BinaryReader);
-    private static readonly Type _binaryWriterType = typeof(BinaryWriter);
-    private static readonly Type _typeType = typeof(Type);
 
-    private static readonly List<BinaryMemberMapping<T>> _mappings = [];
+    private static readonly ParameterExpression _readerExpr = Expression.Parameter(typeof(BinaryReader), "reader");
+    private static readonly ParameterExpression _writerExpr = Expression.Parameter(typeof(BinaryWriter), "writer");
+    private static readonly ParameterExpression _infoExpr = Expression.Parameter(typeof(BinaryMemberInfo), "info");
+    private static readonly ParameterExpression _typeExpr = Expression.Parameter(typeof(Type), "type");
+    private static readonly ParameterExpression _objExpr = Expression.Parameter(typeof(T), "obj");
+
+    private static readonly ConcurrentDictionary<Type, (Expression, int)> _cacheCascadeExprs = [];
+    private static readonly ConcurrentDictionary<Type, List<BinaryMemberMapping<T>>> _cacheMaps = [];
+
+
+    /// <summary>
+    /// 清除映射缓存。
+    /// </summary>
+    public static void ClearCache()
+    {
+        _cacheCascadeExprs.Clear();
+        _cacheMaps.Clear();
+    }
 
 
     /// <summary>
     /// 获取泛型二进制成员映射集合。
     /// </summary>
-    /// <param name="inputType">给定的输入类型。</param>
     /// <param name="options">给定的 <see cref="BinarySerializerOptions"/>。</param>
-    /// <returns>返回 <see cref="BinaryMemberMapping{T}"/> 列表。</returns>
-    public static List<BinaryMemberMapping<T>> GetMappings(Type inputType, BinarySerializerOptions options)
+    /// <returns>返回 <see cref="BinaryMemberMapping"/> 列表。</returns>
+    public static List<BinaryMemberMapping<T>> GetMappings(BinarySerializerOptions options)
     {
-        if (_mappings.Count == 0)
+        return _cacheMaps.GetOrAdd(_objExpr.Type, key =>
         {
-            var readerExp = Expression.Parameter(_binaryReaderType, "reader");
-            var writerExp = Expression.Parameter(_binaryWriterType, "writer");
-            var infoExp = Expression.Parameter(_binaryMemberInfoType, "info");
-            var typeExp = Expression.Parameter(_typeType, "type");
-            var inputExp = Expression.Parameter(inputType, "obj");
+            var mappings = LookupMappings(options, key);
 
-            var members = options.TypeResolver.ResolveMembers(inputType, options);
-            for (var i = 0; i < members.Length; i++)
+            mappings = [.. mappings.OrderBy(ks => ks.OrderId).OrderBy(ks => ks.DeclaringTypeCascadeId)];
+
+            return mappings;
+        });
+    }
+
+    private static List<BinaryMemberMapping<T>> LookupMappings(BinarySerializerOptions options,
+        Type parentType, BinaryParentExpression? parentMember = null)
+    {
+        (var parentExpr, var parentCascadeId) = _cacheCascadeExprs.GetOrAdd(parentType, key =>
+        {
+            var expr = parentMember?.CurrentMember as Expression;
+            var cascadeId = expr?.ToString().Split('.').Length - 1;
+
+            return (expr ?? _objExpr, cascadeId ?? 0);
+        });
+
+        var mappings = new List<BinaryMemberMapping<T>>();
+
+        var members = options.TypeResolver.ResolveMembers(parentType);
+        for (var i = 0; i < members.Length; i++)
+        {
+            var member = members[i];
+            var memberType = member.GetRequiredType();
+
+            // 绑定成员声明类型级联标识
+            member.DeclaringTypeCascadeId = parentCascadeId;
+
+            var containSameTypeReference = _cacheCascadeExprs.Count == 0
+                ? memberType.IsSameOrNullableArgumentType(parentType)
+                : _cacheCascadeExprs.Keys.Any(memberType.IsSameOrNullableArgumentType);
+
+            if (!member.CanRead || memberType.IsSameOrNullableArgumentType(parentType))
             {
-                var member = members[i];
-                var memberType = member.GetRequiredType();
-
-                if (!member.CanRead || memberType.IsSameOrNullableUnderlyingType(inputType))
-                {
-                    continue; // 排除自引用类型
-                }
-
-                var memberExp = member.BuildExpression(inputExp);
-                var converter = options.GetBinaryConverter(memberType,
-                    member.GetCustomAttribute<BinaryConverterAttribute>());
-
-                if (converter is null)
-                {
-                    continue; // 排除不支持的类型
-                }
-
-                var converterType = converter.GetType();
-                var converterExp = Expression.Parameter(converterType, "converter");
-
-                // Read: (obj, converter, reader, type, info)
-                //      => obj.Member = converter.Read(reader, type, info)
-                var readMethod = converter.GetReadMethod();
-                var readMethodParamsExps = new Expression[]
-                {
-                    readerExp,
-                    typeExp,
-                    infoExp
-                };
-
-                var readMethodCallExp = Expression.Call(converterExp, readMethod, readMethodParamsExps);
-
-                var readDelegateType = _actionGenericTypeDefinition.MakeGenericType(inputType, converterType,
-                    readerExp.Type, typeExp.Type, infoExp.Type);
-
-                var readAssignExp = Expression.Assign(memberExp, readMethodCallExp);
-
-                var readLambda = Expression.Lambda(readDelegateType, readAssignExp,
-                    [inputExp, converterExp, readerExp, typeExp, infoExp]);
-
-                // Write: (obj, converter, writer, type, info)
-                //      => converter.Write(writer, type, obj.Member, info)
-                var writeMethod = converter.GetWriteMethod();
-                var writeMethodParamsExps = new Expression[]
-                {
-                    writerExp,
-                    typeExp,
-                    memberExp,
-                    infoExp
-                };
-
-                var writeMethodCallExp = Expression.Call(converterExp, writeMethod, writeMethodParamsExps);
-
-                var writeDelegateType = _actionGenericTypeDefinition.MakeGenericType(inputType, converterType,
-                    writerExp.Type, typeExp.Type, infoExp.Type);
-
-                var writeLambda = Expression.Lambda(writeDelegateType, writeMethodCallExp,
-                    [inputExp, converterExp, writerExp, typeExp, infoExp]);
-
-                _mappings.Add(new(converter, member, memberType)
-                {
-                    ReadMethod = readMethod,
-                    ReadAction = readLambda.Compile(),
-                    WriteMethod = writeMethod,
-                    WriteAction = writeLambda.Compile()
-                });
+                continue; // 排除自引用类型
             }
+
+            var cascadeMemberExprs = member.BuildExpression(parentExpr);
+
+            var converter = options.ConverterResolver.ResolveConverter(memberType,
+                member.GetCustomAttribute<BinaryConverterAttribute>());
+
+            if (converter is null)
+            {
+                if (parentMember is null)
+                {
+                    parentMember = new(parentType, _objExpr, cascadeMemberExprs);
+                }
+                else
+                {
+                    parentMember = parentMember with { CurrentMember = cascadeMemberExprs };
+                }
+
+                // 级联查找子级成员映射
+                var referenceMappings = LookupMappings(options, memberType, parentMember);
+                if (referenceMappings.Count > 0)
+                {
+                    mappings.AddRange(referenceMappings);
+                }
+
+                continue; // 排除不支持的类型
+            }
+
+            var converterType = converter.GetType();
+            var converterExpr = Expression.Parameter(converterType, "converter");
+
+            // Read: (obj, converter, reader, type, info)
+            //      => obj.Member = converter.Read(reader, type, info)
+            var readMethod = converter.GetReadMethod();
+            var readMethodParamsExps = new Expression[]
+            {
+                    _readerExpr,
+                    _typeExpr,
+                    _infoExpr
+            };
+
+            var readMethodCallExpr = Expression.Call(converterExpr, readMethod, readMethodParamsExps);
+
+            var readDelegateType = _actionGenericTypeDefinition.MakeGenericType(parentMember?.ParentType ?? parentType,
+                converterType, _readerExpr.Type, _typeExpr.Type, _infoExpr.Type);
+
+            var readAssignExpr = Expression.Assign(cascadeMemberExprs, readMethodCallExpr);
+
+            var readLambda = Expression.Lambda(readDelegateType, readAssignExpr,
+                [parentMember?.ParentParameter ?? _objExpr, converterExpr, _readerExpr, _typeExpr, _infoExpr]);
+
+            var readAction = readLambda.Compile();
+
+            // Write: (obj, converter, writer, type, info)
+            //      => converter.Write(writer, type, obj.Member, info)
+            var writeMethod = converter.GetWriteMethod();
+            var writeMethodParamsExps = new Expression[]
+            {
+                    _writerExpr,
+                    _typeExpr,
+                    cascadeMemberExprs,
+                    _infoExpr
+            };
+
+            var writeMethodCallExpr = Expression.Call(converterExpr, writeMethod, writeMethodParamsExps);
+
+            var writeDelegateType = _actionGenericTypeDefinition.MakeGenericType(parentMember?.ParentType ?? parentType,
+                converterType, _writerExpr.Type, _typeExpr.Type, _infoExpr.Type);
+
+            var writeLambda = Expression.Lambda(writeDelegateType, writeMethodCallExpr,
+                [parentMember?.ParentParameter ?? _objExpr, converterExpr, _writerExpr, _typeExpr, _infoExpr]);
+
+            var writeAction = writeLambda.Compile();
+
+            var mapping = new BinaryMemberMapping<T>(converter, member, memberType)
+            {
+                ReadMethod = readMethod,
+                ReadAction = readAction,
+                WriteMethod = writeMethod,
+                WriteAction = writeAction
+            };
+
+            mappings.Add(mapping);
         }
 
-        return _mappings;
+        return mappings;
     }
 
 }

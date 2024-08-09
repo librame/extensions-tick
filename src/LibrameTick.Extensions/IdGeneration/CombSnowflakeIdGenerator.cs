@@ -10,8 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
-using Librame.Extensions.Infrastructure.Dependency;
+using Librame.Extensions.Dependency;
 
 namespace Librame.Extensions.IdGeneration;
 
@@ -24,7 +23,7 @@ namespace Librame.Extensions.IdGeneration;
 /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
 /// <param name="clock">给定的 <see cref="IClockDependency"/>。</param>
 public class CombSnowflakeIdGenerator(IdGenerationOptions options, IClockDependency clock)
-    : AbstractClockIdGenerator<Guid>(options, clock)
+    : ClockIdGenerator<Guid>(options, clock)
 {
     private readonly uint _workId = options.WorkId;
 

@@ -83,7 +83,7 @@ public sealed class ShardingKey(ShardingKind kind, string baseName, Type? source
         if (SourceType is null)
             return $"{Kind}:{BaseName}";
 
-        return $"{Kind}:{BaseName};{nameof(SourceType)}={SourceType.AsSimpleString()}";
+        return $"{Kind}:{BaseName};{nameof(SourceType)}={SourceType.GetFriendlyName()}";
     }
 
 

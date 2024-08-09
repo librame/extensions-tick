@@ -43,57 +43,71 @@ public interface IDeviceMonitor : IDisposable
 
 
     /// <summary>
+    /// 获取支持的所有设备信息。
+    /// </summary>
+    /// <returns>返回 <see cref="LocalDeviceInfo"/>。</returns>
+    LocalDeviceInfo GetAll();
+
+    /// <summary>
+    /// 异步获取支持的所有设备信息。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="LocalDeviceInfo"/> 的异步操作。</returns>
+    Task<LocalDeviceInfo> GetAllAsync(CancellationToken cancellationToken = default);
+
+
+    /// <summary>
     /// 获取处理器设备信息。
     /// </summary>
     /// <returns>返回 <see cref="IProcessorDeviceInfo"/>。</returns>
-    IProcessorDeviceInfo GetProcessor();
+    ProcessorDeviceInfo GetProcessor();
 
     /// <summary>
     /// 异步获取处理器设备信息。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IProcessorDeviceInfo"/> 的异步操作。</returns>
-    Task<IProcessorDeviceInfo> GetProcessorAsync(CancellationToken cancellationToken = default);
-
-
-    /// <summary>
-    /// 获取网络设备信息。
-    /// </summary>
-    /// <returns>返回 <see cref="INetworkDeviceInfo"/>。</returns>
-    INetworkDeviceInfo GetNetwork();
-
-    /// <summary>
-    /// 异步获取网络设备信息。
-    /// </summary>
-    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="INetworkDeviceInfo"/> 的异步操作。</returns>
-    Task<INetworkDeviceInfo> GetNetworkAsync(CancellationToken cancellationToken = default);
+    Task<ProcessorDeviceInfo> GetProcessorAsync(CancellationToken cancellationToken = default);
 
 
     /// <summary>
     /// 获取内存设备信息。
     /// </summary>
     /// <returns>返回 <see cref="IMemoryDeviceInfo"/>。</returns>
-    IMemoryDeviceInfo GetMemory();
+    MemoryDeviceInfo GetMemory();
 
     /// <summary>
     /// 异步获取内存设备信息。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IMemoryDeviceInfo"/> 的异步操作。</returns>
-    Task<IMemoryDeviceInfo> GetMemoryAsync(CancellationToken cancellationToken = default);
+    Task<MemoryDeviceInfo> GetMemoryAsync(CancellationToken cancellationToken = default);
 
 
     /// <summary>
-    /// 获取磁盘设备信息。
+    /// 获取复合磁盘设备信息。
     /// </summary>
-    /// <returns>返回 <see cref="IDiskDeviceInfo"/>。</returns>
-    IDiskDeviceInfo GetDisk();
+    /// <returns>返回 <see cref="CompositeDiskDeviceInfo"/>。</returns>
+    CompositeDiskDeviceInfo GetDisks();
 
     /// <summary>
-    /// 异步获取磁盘设备信息。
+    /// 异步获取复合磁盘设备信息。
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
-    /// <returns>返回一个包含 <see cref="IDiskDeviceInfo"/> 的异步操作。</returns>
-    Task<IDiskDeviceInfo> GetDiskAsync(CancellationToken cancellationToken = default);
+    /// <returns>返回一个包含 <see cref="CompositeDiskDeviceInfo"/> 的异步操作。</returns>
+    Task<CompositeDiskDeviceInfo> GetDisksAsync(CancellationToken cancellationToken = default);
+
+
+    /// <summary>
+    /// 获取复合网络设备信息。
+    /// </summary>
+    /// <returns>返回 <see cref="CompositeNetworkDeviceInfo"/>。</returns>
+    CompositeNetworkDeviceInfo GetNetworks();
+
+    /// <summary>
+    /// 异步获取复合网络设备信息。
+    /// </summary>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含 <see cref="CompositeNetworkDeviceInfo"/> 的异步操作。</returns>
+    Task<CompositeNetworkDeviceInfo> GetNetworksAsync(CancellationToken cancellationToken = default);
 }

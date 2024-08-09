@@ -30,23 +30,23 @@ public static class NetworkDevice
 
 
     /// <summary>
-    /// 获取网络设备信息。
+    /// 获取复合网络设备信息。
     /// </summary>
     /// <param name="options">给定的 <see cref="DeviceMonitoringOptions"/>。</param>
-    /// <returns>返回 <see cref="INetworkDeviceInfo"/>。</returns>
-    public static INetworkDeviceInfo GetInfo(DeviceMonitoringOptions options)
-        => GetInfo(options.NetworkCollectCount, options.NetworkCollectInterval, options.CreateTimeFunc,
+    /// <returns>返回 <see cref="CompositeNetworkDeviceInfo"/>。</returns>
+    public static CompositeNetworkDeviceInfo GetInfos(DeviceMonitoringOptions options)
+        => GetInfos(options.NetworkCollectCount, options.NetworkCollectInterval, options.CreateTimeFunc,
             options.HasInterfaceFunc);
 
     /// <summary>
-    /// 获取网络设备信息。
+    /// 获取复合网络设备信息。
     /// </summary>
     /// <param name="collectCount">给定用于提升准确性的重复采集次数。</param>
     /// <param name="collectInterval">给定的单次采集间隔。</param>
     /// <param name="createTimeFunc">给定的产生时间方法。</param>
     /// <param name="hasInterfaceFunc">给定含有网络接口的方法。</param>
-    /// <returns>返回 <see cref="INetworkDeviceInfo"/>。</returns>
-    public static INetworkDeviceInfo GetInfo(int collectCount, TimeSpan collectInterval,
+    /// <returns>返回 <see cref="CompositeNetworkDeviceInfo"/>。</returns>
+    public static CompositeNetworkDeviceInfo GetInfos(int collectCount, TimeSpan collectInterval,
         Func<DateTimeOffset> createTimeFunc, Func<NetworkInterface, bool>? hasInterfaceFunc)
     {
         if (collectCount < 1)
@@ -59,10 +59,10 @@ public static class NetworkDevice
 
         var infos = GetInfos(createTimeFunc, collectCount, collectInterval).ToArray();
 
-        return new CompositeNetworkDeviceInfo(infos);
+        return CompositeNetworkDeviceInfo.Create(infos);
     }
 
-    private static IEnumerable<INetworkDeviceInfo> GetInfos(Func<DateTimeOffset> createTimeFunc,
+    private static IEnumerable<NetworkDeviceInfo> GetInfos(Func<DateTimeOffset> createTimeFunc,
         int collectCount, TimeSpan collectInterval)
     {
         var lastTraffics = _hostInterfaces!.Select(s => GetTraffic(createTimeFunc, s)).ToArray();
@@ -104,7 +104,7 @@ public static class NetworkDevice
 
             var realTraffic = lastTraffics[i].WithRate(avgReceivedRate, avgSendRate);
 
-            yield return new NetworkDeviceInfo(info, realTraffic);
+            yield return NetworkDeviceInfo.Create(info, realTraffic);
         }
     }
 
@@ -114,8 +114,8 @@ public static class NetworkDevice
         var statistics = info.GetIPStatistics();
 
         return lastTraffic is null
-            ? new NetworkTraffic(createTimeFunc(), statistics.BytesReceived, statistics.BytesSent)
-            : new NetworkTraffic(createTimeFunc(), statistics.BytesReceived, statistics.BytesSent, lastTraffic.Value);
+            ? NetworkTraffic.Create(createTimeFunc(), statistics.BytesReceived, statistics.BytesSent)
+            : NetworkTraffic.Create(createTimeFunc(), statistics.BytesReceived, statistics.BytesSent, lastTraffic);
     }
 
     private static IEnumerable<NetworkInterface> GetHostInterfaces(Func<NetworkInterface, bool>? hasInterfaceFunc)
@@ -125,14 +125,14 @@ public static class NetworkDevice
             .ToArray();
 
         var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-
         if (hasInterfaceFunc is not null)
+        {
             interfaces = interfaces.Where(hasInterfaceFunc).ToArray();
+        }
 
         foreach (var item in interfaces)
         {
             var itemAddresses = item.GetIPProperties().UnicastAddresses.Select(s => s.Address);
-            
             if (itemAddresses.Intersect(hostAddresses).Any())
             {
                 yield return item;

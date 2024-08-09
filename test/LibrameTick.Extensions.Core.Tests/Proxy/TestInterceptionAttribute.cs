@@ -1,5 +1,4 @@
 ﻿using System;
-using Librame.Extensions.Infrastructure.Proxy;
 
 namespace Librame.Extensions.Proxy
 {

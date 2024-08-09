@@ -16,10 +16,10 @@ namespace Librame.Extensions.Serialization;
 /// 定义二进制成员映射。
 /// </summary>
 /// <param name="converter">给定的 <see cref="IBinaryConverter"/>。</param>
-/// <param name="memberInfo">给定的 <see cref="BinaryMemberInfo"/>。</param>
+/// <param name="member">给定的 <see cref="BinaryMemberInfo"/>。</param>
 /// <param name="memberType">给定的二进制成员类型。</param>
 public class BinaryMemberMapping(IBinaryConverter converter,
-    BinaryMemberInfo memberInfo, Type memberType)
+    BinaryMemberInfo member, Type memberType)
 {
     /// <summary>
     /// 获取二进制转换器。
@@ -30,12 +30,32 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     public IBinaryConverter Converter { get; init; } = converter;
 
     /// <summary>
+    /// 获取或设置声明类型级联标识。
+    /// </summary>
+    /// <value>
+    /// 返回整数。
+    /// </value>
+    public int DeclaringTypeCascadeId
+    {
+        get => Member.DeclaringTypeCascadeId;
+        set => Member.DeclaringTypeCascadeId = value;
+    }
+
+    /// <summary>
+    /// 获取声明类型。
+    /// </summary>
+    /// <value>
+    /// 返回类型实例。
+    /// </value>
+    public Type? DeclaringType { get; init; } = member.DeclaringType;
+
+    /// <summary>
     /// 获取二进制成员信息。
     /// </summary>
     /// <value>
     /// 返回 <see cref="BinaryMemberInfo"/>。
     /// </value>
-    public BinaryMemberInfo MemberInfo { get; init; } = memberInfo;
+    public BinaryMemberInfo Member { get; init; } = member;
 
     /// <summary>
     /// 获取二进制成员类型。
@@ -51,7 +71,7 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     /// <value>
     /// 返回名称字符串。
     /// </value>
-    public string MemberName { get; init; } = memberInfo.Name;
+    public string MemberName { get; init; } = member.Name;
 
     /// <summary>
     /// 获取顺序标识。
@@ -59,7 +79,7 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     /// <value>
     /// 返回可空整数。
     /// </value>
-    public int? OrderId { get; init; } = memberInfo.OrderId;
+    public int? OrderId { get; init; } = member.OrderId;
 
     /// <summary>
     /// 获取或设置读取方法。
@@ -77,6 +97,14 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     /// </value>
     public MethodInfo? WriteMethod { get; set; }
 
+    /// <summary>
+    /// 获取或设置父级调用子级对象的方法。传入参数依次为 <see cref="BinaryMemberMapping"/>、父级对象。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="Func{BinaryMemberMapping, Object, Object}"/> 方法委托。
+    /// </value>
+    public Func<BinaryMemberMapping, object, object>? CascadeChildrenInvokeFunc { get; set; }
+
 
     /// <summary>
     /// 读取指定对象的成员值。
@@ -90,9 +118,9 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     {
         ArgumentNullException.ThrowIfNull(ReadMethod);
 
-        var value = ReadMethod.Invoke(Converter, [reader, MemberType, MemberInfo]);
+        var value = ReadMethod.Invoke(Converter, [reader, MemberType, Member]);
 
-        MemberInfo.SetValue(obj, value);
+        Member.SetValue(CascadeChildrenInvokeFunc?.Invoke(this, obj) ?? obj, value);
     }
 
     /// <summary>
@@ -107,9 +135,9 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     {
         ArgumentNullException.ThrowIfNull(WriteMethod);
 
-        var value = MemberInfo.GetValue(obj);
+        var value = Member.GetValue(CascadeChildrenInvokeFunc?.Invoke(this, obj) ?? obj);
 
-        WriteMethod.Invoke(Converter, [writer, MemberType, value, MemberInfo]);
+        WriteMethod.Invoke(Converter, [writer, MemberType, value, Member]);
     }
 
 }

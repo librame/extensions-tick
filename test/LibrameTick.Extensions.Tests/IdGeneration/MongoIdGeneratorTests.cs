@@ -1,4 +1,4 @@
-﻿using Librame.Extensions.Infrastructure.Dependency;
+﻿using Librame.Extensions.Dependency;
 using System;
 using System.Collections.Generic;
 using Xunit;

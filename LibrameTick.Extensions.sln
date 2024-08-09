@@ -58,6 +58,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "readmes", "readmes", "{7FD1
 		docs\readmes\LibrameTick.Extensions.md = docs\readmes\LibrameTick.Extensions.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{BEFE0D11-918C-490E-AB6B-A8BB545A6FDA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibrameTick.Extensions.Sample", "samples\LibrameTick.Extensions.Sample\LibrameTick.Extensions.Sample.csproj", "{E6E01B9C-2A7F-4F1D-BE94-0ED8DD9458DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -112,6 +116,10 @@ Global
 		{271BE4B7-19A4-4A9C-960F-DE436E838755}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{271BE4B7-19A4-4A9C-960F-DE436E838755}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{271BE4B7-19A4-4A9C-960F-DE436E838755}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6E01B9C-2A7F-4F1D-BE94-0ED8DD9458DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6E01B9C-2A7F-4F1D-BE94-0ED8DD9458DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6E01B9C-2A7F-4F1D-BE94-0ED8DD9458DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6E01B9C-2A7F-4F1D-BE94-0ED8DD9458DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,6 +138,7 @@ Global
 		{D30D99D0-30B1-4AEC-AD1F-40BFAC1403F1} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
 		{271BE4B7-19A4-4A9C-960F-DE436E838755} = {622DA40D-4E81-42F6-9D1C-BA034DC7BFCE}
 		{7FD1DA05-E98B-45B6-A261-A29011A89C3B} = {BE8DB1F9-E800-4EC2-B001-896D6DF35033}
+		{E6E01B9C-2A7F-4F1D-BE94-0ED8DD9458DB} = {BEFE0D11-918C-490E-AB6B-A8BB545A6FDA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {830A172B-0219-487F-BB20-5A070B3A51D4}

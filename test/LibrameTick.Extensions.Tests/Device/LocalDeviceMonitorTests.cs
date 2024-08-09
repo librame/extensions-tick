@@ -14,17 +14,15 @@ namespace Librame.Extensions.Device
             Assert.Equal(IPStatus.Success, ping.Status);
             Assert.NotEmpty(ping.Address.ToString());
 
-            var processor = monitor.GetProcessor();
-            Assert.True(processor.UsageRate > 0);
+            var original = monitor.GetAll();
 
-            var memory = monitor.GetMemory();
-            Assert.True(memory.UsageRate > 0);
+            var buffer = Serialization.BinarySerializer.Serialize(original);
+            var compare = Serialization.BinarySerializer.Deserialize<LocalDeviceInfo>(buffer);
 
-            var disk = monitor.GetDisk();
-            Assert.True(disk.UsageRate > 0);
-
-            var network = monitor.GetNetwork();
-            Assert.True(network.UsageRate >= 0);
+            Assert.Equal(original.Processor.UsageRate, compare?.Processor.UsageRate);
+            Assert.Equal(original.Memory.UsageRate, compare?.Memory.UsageRate);
+            Assert.Equal(original.Disks.UsageRate, compare?.Disks.UsageRate);
+            Assert.Equal(original.Networks.UsageRate, compare?.Networks.UsageRate);
         }
 
     }

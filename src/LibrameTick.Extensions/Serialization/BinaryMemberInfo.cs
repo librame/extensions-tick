@@ -23,9 +23,25 @@ namespace Librame.Extensions.Serialization;
 /// <param name="orderId">给定的顺序标识。</param>
 public class BinaryMemberInfo(MemberInfo info, BinarySerializerOptions options, int orderId)
 {
-    private readonly FieldInfo? _fileInfo = info as FieldInfo;
+    private readonly FieldInfo? _fieldInfo = info as FieldInfo;
     private readonly PropertyInfo? _propertyInfo = info as PropertyInfo;
 
+
+    /// <summary>
+    /// 获取或设置声明类型级联标识。
+    /// </summary>
+    /// <value>
+    /// 返回整数。
+    /// </value>
+    public int DeclaringTypeCascadeId { get; set; }
+
+    /// <summary>
+    /// 获取声明类型。
+    /// </summary>
+    /// <value>
+    /// 返回类型实例。
+    /// </value>
+    public Type? DeclaringType { get; init; } = info.DeclaringType;
 
     /// <summary>
     /// 获取成员信息。
@@ -66,7 +82,7 @@ public class BinaryMemberInfo(MemberInfo info, BinarySerializerOptions options, 
     /// <value>
     /// 返回可写的布尔值。
     /// </value>
-    public bool CanWrite => _propertyInfo?.CanWrite ?? !(_fileInfo!.IsInitOnly || _fileInfo.IsLiteral);
+    public bool CanWrite => _propertyInfo?.CanWrite ?? !(_fieldInfo!.IsInitOnly || _fieldInfo.IsLiteral);
 
     /// <summary>
     /// 获取当前成员是否可读。
@@ -80,13 +96,13 @@ public class BinaryMemberInfo(MemberInfo info, BinarySerializerOptions options, 
     /// <summary>
     /// 构建成员表达式。
     /// </summary>
-    /// <param name="parameterExpression">给定的对象 <see cref="ParameterExpression"/>。</param>
+    /// <param name="parameterExpression">给定的对象 <see cref="Expression"/>。</param>
     /// <returns>返回 <see cref="MemberExpression"/>。</returns>
-    public MemberExpression BuildExpression(ParameterExpression parameterExpression)
+    public MemberExpression BuildExpression(Expression parameterExpression)
     {
         return _propertyInfo is not null
             ? Expression.Property(parameterExpression, _propertyInfo)
-            : Expression.Field(parameterExpression, _fileInfo!);
+            : Expression.Field(parameterExpression, _fieldInfo!);
     }
 
 
@@ -96,7 +112,7 @@ public class BinaryMemberInfo(MemberInfo info, BinarySerializerOptions options, 
     /// <returns>返回类型实例。</returns>
     public Type GetRequiredType()
     {
-        var memberType = _propertyInfo?.PropertyType ?? _fileInfo?.FieldType;
+        var memberType = _propertyInfo?.PropertyType ?? _fieldInfo?.FieldType;
         ArgumentNullException.ThrowIfNull(memberType);
 
         return memberType;
@@ -138,7 +154,7 @@ public class BinaryMemberInfo(MemberInfo info, BinarySerializerOptions options, 
     /// </summary>
     /// <param name="obj">给定的对象。</param>
     public object? GetValue(object? obj)
-        => _propertyInfo?.GetValue(obj) ?? _fileInfo?.GetValue(obj);
+        => _propertyInfo?.GetValue(obj) ?? _fieldInfo?.GetValue(obj);
 
     /// <summary>
     /// 设置指定对象的成员值。
@@ -153,7 +169,7 @@ public class BinaryMemberInfo(MemberInfo info, BinarySerializerOptions options, 
             return;
         }
 
-        _fileInfo?.SetValue(obj, value);
+        _fieldInfo?.SetValue(obj, value);
     }
 
 }

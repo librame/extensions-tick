@@ -17,7 +17,7 @@ using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Device;
 using Microsoft.EntityFrameworkCore.Update;
 using Microsoft.EntityFrameworkCore.Update.Internal;
-using Librame.Extensions.Infrastructure.Dispatching;
+using Librame.Extensions.Dispatching;
 
 namespace Librame.Extensions.Data.Accessing;
 

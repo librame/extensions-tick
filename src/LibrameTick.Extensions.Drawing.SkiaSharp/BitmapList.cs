@@ -19,7 +19,7 @@ namespace Librame.Extensions.Drawing;
 /// <summary>
 /// 定义实现 <see cref="IBitmapList"/> 的位图列表。
 /// </summary>
-public class BitmapList : AbstractDisposable, IBitmapList
+public class BitmapList : Disposable, IBitmapList
 {
     private readonly List<BitmapDescriptor> _bitmaps;
 

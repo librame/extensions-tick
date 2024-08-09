@@ -14,7 +14,7 @@ using Librame.Extensions.Core;
 using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Data.Sharding;
 using Librame.Extensions.Device;
-using Librame.Extensions.Infrastructure.Dispatching;
+using Librame.Extensions.Dispatching;
 
 namespace Librame.Extensions.Data.Accessing;
 

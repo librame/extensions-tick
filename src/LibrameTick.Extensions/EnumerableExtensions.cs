@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
+using Librame.Extensions;
 
 namespace Librame.Extensions;
 
@@ -505,30 +505,6 @@ public static class EnumerableExtensions
 
             if (result is not null)
                 yield return result;
-        }
-    }
-
-
-    /// <summary>
-    /// 基于谓词筛选序列，并返回匹配的索引与元素的键值对集合。
-    /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
-    /// <param name="enumerable">给定的 <see cref="IEnumerable{T}"/>。</param>
-    /// <param name="predicate">给定的谓词筛选条件。</param>
-    /// <returns>返回包含索引与元素的键值对集合。</returns>
-    public static IEnumerable<Pair<int, T>> SelectPairsWith<T>(this IEnumerable<T> enumerable,
-        Func<T, bool> predicate)
-    {
-        var i = 0;
-
-        foreach (var item in enumerable)
-        {
-            if (predicate(item))
-            {
-                yield return Pair.Create(i, item);
-            }
-
-            i++;
         }
     }
 

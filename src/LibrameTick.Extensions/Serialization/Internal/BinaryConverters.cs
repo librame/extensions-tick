@@ -15,7 +15,7 @@ namespace Librame.Extensions.Serialization.Internal;
 internal static class BinaryConverters
 {
 
-    private static string InternalConverterNamed(string typeName)
+    internal static string InternalConverterNamed(string typeName)
         => $"Native{typeName}";
 
 
@@ -24,6 +24,13 @@ internal static class BinaryConverters
         // 如果使用泛型表达式，需严格要求类型与可空类型
         var converters = new List<IBinaryConverter>
         {
+            // IPAddress
+            new BinaryConverterFactory<IPAddress>(static (r, m) => IPAddress.Parse(r.ReadString()),
+                static (w, v, m) => w.Write(v.ToString()), InternalConverterNamed),
+
+            new BinaryConverterFactory<IPAddress?>(static (r, m) => new(r.ReadInt64()),
+                static (w, v, m) => w.Write(v?.ToString() ?? string.Empty), InternalConverterNamed),
+
             // byte[]
             new BinaryArrayConverter<byte[]>(static (r, m, a) => r.ReadBytes(a.Count),
                 static (w, v, m, a) => w.Write(v, a.Index, a.Count), InternalConverterNamed),
@@ -39,21 +46,21 @@ internal static class BinaryConverters
                 static (w, v, m, a) => w.Write(v ?? [], a.Index, a.Count), InternalConverterNamed),
 
             // Guid
-            new BinaryConverterFactory<Guid>(static (r, m) => new Guid(r.ReadBytes(16)),
+            new BinaryConverterFactory<Guid>(static (r, m) => new(r.ReadBytes(16)),
                 static (w, v, m) => w.Write( v.ToByteArray() ), InternalConverterNamed),
 
-            new BinaryConverterFactory<Guid?>(static (r, m) => new Guid(r.ReadBytes(16)),
+            new BinaryConverterFactory<Guid?>(static (r, m) => new(r.ReadBytes(16)),
                 static (w, v, m) => w.Write( (v ?? Guid.Empty).ToByteArray() ), InternalConverterNamed),
 
             // DateTime
-            new BinaryConverterFactory<DateTime>(static (r, m) => new DateTime(r.ReadInt64()),
+            new BinaryConverterFactory<DateTime>(static (r, m) => new(r.ReadInt64()),
                 static (w, v, m) => w.Write(v.Ticks), InternalConverterNamed),
 
-            new BinaryConverterFactory<DateTime?>(static (r, m) => new DateTime(r.ReadInt64()),
+            new BinaryConverterFactory<DateTime?>(static (r, m) => new(r.ReadInt64()),
                 static (w, v, m) => w.Write( (v ?? DateTime.MinValue).Ticks ), InternalConverterNamed),
             
             // DateTimeOffset
-            new BinaryConverterFactory<DateTimeOffset>(static (r, m) => new DateTimeOffset(r.ReadInt64(), new TimeSpan(r.ReadInt64())),
+            new BinaryConverterFactory<DateTimeOffset>(static (r, m) => new(r.ReadInt64(), new(r.ReadInt64())),
                 static (w, v, m) =>
                 {
                     w.Write(v.Ticks);
@@ -61,7 +68,7 @@ internal static class BinaryConverters
                 },
                 InternalConverterNamed),
 
-            new BinaryConverterFactory<DateTimeOffset?>(static (r, m) => new DateTimeOffset(r.ReadInt64(), new TimeSpan(r.ReadInt64())),
+            new BinaryConverterFactory<DateTimeOffset?>(static (r, m) => new(r.ReadInt64(), new(r.ReadInt64())),
                 static (w, v, m) =>
                 {
                     w.Write((v ?? DateTimeOffset.MinValue).Ticks);
@@ -77,10 +84,10 @@ internal static class BinaryConverters
                 static (w, v, m) => w.Write( (v ?? DateOnly.MinValue).ToString() ), InternalConverterNamed),
             
             // TimeOnly
-            new BinaryConverterFactory<TimeOnly>(static (r, m) => new TimeOnly(r.ReadInt64()),
+            new BinaryConverterFactory<TimeOnly>(static (r, m) => new(r.ReadInt64()),
                 static (w, v, m) => w.Write(v.Ticks), InternalConverterNamed),
 
-            new BinaryConverterFactory<TimeOnly?>(static (r, m) => new TimeOnly(r.ReadInt64()),
+            new BinaryConverterFactory<TimeOnly?>(static (r, m) => new(r.ReadInt64()),
                 static (w, v, m) => w.Write( (v ?? TimeOnly.MinValue).Ticks ), InternalConverterNamed),
             
             // bool
@@ -162,7 +169,7 @@ internal static class BinaryConverters
 
             // string
             new BinaryConverterFactory<string>(static (r, m) => r.ReadString(),
-                static (w, v, m) => w.Write(v ?? string.Empty), InternalConverterNamed),
+                static (w, v, m) => w.Write(v), InternalConverterNamed),
 
             new BinaryConverterFactory<string?>(static (r, m) => r.ReadString(),
                 static (w, v, m) => w.Write(v ?? string.Empty), InternalConverterNamed),

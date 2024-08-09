@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure.Dependency;
+using Librame.Extensions.Dependency;
 
 namespace Librame.Extensions.Serialization;
 
@@ -26,8 +26,10 @@ public static class JsonExtensions
         => new(() => DependencyRegistration.InitializeDependency<Internal.JsonDependencyInitializer, IJsonDependency>());
 
 
+    #region Serialize Json
+
     /// <summary>
-    /// 转为 JSON。
+    /// 将指定对象序列化为 JSON。
     /// </summary>
     /// <param name="obj">给定的对象。</param>
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="JsonDependency"/> 选项）。</param>
@@ -36,7 +38,7 @@ public static class JsonExtensions
         => JsonSerializer.Serialize(obj, options ?? JsonDependency.Value.Options.Value);
 
     /// <summary>
-    /// 还原 JSON。
+    /// 从 JSON 反序列化为指定类型的对象。
     /// </summary>
     /// <param name="json">给定的 JSON 字符串。</param>
     /// <param name="returnType">给定的返回类型。</param>
@@ -46,7 +48,7 @@ public static class JsonExtensions
         => JsonSerializer.Deserialize(json, returnType, options ?? JsonDependency.Value.Options.Value);
 
     /// <summary>
-    /// 还原 JSON。
+    /// 从 JSON 反序列化为指定类型的实例。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="json">给定的 JSON 字符串。</param>
@@ -55,9 +57,13 @@ public static class JsonExtensions
     public static T? FromJson<T>(this string json, JsonSerializerOptions? options = null)
         => JsonSerializer.Deserialize<T>(json, options ?? JsonDependency.Value.Options.Value);
 
+    #endregion
+
+
+    #region Serialize JsonFile
 
     /// <summary>
-    /// 转为 JSON 文件。
+    /// 将指定对象序列化为 JSON 文件。
     /// </summary>
     /// <param name="obj">给定的对象。</param>
     /// <param name="filePath">给定的 JSON 文件路径。</param>
@@ -65,8 +71,8 @@ public static class JsonExtensions
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="JsonDependency"/> 选项）。</param>
     /// <param name="jsonFormatter">给定的 JSON 格式化器（可选）。</param>
     /// <returns>返回 JSON 字符串。</returns>
-    public static string AsJsonFile(this object obj, string filePath, Encoding? encoding = null, JsonSerializerOptions? options = null,
-        Func<string, string>? jsonFormatter = null)
+    public static string AsJsonFile(this object obj, string filePath, Encoding? encoding = null,
+        JsonSerializerOptions? options = null, Func<string, string>? jsonFormatter = null)
     {
         var json = obj.AsJson(options);
 
@@ -88,7 +94,7 @@ public static class JsonExtensions
     }
 
     /// <summary>
-    /// 还原 JSON 文件。
+    /// 从 JSON 文件反序列化为指定类型的对象。
     /// </summary>
     /// <param name="filePath">给定的 JSON 文件路径。</param>
     /// <param name="returnType">给定的返回类型。</param>
@@ -96,8 +102,8 @@ public static class JsonExtensions
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="JsonDependency"/> 选项）。</param>
     /// <param name="jsonFormatter">给定的 JSON 格式化器（可选）。</param>
     /// <returns>返回对象。</returns>
-    public static object? FromJsonFile(this string filePath, Type returnType, Encoding? encoding = null, JsonSerializerOptions? options = null,
-        Func<string, string>? jsonFormatter = null)
+    public static object? FromJsonFile(this string filePath, Type returnType, Encoding? encoding = null,
+        JsonSerializerOptions? options = null, Func<string, string>? jsonFormatter = null)
     {
         var json = string.Empty;
 
@@ -119,7 +125,7 @@ public static class JsonExtensions
     }
 
     /// <summary>
-    /// 还原 JSON 文件。
+    /// 从 JSON 文件反序列化为指定类型的对象。
     /// </summary>
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="filePath">给定的 JSON 文件路径。</param>
@@ -127,8 +133,8 @@ public static class JsonExtensions
     /// <param name="options">给定的 <see cref="JsonSerializerOptions"/>（可选；默认使用 <see cref="JsonDependency"/> 选项）。</param>
     /// <param name="jsonFormatter">给定的 JSON 格式化器（可选）。</param>
     /// <returns>返回 <typeparamref name="T"/>。</returns>
-    public static T? FromJsonFile<T>(this string filePath, Encoding? encoding = null, JsonSerializerOptions? options = null,
-        Func<string, string>? jsonFormatter = null)
+    public static T? FromJsonFile<T>(this string filePath, Encoding? encoding = null,
+        JsonSerializerOptions? options = null, Func<string, string>? jsonFormatter = null)
     {
         var json = string.Empty;
 
@@ -148,5 +154,7 @@ public static class JsonExtensions
 
         return json.FromJson<T>(options);
     }
+
+    #endregion
 
 }

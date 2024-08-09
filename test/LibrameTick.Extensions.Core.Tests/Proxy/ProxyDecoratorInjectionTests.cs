@@ -1,5 +1,4 @@
 ﻿using Librame.Extensions.Core;
-using Librame.Extensions.Infrastructure.Proxy;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

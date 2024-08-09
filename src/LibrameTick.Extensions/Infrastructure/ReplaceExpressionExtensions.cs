@@ -58,11 +58,11 @@ public static class ReplaceExpressionExtensions
     {
         var parameter = Expression.Parameter(typeof(T));
 
-        var leftVisitor = new Infrastructure.ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
+        var leftVisitor = new ReplaceExpressionVisitor(expr1.Parameters[0], parameter);
         var left = leftVisitor.Visit(expr1.Body);
         ArgumentNullException.ThrowIfNull(left);
 
-        var rightVisitor = new Infrastructure.ReplaceExpressionVisitor(expr2.Parameters[0], parameter);
+        var rightVisitor = new ReplaceExpressionVisitor(expr2.Parameters[0], parameter);
         var right = rightVisitor.Visit(expr2.Body);
         ArgumentNullException.ThrowIfNull(right);
 

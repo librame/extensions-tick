@@ -10,6 +10,18 @@ namespace Librame.Extensions
     {
 
         [Fact]
+        public void GetFriendlyNameTest()
+        {
+            var type = typeof(Action<Dictionary<Guid, KeyValuePair<int, string>>>);
+
+            var name = type.GetFriendlyName();
+            Assert.NotEmpty(name);
+
+            var assemblyName = type.GetAssemblyFriendlyName();
+            Assert.NotEmpty(assemblyName);
+        }
+
+        [Fact]
         public void IsConcreteTypeTest()
         {
             Assert.True(typeof(HMACMD5).IsConcreteType());

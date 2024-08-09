@@ -15,77 +15,85 @@ using Librame.Extensions.Infrastructure;
 namespace Librame.Extensions.Device;
 
 /// <summary>
-/// 定义一个实现 <see cref="IMemoryDeviceInfo"/> 的内存设备信息结构体。
+/// 定义一个实现 <see cref="IMemoryDeviceInfo"/> 的内存设备信息。
 /// </summary>
 /// <remarks>
 /// 参考：<see href="https://github.com/whuanle/CZGL.SystemInfo.git"/>
 /// </remarks>
-public readonly struct MemoryDeviceInfo : IMemoryDeviceInfo
+public sealed class MemoryDeviceInfo : StaticDefaultInitializer<MemoryDeviceInfo>, IMemoryDeviceInfo
 {
-    /// <summary>
-    /// 使用 <see cref="DllInterop.MemoryStatusExE"/> 构造一个 <see cref="MemoryDeviceInfo"/>。
-    /// </summary>
-    /// <param name="status">给定的 <see cref="DllInterop.MemoryStatusExE"/>。</param>
-    internal MemoryDeviceInfo(DllInterop.MemoryStatusExE status)
-        : this(status.ullTotalPhys, status.ullAvailPhys,
-                status.dwMemoryLoad, status.ullTotalVirtual, status.ullAvailVirtual)
-    {
-    }
-
-    /// <summary>
-    /// 构造一个 <see cref="MemoryDeviceInfo"/>。
-    /// </summary>
-    /// <param name="totalPhysicalMemory">给定的总物理内存字节数。</param>
-    /// <param name="availablePhysicalMemory">给定的可用物理内存字节数。</param>
-    /// <param name="usageRate">给定的物理内存利用率。</param>
-    /// <param name="totalVirtualMemory">给定的总虚拟内存字节数。</param>
-    /// <param name="availableVirtualMemory">给定的可用虚拟内存字节数。</param>
-    public MemoryDeviceInfo(ulong totalPhysicalMemory, ulong availablePhysicalMemory,
-        float usageRate, ulong totalVirtualMemory, ulong availableVirtualMemory)
-    {
-        TotalPhysicalMemory = totalPhysicalMemory;
-        AvailablePhysicalMemory = availablePhysicalMemory;
-        UsageRate = usageRate;
-        TotalVirtualMemory = totalVirtualMemory;
-        AvailableVirtualMemory = availableVirtualMemory;
-    }
-
-
     /// <summary>
     /// 总物理内存字节数。
     /// </summary>
-    public ulong TotalPhysicalMemory { get; init; }
+    public ulong TotalPhysicalMemory { get; set; }
 
     /// <summary>
     /// 可用物理内存字节数。
     /// </summary>
-    public ulong AvailablePhysicalMemory { get; init; }
+    public ulong AvailablePhysicalMemory { get; set; }
 
     /// <summary>
     /// 已用物理内存字节数。
     /// </summary>
-    public ulong UsedPhysicalMemory
-        => TotalPhysicalMemory - AvailablePhysicalMemory;
+    public ulong UsedPhysicalMemory { get; set; }
 
     /// <summary>
     /// 总虚拟内存字节数。
     /// </summary>
-    public ulong TotalVirtualMemory { get; init; }
+    public ulong TotalVirtualMemory { get; set; }
 
     /// <summary>
     /// 可用虚拟内存字节数。
     /// </summary>
-    public ulong AvailableVirtualMemory { get; init; }
+    public ulong AvailableVirtualMemory { get; set; }
 
     /// <summary>
     /// 已用虚拟内存字节数。
     /// </summary>
-    public ulong UsedVirtualMemory
-        => TotalVirtualMemory - AvailableVirtualMemory;
+    public ulong UsedVirtualMemory { get; set; }
 
     /// <summary>
     /// 物理内存利用率（通常以百分比数值表示）。
     /// </summary>
-    public float UsageRate { get; init; }
+    public float UsageRate { get; set; }
+
+
+    /// <summary>
+    /// 创建内存设备信息。
+    /// </summary>
+    /// <param name="sysinfo">给定的 <see cref="DllInterop.LinuxSysinfo"/>。</param>
+    /// <returns>返回 <see cref="MemoryDeviceInfo"/>。</returns>
+    internal static MemoryDeviceInfo Create(DllInterop.LinuxSysinfo sysinfo)
+    {
+        return new()
+        {
+            TotalPhysicalMemory = sysinfo.totalram,
+            AvailablePhysicalMemory = sysinfo.freeram,
+            UsedPhysicalMemory = sysinfo.totalram - sysinfo.freeram,
+            TotalVirtualMemory = sysinfo.totalswap,
+            AvailableVirtualMemory = sysinfo.freeswap,
+            UsedVirtualMemory = sysinfo.totalswap - sysinfo.freeswap,
+            UsageRate = ((float)sysinfo.totalram - sysinfo.freeram) / sysinfo.totalram * 100
+        };
+    }
+
+    /// <summary>
+    /// 创建内存设备信息。
+    /// </summary>
+    /// <param name="status">给定的 <see cref="DllInterop.MemoryStatusExE"/>。</param>
+    /// <returns>返回 <see cref="MemoryDeviceInfo"/>。</returns>
+    internal static MemoryDeviceInfo Create(DllInterop.MemoryStatusExE status)
+    {
+        return new()
+        {
+            TotalPhysicalMemory = status.ullTotalPhys,
+            AvailablePhysicalMemory = status.ullAvailPhys,
+            UsedPhysicalMemory = status.ullTotalPhys - status.ullAvailPhys,
+            TotalVirtualMemory = status.ullTotalVirtual,
+            AvailableVirtualMemory = status.ullAvailVirtual,
+            UsedVirtualMemory = status.ullTotalVirtual - status.ullAvailVirtual,
+            UsageRate = status.dwMemoryLoad
+        };
+    }
 
 }

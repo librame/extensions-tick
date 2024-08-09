@@ -15,22 +15,13 @@ namespace Librame.Extensions.Cron;
 /// <summary>
 /// 定义 CRON 描述符。
 /// </summary>
-public class CronDescriptor
+/// <param name="expression">给定的 CRON 表达式。</param>
+public class CronDescriptor(string expression)
 {
-    /// <summary>
-    /// 构造一个 <see cref="CronDescriptor"/>。
-    /// </summary>
-    /// <param name="expression">给定的 CRON 表达式。</param>
-    public CronDescriptor(string expression)
-    {
-        Expression = expression;
-    }
-
-
     /// <summary>
     /// 当前表达式。
     /// </summary>
-    public string Expression { get; init; }
+    public string Expression { get; init; } = expression;
 
     /// <summary>
     /// 经过全大写处理的表达式。

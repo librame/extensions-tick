@@ -19,7 +19,6 @@ using Librame.Extensions.Network;
 using Librame.Extensions.Proxy;
 using Librame.Extensions.Setting;
 using Librame.Extensions.Storage;
-using Librame.Extensions.Infrastructure.Proxy;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

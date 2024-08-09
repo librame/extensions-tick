@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure.Dependency;
+using Librame.Extensions.Dependency;
 
 namespace Librame.Extensions.Infrastructure;
 
@@ -18,17 +18,8 @@ namespace Librame.Extensions.Infrastructure;
 /// 定义路径相等比较器。主要用于区别在不同的操作系统下路径的大小写比较。
 /// </summary>
 /// <seealso cref="IEqualityComparer{String}" />
-public sealed class PathEqualityComparer : IEqualityComparer<string>
+public sealed class PathEqualityComparer : StaticDefaultInitializer<PathEqualityComparer>, IEqualityComparer<string>
 {
-    /// <summary>
-    /// 获取默认比较器实例。
-    /// </summary>
-    /// <value>
-    /// 返回 <see cref="PathEqualityComparer"/> 的默认实例。
-    /// </value>
-    public static PathEqualityComparer Default { get; } = new PathEqualityComparer();
-
-
     /// <summary>
     /// 确定两个路径是否相等。如果是 <see cref="OSPlatform.Linux"/> 或 <see cref="OSPlatform.FreeBSD"/>，则区分大小写，反之则忽略大小写。
     /// </summary>

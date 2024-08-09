@@ -12,7 +12,6 @@
 
 using Librame.Extensions.Core;
 using Librame.Extensions.Data;
-using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.IdGeneration;
 

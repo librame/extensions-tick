@@ -26,7 +26,7 @@ public static class ExtensionOptionsExtensions
     /// <param name="optionsType">给定的扩展选项类型。</param>
     /// <returns>返回字符串。</returns>
     public static string GetJsonFileName(this Type optionsType)
-        => $"{optionsType.GetAssemblySimpleName()}.json";
+        => $"{optionsType.GetAssemblyFriendlyName()}.json";
 
     /// <summary>
     /// 构建扩展选项的 JSON 文件路径（默认以扩展选项的配置目录为基础路径，以 <see cref="GetJsonFileName(Type)"/> 为文件名）。

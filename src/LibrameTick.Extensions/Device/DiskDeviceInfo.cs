@@ -18,41 +18,30 @@ namespace Librame.Extensions.Device;
 /// <remarks>
 /// 参考：<see href="https://github.com/whuanle/CZGL.SystemInfo.git"/>
 /// </remarks>
-public readonly struct DiskDeviceInfo : IDiskDeviceInfo
+/// <remarks>
+/// 构造一个 <see cref="DiskDeviceInfo"/>。
+/// </remarks>
+public sealed class DiskDeviceInfo : StaticDefaultInitializer<DiskDeviceInfo>, IDiskDeviceInfo
 {
-    private readonly DriveInfo _info;
-
-
-    /// <summary>
-    /// 构造一个 <see cref="DiskDeviceInfo"/>。
-    /// </summary>
-    /// <param name="info">给定的 <see cref="DriveInfo"/>。</param>
-    public DiskDeviceInfo(DriveInfo info)
-    {
-        _info = info;
-    }
-
-
     /// <summary>
     /// 磁盘名称。
     /// </summary>
     /// <remarks>
-    /// ex:<br />
     /// Windows: C:\<br />
     /// Linux: /dev
     /// </remarks>
-    public string Name => _info.Name;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// 磁盘根目录。
     /// </summary>
-    public string RootPath => _info.RootDirectory.FullName;
+    public string RootPath { get; set; } = string.Empty;
 
     /// <summary>
     /// 驱动器类型。
     /// </summary>
     /// <remarks>获取驱动器类型，如 CD-ROM、可移动、网络或固定。</remarks>
-    public DriveType DriveType => _info.DriveType;
+    public DriveType DriveType { get; set; } = DriveType.Unknown;
 
     /// <summary>
     /// 文件系统。
@@ -62,25 +51,51 @@ public readonly struct DiskDeviceInfo : IDiskDeviceInfo
     /// Windows: NTFS、CDFS...<br />
     /// Linux: rootfs、tmpfs、binfmt_misc...
     /// </remarks>
-    public string FileSystem => _info.DriveFormat;
+    public string FileSystem { get; set; } = string.Empty;
 
     /// <summary>
     /// 磁盘剩余容量（以字节为单位）。
     /// </summary>
-    public long FreeSpace => _info.AvailableFreeSpace;
+    public long FreeSpace { get; set; }
 
     /// <summary>
     /// 磁盘总容量（以字节为单位）。
     /// </summary>
-    public long TotalSize => _info.TotalSize;
+    public long TotalSize { get; set; }
 
     /// <summary>
     /// 磁盘已用容量（以字节为单位）。
     /// </summary>
-    public long UsedSize => TotalSize - FreeSpace;
+    public long UsedSize { get; set; }
 
     /// <summary>
     /// 磁盘利用率（通常以百分比数值表示）。
     /// </summary>
-    public float UsageRate => TotalSize == 0 ? 0f : (float)UsedSize / TotalSize * 100;
+    public float UsageRate { get; set; }
+
+
+    /// <summary>
+    /// 创建磁盘设备信息。
+    /// </summary>
+    /// <param name="info">给定的 <see cref="DriveInfo"/>。</param>
+    /// <returns>返回 <see cref="DiskDeviceInfo"/>。</returns>
+    public static DiskDeviceInfo Create(DriveInfo info)
+    {
+        var usageRate = info.TotalSize == 0
+            ? 0f
+            : (float)(info.TotalSize - info.AvailableFreeSpace) / info.TotalSize * 100;
+
+        return new()
+        {
+            Name = info.Name,
+            RootPath = info.RootDirectory.FullName,
+            DriveType = info.DriveType,
+            FileSystem = info.DriveFormat,
+            FreeSpace = info.AvailableFreeSpace,
+            TotalSize = info.TotalSize,
+            UsedSize = info.TotalSize - info.AvailableFreeSpace,
+            UsageRate = usageRate
+        };
+    }
+
 }

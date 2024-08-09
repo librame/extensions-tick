@@ -10,7 +10,6 @@
 
 #endregion
 
-using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Microparts;
 using Librame.Extensions.Serialization;
 
@@ -134,8 +133,8 @@ public abstract class AbstractDeviceLoader : AbstractDisposable, IDeviceLoader
     {
         var processor = await _localhost!.GetProcessorAsync();
         var memory = await _localhost.GetMemoryAsync();
-        var network = await _localhost.GetNetworkAsync();
-        var disk = await _localhost.GetDiskAsync();
+        var network = await _localhost.GetNetworksAsync();
+        var disk = await _localhost.GetDisksAsync();
 
         return new DeviceUsageDescriptor
         {

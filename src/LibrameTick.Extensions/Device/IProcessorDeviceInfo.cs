@@ -20,18 +20,10 @@ public interface IProcessorDeviceInfo : IDeviceUsage<float>
     /// <summary>
     /// 处理器时间。
     /// </summary>
-    ProcessorTimes Times { get; init; }
+    ProcessorMoment? Moment { get; }
 
     /// <summary>
     /// 处理器数。
     /// </summary>
-    public int Count { get; init; }
-
-
-    /// <summary>
-    /// 使用新处理器时间创建一个实例副本。
-    /// </summary>
-    /// <param name="newTimes">给定的新 <see cref="ProcessorTimes"/>。</param>
-    /// <returns>返回 <see cref="IProcessorDeviceInfo"/>。</returns>
-    IProcessorDeviceInfo WithTimes(ProcessorTimes newTimes);
+    public int Count { get; }
 }

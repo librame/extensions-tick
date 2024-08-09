@@ -18,13 +18,21 @@ namespace Librame.Extensions.Serialization;
 public interface IBinaryTypeResolver
 {
     /// <summary>
+    /// 获取二进制序列化选项。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="BinarySerializerOptions"/>。
+    /// </value>
+    BinarySerializerOptions Options { get; }
+
+
+    /// <summary>
     /// 解析指定类型的成员信息。
     /// </summary>
     /// <param name="inputType">给定要解析的输入类型。</param>
-    /// <param name="options">给定的 <see cref="BinarySerializerOptions"/>。</param>
     /// <returns>返回 <see cref="BinaryMemberInfo"/> 数组。</returns>
     /// <exception cref="NotSupportedException">
     /// Resolving member type other than field and property is not supported.
     /// </exception>
-    BinaryMemberInfo[] ResolveMembers(Type inputType, BinarySerializerOptions options);
+    BinaryMemberInfo[] ResolveMembers(Type inputType);
 }

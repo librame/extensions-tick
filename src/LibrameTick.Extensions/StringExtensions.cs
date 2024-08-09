@@ -53,6 +53,35 @@ public static class StringExtensions
         => value.ToCharArray().Any(c => invalidChars.Contains(c));
 
 
+    /// <summary>
+    /// 重复字符串。
+    /// </summary>
+    /// <param name="str">给定要重复的字符串。</param>
+    /// <param name="count">给定的重复次数。</param>
+    /// <param name="separator">给定重复之间的分隔符（可选；默认没有分隔符）。</param>
+    /// <returns>返回经过重复的字符串。</returns>
+    public static string Repeat(this string str, int count, string? separator = null)
+    {
+        if (count <= 1) return str;
+
+        var capacity = (str.Length + (separator?.Length ?? 0)) * count + (separator is null ? 0 : -1);
+
+        var sb = new StringBuilder(capacity);
+
+        for (var i = 0; i < count; i++)
+        {
+            sb.Append(str);
+
+            if (i < count - 1 && separator is not null)
+            {
+                sb.Append(separator);
+            }
+        }
+
+        return sb.ToString();
+    }
+
+
     #region IfNull
 
     /// <summary>
