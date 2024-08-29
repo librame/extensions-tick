@@ -133,13 +133,4 @@ public interface IAlgorithmDependency : IDisposable, IDependency
     Lazy<AsymmetricAlgorithmPair<ECDsaCng>> LazyEcdsaPair { get; }
 
     #endregion
-
-
-    /// <summary>
-    /// 流式过程。
-    /// </summary>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="func">给定的处理方法。</param>
-    /// <returns>返回处理 <typeparamref name="TResult"/>。</returns>
-    TResult FluentProcess<TResult>(Func<IAlgorithmDependency, TResult> func);
 }

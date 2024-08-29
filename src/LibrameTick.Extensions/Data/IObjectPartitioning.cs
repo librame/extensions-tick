@@ -74,10 +74,10 @@ public interface IObjectPartitioning
     async ValueTask<object> SetObjectPartitionAsync(Func<object, object> newPartitionFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentPartition = await GetObjectPartitionAsync(cancellationToken).AvoidCapturedContext();
+        var currentPartition = await GetObjectPartitionAsync(cancellationToken).ConfigureAwait(false);
 
         return await SetObjectPartitionAsync(newPartitionFactory(currentPartition), cancellationToken)
-            .AvoidCapturedContext();
+            .ConfigureAwait(false);
     }
 
 }

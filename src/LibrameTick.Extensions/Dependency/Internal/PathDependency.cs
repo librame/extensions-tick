@@ -78,7 +78,6 @@ internal sealed class PathDependency : IPathDependency
         return (path, binPath);
     }
 
-
     private static StringComparison GetOSComparison()
     {
         return RuntimeInformation.IsOSPlatform(OSPlatform.Linux)

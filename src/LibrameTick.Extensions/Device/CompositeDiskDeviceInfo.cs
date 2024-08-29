@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions;
+using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Serialization;
 
 namespace Librame.Extensions.Device;
@@ -18,8 +18,7 @@ namespace Librame.Extensions.Device;
 /// <summary>
 /// 定义一个实现 <see cref="IDiskDeviceInfo"/> 的复合磁盘设备信息。
 /// </summary>
-public sealed class CompositeDiskDeviceInfo : StaticDefaultInitializer<CompositeDiskDeviceInfo>,
-    IDiskDeviceInfo, IComposable<IDiskDeviceInfo>
+public sealed class CompositeDiskDeviceInfo : IDiskDeviceInfo, IComposable<IDiskDeviceInfo>
 {
     /// <summary>
     /// 磁盘设备信息数组。
@@ -27,7 +26,7 @@ public sealed class CompositeDiskDeviceInfo : StaticDefaultInitializer<Composite
     /// <value>
     /// 返回 <see cref="List{DiskDeviceInfo}"/>。
     /// </value>
-    [BinaryExpressionMapping]
+    [BinaryMapping]
     public List<DiskDeviceInfo> Infos { get; set; } = [];
 
     /// <summary>

@@ -16,12 +16,12 @@ namespace Librame.Extensions.Device;
 /// 定义一个实现 <see cref="IProcessorDeviceInfo"/> 的处理器设备信息。
 /// </summary>
 [Serializable]
-public sealed class ProcessorDeviceInfo : StaticDefaultInitializer<ProcessorDeviceInfo>, IProcessorDeviceInfo
+public sealed class ProcessorDeviceInfo : IProcessorDeviceInfo
 {
     /// <summary>
     /// 处理器时刻。
     /// </summary>
-    public ProcessorMoment Moment { get; set; } = ProcessorMoment.Default;
+    public ProcessorMoment Moment { get; set; } = new();
 
     /// <summary>
     /// 处理器数。

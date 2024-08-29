@@ -18,8 +18,9 @@ namespace Librame.Extensions.Serialization;
 /// <param name="converter">给定的 <see cref="IBinaryConverter"/>。</param>
 /// <param name="memberInfo">给定的 <see cref="BinaryMemberInfo"/>。</param>
 /// <param name="memberType">给定的二进制成员类型。</param>
-public class BinaryMemberMapping<T>(IBinaryConverter converter, BinaryMemberInfo memberInfo,
-    Type memberType) : BinaryMemberMapping(converter, memberInfo, memberType)
+public class BinaryMemberMapping<T>(IBinaryConverter converter,
+    BinaryMemberInfo memberInfo, Type memberType)
+    : BinaryMemberMapping(converter, memberInfo, memberType)
 {
     /// <summary>
     /// 获取或设置读取泛型动作委托。
@@ -47,6 +48,11 @@ public class BinaryMemberMapping<T>(IBinaryConverter converter, BinaryMemberInfo
     {
         ArgumentNullException.ThrowIfNull(ReadAction);
 
+        if (Member.Options.AutomaticInstantiationIfNull && Member.Parent is not null)
+        {
+            InitializeParentValueIfNull(Member.Parent, instance);
+        }
+
         ReadAction.DynamicInvoke(instance, Converter, reader, MemberType, Member);
     }
 
@@ -58,6 +64,11 @@ public class BinaryMemberMapping<T>(IBinaryConverter converter, BinaryMemberInfo
     public void Write(BinaryWriter writer, T instance)
     {
         ArgumentNullException.ThrowIfNull(WriteAction);
+
+        if (Member.Options.AutomaticInstantiationIfNull && Member.Parent is not null)
+        {
+            InitializeParentValueIfNull(Member.Parent, instance);
+        }
 
         WriteAction.DynamicInvoke(instance, Converter, writer, MemberType, Member);
     }

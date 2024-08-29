@@ -31,8 +31,13 @@ namespace Librame.Extensions.Cryptography
             Assert.Equal(base64, base64Sort.FromSortableBase64String());
 
             // Image Base64
+            var contentType = "image/jpeg";
+
             var imgBase64 = buffer.AsImageBase64String("image/jpeg");
-            Assert.Equal(buffer, imgBase64.FromImageBase64String().bytes);
+            (var imgType, var imgBytes) = imgBase64.FromImageBase64String();
+
+            Assert.Equal(contentType, imgType);
+            Assert.Equal(buffer, imgBytes);
         }
 
 
@@ -164,8 +169,8 @@ namespace Librame.Extensions.Cryptography
             Assert.Equal(_plaintext, plaintext);
 
             // Sign
-            var sig = _plaintext.SignDataPrivateRsaWithBase64String();
-            var result = sig.VerifyDataPublicRsaWithBase64String(_plaintext);
+            var signed = _plaintext.SignDataPrivateRsaWithBase64String();
+            var result = _plaintext.VerifyDataPublicRsaWithBase64String(signed);
             Assert.True(result);
         }
 
@@ -177,25 +182,25 @@ namespace Librame.Extensions.Cryptography
         [Fact]
         public void EcdsaTest()
         {
-            var ciphertext = _plaintext.SignDataPrivateEcdsaWithBase64String();
-            Assert.NotEmpty(ciphertext);
+            var signed = _plaintext.SignDataPrivateEcdsaWithBase64String();
+            Assert.NotEmpty(signed);
             
-            var result = ciphertext.VerifyDataPublicEcdsaWithBase64String(_plaintext);
+            var result = _plaintext.VerifyDataPublicEcdsaWithBase64String(signed);
             Assert.True(result);
         }
 
         #endregion
 
 
-        #region Password
+        #region PasswordHash
 
         [Fact]
         public void PasswordTest()
         {
-            var ciphertext = _plaintext.AsPassword();
+            var ciphertext = _plaintext.AsPasswordHash();
             Assert.NotEmpty(ciphertext);
 
-            var result = ciphertext.VerifyPassword(_plaintext);
+            var result = _plaintext.VerifyPasswordHash(ciphertext);
             Assert.True(result);
         }
 

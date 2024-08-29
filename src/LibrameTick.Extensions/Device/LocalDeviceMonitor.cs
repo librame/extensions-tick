@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.Device;
 
 /// <summary>
@@ -19,7 +21,7 @@ namespace Librame.Extensions.Device;
 /// 构造一个 <see cref="LocalDeviceMonitor"/>。
 /// </remarks>
 /// <param name="options">给定的 <see cref="DeviceMonitoringOptions"/>。</param>
-public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : AbstractDisposable, IDeviceMonitor
+public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Disposable, IDeviceMonitor
 {
     private Ping? _ping;
 
@@ -85,10 +87,10 @@ public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Abstra
     /// <returns>返回一个包含 <see cref="LocalDeviceInfo"/> 的异步操作。</returns>
     public async Task<LocalDeviceInfo> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var processor = await GetProcessorAsync(cancellationToken);
-        var memory = await GetMemoryAsync(cancellationToken);
-        var disks = await GetDisksAsync(cancellationToken);
-        var networks = await GetNetworksAsync(cancellationToken);
+        var processor = await GetProcessorAsync(cancellationToken).ConfigureAwait(false);
+        var memory = await GetMemoryAsync(cancellationToken).ConfigureAwait(false);
+        var disks = await GetDisksAsync(cancellationToken).ConfigureAwait(false);
+        var networks = await GetNetworksAsync(cancellationToken).ConfigureAwait(false);
 
         return new()
         {

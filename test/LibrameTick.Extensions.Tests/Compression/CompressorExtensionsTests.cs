@@ -1,5 +1,5 @@
-﻿using Librame.Extensions.Configuration;
-using System.IO;
+﻿using Librame.Extensions.Infrastructure;
+using System.Text;
 using Xunit;
 
 namespace Librame.Extensions.Compression
@@ -8,17 +8,46 @@ namespace Librame.Extensions.Compression
     {
 
         [Fact]
-        public void CompressFileTest()
+        public void CompressByteArrayTest()
         {
-            var originalPath = "compression-original.txt".SetFileBasePath();
-            var compressedPath = "compression-compressed.txt".SetFileBasePath();
+            var encoding = Encoding.UTF8;
 
             var testString = "This is a test string.".Repeat(10);
-            originalPath.WriteAll();
+            var testBytes = encoding.GetBytes(testString);
 
-            File.WriteAllText(originalPath.ToString(), testString);
+            var compressedBytes = testBytes.Compress();
+            var decompressedBytes = compressedBytes.Decompress();
 
-            originalPath.CompressFile(compressedPath, CompressorAlgorithm.GZip);
+            var decompressedString = encoding.GetString(decompressedBytes);
+
+            Assert.Equal(testString, decompressedString);
+        }
+
+        [Fact]
+        public void CompressFileTest()
+        {
+            var originalFile = "compression-original.txt".SetFileBasePath();
+            var decompressedFile = "compression-decompressed.txt".SetFileBasePath();
+
+            var testString = "This is a test string.".Repeat(10);
+
+            originalFile.WriteAllText(testString);
+
+            var options = new CompressionOptions()
+            {
+                Algorithm = CompressorAlgorithm.Brotli,
+                UseBufferedStream = true
+            };
+
+            var compressedFile = originalFile.Compress(options);
+            compressedFile.Decompress(decompressedFile, options);
+
+            var decompressedString = decompressedFile.ReadAllText();
+            Assert.Equal(testString, decompressedString);
+
+            decompressedFile.Delete();
+            compressedFile.Delete();
+            originalFile.Delete();
         }
 
     }

@@ -10,18 +10,13 @@
 
 #endregion
 
-namespace Librame.Extensions.Storage;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义读写文件的存取器接口。
+/// 定义文件的二进制存取插件接口。
 /// </summary>
-public interface IFileAccessor
+public interface IBinaryAccessFilePlugin : IFilePlugin
 {
-    /// <summary>
-    /// 文件路径。
-    /// </summary>
-    string Path { get; }
-
 
     #region No Buffer
 

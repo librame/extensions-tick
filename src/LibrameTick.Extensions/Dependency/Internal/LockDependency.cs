@@ -39,12 +39,32 @@ internal sealed class LockDependency(int maxLockersCount, TimeSpan deadlockDurat
     public TimeSpan DeadlockDuration { get; init; } = deadlockDuration;
 
 
+    public void Lock(Action action)
+    {
+        lock (GetLocker(out _))
+        {
+            action();
+        }
+    }
+
     public void Lock(Action<int> action)
     {
         lock (GetLocker(out int index))
         {
             action(index);
         }
+    }
+
+    public TResult Lock<TResult>(Func<TResult> func)
+    {
+        TResult result;
+
+        lock (GetLocker(out _))
+        {
+            result = func();
+        }
+
+        return result;
     }
 
     public TResult Lock<TResult>(Func<int, TResult> func)

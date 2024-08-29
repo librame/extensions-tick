@@ -21,7 +21,18 @@ namespace Librame.Extensions.Serialization;
 public sealed class BinaryVersionAttribute(double version) : Attribute
 {
     /// <summary>
-    /// 版本号。
+    /// 兼容的版本号。
     /// </summary>
+    /// <value>
+    /// 返回双精度浮点数。
+    /// </value>
     public double Version { get; set; } = version;
+
+    /// <summary>
+    /// 兼容的版本比较方式。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="BinaryVersionComparison"/>。
+    /// </value>
+    public BinaryVersionComparison Comparison { get; set; } = BinaryVersionComparison.LessThanOrEquals;
 }

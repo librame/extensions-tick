@@ -77,7 +77,7 @@ public class TransactionDispatcher<TSource>(IEnumerable<TSource> sources,
         {
             try
             {
-                await base.DispatchActionAsync(func, breakFunc, isTraversal, cancellationToken);
+                await base.DispatchActionAsync(func, breakFunc, isTraversal, cancellationToken).ConfigureAwait(false);
 
                 transaction.Complete();
             }
@@ -143,7 +143,7 @@ public class TransactionDispatcher<TSource>(IEnumerable<TSource> sources,
         {
             try
             {
-                result = await base.DispatchFuncAsync(func, breakFunc, isTraversal, cancellationToken);
+                result = await base.DispatchFuncAsync(func, breakFunc, isTraversal, cancellationToken).ConfigureAwait(false);
 
                 transaction.Complete();
             }

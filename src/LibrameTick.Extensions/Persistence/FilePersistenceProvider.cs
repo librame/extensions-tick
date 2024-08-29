@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Dependency;
+
 namespace Librame.Extensions.Persistence;
 
 /// <summary>
@@ -19,8 +21,6 @@ namespace Librame.Extensions.Persistence;
 public abstract class FilePersistenceProvider<TPersistence>
     : PersistenceProvider<TPersistence>, IFilePersistenceProvider<TPersistence>
 {
-    //private static readonly object _locker = new();
-
     private bool _disposed = false;
     private readonly FileSystemWatcher? _fileWatcher;
 
@@ -41,10 +41,10 @@ public abstract class FilePersistenceProvider<TPersistence>
 
         if (Exist())
         {
-            lock (_locker)
+            DependencyRegistration.CurrentContext.Locks.Lock(() =>
             {
                 Current = Load();
-            }
+            });
         }
         else
         {
@@ -92,18 +92,18 @@ public abstract class FilePersistenceProvider<TPersistence>
     {
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
 
-        lock (_locker)
+        DependencyRegistration.CurrentContext.Locks.Lock(() =>
         {
             Current = Load();
-        }
+        });
     }
 
     private void FileWatcher_Deleted(object sender, FileSystemEventArgs e)
     {
-        lock (_locker)
+        DependencyRegistration.CurrentContext.Locks.Lock(() =>
         {
             Save(Current);
-        }
+        });
     }
 
 

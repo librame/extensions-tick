@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions;
+using Librame.Extensions.Infrastructure;
 using Librame.Extensions.Serialization;
 
 namespace Librame.Extensions.Device;
@@ -18,8 +18,7 @@ namespace Librame.Extensions.Device;
 /// <summary>
 /// 定义一个实现 <see cref="INetworkDeviceInfo"/> 的复合网络设备信息。
 /// </summary>
-public sealed class CompositeNetworkDeviceInfo : StaticDefaultInitializer<CompositeNetworkDeviceInfo>,
-    INetworkDeviceInfo, IComposable<INetworkDeviceInfo>
+public sealed class CompositeNetworkDeviceInfo : INetworkDeviceInfo, IComposable<INetworkDeviceInfo>
 {
     /// <summary>
     /// 网络设备信息数组。
@@ -27,7 +26,7 @@ public sealed class CompositeNetworkDeviceInfo : StaticDefaultInitializer<Compos
     /// <value>
     /// 返回 <see cref="INetworkDeviceInfo"/> 数组。
     /// </value>
-    [BinaryExpressionMapping]
+    [BinaryMapping]
     public List<NetworkDeviceInfo> Infos { get; set; } = [];
 
     /// <summary>
@@ -58,7 +57,7 @@ public sealed class CompositeNetworkDeviceInfo : StaticDefaultInitializer<Compos
     /// <summary>
     /// 网络流量。
     /// </summary>
-    public NetworkTraffic Traffic { get; set; } = NetworkTraffic.Default;
+    public NetworkTraffic Traffic { get; set; } = new();
 
     /// <summary>
     /// 标识符。

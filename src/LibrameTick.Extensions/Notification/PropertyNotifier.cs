@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.Notification;
 
 /// <summary>
@@ -33,8 +35,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
     {
     }
 
-    private PropertyNotifier(object source, string? named,
-        IPropertyNotifier? parentNotifier,
+    private PropertyNotifier(object source, string? named, IPropertyNotifier? parentNotifier,
         ConcurrentDictionary<PropertyNoticeNamedKey, object>? propertyValues,
         ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>>? propertyFuncs)
     {

@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.Device;
 
 /// <summary>
@@ -23,7 +25,7 @@ public sealed class LocalDeviceInfo : StaticDefaultInitializer<LocalDeviceInfo>
     /// <value>
     /// 返回 <see cref="ProcessorDeviceInfo"/>。
     /// </value>
-    public ProcessorDeviceInfo Processor { get; set; } = ProcessorDeviceInfo.Default;
+    public ProcessorDeviceInfo Processor { get; set; } = new();
 
     /// <summary>
     /// 获取或设置内存信息。
@@ -31,7 +33,7 @@ public sealed class LocalDeviceInfo : StaticDefaultInitializer<LocalDeviceInfo>
     /// <value>
     /// 返回 <see cref="MemoryDeviceInfo"/>。
     /// </value>
-    public MemoryDeviceInfo Memory { get; set; } = MemoryDeviceInfo.Default;
+    public MemoryDeviceInfo Memory { get; set; } = new();
 
     /// <summary>
     /// 获取或设置复合磁盘信息。
@@ -39,7 +41,7 @@ public sealed class LocalDeviceInfo : StaticDefaultInitializer<LocalDeviceInfo>
     /// <value>
     /// 返回 <see cref="CompositeDiskDeviceInfo"/>。
     /// </value>
-    public CompositeDiskDeviceInfo Disks { get; set; } = CompositeDiskDeviceInfo.Default;
+    public CompositeDiskDeviceInfo Disks { get; set; } = new();
 
     /// <summary>
     /// 获取或设置复合网络信息。
@@ -47,5 +49,5 @@ public sealed class LocalDeviceInfo : StaticDefaultInitializer<LocalDeviceInfo>
     /// <value>
     /// 返回 <see cref="CompositeNetworkDeviceInfo"/>。
     /// </value>
-    public CompositeNetworkDeviceInfo Networks { get; set; } = CompositeNetworkDeviceInfo.Default;
+    public CompositeNetworkDeviceInfo Networks { get; set; } = new();
 }

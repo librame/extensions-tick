@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Compression;
 
 /// <summary>
-/// 定义抽象实现 <see cref="ICompressionAdapter"/> 的压缩适配器。
+/// 定义实现 <see cref="ICompressionAdapter"/> 的压缩适配器。
 /// </summary>
 /// <typeparam name="TAdapted">指定的被适配类型。</typeparam>
 /// <typeparam name="TCompressed">指定的被压缩类型。</typeparam>

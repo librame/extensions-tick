@@ -19,13 +19,29 @@ namespace Librame.Extensions.Serialization;
 /// 使用成员信息与序列化选项构造一个 <see cref="BinaryMemberInfo"/> 实例。
 /// </remarks>
 /// <param name="info">给定的 <see cref="MemberInfo"/>。</param>
+/// <param name="fromExpression">成员是否来自表达式解析。</param>
 /// <param name="options">给定的 <see cref="BinarySerializerOptions"/>。</param>
 /// <param name="orderId">给定的顺序标识。</param>
-public class BinaryMemberInfo(MemberInfo info, BinarySerializerOptions options, int orderId)
+/// <param name="parent">给定的父级成员信息（可空）。</param>
+public class BinaryMemberInfo(MemberInfo info, bool fromExpression,
+    BinarySerializerOptions options, int orderId, BinaryMemberInfo? parent)
 {
     private readonly FieldInfo? _fieldInfo = info as FieldInfo;
     private readonly PropertyInfo? _propertyInfo = info as PropertyInfo;
 
+
+    /// <summary>
+    /// 父级成员信息。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="BinaryMemberInfo"/>。
+    /// </value>
+    public BinaryMemberInfo? Parent { get; init; } = parent;
+
+    /// <summary>
+    /// 成员来自表达式解析。
+    /// </summary>
+    public bool FromExpression { get; init; } = fromExpression;
 
     /// <summary>
     /// 获取或设置声明类型级联标识。

@@ -87,7 +87,7 @@ public abstract class ClockIdGenerator<TId>(IdGenerationOptions options, IClockD
     /// <returns>返回一个包含长整数的异步操作。</returns>
     protected virtual async ValueTask<long> GetNowTicksAsync(CancellationToken cancellationToken = default)
     {
-        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).AvoidCapturedContext();
+        var now = await Clock.GetUtcNowAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
         var ticks = ConvertTicksPrecision(now.Ticks);
 
         Options.UpdateNowTicksAction?.Invoke(ticks);
@@ -104,10 +104,10 @@ public abstract class ClockIdGenerator<TId>(IdGenerationOptions options, IClockD
     protected virtual async ValueTask<long> GetNowTicksAsync(long lastTicks,
         CancellationToken cancellationToken = default)
     {
-        var nowTicks = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
+        var nowTicks = await GetNowTicksAsync(cancellationToken).ConfigureAwait(false);
 
         while (nowTicks <= lastTicks)
-            nowTicks = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
+            nowTicks = await GetNowTicksAsync(cancellationToken).ConfigureAwait(false);
 
         return nowTicks;
     }

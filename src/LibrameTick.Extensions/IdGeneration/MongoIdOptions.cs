@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Cryptography;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.IdGeneration;
 
@@ -93,25 +94,28 @@ public class MongoIdOptions : IOptions
         IncrementBytes = BitConverter.GetBytes(increment);
         Increment = increment;
 
-        return 12.SharedByteArrayFunc(clearArrayIfReturn: true, buffer =>
-        {
-            var copyIndex = 0;
+        // 不能使用租借字节数组，因为租借的数组长度不固定
+        var buffer = new byte[12];
+        var copyIndex = 0;
 
-            var ticksBytes = BitConverter.GetBytes(deltaTicks);
-            Array.Reverse(ticksBytes);
-            Array.Copy(ticksBytes, 0, buffer, copyIndex, 4);
+        var ticksBytes = BitConverter.GetBytes(deltaTicks);
+        Array.Reverse(ticksBytes);
+        Array.Copy(ticksBytes, 0, buffer, copyIndex, 4);
 
-            copyIndex += 4;
-            Array.Copy(MachineBytes, 0, buffer, copyIndex, 3);
+        copyIndex += 4;
+        Array.Copy(MachineBytes, 0, buffer, copyIndex, 3);
 
-            copyIndex += 3;
-            Array.Copy(ProcessBytes.Reverse().ToArray(), 2, buffer, copyIndex, 2);
+        copyIndex += 3;
+        var processBytes = ProcessBytes;
+        Array.Reverse(processBytes);
+        Array.Copy(processBytes, 2, buffer, copyIndex, 2);
 
-            copyIndex += 2;
-            Array.Copy(IncrementBytes.Reverse().ToArray(), 1, buffer, copyIndex, 3);
+        copyIndex += 2;
+        var incrementBytes = IncrementBytes;
+        Array.Reverse(incrementBytes);
+        Array.Copy(incrementBytes, 1, buffer, copyIndex, 3);
 
-            return buffer.AsHexString();
-        });
+        return buffer.AsHexString();
     }
 
 
@@ -126,18 +130,17 @@ public class MongoIdOptions : IOptions
         var ticksBytes = mongoId.FromHexString();
         if (ticksBytes.Length != 12)
         {
-            ArgumentOutOfRangeException ex = new(nameof(mongoId), "value should be 12 characters");
+            var ex = new ArgumentOutOfRangeException(nameof(mongoId), "value should be 12 characters");
             throw ex;
         }
 
         var copyIndex = 0;
 
-        var buffer = ArrayPool<byte>.Shared.Rent(4);
+        var buffer = new byte[4];
         Array.Copy(ticksBytes, copyIndex, buffer, 0, 4);
         Array.Reverse(buffer);
 
         deltaTicks = BitConverter.ToInt32(buffer, 0);
-        ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
 
         copyIndex += 4;
         var machineIdBytes = new byte[4];
@@ -146,13 +149,14 @@ public class MongoIdOptions : IOptions
         copyIndex += 3;
         var processIdBytes = new byte[4];
         Array.Copy(ticksBytes, copyIndex, processIdBytes, 0, 2);
+        Array.Reverse(processIdBytes);
 
         copyIndex += 2;
         var incrementBytes = new byte[4];
         Array.Copy(ticksBytes, copyIndex, incrementBytes, 0, 3);
+        Array.Reverse(incrementBytes);
 
-        return new MongoIdOptions(incrementBytes.Reverse().ToArray(),
-            machineIdBytes, processIdBytes.Reverse().ToArray());
+        return new MongoIdOptions(incrementBytes, machineIdBytes, processIdBytes);
     }
 
 }

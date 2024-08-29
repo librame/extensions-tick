@@ -1,7 +1,6 @@
-﻿using Librame.Extensions.Configuration;
-using Librame.Extensions.Dependency;
+﻿using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 using System;
-using System.IO;
 using System.Text;
 using System.Threading;
 using Xunit;
@@ -22,7 +21,7 @@ namespace Librame.Extensions.Tests
             WriteLineAtMaxLevel();
 
             var filePath = "lockers_test.txt".SetFileBasePath();
-            File.WriteAllText(filePath.ToString(), _builder.ToString());
+            filePath.WriteAllText(_builder.ToString());
 
             void WriteLineAtMaxLevel()
             {

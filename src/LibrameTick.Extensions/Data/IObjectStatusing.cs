@@ -74,10 +74,10 @@ public interface IObjectStatusing
     async ValueTask<object> SetObjectStatusAsync(Func<object, object> newStatusFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentStatus = await GetObjectStatusAsync(cancellationToken).AvoidCapturedContext();
+        var currentStatus = await GetObjectStatusAsync(cancellationToken).ConfigureAwait(false);
 
         return await SetObjectStatusAsync(newStatusFactory(currentStatus), cancellationToken)
-            .AvoidCapturedContext();
+            .ConfigureAwait(false);
     }
 
 }

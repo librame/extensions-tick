@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.IdGeneration;
 
@@ -21,7 +22,7 @@ public class MongoIdGenerator : ClockIdGenerator<string>
 {
     private int _location = Environment.TickCount;
 
-    private long _baseTicks = -1L;
+    private readonly long _baseTicks = -1L;
     private long _lastTicks = -1L;
     private long _lastTicksAsync = -1L;
 
@@ -77,7 +78,7 @@ public class MongoIdGenerator : ClockIdGenerator<string>
     /// <returns>返回一个包含字符串的异步操作。</returns>
     public override async ValueTask<string> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).ConfigureAwait(false);
 
         _lastTicksAsync = nowTicksAsync;
         Options.GeneratingAction?.Invoke(new(nowTicksAsync, _baseTicks, TimePrecision.Second));

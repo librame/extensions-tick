@@ -10,7 +10,10 @@
 
 #endregion
 
+using Librame.Extensions.Compression;
+using Librame.Extensions.Cryptography;
 using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 using InternalBinaryChildrenInvoker = Librame.Extensions.Serialization.Internal.BinaryChildrenInvoker;
 using InternalBinaryConverterResolver = Librame.Extensions.Serialization.Internal.BinaryConverterResolver;
 using InternalBinaryConverters = Librame.Extensions.Serialization.Internal.BinaryConverters;
@@ -23,18 +26,29 @@ namespace Librame.Extensions.Serialization;
 /// </summary>
 public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializerOptions>
 {
-    private readonly string _useVersionKey = $"[{nameof(UseVersion)}]";
-
     private MemberTypes _memberTypes = MemberTypes.Property;
 
 
     /// <summary>
-    /// 构造一个 <see cref="BinarySerializerOptions"/> 默认实例。
+    /// 构造一个默认不启用算法与压缩功能的 <see cref="BinarySerializerOptions"/> 实例。
     /// </summary>
     public BinarySerializerOptions()
+        : this(enableAlgorithms: false, enableCompressions: false)
     {
+    }
+
+    /// <summary>
+    /// 构造一个 <see cref="BinarySerializerOptions"/> 实例。
+    /// </summary>
+    /// <param name="enableAlgorithms">启用算法功能。</param>
+    /// <param name="enableCompressions">启用压缩功能。</param>
+    public BinarySerializerOptions(bool enableAlgorithms, bool enableCompressions)
+    {
+        Algorithms = new() { IsReferenceEnabled = enableAlgorithms };
+        Compressions = new() { IsReferenceEnabled = enableCompressions };
         Converters = InternalBinaryConverters.InitializeConverters();
         Encoding = DependencyRegistration.CurrentContext.Encoding;
+        AutomaticInstantiationIfNull = true;
 
         OrderByMembersFunc = (member, index, count)
             => member.GetCustomAttribute<BinaryOrderAttribute>()?.Id ?? (index + 1);
@@ -47,11 +61,14 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// <summary>
     /// 使用指定的 <see cref="BinarySerializerOptions"/> 构造一个 <see cref="BinarySerializerOptions"/> 实例。
     /// </summary>
-    /// <param name="options">The options.</param>
+    /// <param name="options">给定的 <see cref="BinarySerializerOptions"/>。</param>
     public BinarySerializerOptions(BinarySerializerOptions options)
     {
+        Algorithms = options.Algorithms;
+        Compressions = options.Compressions;
         Converters = new(options.Converters);
         Encoding = options.Encoding;
+        AutomaticInstantiationIfNull = options.AutomaticInstantiationIfNull;
         UseVersion = options.UseVersion;
 
         MemberType = options.MemberType;
@@ -64,6 +81,28 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
 
 
     /// <summary>
+    /// 获取或设置算法选项。
+    /// </summary>
+    /// <remarks>
+    /// 如果压缩选项不为空，则序列化时将启用加解密功能。
+    /// </remarks>
+    /// <value>
+    /// 返回 <see cref="AlgorithmReferenceOptions"/>。
+    /// </value>
+    public AlgorithmReferenceOptions Algorithms { get; set; }
+
+    /// <summary>
+    /// 获取或设置压缩选项。
+    /// </summary>
+    /// <remarks>
+    /// 如果压缩选项不为空，则序列化时将启用压缩功能。
+    /// </remarks>
+    /// <value>
+    /// 返回 <see cref="CompressionOptions"/>。
+    /// </value>
+    public CompressionOptions Compressions { get; set; }
+
+    /// <summary>
     /// 获取转换器列表。
     /// </summary>
     /// <value>
@@ -74,6 +113,9 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// <summary>
     /// 获取或设置要序列化类型成员的版本。
     /// </summary>
+    /// <remarks>
+    /// 如果版本不为空，则序列化时将启用版本功能。
+    /// </remarks>
     /// <value>
     /// 返回 <see cref="BinarySerializerVersion"/>。
     /// </value>
@@ -86,6 +128,17 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// 返回 <see cref="System.Text.Encoding"/>。
     /// </value>
     public Encoding Encoding { get; set; }
+
+    /// <summary>
+    /// 获取或设置如果自定义类型实例为 NULL 时，是否需要自动实例化。
+    /// </summary>
+    /// <remarks>
+    /// 默认自动实例化为 NULL 的自定义类型实例。
+    /// </remarks>
+    /// <value>
+    /// 返回是否自动实例化的布尔值。
+    /// </value>
+    public bool AutomaticInstantiationIfNull { get; set; }
 
     /// <summary>
     /// 获取或设置转换器解析器。
@@ -137,100 +190,6 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
             
             _memberTypes = value;
         }
-    }
-
-
-    /// <summary>
-    /// 过滤不满足解析类型成员的方法。
-    /// </summary>
-    /// <param name="member">给定的 <see cref="MemberInfo"/>。</param>
-    /// <returns>返回满足条件的布尔值。</returns>
-    public bool FilterMembers(MemberInfo member)
-    {
-        var isUnfiltered = member.MemberType == MemberType && !member.IsIgnoreAttributeDefined();
-
-        // 未指定序列化版本，只过滤标注忽略自定义特性的成员
-        if (UseVersion is null) return isUnfiltered;
-
-        var memberVersion = member.GetCustomAttribute<BinaryVersionAttribute>();
-
-        // 如果未标注版本自定义特性的成员将不会被过滤
-        if (memberVersion is null) return isUnfiltered;
-
-        // 根据版本比较方法过滤不满足条件的成员
-        return UseVersion.Comparison switch
-        {
-            BinaryVersionComparison.Equals => memberVersion.Version == UseVersion.Version,
-            BinaryVersionComparison.GreaterThan => memberVersion.Version > UseVersion.Version,
-            BinaryVersionComparison.GreaterThanOrEquals => memberVersion.Version >= UseVersion.Version,
-            BinaryVersionComparison.LessThan => memberVersion.Version < UseVersion.Version,
-            BinaryVersionComparison.LessThanOrEquals => memberVersion.Version <= UseVersion.Version,
-            _ => isUnfiltered
-        };
-    }
-
-
-    /// <summary>
-    /// 读取版本信息。
-    /// </summary>
-    /// <param name="reader">给定的 <see cref="BinaryReader"/>。</param>
-    /// <returns>返回 <see cref="BinarySerializerVersion"/>。</returns>
-    public BinarySerializerVersion? ReadVersion(BinaryReader reader)
-        => TryReadVersion(reader, out var version) ? version : null;
-
-    /// <summary>
-    /// 写入版本信息。
-    /// </summary>
-    /// <param name="writer">给定的 <see cref="BinaryWriter"/>。</param>
-    public void WriteVersion(BinaryWriter writer)
-    {
-        writer.Write(_useVersionKey);
-        writer.Write(UseVersion is not null);
-
-        if (UseVersion is not null)
-        {
-            writer.Write(UseVersion.Version);
-            writer.Write(Enum.GetName(UseVersion.Comparison) ?? UseVersion.Comparison.ToString());
-        }
-    }
-
-    /// <summary>
-    /// 尝试读取版本信息。
-    /// </summary>
-    /// <param name="reader">给定的 <see cref="BinaryReader"/>。</param>
-    /// <param name="version">输出可能存在的 <see cref="BinarySerializerVersion"/>。</param>
-    /// <returns>返回是否成功读取的布尔值。</returns>
-    public bool TryReadVersion(BinaryReader reader,
-        [NotNullWhen(true)] out BinarySerializerVersion? version)
-    {
-        string? str;
-        bool has;
-
-        try
-        {
-            // Try read version key
-            str = reader.ReadString();
-
-            // Try read version is not null
-            has = reader.ReadBoolean();
-        }
-        catch
-        {
-            str = null;
-            has = false;
-        }
-
-        if (_useVersionKey.Equals(str, StringComparison.Ordinal) && has)
-        {
-            var number = reader.ReadDouble();
-            var comparison = Enum.Parse<BinaryVersionComparison>(reader.ReadString());
-
-            version = new(number, comparison);
-            return true;
-        }
-
-        version = null;
-        return false;
     }
 
 }

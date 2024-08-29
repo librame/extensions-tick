@@ -15,7 +15,7 @@ namespace Librame.Extensions.Device;
 /// <summary>
 /// 定义一个网络流量。
 /// </summary>
-public sealed class NetworkTraffic : StaticDefaultInitializer<NetworkTraffic>
+public sealed class NetworkTraffic
 {
     /// <summary>
     /// 产生时间。

@@ -10,6 +10,7 @@
 
 #endregion
 
+global using Microsoft.IO;
 global using System;
 global using System.Buffers;
 global using System.Collections;
@@ -29,7 +30,6 @@ global using System.IO.Compression;
 global using System.Linq;
 global using System.Linq.Expressions;
 global using System.Net;
-global using System.Net.Http;
 global using System.Net.NetworkInformation;
 global using System.Net.Sockets;
 global using System.Numerics;

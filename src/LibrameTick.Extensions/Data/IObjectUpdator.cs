@@ -74,9 +74,9 @@ public interface IObjectUpdator
     async ValueTask<object?> SetObjectUpdatedByAsync(Func<object?, object?> newUpdatedByFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentUpdatedBy = await GetObjectUpdatedByAsync(cancellationToken).AvoidCapturedContext();
+        var currentUpdatedBy = await GetObjectUpdatedByAsync(cancellationToken).ConfigureAwait(false);
 
-        return await SetObjectUpdatedByAsync(newUpdatedByFactory(currentUpdatedBy), cancellationToken).AvoidCapturedContext();
+        return await SetObjectUpdatedByAsync(newUpdatedByFactory(currentUpdatedBy), cancellationToken).ConfigureAwait(false);
     }
 
 }

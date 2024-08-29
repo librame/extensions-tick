@@ -18,58 +18,6 @@ namespace Librame.Extensions;
 public static class TaskExtensions
 {
 
-    #region AvoidCapturedContext
-
-    /// <summary>
-    /// 在非UI线程或同步上下文中避免捕获上下文。
-    /// </summary>
-    /// <remarks>
-    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
-    /// </remarks>
-    /// <param name="task">给定的 <see cref="Task"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredTaskAwaitable"/>。</returns>
-    public static ConfiguredTaskAwaitable AvoidCapturedContext(this Task task)
-        => task.ConfigureAwait(continueOnCapturedContext: false);
-
-    /// <summary>
-    /// 在非UI线程或同步上下文中避免捕获上下文。
-    /// </summary>
-    /// <remarks>
-    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
-    /// </remarks>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="task">给定的 <see cref="Task{TResult}"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredTaskAwaitable<TResult> AvoidCapturedContext<TResult>(this Task<TResult> task)
-        => task.ConfigureAwait(continueOnCapturedContext: false);
-
-
-    /// <summary>
-    /// 在非UI线程或同步上下文中避免捕获上下文。
-    /// </summary>
-    /// <remarks>
-    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
-    /// </remarks>
-    /// <param name="valueTask">给定的 <see cref="ValueTask"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable"/>。</returns>
-    public static ConfiguredValueTaskAwaitable AvoidCapturedContext(this ValueTask valueTask)
-        => valueTask.ConfigureAwait(continueOnCapturedContext: false);
-
-    /// <summary>
-    /// 在非UI线程或同步上下文中避免捕获上下文。
-    /// </summary>
-    /// <remarks>
-    /// 可避免在等待任务的多任务场景中可能带来的死锁问题。
-    /// </remarks>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="valueTask">给定的 <see cref="ValueTask{TResult}"/>。</param>
-    /// <returns>返回 <see cref="ConfiguredValueTaskAwaitable{TResult}"/>。</returns>
-    public static ConfiguredValueTaskAwaitable<TResult> AvoidCapturedContext<TResult>(this ValueTask<TResult> valueTask)
-        => valueTask.ConfigureAwait(continueOnCapturedContext: false);
-
-    #endregion
-
-
     #region SkipByTimeout
 
     /// <summary>
@@ -80,23 +28,22 @@ public static class TaskExtensions
     /// <returns>返回一个异步操作。</returns>
     public static async Task SkipByTimeout(this Task sourceTask, TimeSpan timeout)
     {
-        using (var cts = new CancellationTokenSource())
-        {
-            var timeoutTask = Task.Delay(timeout, cts.Token);
-            var resultTask = await Task.WhenAny(sourceTask, timeoutTask);
+        using var cts = new CancellationTokenSource();
 
-            if (resultTask == timeoutTask)
-            {
-                // sourceTask 来源任务不能取消
-            }
-            else
-            {
-                await sourceTask;
-            }
-            
-            // 取消计时器任务
-            cts.Cancel();
+        var timeoutTask = Task.Delay(timeout, cts.Token);
+        var resultTask = await Task.WhenAny(sourceTask, timeoutTask);
+
+        if (resultTask == timeoutTask)
+        {
+            // sourceTask 来源任务不能取消
         }
+        else
+        {
+            await sourceTask;
+        }
+
+        // 取消计时器任务
+        cts.Cancel();
     }
 
     /// <summary>
@@ -107,28 +54,27 @@ public static class TaskExtensions
     /// <returns>返回一个包含结果的异步操作。</returns>
     public static async Task<TResult?> SkipByTimeout<TResult>(this Task<TResult> sourceTask, TimeSpan timeout)
     {
-        using (var cts = new CancellationTokenSource())
+        TResult? result;
+
+        using var cts = new CancellationTokenSource();
+
+        var timeoutTask = Task.Delay(timeout, cts.Token);
+        var resultTask = await Task.WhenAny(sourceTask, timeoutTask);
+
+        if (resultTask == timeoutTask)
         {
-            TResult? result;
-
-            var timeoutTask = Task.Delay(timeout, cts.Token);
-            var resultTask = await Task.WhenAny(sourceTask, timeoutTask);
-            
-            if (resultTask == timeoutTask)
-            {
-                // sourceTask 来源任务不能取消
-                result = default;
-            }
-            else
-            {
-                result = await sourceTask;
-            }
-
-            // 取消计时器任务
-            cts.Cancel();
-
-            return result;
+            // sourceTask 来源任务不能取消
+            result = default;
         }
+        else
+        {
+            result = await sourceTask;
+        }
+
+        // 取消计时器任务
+        cts.Cancel();
+
+        return result;
     }
 
     #endregion
@@ -145,7 +91,9 @@ public static class TaskExtensions
     public static async Task SimpleTask(this CancellationToken cancellationToken, Action action)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             await Task.CompletedTask;
+        }
 
         action.BeginInvoke(action.EndInvoke, null);
     }
@@ -163,17 +111,19 @@ public static class TaskExtensions
     /// <exception cref="ArgumentNullException">
     /// The <paramref name="resultFunc"/> invoke result is null.
     /// </exception>
-    public static Task<TResult> SimpleTask<TResult>(this CancellationToken cancellationToken, Func<TResult> resultFunc)
+    public static Task<TResult> SimpleTask<TResult>(this CancellationToken cancellationToken,
+        Func<TResult> resultFunc)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             return Task.FromCanceled<TResult>(cancellationToken);
+        }
 
         TResult? result = default;
 
-        resultFunc.BeginInvoke(asyncResult => result = resultFunc.EndInvoke(asyncResult), null);
+        resultFunc.BeginInvoke(asyncResult => result = resultFunc.EndInvoke(asyncResult), @object: null);
 
-        return Task.FromResult(result ?? throw new ArgumentNullException(nameof(resultFunc),
-            $"The {nameof(resultFunc)} invoke result is null."));
+        return Task.FromResult(result ?? throw InvokeResultFuncIsNull(nameof(resultFunc)));
     }
 
     /// <summary>
@@ -189,7 +139,9 @@ public static class TaskExtensions
     public static Task<TResult> SimpleTask<TResult>(this CancellationToken cancellationToken, TResult result)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             return Task.FromCanceled<TResult>(cancellationToken);
+        }
 
         return Task.FromResult(result);
     }
@@ -204,9 +156,11 @@ public static class TaskExtensions
     public static async ValueTask SimpleValueTask(this CancellationToken cancellationToken, Action action)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             await ValueTask.CompletedTask;
+        }
 
-        action.BeginInvoke(action.EndInvoke, null);
+        action.BeginInvoke(action.EndInvoke, @object: null);
     }
 
     /// <summary>
@@ -222,17 +176,19 @@ public static class TaskExtensions
     /// <exception cref="ArgumentNullException">
     /// The <paramref name="resultFunc"/> invoke result is null.
     /// </exception>
-    public static ValueTask<TResult> SimpleValueTask<TResult>(this CancellationToken cancellationToken, Func<TResult> resultFunc)
+    public static ValueTask<TResult> SimpleValueTask<TResult>(this CancellationToken cancellationToken,
+        Func<TResult> resultFunc)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             return ValueTask.FromCanceled<TResult>(cancellationToken);
+        }
 
         TResult? result = default;
 
-        resultFunc.BeginInvoke(asyncResult => result = resultFunc.EndInvoke(asyncResult), null);
+        resultFunc.BeginInvoke(asyncResult => result = resultFunc.EndInvoke(asyncResult), @object: null);
 
-        return ValueTask.FromResult(result ?? throw new ArgumentNullException(nameof(resultFunc),
-            $"The {nameof(resultFunc)} invoke result is null."));
+        return ValueTask.FromResult(result ?? throw InvokeResultFuncIsNull(nameof(resultFunc)));
     }
 
     /// <summary>
@@ -245,10 +201,15 @@ public static class TaskExtensions
     public static ValueTask<TResult> SimpleValueTask<TResult>(this CancellationToken cancellationToken, TResult result)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             return ValueTask.FromCanceled<TResult>(cancellationToken);
+        }
 
         return ValueTask.FromResult(result);
     }
+
+    private static ArgumentNullException InvokeResultFuncIsNull(string paraName)
+        => new(paraName, $"The {paraName} invoke result is null.");
 
     #endregion
 

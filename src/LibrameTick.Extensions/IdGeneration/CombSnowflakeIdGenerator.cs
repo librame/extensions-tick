@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.IdGeneration;
 
@@ -65,7 +66,7 @@ public class CombSnowflakeIdGenerator(IdGenerationOptions options, IClockDepende
     /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
     public override async ValueTask<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
+        var nowTicksAsync = await GetNowTicksAsync(cancellationToken).ConfigureAwait(false);
 
         Options.GeneratingAction?.Invoke(new(nowTicksAsync, 0, TimePrecision.Microsecond));
 
@@ -103,26 +104,30 @@ public class CombSnowflakeIdGenerator(IdGenerationOptions options, IClockDepende
         var b = _b;
         var s = _sequence++;
 
-        var bytes = new byte[16];
+        var buffer = ArrayPool<byte>.Shared.Rent(16);
 
-        bytes[0] = (byte)(a >> 24);
-        bytes[1] = (byte)(a >> 16);
-        bytes[2] = (byte)(a >> 8);
-        bytes[3] = (byte)a;
-        bytes[4] = (byte)(b >> 24);
-        bytes[5] = (byte)(b >> 16);
-        bytes[6] = (byte)(b >> 8);
-        bytes[7] = (byte)b;
-        bytes[8] = (byte)(_workId >> 24);
-        bytes[9] = (byte)(_workId >> 16);
-        bytes[10] = (byte)(_workId >> 8);
-        bytes[11] = (byte)_workId;
-        bytes[12] = (byte)(s >> 24);
-        bytes[13] = (byte)(s >> 16);
-        bytes[14] = (byte)(s >> 8);
-        bytes[15] = (byte)(s >> 0);
+        buffer[0] = (byte)(a >> 24);
+        buffer[1] = (byte)(a >> 16);
+        buffer[2] = (byte)(a >> 8);
+        buffer[3] = (byte)a;
+        buffer[4] = (byte)(b >> 24);
+        buffer[5] = (byte)(b >> 16);
+        buffer[6] = (byte)(b >> 8);
+        buffer[7] = (byte)b;
+        buffer[8] = (byte)(_workId >> 24);
+        buffer[9] = (byte)(_workId >> 16);
+        buffer[10] = (byte)(_workId >> 8);
+        buffer[11] = (byte)_workId;
+        buffer[12] = (byte)(s >> 24);
+        buffer[13] = (byte)(s >> 16);
+        buffer[14] = (byte)(s >> 8);
+        buffer[15] = (byte)(s >> 0);
 
-        return new Guid(bytes);
+        var guid = new Guid(buffer);
+
+        ArrayPool<byte>.Shared.Return(buffer);
+
+        return guid;
     }
 
     private void UpdateTicks(long ticks, bool isAsync)
@@ -133,9 +138,13 @@ public class CombSnowflakeIdGenerator(IdGenerationOptions options, IClockDepende
         _sequence = uint.MinValue;
 
         if (isAsync)
+        {
             _lastTicksAsync = ticks;
+        }
         else
+        {
             _lastTicks = ticks;
+        }
     }
 
 }

@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义抽象实现 <see cref="IDisposable"/> 的可处置资源类。
+/// 定义抽象实现 <see cref="IDisposable"/> 的可释放资源类。
 /// </summary>
 public abstract class Disposable : IDisposable
 {
@@ -30,40 +30,20 @@ public abstract class Disposable : IDisposable
 
 
     /// <summary>
-    /// 是否已处置资源。
+    /// 是否已释放资源。
     /// </summary>
     public bool IsDisposed => _disposed;
 
 
     /// <summary>
-    /// 未释放资源。
+    /// 如果已释放资源则抛出 <see cref="ObjectDisposedException"/> 异常。
     /// </summary>
-    /// <param name="action">给定未释放资源时，要执行的动作。</param>
-    public void NotDisposed(Action action)
-    {
-        if (_disposed)
-            throw new ObjectDisposedException(GetType().Name);
-
-        action();
-    }
-
-    /// <summary>
-    /// 未释放资源。
-    /// </summary>
-    /// <typeparam name="TValue">指定的值类型。</typeparam>
-    /// <param name="func">给定未释放资源时，要执行的函数。</param>
-    /// <returns>返回值。</returns>
-    public TValue NotDisposed<TValue>(Func<TValue> func)
-    {
-        if (_disposed)
-            throw new ObjectDisposedException(GetType().Name);
-
-        return func();
-    }
+    public void ThrowIfDisposed()
+        => ObjectDisposedException.ThrowIf(_disposed, this);
 
 
     /// <summary>
-    /// 处置资源。
+    /// 释放资源。
     /// </summary>
     public void Dispose()
     {
@@ -72,9 +52,9 @@ public abstract class Disposable : IDisposable
     }
 
     /// <summary>
-    /// 处置资源。
+    /// 释放资源。
     /// </summary>
-    /// <param name="disposing">立即处置资源。</param>
+    /// <param name="disposing">立即释放资源。</param>
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)
@@ -105,6 +85,9 @@ public abstract class Disposable : IDisposable
     /// <summary>
     /// 释放原生（非托管）资源。
     /// </summary>
+    /// <remarks>
+    /// 通常是指包装操作系统资源的对象，例如文件句柄、内存块、GDI与COM对象、线程与进程、网络套接字、数据库连接、文件映射、Windows API等。
+    /// </remarks>
     /// <returns>返回是否成功释放的布尔值。</returns>
     protected virtual bool ReleaseNative()
         => true;

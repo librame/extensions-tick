@@ -18,30 +18,31 @@ namespace Librame.Extensions.Infrastructure;
 /// <typeparam name="TSelf">指定实现 <see cref="IFluent{TSelf, TValue}"/> 接口的类型。</typeparam>
 /// <typeparam name="TChain">指定的链式类型。</typeparam>
 public interface IFluent<TSelf, TChain> : IFluent<TSelf>
+    where TSelf : IFluent<TSelf, TChain>
 {
     /// <summary>
-    /// 获取初始实例。
+    /// 获取初始值。
     /// </summary>
     /// <value>
     /// 返回 <typeparamref name="TChain"/>。
     /// </value>
-    public TChain Initial { get; }
+    public TChain InitialValue { get; }
 
     /// <summary>
-    /// 获取当前实例。
+    /// 获取当前值。
     /// </summary>
     /// <value>
     /// 返回 <typeparamref name="TChain"/>。
     /// </value>
-    public TChain Current { get; }
+    public TChain CurrentValue { get; }
 
 
     /// <summary>
-    /// 链接方法。
+    /// 切换当前值的方法。
     /// </summary>
-    /// <param name="valueFunc">给定的链接方法。</param>
+    /// <param name="newCurrentValueFunc">给定切换新 <see cref="CurrentValue"/> 的方法。</param>
     /// <returns>返回 <typeparamref name="TSelf"/>。</returns>
-    TSelf Chaining(Func<TSelf, TChain> valueFunc);
+    TSelf Switch(Func<TSelf, TChain> newCurrentValueFunc);
 }
 
 
@@ -50,11 +51,12 @@ public interface IFluent<TSelf, TChain> : IFluent<TSelf>
 /// </summary>
 /// <typeparam name="TSelf">指定实现 <see cref="IFluent{TSelf}"/> 接口的类型。</typeparam>
 public interface IFluent<TSelf>
+    where TSelf : IFluent<TSelf>
 {
     /// <summary>
-    /// 链接动作。
+    /// 链式动作。
     /// </summary>
-    /// <param name="action">给定的链接动作。</param>
+    /// <param name="action">给定的动作。</param>
     /// <returns>返回 <typeparamref name="TSelf"/>。</returns>
-    TSelf Chaining(Action<TSelf> action);
+    TSelf Chain(Action<TSelf> action);
 }

@@ -10,7 +10,7 @@
 
 #endregion
 
-using Librame.Extensions;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Device;
 
@@ -20,12 +20,12 @@ namespace Librame.Extensions.Device;
 /// <remarks>
 /// 参考：<see href="https://github.com/whuanle/CZGL.SystemInfo.git"/>
 /// </remarks>
-public sealed class NetworkDeviceInfo : StaticDefaultInitializer<NetworkDeviceInfo>, INetworkDeviceInfo
+public sealed class NetworkDeviceInfo : INetworkDeviceInfo
 {
     /// <summary>
     /// 网络流量。
     /// </summary>
-    public NetworkTraffic Traffic { get; set; } = NetworkTraffic.Default;
+    public NetworkTraffic Traffic { get; set; } = new();
 
     /// <summary>
     /// 标识符。

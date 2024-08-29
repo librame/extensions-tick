@@ -18,5 +18,8 @@ namespace Librame.Extensions.Serialization;
 /// <param name="ParentType">给定的父级类型。</param>
 /// <param name="ParentParameter">给定的父级参数表达式。</param>
 /// <param name="CurrentMember">给定的当前成员表达式。</param>
+/// <param name="ParentMember">给定的父级成员信息。</param>
 public record BinaryParentExpression(Type ParentType,
-    ParameterExpression ParentParameter, MemberExpression CurrentMember);
+    ParameterExpression ParentParameter,
+    MemberExpression CurrentMember,
+    BinaryMemberInfo? ParentMember);

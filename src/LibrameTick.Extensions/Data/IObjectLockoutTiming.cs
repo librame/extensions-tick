@@ -90,10 +90,10 @@ public interface IObjectLockoutTiming : IEquatable<IObjectLockoutTiming>
     async ValueTask<object?> SetObjectLockoutStartAsync(Func<object?, object?> newLockoutStartFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentLockoutStart = await GetObjectLockoutStartAsync(cancellationToken).AvoidCapturedContext();
+        var currentLockoutStart = await GetObjectLockoutStartAsync(cancellationToken).ConfigureAwait(false);
 
         return await SetObjectLockoutStartAsync(newLockoutStartFactory(currentLockoutStart), cancellationToken)
-            .AvoidCapturedContext();
+            .ConfigureAwait(false);
     }
 
     #endregion
@@ -152,10 +152,10 @@ public interface IObjectLockoutTiming : IEquatable<IObjectLockoutTiming>
     async ValueTask<object?> SetObjectLockoutEndAsync(Func<object?, object?> newLockoutEndFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentLockoutEnd = await GetObjectLockoutEndAsync(cancellationToken).AvoidCapturedContext();
+        var currentLockoutEnd = await GetObjectLockoutEndAsync(cancellationToken).ConfigureAwait(false);
 
         return await SetObjectLockoutEndAsync(newLockoutEndFactory(currentLockoutEnd), cancellationToken)
-            .AvoidCapturedContext();
+            .ConfigureAwait(false);
     }
 
     #endregion

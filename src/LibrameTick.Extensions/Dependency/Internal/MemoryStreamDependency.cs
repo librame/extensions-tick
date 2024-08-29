@@ -21,7 +21,7 @@ internal sealed class MemoryStreamDependency : IMemoryStreamDependency
 
     public RecyclableMemoryStream GetStream()
         => _manager.GetStream();
-
+    
     public RecyclableMemoryStream GetStream(byte[] buffer)
         => _manager.GetStream(buffer);
 

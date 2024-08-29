@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.IdGeneration;
 
@@ -56,7 +57,7 @@ public class CombIdGenerator(CombIdGeneration generation, IdGenerationOptions op
     /// <returns>返回一个包含 <see cref="Guid"/> 的异步操作。</returns>
     public override async ValueTask<Guid> GenerateIdAsync(CancellationToken cancellationToken = default)
     {
-        var nowTicks = await GetNowTicksAsync(cancellationToken).AvoidCapturedContext();
+        var nowTicks = await GetNowTicksAsync(cancellationToken).ConfigureAwait(false);
 
         Options.GeneratingAction?.Invoke(new(nowTicks, 0, TimePrecision.Millisecond,
             _accuracyDescription));

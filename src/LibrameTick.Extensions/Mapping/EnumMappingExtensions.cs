@@ -36,7 +36,8 @@ public static class EnumMappingExtensions
         if (Enum.TryParse<TEnum>(value.ToString(), true, out var result) && Enum.IsDefined(result))
             return result;
 
-        return defaultEnum ?? throw new ArgumentException($"The value '{value}' is not a valid enum '{nameof(TEnum)}' constant value.");
+        return defaultEnum
+            ?? throw new ArgumentException($"The value '{value}' is not a valid enum '{nameof(TEnum)}' constant value.");
     }
 
 

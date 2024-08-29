@@ -203,7 +203,7 @@ public class BaseDispatcher<TSource>(IEnumerable<TSource> sources,
             CurrentFailRetries = 0;
 
             // 调度单个来源
-            await DispatchingActionCoreAsync(func, cancellationToken);
+            await DispatchingActionCoreAsync(func, cancellationToken).ConfigureAwait(false);
 
             // 如果索引数与当前失败重试次数等于集合数，表示遍历已完成
             if (CurrentIndex + CurrentFailRetries == Count)
@@ -235,7 +235,7 @@ public class BaseDispatcher<TSource>(IEnumerable<TSource> sources,
         {
             CurrentSource = CurrentSources!.Skip(CurrentIndex).First();
 
-            await func(this);
+            await func(this).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -248,10 +248,12 @@ public class BaseDispatcher<TSource>(IEnumerable<TSource> sources,
 
             // 根据失败重试间隔时长休眠
             if (Options.FailRetryInterval != TimeSpan.Zero)
-                await Task.Delay(Options.FailRetryInterval, cancellationToken);
+            {
+                await Task.Delay(Options.FailRetryInterval, cancellationToken).ConfigureAwait(false);
+            }
 
             CurrentIndex++;
-            await DispatchingActionCoreAsync(func, cancellationToken);
+            await DispatchingActionCoreAsync(func, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -364,7 +366,7 @@ public class BaseDispatcher<TSource>(IEnumerable<TSource> sources,
         CurrentSources = Sources;
         CurrentIndex = 0;
 
-        return (await DispatchingFuncAsync(func, breakFunc, isTraversal, cancellationToken)).ToArray();
+        return (await DispatchingFuncAsync(func, breakFunc, isTraversal, cancellationToken).ConfigureAwait(false)).ToArray();
     }
 
     /// <summary>
@@ -388,7 +390,7 @@ public class BaseDispatcher<TSource>(IEnumerable<TSource> sources,
             CurrentFailRetries = 0;
 
             // 调度单个来源
-            var result = await DispatchingFuncCoreAsync(func, cancellationToken);
+            var result = await DispatchingFuncCoreAsync(func, cancellationToken).ConfigureAwait(false);
             if (result is not null)
                 results.Add(result);
 
@@ -426,7 +428,7 @@ public class BaseDispatcher<TSource>(IEnumerable<TSource> sources,
         {
             CurrentSource = CurrentSources!.Skip(CurrentIndex).First();
 
-            return await func(this);
+            return await func(this).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -439,10 +441,12 @@ public class BaseDispatcher<TSource>(IEnumerable<TSource> sources,
 
             // 根据失败重试间隔时长休眠
             if (Options.FailRetryInterval != TimeSpan.Zero)
-                await Task.Delay(Options.FailRetryInterval, cancellationToken);
+            {
+                await Task.Delay(Options.FailRetryInterval, cancellationToken).ConfigureAwait(false);
+            }
 
             CurrentIndex++;
-            return await DispatchingFuncCoreAsync(func, cancellationToken);
+            return await DispatchingFuncCoreAsync(func, cancellationToken).ConfigureAwait(false);
         }
     }
 

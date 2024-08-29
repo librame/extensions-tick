@@ -20,7 +20,7 @@ namespace Librame.Extensions.Device;
 /// <remarks>
 /// 参考：<see href="https://github.com/whuanle/CZGL.SystemInfo.git"/>
 /// </remarks>
-public sealed class MemoryDeviceInfo : StaticDefaultInitializer<MemoryDeviceInfo>, IMemoryDeviceInfo
+public sealed class MemoryDeviceInfo : IMemoryDeviceInfo
 {
     /// <summary>
     /// 总物理内存字节数。

@@ -21,7 +21,9 @@ internal sealed class ClockDependency : IClockDependency
     public async ValueTask<DateTimeOffset> GetNowAsync(CancellationToken cancellationToken = default)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             await ValueTask.CompletedTask;
+        }
 
         return GetNow();
     }
@@ -33,7 +35,9 @@ internal sealed class ClockDependency : IClockDependency
     public async ValueTask<DateTimeOffset> GetUtcNowAsync(CancellationToken cancellationToken = default)
     {
         if (cancellationToken.IsCancellationRequested)
+        {
             await ValueTask.CompletedTask;
+        }
 
         return GetUtcNow();
     }

@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.Dispatching;
 
 /// <summary>
@@ -93,7 +95,7 @@ public class CompositeDispatcher<TSource>(IEnumerable<IDispatcher<TSource>> disp
                     CurrentSources = Sources;
                     CurrentIndex = 0;
 
-                    await base.DispatchingActionAsync(func, breakFunc, isTraversal, cancellationToken);
+                    await base.DispatchingActionAsync(func, breakFunc, isTraversal, cancellationToken).ConfigureAwait(false);
                 }
 
                 transaction.Complete();
@@ -171,7 +173,7 @@ public class CompositeDispatcher<TSource>(IEnumerable<IDispatcher<TSource>> disp
                     CurrentSources = Sources;
                     CurrentIndex = 0;
 
-                    result.AddRange(await base.DispatchFuncAsync(func, breakFunc, isTraversal, cancellationToken));
+                    result.AddRange(await base.DispatchFuncAsync(func, breakFunc, isTraversal, cancellationToken).ConfigureAwait(false));
                 }
 
                 transaction.Complete();

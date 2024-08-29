@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Device;
 

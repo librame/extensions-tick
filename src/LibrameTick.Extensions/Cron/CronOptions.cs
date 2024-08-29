@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.Cron;
 
 /// <summary>

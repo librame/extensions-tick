@@ -44,12 +44,14 @@ public static class BinaryExpressionMapper<T>
     /// 获取泛型二进制成员映射集合。
     /// </summary>
     /// <param name="options">给定的 <see cref="BinarySerializerOptions"/>。</param>
+    /// <param name="useVersion">给定要使用的版本（可选）。</param>
     /// <returns>返回 <see cref="BinaryMemberMapping"/> 列表。</returns>
-    public static List<BinaryMemberMapping<T>> GetMappings(BinarySerializerOptions options)
+    public static List<BinaryMemberMapping<T>> GetMappings(BinarySerializerOptions options,
+        BinarySerializerVersion? useVersion)
     {
         return _cacheMaps.GetOrAdd(_objExpr.Type, key =>
         {
-            var mappings = LookupMappings(options, key);
+            var mappings = LookupMappings(options, useVersion, key);
 
             mappings = [.. mappings.OrderBy(ks => ks.OrderId).OrderBy(ks => ks.DeclaringTypeCascadeId)];
 
@@ -58,11 +60,11 @@ public static class BinaryExpressionMapper<T>
     }
 
     private static List<BinaryMemberMapping<T>> LookupMappings(BinarySerializerOptions options,
-        Type parentType, BinaryParentExpression? parentMember = null)
+        BinarySerializerVersion? useVersion, Type parentType, BinaryParentExpression? parentExpression = null)
     {
         (var parentExpr, var parentCascadeId) = _cacheCascadeExprs.GetOrAdd(parentType, key =>
         {
-            var expr = parentMember?.CurrentMember as Expression;
+            var expr = parentExpression?.CurrentMember as Expression;
             var cascadeId = expr?.ToString().Split('.').Length - 1;
 
             return (expr ?? _objExpr, cascadeId ?? 0);
@@ -70,7 +72,9 @@ public static class BinaryExpressionMapper<T>
 
         var mappings = new List<BinaryMemberMapping<T>>();
 
-        var members = options.TypeResolver.ResolveMembers(parentType);
+        var members = options.TypeResolver.ResolveMembers(parentType, fromExpression: true,
+            useVersion, parentExpression?.ParentMember);
+
         for (var i = 0; i < members.Length; i++)
         {
             var member = members[i];
@@ -83,10 +87,8 @@ public static class BinaryExpressionMapper<T>
                 ? memberType.IsSameOrNullableArgumentType(parentType)
                 : _cacheCascadeExprs.Keys.Any(memberType.IsSameOrNullableArgumentType);
 
-            if (!member.CanRead || memberType.IsSameOrNullableArgumentType(parentType))
-            {
-                continue; // 排除自引用类型
-            }
+            // 排除自引用类型
+            if (containSameTypeReference) continue;
 
             var cascadeMemberExprs = member.BuildExpression(parentExpr);
 
@@ -95,17 +97,21 @@ public static class BinaryExpressionMapper<T>
 
             if (converter is null)
             {
-                if (parentMember is null)
+                if (parentExpression is null)
                 {
-                    parentMember = new(parentType, _objExpr, cascadeMemberExprs);
+                    parentExpression = new(parentType, _objExpr, cascadeMemberExprs, member);
                 }
                 else
                 {
-                    parentMember = parentMember with { CurrentMember = cascadeMemberExprs };
+                    parentExpression = parentExpression with
+                    {
+                        CurrentMember = cascadeMemberExprs,
+                        ParentMember = member
+                    };
                 }
 
                 // 级联查找子级成员映射
-                var referenceMappings = LookupMappings(options, memberType, parentMember);
+                var referenceMappings = LookupMappings(options, useVersion, memberType, parentExpression);
                 if (referenceMappings.Count > 0)
                 {
                     mappings.AddRange(referenceMappings);
@@ -129,13 +135,13 @@ public static class BinaryExpressionMapper<T>
 
             var readMethodCallExpr = Expression.Call(converterExpr, readMethod, readMethodParamsExps);
 
-            var readDelegateType = _actionGenericTypeDefinition.MakeGenericType(parentMember?.ParentType ?? parentType,
+            var readDelegateType = _actionGenericTypeDefinition.MakeGenericType(parentExpression?.ParentType ?? parentType,
                 converterType, _readerExpr.Type, _typeExpr.Type, _infoExpr.Type);
 
             var readAssignExpr = Expression.Assign(cascadeMemberExprs, readMethodCallExpr);
 
             var readLambda = Expression.Lambda(readDelegateType, readAssignExpr,
-                [parentMember?.ParentParameter ?? _objExpr, converterExpr, _readerExpr, _typeExpr, _infoExpr]);
+                [parentExpression?.ParentParameter ?? _objExpr, converterExpr, _readerExpr, _typeExpr, _infoExpr]);
 
             var readAction = readLambda.Compile();
 
@@ -152,11 +158,11 @@ public static class BinaryExpressionMapper<T>
 
             var writeMethodCallExpr = Expression.Call(converterExpr, writeMethod, writeMethodParamsExps);
 
-            var writeDelegateType = _actionGenericTypeDefinition.MakeGenericType(parentMember?.ParentType ?? parentType,
+            var writeDelegateType = _actionGenericTypeDefinition.MakeGenericType(parentExpression?.ParentType ?? parentType,
                 converterType, _writerExpr.Type, _typeExpr.Type, _infoExpr.Type);
 
             var writeLambda = Expression.Lambda(writeDelegateType, writeMethodCallExpr,
-                [parentMember?.ParentParameter ?? _objExpr, converterExpr, _writerExpr, _typeExpr, _infoExpr]);
+                [parentExpression?.ParentParameter ?? _objExpr, converterExpr, _writerExpr, _typeExpr, _infoExpr]);
 
             var writeAction = writeLambda.Compile();
 

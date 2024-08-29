@@ -118,6 +118,11 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     {
         ArgumentNullException.ThrowIfNull(ReadMethod);
 
+        if (Member.Options.AutomaticInstantiationIfNull && Member.Parent is not null)
+        {
+            InitializeParentValueIfNull(Member.Parent, obj);
+        }
+
         var value = ReadMethod.Invoke(Converter, [reader, MemberType, Member]);
 
         Member.SetValue(CascadeChildrenInvokeFunc?.Invoke(this, obj) ?? obj, value);
@@ -135,9 +140,31 @@ public class BinaryMemberMapping(IBinaryConverter converter,
     {
         ArgumentNullException.ThrowIfNull(WriteMethod);
 
+        if (Member.Options.AutomaticInstantiationIfNull && Member.Parent is not null)
+        {
+            InitializeParentValueIfNull(Member.Parent, obj);
+        }
+
         var value = Member.GetValue(CascadeChildrenInvokeFunc?.Invoke(this, obj) ?? obj);
 
         WriteMethod.Invoke(Converter, [writer, MemberType, value, Member]);
+    }
+
+
+    /// <summary>
+    /// 初始化父级属性值。
+    /// </summary>
+    /// <param name="parentMember">给定的父级成员信息。</param>
+    /// <param name="instance">给定的实例。</param>
+    public static void InitializeParentValueIfNull(BinaryMemberInfo parentMember, object? instance)
+    {
+        // 查找父级属性值是否为空
+        var parentValue = parentMember.GetValue(instance);
+        if (parentValue is null)
+        {
+            var newValue = Activator.CreateInstance(parentMember.GetRequiredType());
+            parentMember.SetValue(instance, newValue);
+        }
     }
 
 }

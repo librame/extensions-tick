@@ -146,6 +146,15 @@ public static class StringExtensions
     #region Append and Insert
 
     /// <summary>
+    /// 向当前字符串末尾附加字符。
+    /// </summary>
+    /// <param name="current">给定的当前字符串。</param>
+    /// <param name="append">给定的附加字符。</param>
+    /// <returns>返回字符串。</returns>
+    public static string Append(this string current, char append)
+        => current.Append(append.ToString());
+
+    /// <summary>
     /// 向当前字符串末尾附加字符串。
     /// </summary>
     /// <param name="current">给定的当前字符串。</param>
@@ -153,6 +162,17 @@ public static class StringExtensions
     /// <returns>返回字符串。</returns>
     public static string Append(this string current, string append)
         => $"{current}{append}";
+
+
+    /// <summary>
+    /// 向当前字符串的索引处插入字符。
+    /// </summary>
+    /// <param name="current">给定的当前字符串。</param>
+    /// <param name="insert">给定的插入字符。</param>
+    /// <param name="startIndex">给定要插入的开始索引（可选；默认为 0 表示在起始处插入）。</param>
+    /// <returns>返回字符串。</returns>
+    public static string Insert(this string current, char insert, int startIndex = 0)
+        => current.Insert(insert.ToString(), startIndex);
 
     /// <summary>
     /// 向当前字符串的索引处插入字符串。
@@ -169,7 +189,7 @@ public static class StringExtensions
         if (startIndex >= current.Length - 1)
             return $"{current}{insert}"; // Append
 
-        return $"{current.Substring(0, startIndex)}{insert}{current.Substring(startIndex)}";
+        return $"{current[..startIndex]}{insert}{current[startIndex..]}";
     }
 
     #endregion

@@ -25,7 +25,7 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
     private readonly Type _itemType = typeof(TItem);
 
     private ArgumentException ItemConverterNotFoundException(BinaryMemberInfo member)
-        => new($"Cannot resolve converter for '{base.BeConvertedType.Name}' item type '{_itemType}'. The member '{member.GetRequiredType()} {member.Info.Name}' whether lacks a '{nameof(BinaryExpressionMappingAttribute)}' or '{nameof(BinaryObjectMappingAttribute)}' annotation.");
+        => new($"Cannot resolve converter for '{base.BeConvertedType.Name}' item type '{_itemType}'. The member '{member.GetRequiredType()} {member.Info.Name}' whether lacks a '{nameof(BinaryMappingAttribute)}' annotation.");
 
 
     /// <summary>
@@ -49,6 +49,8 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
         var count = reader.ReadInt32();
         var list = new TList();
 
+        var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
+
         var converter = member.Options.ConverterResolver.ResolveConverter(_itemType);
         if (converter is BinaryConverter<TItem> itemConverter)
         {
@@ -58,9 +60,9 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
                 list.Add(item!); // 此处为虚可空实例，实际是否为空由泛型决定
             }
         }
-        else if (member.Info.IsExpressionMappingAttributeDefined())
+        else if (member.FromExpression && member.Info.IsMappingAttributeDefined())
         {
-            var mappings = BinaryExpressionMapper<TItem>.GetMappings(member.Options);
+            var mappings = BinaryExpressionMapper<TItem>.GetMappings(member.Options, useVersion);
             for (var j = 0; j < count; j++)
             {
                 var item = Activator.CreateInstance<TItem>();
@@ -72,9 +74,9 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
                 list.Add(item);
             }
         }
-        else if (member.Info.IsObjectMappingAttributeDefined())
+        else if (!member.FromExpression && member.Info.IsMappingAttributeDefined())
         {
-            var mappings = BinaryObjectMapper.GetMappings(_itemType, member.Options);
+            var mappings = BinaryObjectMapper.GetMappings(_itemType, member.Options, useVersion);
             for (var j = 0; j < count; j++)
             {
                 var item = Activator.CreateInstance<TItem>();
@@ -105,6 +107,8 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
         var count = value.Count;
         writer.Write(count);
 
+        var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
+
         var converter = member.Options.ConverterResolver.ResolveConverter(_itemType);
         if (converter is BinaryConverter<TItem> itemConverter)
         {
@@ -114,9 +118,9 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
                 itemConverter.Write(writer, _itemType, item, member);
             }
         }
-        else if (member.Info.IsExpressionMappingAttributeDefined())
+        else if (member.FromExpression && member.Info.IsMappingAttributeDefined())
         {
-            var mappings = BinaryExpressionMapper<TItem>.GetMappings(member.Options);
+            var mappings = BinaryExpressionMapper<TItem>.GetMappings(member.Options, useVersion);
             for (var j = 0; j < value.Count; j++)
             {
                 var item = value[j];
@@ -126,9 +130,9 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
                 }
             }
         }
-        else if (member.Info.IsObjectMappingAttributeDefined())
+        else if (!member.FromExpression && member.Info.IsMappingAttributeDefined())
         {
-            var mappings = BinaryObjectMapper.GetMappings(_itemType, member.Options);
+            var mappings = BinaryObjectMapper.GetMappings(_itemType, member.Options, useVersion);
             for (var j = 0; j < value.Count; j++)
             {
                 var item = value[j];

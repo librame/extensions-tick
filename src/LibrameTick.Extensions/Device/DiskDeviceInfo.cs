@@ -21,7 +21,7 @@ namespace Librame.Extensions.Device;
 /// <remarks>
 /// 构造一个 <see cref="DiskDeviceInfo"/>。
 /// </remarks>
-public sealed class DiskDeviceInfo : StaticDefaultInitializer<DiskDeviceInfo>, IDiskDeviceInfo
+public sealed class DiskDeviceInfo : IDiskDeviceInfo
 {
     /// <summary>
     /// 磁盘名称。

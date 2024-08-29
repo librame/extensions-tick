@@ -73,10 +73,10 @@ public interface IObjectIdentifier
     /// <returns>返回一个包含对象标识（兼容各种引用与值类型标识）的异步操作。</returns>
     async ValueTask<object> SetObjectIdAsync(Func<object, object> newIdFactory, CancellationToken cancellationToken = default)
     {
-        var currentId = await GetObjectIdAsync(cancellationToken).AvoidCapturedContext();
+        var currentId = await GetObjectIdAsync(cancellationToken).ConfigureAwait(false);
 
         return await SetObjectIdAsync(newIdFactory(currentId), cancellationToken)
-            .AvoidCapturedContext();
+            .ConfigureAwait(false);
     }
 
 }

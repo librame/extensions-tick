@@ -74,9 +74,9 @@ public interface IObjectCreator
     async ValueTask<object?> SetObjectCreatedByAsync(Func<object?, object?> newCreatedByFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentCreatedBy = await GetObjectCreatedByAsync(cancellationToken).AvoidCapturedContext();
+        var currentCreatedBy = await GetObjectCreatedByAsync(cancellationToken).ConfigureAwait(false);
 
-        return await SetObjectCreatedByAsync(newCreatedByFactory(currentCreatedBy), cancellationToken).AvoidCapturedContext();
+        return await SetObjectCreatedByAsync(newCreatedByFactory(currentCreatedBy), cancellationToken).ConfigureAwait(false);
     }
 
 }

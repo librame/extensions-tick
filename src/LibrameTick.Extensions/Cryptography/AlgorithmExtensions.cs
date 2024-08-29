@@ -11,6 +11,7 @@
 #endregion
 
 using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Cryptography;
 
@@ -24,84 +25,6 @@ public static class AlgorithmExtensions
     /// </summary>
     public static Lazy<IAlgorithmDependency> AlgorithmDependency
         => new(() => DependencyRegistration.InitializeDependency<Internal.AlgorithmDependencyInitializer, IAlgorithmDependency>());
-
-
-    #region SharedArray
-
-    /// <summary>
-    /// 使用共享字节数组动作。
-    /// </summary>
-    /// <remarks>
-    /// 请求租用的最小字节数组长度不等于实际的字节数组长度。如果对租用的数组长度有精确的要求，则不适用此方法。
-    /// </remarks>
-    /// <param name="minLength">给定要租用的最小字节数组长度。</param>
-    /// <param name="clearArrayIfReturn">给定归还字节数组后是否需要清除字节数组内容。</param>
-    /// <param name="resultAction">给定使用字节数组的动作。</param>
-    public static void SharedByteArrayAction(this int minLength,
-        bool clearArrayIfReturn, Action<byte[]> resultAction)
-        => minLength.SharedArrayAction(clearArrayIfReturn, resultAction);
-
-    /// <summary>
-    /// 使用共享数组动作。
-    /// </summary>
-    /// <remarks>
-    /// 请求租用的最小字节数组长度不等于实际的字节数组长度。如果对租用的数组长度有精确的要求，则不适用此方法。
-    /// </remarks>
-    /// <typeparam name="TArray">指定的数组类型。</typeparam>
-    /// <param name="minLength">给定要租用的最小数组长度。</param>
-    /// <param name="clearArrayIfReturn">给定归还数组后是否需要清除数组内容。</param>
-    /// <param name="resultAction">给定使用数组的动作。</param>
-    public static void SharedArrayAction<TArray>(this int minLength,
-        bool clearArrayIfReturn, Action<TArray[]> resultAction)
-    {
-        var buffer = ArrayPool<TArray>.Shared.Rent(minLength);
-
-        resultAction(buffer);
-
-        ArrayPool<TArray>.Shared.Return(buffer, clearArrayIfReturn);
-    }
-
-
-    /// <summary>
-    /// 使用共享字节数组方法。
-    /// </summary>
-    /// <remarks>
-    /// 请求租用的最小字节数组长度不等于实际的字节数组长度。如果对租用的数组长度有精确的要求，则不适用此方法。
-    /// </remarks>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="minLength">给定要租用的最小字节数组长度。</param>
-    /// <param name="clearArrayIfReturn">给定归还字节数组后是否需要清除字节数组内容。</param>
-    /// <param name="resultFunc">给定使用字节数组的方法。</param>
-    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
-    public static TResult SharedByteArrayFunc<TResult>(this int minLength,
-        bool clearArrayIfReturn, Func<byte[], TResult> resultFunc)
-        => minLength.SharedArrayFunc(clearArrayIfReturn, resultFunc);
-
-    /// <summary>
-    /// 使用共享数组方法。
-    /// </summary>
-    /// <remarks>
-    /// 请求租用的最小字节数组长度不等于实际的字节数组长度。如果对租用的数组长度有精确的要求，则不适用此方法。
-    /// </remarks>
-    /// <typeparam name="TArray">指定的数组类型。</typeparam>
-    /// <typeparam name="TResult">指定的结果类型。</typeparam>
-    /// <param name="minLength">给定要租用的最小数组长度。</param>
-    /// <param name="clearArrayIfReturn">给定归还数组后是否需要清除数组内容。</param>
-    /// <param name="resultFunc">给定使用数组的方法。</param>
-    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
-    public static TResult SharedArrayFunc<TArray, TResult>(this int minLength,
-        bool clearArrayIfReturn, Func<TArray[], TResult> resultFunc)
-    {
-        var buffer = ArrayPool<TArray>.Shared.Rent(minLength);
-
-        var value = resultFunc(buffer);
-
-        ArrayPool<TArray>.Shared.Return(buffer, clearArrayIfReturn);
-
-        return value;
-    }
-
-    #endregion
 
 
     #region Encoding
@@ -255,6 +178,9 @@ public static class AlgorithmExtensions
 
     #region Base64String
 
+    private static readonly string _imageDataKey = "data:";
+    private static readonly string _imageBase64Separator = ";base64,";
+
     private static readonly FrozenDictionary<char, char> _base64SortChars = new Dictionary<char, char>()
     {
         {'A','$'},{'B','-'},{'C','0'},{'D','1'},{'E','2'},{'F','3'},{'G','4'},{'H','5'},{'I','6'},{'J','7'},{'K','8'},
@@ -287,10 +213,10 @@ public static class AlgorithmExtensions
     /// 将图像字节数组转换为 BASE64 字符串形式。
     /// </summary>
     /// <param name="bytes">给定的图像字节数组。</param>
-    /// <param name="imageType">给定的图像类型（如：image/jpeg）。</param>
+    /// <param name="contentType">给定的图像内容类型（如：image/jpeg）。</param>
     /// <returns>返回字符串。</returns>
-    public static string AsImageBase64String(this byte[] bytes, string imageType)
-        => $"data:{imageType};base64,{bytes.AsBase64String()}";
+    public static string AsImageBase64String(this byte[] bytes, string contentType)
+        => $"{_imageDataKey}{contentType}{_imageBase64Separator}{bytes.AsBase64String()}";
 
     /// <summary>
     /// 从 BASE64 字符串还原图像类型与字节数组。
@@ -300,12 +226,14 @@ public static class AlgorithmExtensions
     /// <exception cref="ArgumentException">
     /// Invalid image base64 format string <paramref name="base64String"/>.
     /// </exception>
-    public static (string imageType, byte[] bytes) FromImageBase64String(this string base64String)
+    public static (string imgType, byte[] imgBytes) FromImageBase64String(this string base64String)
     {
-        if (!base64String.TrySplitPair(';', out var pair))
+        if (!base64String.StartsWith(_imageDataKey) || !base64String.TrySplitPair(_imageBase64Separator, out var pair))
+        {
             throw new ArgumentException($"Invalid image base64 format string '{base64String}'.");
+        }
 
-        return (pair.Key.TrimStart("data:"), pair.Value.TrimStart("base64,").FromBase64String());
+        return (pair.Key.TrimStart(_imageDataKey), pair.Value.FromBase64String());
     }
 
 
@@ -411,41 +339,175 @@ public static class AlgorithmExtensions
     /// 计算 MD5 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsMd5(this byte[] buffer)
-        => AlgorithmDependency.Value.LazyMd5.Value.ComputeHash(buffer);
+    {
+        using var md5 = AlgorithmDependency.Value.LazyMd5.Value;
+        return md5.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 MD5 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsMd5(this Stream stream)
+    {
+        using var md5 = AlgorithmDependency.Value.LazyMd5.Value;
+        return md5.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 MD5 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsMd5Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var md5 = AlgorithmDependency.Value.LazyMd5.Value;
+        return await md5.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 SHA1 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha1(this byte[] buffer)
-        => AlgorithmDependency.Value.LazySha1.Value.ComputeHash(buffer);
+    {
+        using var sha1 = AlgorithmDependency.Value.LazySha1.Value;
+        return sha1.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 SHA1 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsSha1(this Stream stream)
+    {
+        using var sha1 = AlgorithmDependency.Value.LazySha1.Value;
+        return sha1.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 SHA1 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsSha1Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var sha1 = AlgorithmDependency.Value.LazySha1.Value;
+        return await sha1.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 SHA256 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha256(this byte[] buffer)
-        => AlgorithmDependency.Value.LazySha256.Value.ComputeHash(buffer);
+    {
+        using var sha256 = AlgorithmDependency.Value.LazySha256.Value;
+        return sha256.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 SHA256 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsSha256(this Stream stream)
+    {
+        using var sha256 = AlgorithmDependency.Value.LazySha256.Value;
+        return sha256.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 SHA256 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsSha256Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var sha256 = AlgorithmDependency.Value.LazySha256.Value;
+        return await sha256.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 SHA384 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha384(this byte[] buffer)
-        => AlgorithmDependency.Value.LazySha384.Value.ComputeHash(buffer);
+    {
+        using var sha384 = AlgorithmDependency.Value.LazySha384.Value;
+        return sha384.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 SHA384 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsSha384(this Stream stream)
+    {
+        using var sha384 = AlgorithmDependency.Value.LazySha384.Value;
+        return sha384.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 SHA384 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsSha384Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var sha384 = AlgorithmDependency.Value.LazySha384.Value;
+        return await sha384.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 SHA512 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha512(this byte[] buffer)
-        => AlgorithmDependency.Value.LazySha512.Value.ComputeHash(buffer);
+    {
+        using var sha512 = AlgorithmDependency.Value.LazySha512.Value;
+        return sha512.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 SHA512 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsSha512(this Stream stream)
+    {
+        using var sha512 = AlgorithmDependency.Value.LazySha512.Value;
+        return sha512.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 SHA512 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsSha512Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var sha512 = AlgorithmDependency.Value.LazySha512.Value;
+        return await sha512.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
 
     #endregion
 
@@ -502,41 +564,175 @@ public static class AlgorithmExtensions
     /// 计算 HMACMD5 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacMd5(this byte[] buffer)
-        => AlgorithmDependency.Value.LazyHmacMd5.Value.ComputeHash(buffer);
+    {
+        using var hmacMd5 = AlgorithmDependency.Value.LazyHmacMd5.Value;
+        return hmacMd5.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 HMACMD5 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsHmacMd5(this Stream stream)
+    {
+        using var hmacMd5 = AlgorithmDependency.Value.LazyHmacMd5.Value;
+        return hmacMd5.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 HMACMD5 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsHmacMd5Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var hmacMd5 = AlgorithmDependency.Value.LazyHmacMd5.Value;
+        return await hmacMd5.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 HMACSHA1 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha1(this byte[] buffer)
-        => AlgorithmDependency.Value.LazyHmacSha1.Value.ComputeHash(buffer);
+    {
+        using var hmacSha1 = AlgorithmDependency.Value.LazyHmacSha1.Value;
+        return hmacSha1.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 HMACSHA1 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsHmacSha1(this Stream stream)
+    {
+        using var hmacSha1 = AlgorithmDependency.Value.LazyHmacSha1.Value;
+        return hmacSha1.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 HMACSHA1 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsHmacSha1Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var hmacSha1 = AlgorithmDependency.Value.LazyHmacSha1.Value;
+        return await hmacSha1.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 HMACSHA256 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha256(this byte[] buffer)
-        => AlgorithmDependency.Value.LazyHmacSha256.Value.ComputeHash(buffer);
+    {
+        using var hmacSha256 = AlgorithmDependency.Value.LazyHmacSha256.Value;
+        return hmacSha256.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 HMACSHA256 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsHmacSha256(this Stream stream)
+    {
+        using var hmacSha256 = AlgorithmDependency.Value.LazyHmacSha256.Value;
+        return hmacSha256.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 HMACSHA256 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsHmacSha256Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var hmacSha256 = AlgorithmDependency.Value.LazyHmacSha256.Value;
+        return await hmacSha256.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 HMACSHA384 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha384(this byte[] buffer)
-        => AlgorithmDependency.Value.LazyHmacSha384.Value.ComputeHash(buffer);
+    {
+        using var hmacSha384 = AlgorithmDependency.Value.LazyHmacSha384.Value;
+        return hmacSha384.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 HMACSHA384 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsHmacSha384(this Stream stream)
+    {
+        using var hmacSha384 = AlgorithmDependency.Value.LazyHmacSha384.Value;
+        return hmacSha384.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 HMACSHA384 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsHmacSha384Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var hmacSha384 = AlgorithmDependency.Value.LazyHmacSha384.Value;
+        return await hmacSha384.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
+
 
     /// <summary>
     /// 计算 HMACSHA512 哈希值。
     /// </summary>
     /// <param name="buffer">给定要计算的字节数组。</param>
-    /// <returns>返回经过计算的字节数组。</returns>
+    /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha512(this byte[] buffer)
-        => AlgorithmDependency.Value.LazyHmacSha512.Value.ComputeHash(buffer);
+    {
+        using var hmacSha512 = AlgorithmDependency.Value.LazyHmacSha512.Value;
+        return hmacSha512.ComputeHash(buffer);
+    }
+
+    /// <summary>
+    /// 计算 HMACSHA512 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <returns>返回哈希字节数组。</returns>
+    public static byte[] AsHmacSha512(this Stream stream)
+    {
+        using var hmacSha512 = AlgorithmDependency.Value.LazyHmacSha512.Value;
+        return hmacSha512.ComputeHash(stream);
+    }
+
+    /// <summary>
+    /// 异步计算 HMACSHA512 哈希值。
+    /// </summary>
+    /// <param name="stream">给定要计算的 <see cref="Stream"/>。</param>
+    /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
+    /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
+    public static async Task<byte[]> AsHmacSha512Async(Stream stream, CancellationToken cancellationToken = default)
+    {
+        using var hmacSha512 = AlgorithmDependency.Value.LazyHmacSha512.Value;
+        return await hmacSha512.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
+    }
 
     #endregion
 
@@ -566,22 +762,106 @@ public static class AlgorithmExtensions
     /// TripleDES 加密。
     /// </summary>
     /// <param name="plaintext">给定的明文。</param>
-    /// <returns>返回经过加密的字节数组。</returns>
-    public static byte[] As3Des(this byte[] plaintext)
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    /// <returns>返回加密字节数组。</returns>
+    public static byte[] As3Des(this byte[] plaintext, byte[]? rgbKey = null, byte[]? rgbIV = null)
     {
-        var transform = AlgorithmDependency.Value.Lazy3Des.Value.CreateEncryptor();
-        return transform.TransformFinalBlock(plaintext, 0, plaintext.Length);
+        using var encryptor = Create3DesEncryptor(rgbKey, rgbIV);
+
+        return encryptor.TransformFinalBlock(plaintext, 0, plaintext.Length);
+    }
+
+    /// <summary>
+    /// TripleDES 加密。
+    /// </summary>
+    /// <param name="plaintext">给定的明文 <see cref="Stream"/>。</param>
+    /// <param name="encrypted">给定的加密 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    public static void As3Des(this Stream plaintext, Stream encrypted, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var encryptor = Create3DesEncryptor(rgbKey, rgbIV);
+
+        using var crypto = new CryptoStream(encrypted, encryptor, CryptoStreamMode.Write);
+        plaintext.CopyTo(crypto);
+    }
+
+    private static ICryptoTransform Create3DesEncryptor(byte[]? rgbKey, byte[]? rgbIV)
+    {
+        using var des = AlgorithmDependency.Value.Lazy3Des.Value;
+
+        return rgbKey is null || rgbIV is null
+            ? des.CreateEncryptor()
+            : des.CreateEncryptor(rgbKey, rgbIV);
+    }
+
+    /// <summary>
+    /// TripleDES 加密。
+    /// </summary>
+    /// <param name="plaintext">给定的明文 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    /// <returns>返回加密字节数组。</returns>
+    public static byte[] As3DesBytes(this Stream plaintext, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var memory = DependencyRegistration.CurrentContext.MemoryStreams.GetStream();
+        plaintext.As3Des(memory, rgbKey, rgbIV);
+
+        return memory.GetReadOnlySequence().ToArray();
+    }
+
+
+    /// <summary>
+    /// TripleDES 解密。
+    /// </summary>
+    /// <param name="ciphertext">给定的密文。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    /// <returns>返回经过解密的字节数组。</returns>
+    public static byte[] From3Des(this byte[] ciphertext, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var decryptor = Create3DesDecryptor(rgbKey, rgbIV);
+
+        return decryptor.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+    }
+
+    /// <summary>
+    /// TripleDES 解密。
+    /// </summary>
+    /// <param name="encrypted">给定的加密 <see cref="Stream"/>。</param>
+    /// <param name="decrypted">给定的解密 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    public static void From3Des(this Stream encrypted, Stream decrypted, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var decryptor = Create3DesDecryptor(rgbKey, rgbIV);
+
+        using var crypto = new CryptoStream(encrypted, decryptor, CryptoStreamMode.Read);
+        crypto.CopyTo(decrypted);
+    }
+
+    private static ICryptoTransform Create3DesDecryptor(byte[]? rgbKey, byte[]? rgbIV)
+    {
+        using var des = AlgorithmDependency.Value.Lazy3Des.Value;
+
+        return rgbKey is null || rgbIV is null
+            ? des.CreateDecryptor()
+            : des.CreateDecryptor(rgbKey, rgbIV);
     }
 
     /// <summary>
     /// TripleDES 解密。
     /// </summary>
     /// <param name="ciphertext">给定的密文。</param>
-    /// <returns>返回经过解密的字节数组。</returns>
-    public static byte[] From3Des(this byte[] ciphertext)
+    /// <param name="decrypted">给定的解密 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    /// <returns>返回解密字节数组。</returns>
+    public static void From3DesBytes(this byte[] ciphertext, Stream decrypted, byte[]? rgbKey = null, byte[]? rgbIV = null)
     {
-        var transform = AlgorithmDependency.Value.Lazy3Des.Value.CreateDecryptor();
-        return transform.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+        using var encrypted = DependencyRegistration.CurrentContext.MemoryStreams.GetStream(ciphertext);
+        encrypted.From3Des(decrypted, rgbKey, rgbIV);
     }
 
     #endregion
@@ -612,22 +892,106 @@ public static class AlgorithmExtensions
     /// AES 加密。
     /// </summary>
     /// <param name="plaintext">给定的明文。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
     /// <returns>返回经过加密的字节数组。</returns>
-    public static byte[] AsAes(this byte[] plaintext)
+    public static byte[] AsAes(this byte[] plaintext, byte[]? rgbKey = null, byte[]? rgbIV = null)
     {
-        var transform = AlgorithmDependency.Value.LazyAes.Value.CreateEncryptor();
-        return transform.TransformFinalBlock(plaintext, 0, plaintext.Length);
+        using var encryptor = CreateAesEncryptor(rgbKey, rgbIV);
+
+        return encryptor.TransformFinalBlock(plaintext, 0, plaintext.Length);
+    }
+
+    /// <summary>
+    /// AES 加密。
+    /// </summary>
+    /// <param name="plaintext">给定的明文 <see cref="Stream"/>。</param>
+    /// <param name="encrypted">给定的加密 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    public static void AsAes(this Stream plaintext, Stream encrypted, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var encryptor = CreateAesEncryptor(rgbKey, rgbIV);
+
+        using var crypto = new CryptoStream(encrypted, encryptor, CryptoStreamMode.Write);
+        plaintext.CopyTo(crypto);
+    }
+
+    private static ICryptoTransform CreateAesEncryptor(byte[]? rgbKey, byte[]? rgbIV)
+    {
+        using var des = AlgorithmDependency.Value.LazyAes.Value;
+
+        return rgbKey is null || rgbIV is null
+            ? des.CreateEncryptor()
+            : des.CreateEncryptor(rgbKey, rgbIV);
+    }
+
+    /// <summary>
+    /// AES 加密。
+    /// </summary>
+    /// <param name="plaintext">给定的明文 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    /// <returns>返回加密字节数组。</returns>
+    public static byte[] AsAesBytes(this Stream plaintext, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var memory = DependencyRegistration.CurrentContext.MemoryStreams.GetStream();
+        plaintext.AsAes(memory, rgbKey, rgbIV);
+
+        return memory.GetReadOnlySequence().ToArray();
+    }
+
+
+    /// <summary>
+    /// AES 解密。
+    /// </summary>
+    /// <param name="ciphertext">给定的密文。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    /// <returns>返回经过解密的字节数组。</returns>
+    public static byte[] FromAes(this byte[] ciphertext, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var decryptor = CreateAesDecryptor(rgbKey, rgbIV);
+
+        return decryptor.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+    }
+
+    /// <summary>
+    /// AES 解密。
+    /// </summary>
+    /// <param name="encrypted">给定的加密 <see cref="Stream"/>。</param>
+    /// <param name="decrypted">给定的解密 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    public static void FromAes(this Stream encrypted, Stream decrypted, byte[]? rgbKey = null, byte[]? rgbIV = null)
+    {
+        using var decryptor = CreateAesDecryptor(rgbKey, rgbIV);
+
+        using var crypto = new CryptoStream(encrypted, decryptor, CryptoStreamMode.Read);
+        crypto.CopyTo(decrypted);
+    }
+
+    private static ICryptoTransform CreateAesDecryptor(byte[]? rgbKey, byte[]? rgbIV)
+    {
+        using var des = AlgorithmDependency.Value.LazyAes.Value;
+
+        return rgbKey is null || rgbIV is null
+            ? des.CreateDecryptor()
+            : des.CreateDecryptor(rgbKey, rgbIV);
     }
 
     /// <summary>
     /// AES 解密。
     /// </summary>
     /// <param name="ciphertext">给定的密文。</param>
-    /// <returns>返回经过解密的字节数组。</returns>
-    public static byte[] FromAes(this byte[] ciphertext)
+    /// <param name="decrypted">给定的解密 <see cref="Stream"/>。</param>
+    /// <param name="rgbKey">给定的密钥（可选）。</param>
+    /// <param name="rgbIV">给定的初始化向量（可选）。</param>
+    /// <returns>返回解密字节数组。</returns>
+    public static void FromAesBytes(this byte[] ciphertext, Stream decrypted, byte[]? rgbKey = null, byte[]? rgbIV = null)
     {
-        var transform = AlgorithmDependency.Value.LazyAes.Value.CreateDecryptor();
-        return transform.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+        using var encrypted = DependencyRegistration.CurrentContext.MemoryStreams.GetStream(ciphertext);
+        encrypted.FromAes(decrypted, rgbKey, rgbIV);
     }
 
     #endregion
@@ -662,9 +1026,10 @@ public static class AlgorithmExtensions
     public static byte[] AsAesCcm(this byte[] plaintext)
     {
         var ciphertext = new byte[plaintext.Length];
-        var aesCcm = AlgorithmDependency.Value.Keyring.AesCcm;
+        var aesCcmKeyring = AlgorithmDependency.Value.Keyring.AesCcm;
 
-        AlgorithmDependency.Value.LazyAesCcm.Value.Encrypt(aesCcm.Nonce, plaintext, ciphertext, aesCcm.Tag);
+        using var aesCcm = AlgorithmDependency.Value.LazyAesCcm.Value;
+        aesCcm.Encrypt(aesCcmKeyring.Nonce, plaintext, ciphertext, aesCcmKeyring.Tag);
 
         return ciphertext;
     }
@@ -677,9 +1042,10 @@ public static class AlgorithmExtensions
     public static byte[] FromAesCcm(this byte[] ciphertext)
     {
         var plaintext = new byte[ciphertext.Length];
-        var aesCcm = AlgorithmDependency.Value.Keyring.AesCcm;
+        var aesCcmKeyring = AlgorithmDependency.Value.Keyring.AesCcm;
 
-        AlgorithmDependency.Value.LazyAesCcm.Value.Decrypt(aesCcm.Nonce, ciphertext, aesCcm.Tag, plaintext);
+        using var aesCcm = AlgorithmDependency.Value.LazyAesCcm.Value;
+        aesCcm.Decrypt(aesCcmKeyring.Nonce, ciphertext, aesCcmKeyring.Tag, plaintext);
 
         return plaintext;
     }
@@ -716,9 +1082,10 @@ public static class AlgorithmExtensions
     public static byte[] AsAesGcm(this byte[] plaintext)
     {
         var ciphertext = new byte[plaintext.Length];
-        var aesGcm = AlgorithmDependency.Value.Keyring.AesGcm;
+        var aesGcmKeyring = AlgorithmDependency.Value.Keyring.AesGcm;
 
-        AlgorithmDependency.Value.LazyAesGcm.Value.Encrypt(aesGcm.Nonce, plaintext, ciphertext, aesGcm.Tag);
+        using var aesGcm = AlgorithmDependency.Value.LazyAesGcm.Value;
+        aesGcm.Encrypt(aesGcmKeyring.Nonce, plaintext, ciphertext, aesGcmKeyring.Tag);
 
         return ciphertext;
     }
@@ -731,9 +1098,10 @@ public static class AlgorithmExtensions
     public static byte[] FromAesGcm(this byte[] ciphertext)
     {
         var plaintext = new byte[ciphertext.Length];
-        var aesGcm = AlgorithmDependency.Value.Keyring.AesGcm;
+        var aesGcmKeyring = AlgorithmDependency.Value.Keyring.AesGcm;
 
-        AlgorithmDependency.Value.LazyAesGcm.Value.Decrypt(aesGcm.Nonce, ciphertext, aesGcm.Tag, plaintext);
+        using var aesGcm = AlgorithmDependency.Value.LazyAesGcm.Value;
+        aesGcm.Decrypt(aesGcmKeyring.Nonce, ciphertext, aesGcmKeyring.Tag, plaintext);
 
         return plaintext;
     }
@@ -765,23 +1133,23 @@ public static class AlgorithmExtensions
 
 
     /// <summary>
-    /// 数字证书 RSA 私钥签名 BASE64 字符串形式。
+    /// 数字证书 RSA 私钥数据签名并转为 BASE64 字符串形式。
     /// </summary>
-    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="data">给定的数据。</param>
     /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-    public static string SignDataPrivateRsaWithBase64String(this string plaintext, Encoding? encoding = null)
-        => plaintext.FromEncodingString(encoding).SignDataPrivateRsa().AsBase64String();
+    public static string SignDataPrivateRsaWithBase64String(this string data, Encoding? encoding = null)
+        => data.FromEncodingString(encoding).SignDataPrivateRsa().AsBase64String();
 
     /// <summary>
-    /// 数字证书 RSA 公钥验证 BASE64 字符串形式。
+    /// 数字证书 RSA 公钥验证数据签名的 BASE64 字符串形式。
     /// </summary>
-    /// <param name="ciphertext">给定的密文。</param>
-    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="data">给定的数据。</param>
+    /// <param name="signed">给定的数据签名。</param>
     /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <returns>返回经过 BASE64 解码的解密字符串。</returns>
-    public static bool VerifyDataPublicRsaWithBase64String(this string ciphertext, string plaintext, Encoding? encoding = null)
-        => ciphertext.FromBase64String().VerifyDataPublicRsa(plaintext.FromEncodingString(encoding));
+    public static bool VerifyDataPublicRsaWithBase64String(this string data, string signed, Encoding? encoding = null)
+        => data.FromEncodingString(encoding).VerifyDataPublicRsa(signed.FromBase64String());
 
 
     /// <summary>
@@ -792,18 +1160,19 @@ public static class AlgorithmExtensions
     /// <returns>返回经过加密的字节数组。</returns>
     public static byte[] AsPublicRsa(this byte[] plaintext, RSAEncryptionPadding? padding = null)
     {
-        var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        padding ??= RSAEncryptionPadding.Pkcs1;
+
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
 
         // RSA 单次加密受支持 Key 的模长(modulus)-n 长度限制，超出限制需分段加密
-        // 此处默认超过 128 就开始分段加密
-        var bufferSize = 128;
+        var bufferSize = rsa.KeySize / 8 - 11;
 
         if (plaintext.Length <= bufferSize)
         {
-            return rsa.Encrypt(plaintext, padding ?? RSAEncryptionPadding.Pkcs1);
+            return rsa.Encrypt(plaintext, padding);
         }
 
-        var ciphertext = new List<byte>();
+        var ciphertext = DependencyRegistration.CurrentContext.MemoryStreams.GetStream();
 
         var encryptLength = 0;
         var surplusLength = plaintext.Length;
@@ -816,22 +1185,56 @@ public static class AlgorithmExtensions
                 curLength = surplusLength;
             }
 
-            curLength.SharedByteArrayAction(clearArrayIfReturn: true, buffer =>
-            {
-                Array.Copy(plaintext, encryptLength, buffer, 0, curLength);
+            var buffer = new byte[curLength];
 
-                // encryptBuffer.Length != bufferSize
-                var encryptBuffer = rsa.Encrypt(buffer, padding ?? RSAEncryptionPadding.Pkcs1);
+            // buffer.Length != curLength
+            Array.Copy(plaintext, encryptLength, buffer, 0, curLength);
 
-                ciphertext.AddRange(encryptBuffer);
-            });
+            // encryptBuffer.Length != bufferSize
+            var encryptBuffer = rsa.Encrypt(buffer, padding);
+
+            ciphertext.Write(encryptBuffer);
 
             encryptLength += bufferSize;
             surplusLength -= bufferSize;
         }
 
-        return [.. ciphertext];
+        return ciphertext.GetReadOnlySequence().ToArray();
     }
+
+    /// <summary>
+    /// RSA 公钥加密。
+    /// </summary>
+    /// <param name="plaintext">给定的明文 <see cref="Stream"/>。</param>
+    /// <param name="encrypted">给定的加密 <see cref="Stream"/>。</param>
+    /// <param name="padding">给定的 <see cref="RSAEncryptionPadding"/>（可选；默认为 <see cref="RSAEncryptionPadding.Pkcs1"/>）。</param>
+    /// <param name="createPublicRsaFunc">给定创建公钥 RSA 的方法（可选；默认使用 <see cref="AlgorithmDependency"/>）。</param>
+    public static void AsPublicRsa(this Stream plaintext, Stream encrypted,
+        RSAEncryptionPadding? padding = null, Func<RSA>? createPublicRsaFunc = null)
+    {
+        padding ??= RSAEncryptionPadding.Pkcs1;
+        createPublicRsaFunc ??= () => AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+
+        using var rsa = createPublicRsaFunc();
+
+        // RSA 单次加密受支持 Key 的模长(modulus)-n 长度限制，超出限制需分段加密
+        var maxBlockSize = rsa.KeySize / 8 - 11;
+
+        var maxBuffer = new byte[maxBlockSize];
+        var readBlockSize = plaintext.Read(maxBuffer, 0, maxBlockSize);
+
+        while (readBlockSize > 0)
+        {
+            var readBuffer = new byte[readBlockSize];
+            Array.Copy(maxBuffer, 0, readBuffer, 0, readBlockSize);
+
+            var encryptedBuffer = rsa.Encrypt(readBuffer, padding);
+            encrypted.Write(encryptedBuffer, 0, encryptedBuffer.Length);
+
+            readBlockSize = plaintext.Read(maxBuffer, 0, maxBlockSize);
+        }
+    }
+
 
     /// <summary>
     /// RSA 私钥解密。
@@ -841,7 +1244,7 @@ public static class AlgorithmExtensions
     /// <returns>返回经过解密的字节数组。</returns>
     public static byte[] FromPrivateRsa(this byte[] ciphertext, RSAEncryptionPadding? padding = null)
     {
-        var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
 
         // 解密时分段长度需使用密钥大小对应的字节长度
         var keySizeInBytes = rsa.KeySize / 8;
@@ -851,7 +1254,7 @@ public static class AlgorithmExtensions
             return rsa.Decrypt(ciphertext, padding ?? RSAEncryptionPadding.Pkcs1);
         }
 
-        var plaintext = new List<byte>();
+        var plaintext = DependencyRegistration.CurrentContext.MemoryStreams.GetStream();
 
         var decryptLength = 0;
         var surplusLength = ciphertext.Length;
@@ -864,46 +1267,113 @@ public static class AlgorithmExtensions
                 curLength = surplusLength;
             }
 
-            curLength.SharedByteArrayAction(clearArrayIfReturn: true, buffer =>
-            {
-                Array.Copy(ciphertext, decryptLength, buffer, 0, curLength);
+            var buffer = new byte[curLength];
 
-                // decryptBuffer.Length != keySizeInBytes
-                var decryptBuffer = rsa.Decrypt(buffer, padding ?? RSAEncryptionPadding.Pkcs1);
+            Array.Copy(ciphertext, decryptLength, buffer, 0, curLength);
 
-                plaintext.AddRange(decryptBuffer);
-            });
+            // decryptBuffer.Length != keySizeInBytes
+            var decryptBuffer = rsa.Decrypt(buffer, padding ?? RSAEncryptionPadding.Pkcs1);
+
+            plaintext.Write(decryptBuffer);
 
             decryptLength += keySizeInBytes;
             surplusLength -= keySizeInBytes;
         }
 
-        return [.. plaintext];
+        return plaintext.GetReadOnlySequence().ToArray();
+    }
+
+    /// <summary>
+    /// RSA 私钥解密。
+    /// </summary>
+    /// <param name="encrypted">给定的加密 <see cref="Stream"/>。</param>
+    /// <param name="decrypted">给定的解密 <see cref="Stream"/>。</param>
+    /// <param name="padding">给定的 <see cref="RSAEncryptionPadding"/>（可选；默认为 <see cref="RSAEncryptionPadding.Pkcs1"/>）。</param>
+    /// <param name="createPrivateRsaFunc">给定创建私钥 RSA 的方法（可选；默认使用 <see cref="AlgorithmDependency"/>）。</param>
+    public static void FromPrivateRsa(this Stream encrypted, Stream decrypted,
+        RSAEncryptionPadding? padding = null, Func<RSA>? createPrivateRsaFunc = null)
+    {
+        padding ??= RSAEncryptionPadding.Pkcs1;
+        createPrivateRsaFunc ??= () => AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+
+        using var rsa = createPrivateRsaFunc();
+
+        // 解密时分段长度需使用密钥大小对应的字节长度
+        var maxBlockSize = rsa.KeySize / 8;
+
+        var maxBuffer = new byte[maxBlockSize];
+        var readBlockSize = encrypted.Read(maxBuffer, 0, maxBlockSize);
+
+        while (readBlockSize > 0)
+        {
+            var readBuffer = new byte[readBlockSize];
+            Array.Copy(maxBuffer, 0, readBuffer, 0, readBlockSize);
+
+            var decryptedBuffer = rsa.Decrypt(readBuffer, padding);
+            decrypted.Write(decryptedBuffer, 0, decryptedBuffer.Length);
+
+            readBlockSize = encrypted.Read(maxBuffer, 0, maxBlockSize);
+        }
     }
 
 
     /// <summary>
-    /// 数字证书 RSA 私钥签名。
+    /// 数字证书 RSA 私钥数据签名。
     /// </summary>
-    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="data">给定的字节数组。</param>
     /// <param name="hashName">给定的 <see cref="HashAlgorithmName"/>（可选；默认为 <see cref="HashAlgorithmName.SHA256"/>）。</param>
     /// <param name="padding">给定的 <see cref="RSASignaturePadding"/>（可选；默认为 <see cref="RSASignaturePadding.Pkcs1"/>）</param>
     /// <returns>返回经过加密的字节数组。</returns>
-    public static byte[] SignDataPrivateRsa(this byte[] plaintext, HashAlgorithmName? hashName = null, RSASignaturePadding? padding = null)
-        => AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo.SignData(plaintext, hashName ?? HashAlgorithmName.SHA256,
-            padding ?? RSASignaturePadding.Pkcs1);
+    public static byte[] SignDataPrivateRsa(this byte[] data, HashAlgorithmName? hashName = null,
+        RSASignaturePadding? padding = null)
+    {
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        return rsa.SignData(data, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
+    }
 
     /// <summary>
-    /// 数字证书 RSA 公钥验证。
+    /// 数字证书 RSA 私钥数据签名。
     /// </summary>
-    /// <param name="ciphertext">给定待验证的签名密文。</param>
-    /// <param name="signed">给定明确的签名数据。</param>
+    /// <param name="data">给定的数据 <see cref="Stream"/>。</param>
+    /// <param name="hashName">给定的 <see cref="HashAlgorithmName"/>（可选；默认为 <see cref="HashAlgorithmName.SHA256"/>）。</param>
+    /// <param name="padding">给定的 <see cref="RSASignaturePadding"/>（可选；默认为 <see cref="RSASignaturePadding.Pkcs1"/>）</param>
+    /// <returns>返回经过加密的字节数组。</returns>
+    public static byte[] SignDataPrivateRsa(this Stream data, HashAlgorithmName? hashName = null,
+        RSASignaturePadding? padding = null)
+    {
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        return rsa.SignData(data, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
+    }
+
+    /// <summary>
+    /// 数字证书 RSA 公钥验证数据签名。
+    /// </summary>
+    /// <param name="data">给定的字节数组。</param>
+    /// <param name="signed">给定数据签名。</param>
     /// <param name="hashName">给定的 <see cref="HashAlgorithmName"/>（可选；默认为 <see cref="HashAlgorithmName.SHA256"/>）。</param>
     /// <param name="padding">给定的 <see cref="RSASignaturePadding"/>（可选；默认为 <see cref="RSASignaturePadding.Pkcs1"/>）</param>
     /// <returns>返回经过解密的字节数组。</returns>
-    public static bool VerifyDataPublicRsa(this byte[] ciphertext, byte[] signed, HashAlgorithmName? hashName = null, RSASignaturePadding? padding = null)
-        => AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo.VerifyData(signed, ciphertext, hashName ?? HashAlgorithmName.SHA256,
-            padding ?? RSASignaturePadding.Pkcs1);
+    public static bool VerifyDataPublicRsa(this byte[] data, byte[] signed, HashAlgorithmName? hashName = null,
+        RSASignaturePadding? padding = null)
+    {
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        return rsa.VerifyData(data, signed, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
+    }
+
+    /// <summary>
+    /// 数字证书 RSA 公钥验证数据签名。
+    /// </summary>
+    /// <param name="data">给定的数据 <see cref="Stream"/>。</param>
+    /// <param name="signed">给定数据签名。</param>
+    /// <param name="hashName">给定的 <see cref="HashAlgorithmName"/>（可选；默认为 <see cref="HashAlgorithmName.SHA256"/>）。</param>
+    /// <param name="padding">给定的 <see cref="RSASignaturePadding"/>（可选；默认为 <see cref="RSASignaturePadding.Pkcs1"/>）</param>
+    /// <returns>返回经过解密的字节数组。</returns>
+    public static bool VerifyDataPublicRsa(this Stream data, byte[] signed, HashAlgorithmName? hashName = null,
+        RSASignaturePadding? padding = null)
+    {
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        return rsa.VerifyData(data, signed, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
+    }
 
 
     /// <summary>
@@ -914,8 +1384,10 @@ public static class AlgorithmExtensions
     /// <param name="padding">给定的 <see cref="RSASignaturePadding"/>（可选；默认为 <see cref="RSASignaturePadding.Pkcs1"/>）</param>
     /// <returns>返回经过加密的字节数组。</returns>
     public static byte[] SignHashPrivateRsa(this byte[] hash, HashAlgorithmName? hashName = null, RSASignaturePadding? padding = null)
-        => AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo.SignHash(hash, hashName ?? HashAlgorithmName.SHA256,
-            padding ?? RSASignaturePadding.Pkcs1);
+    {
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        return rsa.SignHash(hash, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
+    }
 
     /// <summary>
     /// 数字证书 RSA 公钥验证。
@@ -926,8 +1398,10 @@ public static class AlgorithmExtensions
     /// <param name="padding">给定的 <see cref="RSASignaturePadding"/>（可选；默认为 <see cref="RSASignaturePadding.Pkcs1"/>）</param>
     /// <returns>返回经过解密的字节数组。</returns>
     public static bool VerifyHashPublicRsa(this byte[] ciphertext, byte[] hash, HashAlgorithmName? hashName = null, RSASignaturePadding? padding = null)
-        => AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo.VerifyHash(hash, ciphertext, hashName ?? HashAlgorithmName.SHA256,
-            padding ?? RSASignaturePadding.Pkcs1);
+    {
+        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        return rsa.VerifyHash(hash, ciphertext, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
+    }
 
     #endregion
 
@@ -935,64 +1409,99 @@ public static class AlgorithmExtensions
     #region ECDSA
 
     /// <summary>
-    /// 数字证书 ECDSA 私钥签名 BASE64 字符串形式。
+    /// 数字证书 ECDSA 私钥数据签名并转换为 BASE64 字符串形式。
     /// </summary>
-    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="data">给定的数据。</param>
     /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <returns>返回经过 BASE64 编码的加密字符串。</returns>
-    public static string SignDataPrivateEcdsaWithBase64String(this string plaintext, Encoding? encoding = null)
-        => plaintext.FromEncodingString(encoding).SignDataPrivateEcdsa().AsBase64String();
+    public static string SignDataPrivateEcdsaWithBase64String(this string data, Encoding? encoding = null)
+        => data.FromEncodingString(encoding).SignDataPrivateEcdsa().AsBase64String();
 
     /// <summary>
-    /// 数字证书 ECDSA 公钥验证 BASE64 字符串形式。
+    /// 数字证书 ECDSA 公钥验证数据签名的 BASE64 字符串形式。
     /// </summary>
-    /// <param name="ciphertext">给定的密文。</param>
-    /// <param name="plaintext">给定的明文。</param>
+    /// <param name="data">给定的数据。</param>
+    /// <param name="signed">给定的数据签名。</param>
     /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
-    /// <returns>返回经过 BASE64 解码的解密字符串。</returns>
-    public static bool VerifyDataPublicEcdsaWithBase64String(this string ciphertext, string plaintext, Encoding? encoding = null)
-        => ciphertext.FromBase64String().VerifyDataPublicEcdsa(plaintext.FromEncodingString(encoding));
+    /// <returns>返回签名是否有效的布尔值。</returns>
+    public static bool VerifyDataPublicEcdsaWithBase64String(this string data, string signed, Encoding? encoding = null)
+        => data.FromEncodingString(encoding).VerifyDataPublicEcdsa(signed.FromBase64String());
 
 
     /// <summary>
-    /// 数字证书 ECDSA 私钥签名。
+    /// 数字证书 ECDSA 私钥数据签名。
     /// </summary>
-    /// <param name="plaintext">给定的明文。</param>
-    /// <returns>返回经过加密的字节数组。</returns>
-    public static byte[] SignDataPrivateEcdsa(this byte[] plaintext)
-        => AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo.SignData(plaintext);
+    /// <param name="data">给定的数据。</param>
+    /// <returns>返回数字签名的字节数组。</returns>
+    public static byte[] SignDataPrivateEcdsa(this byte[] data)
+    {
+        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo;
+        return ecdsa.SignData(data);
+    }
 
     /// <summary>
-    /// 数字证书 ECDSA 公钥验证。
+    /// 数字证书 ECDSA 私钥数据签名。
     /// </summary>
-    /// <param name="ciphertext">给定待验证的签名密文。</param>
-    /// <param name="signed">给定明确的签名数据。</param>
-    /// <returns>返回经过解密的字节数组。</returns>
-    public static bool VerifyDataPublicEcdsa(this byte[] ciphertext, byte[] signed)
-        => AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo.VerifyData(signed, ciphertext);
+    /// <param name="data">给定的数据 <see cref="Stream"/>。</param>
+    /// <returns>返回数字签名的字节数组。</returns>
+    public static byte[] SignDataPrivateEcdsa(this Stream data)
+    {
+        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo;
+        return ecdsa.SignData(data);
+    }
+
+    /// <summary>
+    /// 数字证书 ECDSA 公钥验证数据签名。
+    /// </summary>
+    /// <param name="data">给定的数据。</param>
+    /// <param name="signed">给定的数据签名。</param>
+    /// <returns>返回签名是否有效的布尔值。</returns>
+    public static bool VerifyDataPublicEcdsa(this byte[] data, byte[] signed)
+    {
+        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo;
+        return ecdsa.VerifyData(data, signed);
+    }
+
+    /// <summary>
+    /// 数字证书 ECDSA 公钥验证数据签名。
+    /// </summary>
+    /// <param name="data">给定的数据 <see cref="Stream"/>。</param>
+    /// <param name="signed">给定的数据签名。</param>
+    /// <returns>返回签名是否有效的布尔值。</returns>
+    public static bool VerifyDataPublicEcdsa(this Stream data, byte[] signed)
+    {
+        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo;
+        return ecdsa.VerifyData(data, signed);
+    }
 
 
     /// <summary>
-    /// 数字证书 ECDSA 私钥签名。
+    /// 数字证书 ECDSA 私钥哈希值签名。
     /// </summary>
-    /// <param name="hash">给定的明文。</param>
-    /// <returns>返回经过加密的字节数组。</returns>
+    /// <param name="hash">给定的哈希值。</param>
+    /// <returns>返回数字签名的字节数组。</returns>
     public static byte[] SignHashPrivateEcdsa(this byte[] hash)
-        => AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo.SignHash(hash);
+    {
+        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo;
+        return ecdsa.SignHash(hash);
+    }
 
     /// <summary>
-    /// 数字证书 ECDSA 公钥验证。
+    /// 数字证书 ECDSA 公钥验证哈希值签名。
     /// </summary>
-    /// <param name="ciphertext">给定待验证的签名密文。</param>
-    /// <param name="hash">给定明确的签名数据。</param>
-    /// <returns>返回经过解密的字节数组。</returns>
-    public static bool VerifyHashPublicEcdsa(this byte[] ciphertext, byte[] hash)
-        => AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo.VerifyHash(hash, ciphertext);
+    /// <param name="hash">给定的哈希值。</param>
+    /// <param name="signed">给定的数据签名。</param>
+    /// <returns>返回签名是否有效的布尔值。</returns>
+    public static bool VerifyHashPublicEcdsa(this byte[] hash,  byte[] signed)
+    {
+        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo;
+        return ecdsa.VerifyHash(hash, signed);
+    }
 
     #endregion
 
 
-    #region Password
+    #region PasswordHash
 
     /// <summary>
     /// 计算密码哈希 BASE64 排序字符串。
@@ -1000,51 +1509,45 @@ public static class AlgorithmExtensions
     /// <param name="plaintext">给定的密码明文。</param>
     /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <param name="hashFunc">给定计算哈希值的方法（可选；默认使用 <see cref="AsSha384(byte[])"/>）。</param>
-    /// <param name="encryptFunc">给定的哈希值加密方法（可选；默认使用 <see cref="AsAes(byte[])"/>）。</param>
+    /// <param name="encryptFunc">给定的哈希值加密方法（可选；默认使用 <see cref="AsAes(byte[], byte[], byte[])"/>）。</param>
     /// <returns>返回经过编码的字符串。</returns>
-    public static string AsPassword(this string plaintext, Encoding? encoding = null,
+    public static string AsPasswordHash(this string plaintext, Encoding? encoding = null,
         Func<byte[], byte[]>? hashFunc = null, Func<byte[], byte[]>? encryptFunc = null)
     {
         hashFunc ??= AsSha384;
-        encryptFunc ??= AsAes;
+        encryptFunc ??= EncryptData;
 
-        return AlgorithmDependency.Value.FluentProcess(algo =>
-        {
-            var buffer = plaintext.FromEncodingString(encoding);
+        return plaintext.EncodePlaintextBuffer(encoding)
+            .Switch(buffer => encryptFunc(hashFunc(buffer)))
+            .ToBase64String();
 
-            buffer = hashFunc(buffer);
-            buffer = encryptFunc(buffer);
 
-            return buffer.AsBase64String();
-        });
+        static byte[] EncryptData(byte[] data)
+            => AsAes(data);
     }
 
     /// <summary>
     /// 验证密码哈希 BASE64 排序字符串。
     /// </summary>
-    /// <param name="passwordHash">给定的密码哈希字符串。</param>
     /// <param name="plaintext">给定的密码明文。</param>
+    /// <param name="passwordHash">给定的密码哈希字符串。</param>
     /// <param name="encoding">给定的字符编码（可选；默认为 <see cref="IDependencyContext.Encoding"/>）。</param>
     /// <param name="hashFunc">给定计算哈希值的方法（可选；默认使用 <see cref="AsSha384(byte[])"/>）。</param>
-    /// <param name="decryptFunc">给定的哈希值解密方法（可选；默认使用 <see cref="FromAes(byte[])"/>）。</param>
+    /// <param name="decryptFunc">给定的哈希值解密方法（可选；默认使用 <see cref="FromAes(byte[], byte[], byte[])"/>）。</param>
     /// <returns>返回密码是否相等的布尔值。</returns>
-    public static bool VerifyPassword(this string passwordHash, string plaintext, Encoding? encoding = null,
+    public static bool VerifyPasswordHash(this string plaintext, string passwordHash, Encoding? encoding = null,
         Func<byte[], byte[]>? hashFunc = null, Func<byte[], byte[]>? decryptFunc = null)
     {
         hashFunc ??= AsSha384;
-        decryptFunc ??= FromAes;
+        decryptFunc ??= DecryptData;
 
-        return AlgorithmDependency.Value.FluentProcess(algo =>
-        {
-            var plaintextBuffer = plaintext.FromEncodingString(encoding);
-            plaintextBuffer = hashFunc(plaintextBuffer);
+        return plaintext.EncodePlaintextBuffer(encoding)
+            .Switch(buffer => hashFunc(buffer))
+            .FixedTimeEquals(decryptFunc(passwordHash.FromBase64String()));
 
-            var hashBuffer = passwordHash.FromBase64String();
-            hashBuffer = decryptFunc(hashBuffer);
 
-            // 使用固定时间比较字符串相等，以防范诸如破解密钥的计时攻击
-            return CryptographicOperations.FixedTimeEquals(plaintextBuffer, hashBuffer);
-        });
+        static byte[] DecryptData(byte[] data)
+            => FromAes(data);
     }
 
     #endregion

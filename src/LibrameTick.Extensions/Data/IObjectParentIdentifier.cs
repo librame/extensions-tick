@@ -68,10 +68,10 @@ public interface IObjectParentIdentifier : IObjectIdentifier
     async ValueTask<object?> SetObjectParentIdAsync(Func<object?, object?> newParentIdFactory,
         CancellationToken cancellationToken = default)
     {
-        var currentParentId = await GetObjectParentIdAsync(cancellationToken).AvoidCapturedContext();
+        var currentParentId = await GetObjectParentIdAsync(cancellationToken).ConfigureAwait(false);
 
         return await SetObjectParentIdAsync(newParentIdFactory(currentParentId), cancellationToken)
-            .AvoidCapturedContext();
+            .ConfigureAwait(false);
     }
 
 }

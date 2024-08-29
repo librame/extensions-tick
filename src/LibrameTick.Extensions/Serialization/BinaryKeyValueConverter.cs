@@ -25,10 +25,10 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
     private readonly Type _valueType = typeof(TValue);
 
     private ArgumentException KeyConverterNotFoundException(BinaryMemberInfo member)
-        => new($"Cannot resolve converter for '{base.BeConvertedType.Name}' key type '{_keyType}'. The member '{member.GetRequiredType()} {member.Info.Name}' whether lacks a '{nameof(BinaryExpressionMappingAttribute)}' or '{nameof(BinaryObjectMappingAttribute)}' annotation.");
+        => new($"Cannot resolve converter for '{base.BeConvertedType.Name}' key type '{_keyType}'. The member '{member.GetRequiredType()} {member.Info.Name}' whether lacks a '{nameof(BinaryMappingAttribute)}' annotation.");
 
     private ArgumentException ValueConverterNotFoundException(BinaryMemberInfo member)
-        => new($"Cannot resolve converter for '{base.BeConvertedType.Name}' value type '{_valueType}'. The member '{member.GetRequiredType()} {member.Info.Name}' whether lacks a '{nameof(BinaryExpressionMappingAttribute)}' or '{nameof(BinaryObjectMappingAttribute)}' annotation.");
+        => new($"Cannot resolve converter for '{base.BeConvertedType.Name}' value type '{_valueType}'. The member '{member.GetRequiredType()} {member.Info.Name}' whether lacks a '{nameof(BinaryMappingAttribute)}' annotation.");
 
 
     /// <summary>
@@ -52,6 +52,8 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
         var keyConverter = member.Options.ConverterResolver.ResolveConverter(_keyType) as BinaryConverter<TKey>;
         var valueConverter = member.Options.ConverterResolver.ResolveConverter(_valueType) as BinaryConverter<TValue>;
 
+        var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
+
         TKey key;
         TValue value;
 
@@ -63,17 +65,17 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
         else if (keyConverter is not null)
         {
             key = keyConverter.Read(reader, _keyType, member)!;
-            value = ReadValue(reader, member);
+            value = ReadValue(reader, member, useVersion);
         }
         else if (valueConverter is not null)
         {
-            key = ReadKey(reader, member);
+            key = ReadKey(reader, member, useVersion);
             value = valueConverter.Read(reader, _keyType, member)!;
         }
         else
         {
-            key = ReadKey(reader, member);
-            value = ReadValue(reader, member);
+            key = ReadKey(reader, member, useVersion);
+            value = ReadValue(reader, member, useVersion);
         }
 
         return new(key, value);
@@ -90,6 +92,8 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
         var keyConverter = member.Options.ConverterResolver.ResolveConverter(_keyType) as BinaryConverter<TKey>;
         var valueConverter = member.Options.ConverterResolver.ResolveConverter(_valueType) as BinaryConverter<TValue>;
 
+        var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
+
         if (keyConverter is not null && valueConverter is not null)
         {
             keyConverter.Write(writer, _keyType, value.Key, member);
@@ -98,36 +102,38 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
         else if (keyConverter is not null)
         {
             keyConverter.Write(writer, _keyType, value.Key, member);
-            WriteValue(writer, value.Value, member);
+            WriteValue(writer, value.Value, member, useVersion);
         }
         else if (valueConverter is not null)
         {
-            WriteKey(writer, value.Key, member);
+            WriteKey(writer, value.Key, member, useVersion);
             valueConverter.Write(writer, _keyType, value.Value, member);
         }
         else
         {
-            WriteKey(writer, value.Key, member);
-            WriteValue(writer, value.Value, member);
+            WriteKey(writer, value.Key, member, useVersion);
+            WriteValue(writer, value.Value, member, useVersion);
         }
     }
 
 
-    private TKey ReadKey(BinaryReader reader, BinaryMemberInfo member)
+    private TKey ReadKey(BinaryReader reader, BinaryMemberInfo member, BinarySerializerVersion? useVersion)
     {
         var key = Activator.CreateInstance<TKey>();
 
-        if (member.Info.IsExpressionMappingAttributeDefined(out var exprAttr) && exprAttr?.ForKey == true)
+        var isKeyMappingDefined = member.Info.IsMappingAttributeDefined(out var attr) && attr?.ForKey == true;
+
+        if (isKeyMappingDefined && member.FromExpression)
         {
-            var mappings = BinaryExpressionMapper<TKey>.GetMappings(member.Options);
+            var mappings = BinaryExpressionMapper<TKey>.GetMappings(member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].Read(reader, key);
             }
         }
-        else if (member.Info.IsObjectMappingAttributeDefined(out var objAttr) && objAttr?.ForKey == true)
+        else if (isKeyMappingDefined && !member.FromExpression)
         {
-            var mappings = BinaryObjectMapper.GetMappings(_keyType, member.Options);
+            var mappings = BinaryObjectMapper.GetMappings(_keyType, member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].ReadObject(reader, key!);
@@ -141,21 +147,23 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
         return key;
     }
 
-    private TValue ReadValue(BinaryReader reader, BinaryMemberInfo member)
+    private TValue ReadValue(BinaryReader reader, BinaryMemberInfo member, BinarySerializerVersion? useVersion)
     {
         var value = Activator.CreateInstance<TValue>();
 
-        if (member.Info.IsExpressionMappingAttributeDefined(out var exprAttr) && exprAttr?.ForValue == true)
+        var isValueMappingDefined = member.Info.IsMappingAttributeDefined(out var attr) && attr?.ForValue == true;
+
+        if (isValueMappingDefined && member.FromExpression)
         {
-            var mappings = BinaryExpressionMapper<TValue>.GetMappings(member.Options);
+            var mappings = BinaryExpressionMapper<TValue>.GetMappings(member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].Read(reader, value);
             }
         }
-        else if (member.Info.IsObjectMappingAttributeDefined(out var objAttr) && objAttr?.ForValue == true)
+        else if (isValueMappingDefined && !member.FromExpression)
         {
-            var mappings = BinaryObjectMapper.GetMappings(_keyType, member.Options);
+            var mappings = BinaryObjectMapper.GetMappings(_keyType, member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].ReadObject(reader, value!);
@@ -170,19 +178,21 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
     }
 
 
-    private void WriteKey(BinaryWriter writer, TKey key, BinaryMemberInfo member)
+    private void WriteKey(BinaryWriter writer, TKey key, BinaryMemberInfo member, BinarySerializerVersion? useVersion)
     {
-        if (member.Info.IsExpressionMappingAttributeDefined(out var exprAttr) && exprAttr?.ForKey == true)
+        var isKeyMappingDefined = member.Info.IsMappingAttributeDefined(out var attr) && attr?.ForKey == true;
+
+        if (isKeyMappingDefined && member.FromExpression)
         {
-            var mappings = BinaryExpressionMapper<TKey>.GetMappings(member.Options);
+            var mappings = BinaryExpressionMapper<TKey>.GetMappings(member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].Write(writer, key);
             }
         }
-        else if (member.Info.IsObjectMappingAttributeDefined(out var objAttr) && objAttr?.ForKey == true)
+        else if (isKeyMappingDefined && !member.FromExpression)
         {
-            var mappings = BinaryObjectMapper.GetMappings(_keyType, member.Options);
+            var mappings = BinaryObjectMapper.GetMappings(_keyType, member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].WriteObject(writer, key!);
@@ -194,19 +204,21 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
         }
     }
 
-    private void WriteValue(BinaryWriter writer, TValue value, BinaryMemberInfo member)
+    private void WriteValue(BinaryWriter writer, TValue value, BinaryMemberInfo member, BinarySerializerVersion? useVersion)
     {
-        if (member.Info.IsExpressionMappingAttributeDefined(out var exprAttr) && exprAttr?.ForValue == true)
+        var isValueMappingDefined = member.Info.IsMappingAttributeDefined(out var attr) && attr?.ForValue == true;
+
+        if (isValueMappingDefined && member.FromExpression)
         {
-            var mappings = BinaryExpressionMapper<TValue>.GetMappings(member.Options);
+            var mappings = BinaryExpressionMapper<TValue>.GetMappings(member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].Write(writer, value);
             }
         }
-        else if (member.Info.IsObjectMappingAttributeDefined(out var objAttr) && objAttr?.ForValue == true)
+        else if (isValueMappingDefined && !member.FromExpression)
         {
-            var mappings = BinaryObjectMapper.GetMappings(_valueType, member.Options);
+            var mappings = BinaryObjectMapper.GetMappings(_valueType, member.Options, useVersion);
             for (var i = 0; i < mappings.Count; i++)
             {
                 mappings[i].WriteObject(writer, value!);

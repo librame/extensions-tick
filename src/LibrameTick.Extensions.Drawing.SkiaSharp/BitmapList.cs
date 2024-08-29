@@ -10,9 +10,7 @@
 
 #endregion
 
-using Librame.Extensions.Core;
 using Librame.Extensions.Infrastructure;
-using Librame.Extensions.Infrastructure.Core;
 
 namespace Librame.Extensions.Drawing;
 

@@ -47,10 +47,10 @@ public abstract class IdGenerator<TId> : IIdGenerator<TId>
     public virtual object GenerateObjectId()
     {
         var id = GenerateId();
-        if (id is null)
-            throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.");
 
-        return id;
+        return id is null
+            ? throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.")
+            : (object)id;
     }
 
     /// <summary>
@@ -60,11 +60,11 @@ public abstract class IdGenerator<TId> : IIdGenerator<TId>
     /// <returns>返回一个包含标识对象的异步操作。</returns>
     public virtual async ValueTask<object> GenerateObjectIdAsync(CancellationToken cancellationToken = default)
     {
-        var id = await GenerateIdAsync(cancellationToken).AvoidCapturedContext();
-        if (id is null)
-            throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.");
+        var id = await GenerateIdAsync(cancellationToken).ConfigureAwait(false);
 
-        return id;
+        return id is null
+            ? throw new ArgumentException($"The {nameof(GenerateId)}() method generate id is null.")
+            : (object)id;
     }
 
 }

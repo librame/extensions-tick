@@ -10,9 +10,11 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.Cryptography.Internal;
 
-internal sealed class AlgorithmDependency(AlgorithmKeyring keyring) : AbstractDisposable, IAlgorithmDependency
+internal sealed class AlgorithmDependency(AlgorithmKeyring keyring) : Disposable, IAlgorithmDependency
 {
     private readonly ConcurrentDictionary<string, IDisposable> _disposables = new();
 
@@ -139,10 +141,6 @@ internal sealed class AlgorithmDependency(AlgorithmKeyring keyring) : AbstractDi
 
     private static string GenerateKey(Type type)
         => type.FullName ?? type.Name;
-
-
-    public TResult FluentProcess<TResult>(Func<IAlgorithmDependency, TResult> func)
-        => func(this);
 
 
     protected override bool ReleaseManaged()

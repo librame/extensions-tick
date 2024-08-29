@@ -10,19 +10,15 @@
 
 #endregion
 
-namespace Librame.Extensions.Storage;
+namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义通过 <see cref="RandomAccess"/> 以线程安全的方式实现 <see cref="IFileAccessor"/> 读写文件的存取器。
+/// 定义通过 <see cref="RandomAccess"/> 以线程安全的方式实现 <see cref="IBinaryAccessFilePlugin"/> 文件的二进制存取插件。
 /// </summary>
-/// <param name="filePath">给定的文件路径。</param>
-public class FileAccessor(string filePath) : IFileAccessor
+/// <param name="path">给定的 <see cref="FluentFilePath"/>。</param>
+public class BinaryAccessFilePlugin(FluentFilePath path)
+    : FilePlugin(path), IBinaryAccessFilePlugin
 {
-    /// <summary>
-    /// 文件路径。
-    /// </summary>
-    public string Path { get; init; } = filePath;
-
 
     #region No Buffer
 
@@ -33,14 +29,13 @@ public class FileAccessor(string filePath) : IFileAccessor
     /// <returns>返回字节数组。</returns>
     public byte[] Read(long offset = 0L)
     {
-        using (var handle = File.OpenHandle(Path))
-        {
-            var length = RandomAccess.GetLength(handle);
-            var buffer = new byte[length - offset];
+        using var handle = File.OpenHandle(Path);
 
-            RandomAccess.Read(handle, buffer, offset);
-            return buffer;
-        }
+        var length = RandomAccess.GetLength(handle);
+        var buffer = new byte[length - offset];
+
+        RandomAccess.Read(handle, buffer, offset);
+        return buffer;
     }
 
     /// <summary>
@@ -50,10 +45,9 @@ public class FileAccessor(string filePath) : IFileAccessor
     /// <param name="offset">给定的写入偏移量（可选；默认从头开始写入）。</param>
     public void Write(byte[] bytes, long offset = 0L)
     {
-        using (var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read))
-        {
-            RandomAccess.Write(handle, bytes, offset);
-        }
+        using var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read);
+
+        RandomAccess.Write(handle, bytes, offset);
     }
 
 
@@ -65,14 +59,13 @@ public class FileAccessor(string filePath) : IFileAccessor
     /// <returns>返回包含字节数组的异步操作。</returns>
     public async Task<byte[]> ReadAsync(long offset = 0L, CancellationToken cancellationToken = default)
     {
-        using (var handle = File.OpenHandle(Path))
-        {
-            var length = RandomAccess.GetLength(handle);
-            var buffer = new byte[length - offset];
+        using var handle = File.OpenHandle(Path);
 
-            await RandomAccess.ReadAsync(handle, buffer, offset, cancellationToken);
-            return buffer;
-        }
+        var length = RandomAccess.GetLength(handle);
+        var buffer = new byte[length - offset];
+
+        await RandomAccess.ReadAsync(handle, buffer, offset, cancellationToken).ConfigureAwait(false);
+        return buffer;
     }
 
     /// <summary>
@@ -84,10 +77,9 @@ public class FileAccessor(string filePath) : IFileAccessor
     /// <returns>返回异步操作。</returns>
     public async ValueTask WriteAsync(byte[] bytes, long offset = 0L, CancellationToken cancellationToken = default)
     {
-        using (var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read))
-        {
-            await RandomAccess.WriteAsync(handle, bytes, offset, cancellationToken);
-        }
+        using var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read);
+
+        await RandomAccess.WriteAsync(handle, bytes, offset, cancellationToken).ConfigureAwait(false);
     }
 
     #endregion
@@ -133,22 +125,21 @@ public class FileAccessor(string filePath) : IFileAccessor
     /// <returns>返回实际写入的文件长度。</returns>
     public long BufferWrite(Func<long, byte[]?> bufferFunc, long offset = 0L)
     {
-        using (var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read))
+        using var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read);
+
+        var currentOffset = offset;
+        while (true)
         {
-            var currentOffset = offset;
-            while (true)
-            {
-                var buffer = bufferFunc(currentOffset);
-                if (buffer is null || buffer.Length == 0)
-                    break;
+            var buffer = bufferFunc(currentOffset);
+            if (buffer is null || buffer.Length == 0)
+                break;
 
-                RandomAccess.Write(handle, buffer, currentOffset);
+            RandomAccess.Write(handle, buffer, currentOffset);
 
-                currentOffset += buffer.Length;
-            }
-
-            return currentOffset - offset;
+            currentOffset += buffer.Length;
         }
+
+        return currentOffset - offset;
     }
 
 
@@ -163,25 +154,25 @@ public class FileAccessor(string filePath) : IFileAccessor
     public async ValueTask<long> BufferReadAsync(Action<byte[]> bufferAction, long offset = 0L, int bufferSize = 512,
         CancellationToken cancellationToken = default)
     {
-        using (var handle = File.OpenHandle(Path))
+        using var handle = File.OpenHandle(Path);
+
+        var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+
+        var currentOffset = offset;
+        while (true)
         {
-            var buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+            var readLength = await RandomAccess.ReadAsync(handle, buffer, currentOffset, cancellationToken)
+                .ConfigureAwait(false);
 
-            var currentOffset = offset;
-            while (true)
-            {
-                var readLength = await RandomAccess.ReadAsync(handle, buffer, currentOffset, cancellationToken);
-                if (readLength == 0)
-                    break;
+            if (readLength == 0) break;
 
-                bufferAction(buffer);
-                currentOffset += readLength;
-            }
-
-            ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
-
-            return currentOffset - offset;
+            bufferAction(buffer);
+            currentOffset += readLength;
         }
+
+        ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+
+        return currentOffset - offset;
     }
 
     /// <summary>
@@ -194,22 +185,21 @@ public class FileAccessor(string filePath) : IFileAccessor
     public async ValueTask<long> BufferWriteAsync(Func<long, byte[]?> bufferFunc, long offset = 0L,
         CancellationToken cancellationToken = default)
     {
-        using (var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read))
+        using var handle = File.OpenHandle(Path, FileMode.Create, FileAccess.Write, FileShare.Read);
+
+        var currentOffset = offset;
+        while (true)
         {
-            var currentOffset = offset;
-            while (true)
-            {
-                var buffer = bufferFunc(currentOffset);
-                if (buffer is null || buffer.Length == 0)
-                    break;
+            var buffer = bufferFunc(currentOffset);
 
-                await RandomAccess.WriteAsync(handle, buffer, currentOffset, cancellationToken);
+            if (buffer is null || buffer.Length == 0) break;
 
-                currentOffset += buffer.Length;
-            }
+            await RandomAccess.WriteAsync(handle, buffer, currentOffset, cancellationToken).ConfigureAwait(false);
 
-            return currentOffset - offset;
+            currentOffset += buffer.Length;
         }
+
+        return currentOffset - offset;
     }
 
     #endregion
@@ -237,50 +227,47 @@ public class FileAccessor(string filePath) : IFileAccessor
     public bool Equals(string otherPath, bool comparePath = false, bool compareSize = false, int bufferSize = 512)
     {
         // 文件路径相等直接返回相等
-        if (comparePath && PathEquals(otherPath))
-            return true;
+        if (comparePath && PathEquals(otherPath)) return true;
 
-        using (var handle1 = File.OpenHandle(Path))
-        using (var handle2 = File.OpenHandle(otherPath))
+        using var handle1 = File.OpenHandle(Path);
+        using var handle2 = File.OpenHandle(otherPath);
+
+        var length1 = RandomAccess.GetLength(handle1);
+        var length2 = RandomAccess.GetLength(handle2);
+
+        // 如果启用比较文件大小，则大小相等表示文件相等
+        if (compareSize && length1 == length2) return true;
+
+        var buffer1 = ArrayPool<byte>.Shared.Rent(bufferSize);
+        var buffer2 = ArrayPool<byte>.Shared.Rent(bufferSize);
+
+        var offset1 = 0L;
+        var offset2 = 0L;
+
+        while (true)
         {
-            var length1 = RandomAccess.GetLength(handle1);
-            var length2 = RandomAccess.GetLength(handle2);
+            var curLength1 = RandomAccess.Read(handle1, buffer1, offset1);
+            var curLength2 = RandomAccess.Read(handle2, buffer2, offset2);
 
-            if (compareSize && length1 == length2)
-                return true; // 如果启用比较文件大小，则大小相等表示文件相等
-
-            var buffer1 = ArrayPool<byte>.Shared.Rent(bufferSize);
-            var buffer2 = ArrayPool<byte>.Shared.Rent(bufferSize);
-
-            var offset1 = 0L;
-            var offset2 = 0L;
-
-            while (true)
+            // 如果同顺序读取指定长度内容不相同，则直接返回不相等
+            if (!buffer1.SequenceEqualByReadOnlySpan(buffer2))
             {
-                var curLength1 = RandomAccess.Read(handle1, buffer1, offset1);
-                var curLength2 = RandomAccess.Read(handle2, buffer2, offset2);
+                ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
+                ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
 
-                // 如果同顺序读取指定长度内容不相同，则直接返回不相等
-                if (!buffer1.SequenceEqualByReadOnlySpan(buffer2))
-                {
-                    ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
-                    ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
-
-                    return false;
-                }
-
-                if (curLength1 == 0 || curLength2 == 0)
-                    break;
-
-                offset1 += curLength1;
-                offset2 += curLength2;
+                return false;
             }
 
-            ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
-            ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
+            if (curLength1 == 0 || curLength2 == 0) break;
 
-            return true;
+            offset1 += curLength1;
+            offset2 += curLength2;
         }
+
+        ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
+        ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
+
+        return true;
     }
 
     /// <summary>
@@ -296,50 +283,47 @@ public class FileAccessor(string filePath) : IFileAccessor
         int bufferSize = 512, CancellationToken cancellationToken = default)
     {
         // 文件路径相等直接返回相等
-        if (comparePath && PathEquals(otherPath))
-            return true;
+        if (comparePath && PathEquals(otherPath)) return true;
 
-        using (var handle1 = File.OpenHandle(Path))
-        using (var handle2 = File.OpenHandle(otherPath))
+        using var handle1 = File.OpenHandle(Path);
+        using var handle2 = File.OpenHandle(otherPath);
+
+        var length1 = RandomAccess.GetLength(handle1);
+        var length2 = RandomAccess.GetLength(handle2);
+
+        // 如果启用比较文件大小，则大小相等表示文件相等
+        if (compareSize && length1 == length2) return true;
+
+        var buffer1 = ArrayPool<byte>.Shared.Rent(bufferSize);
+        var buffer2 = ArrayPool<byte>.Shared.Rent(bufferSize);
+
+        var offset1 = 0L;
+        var offset2 = 0L;
+
+        while (true)
         {
-            var length1 = RandomAccess.GetLength(handle1);
-            var length2 = RandomAccess.GetLength(handle2);
+            var curLength1 = await RandomAccess.ReadAsync(handle1, buffer1, offset1, cancellationToken).ConfigureAwait(false);
+            var curLength2 = await RandomAccess.ReadAsync(handle2, buffer2, offset2, cancellationToken).ConfigureAwait(false);
 
-            if (compareSize && length1 == length2)
-                return true; // 如果启用比较文件大小，则大小相等表示文件相等
-
-            var buffer1 = ArrayPool<byte>.Shared.Rent(bufferSize);
-            var buffer2 = ArrayPool<byte>.Shared.Rent(bufferSize);
-
-            var offset1 = 0L;
-            var offset2 = 0L;
-
-            while (true)
+            // 如果同顺序读取指定长度内容不相同，则直接返回不相等
+            if (!buffer1.SequenceEqualByReadOnlySpan(buffer2))
             {
-                var curLength1 = await RandomAccess.ReadAsync(handle1, buffer1, offset1, cancellationToken);
-                var curLength2 = await RandomAccess.ReadAsync(handle2, buffer2, offset2, cancellationToken);
+                ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
+                ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
 
-                // 如果同顺序读取指定长度内容不相同，则直接返回不相等
-                if (!buffer1.SequenceEqualByReadOnlySpan(buffer2))
-                {
-                    ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
-                    ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
-
-                    return false;
-                }
-
-                if (curLength1 == 0 || curLength2 == 0)
-                    break;
-
-                offset1 += curLength1;
-                offset2 += curLength2;
+                return false;
             }
 
-            ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
-            ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
+            if (curLength1 == 0 || curLength2 == 0) break;
 
-            return true;
+            offset1 += curLength1;
+            offset2 += curLength2;
         }
+
+        ArrayPool<byte>.Shared.Return(buffer1, clearArray: true);
+        ArrayPool<byte>.Shared.Return(buffer2, clearArray: true);
+
+        return true;
     }
 
     #endregion

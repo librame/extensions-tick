@@ -16,18 +16,15 @@ namespace Librame.Extensions.Compression;
 /// 定义实现 <see cref="Compressor{TAdapted, Stream}"/> 的流式压缩器接口。
 /// </summary>
 /// <typeparam name="TStreamAdapted">指定的流式适配类型。</typeparam>
-public class StreamCompressor<TStreamAdapted> : Compressor<TStreamAdapted, Stream>
+/// <remarks>
+/// 构造一个 <see cref="StreamCompressor{TStreamAdapted}"/>。
+/// </remarks>
+/// <param name="options">给定的 <see cref="CompressionOptions"/>。</param>
+public class StreamCompressor<TStreamAdapted>(CompressionOptions options)
+    : Compressor<TStreamAdapted, Stream>(options)
     where TStreamAdapted : Stream
 {
-    /// <summary>
-    /// 构造一个 <see cref="StreamCompressor{TStreamAdapted}"/>。
-    /// </summary>
-    /// <param name="options">给定的 <see cref="CompressionOptions"/>。</param>
-    public StreamCompressor(CompressionOptions options) : base(options)
-    {
-    }
 
-    
     /// <summary>
     /// 压缩 <see cref="Stream"/>。
     /// </summary>
@@ -35,23 +32,21 @@ public class StreamCompressor<TStreamAdapted> : Compressor<TStreamAdapted, Strea
     /// <param name="compressed">给定已压缩的 <see cref="Stream"/>。</param>
     public override void Compress(Stream original, Stream compressed)
     {
-        using (var compress = Adapter.GetCompress(original, Options))
-        {
-            compress.CopyTo(compressed);
-        }
+        using var compressor = RealAdapter.GetCompress(compressed, Options);
+
+        original.CopyTo(compressor);
     }
 
     /// <summary>
     /// 解压 <see cref="Stream"/>。
     /// </summary>
     /// <param name="compressed">给定已压缩的 <see cref="Stream"/>。</param>
-    /// <param name="original">给定原始的 <see cref="Stream"/>。</param>
-    public override void Decompress(Stream compressed, Stream original)
+    /// <param name="decompressed">给定的解压 <see cref="Stream"/>。</param>
+    public override void Decompress(Stream compressed, Stream decompressed)
     {
-        using (var decompress = Adapter.GetDecompress(compressed, Options))
-        {
-            decompress.CopyTo(original);
-        }
+        using var decompressor = RealAdapter.GetDecompress(compressed, Options);
+
+        decompressor.CopyTo(decompressed);
     }
 
 }

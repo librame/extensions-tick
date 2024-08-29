@@ -36,12 +36,14 @@ public static class BinaryObjectMapper
     /// </summary>
     /// <param name="inputType">给定的输入类型。</param>
     /// <param name="options">给定的 <see cref="BinarySerializerOptions"/>。</param>
+    /// <param name="useVersion">给定要使用的版本（可选）。</param>
     /// <returns>返回 <see cref="BinaryMemberMapping"/> 列表。</returns>
-    public static List<BinaryMemberMapping> GetMappings(Type inputType, BinarySerializerOptions options)
+    public static List<BinaryMemberMapping> GetMappings(Type inputType, BinarySerializerOptions options,
+        BinarySerializerVersion? useVersion)
     {
         return _cacheMaps.GetOrAdd(inputType, key =>
         {
-            var mappings = LookupMappings(options, key);
+            var mappings = LookupMappings(options, useVersion, key);
 
             mappings = [.. mappings.OrderBy(ks => ks.OrderId).OrderBy(ks => ks.DeclaringTypeCascadeId)];
 
@@ -50,11 +52,13 @@ public static class BinaryObjectMapper
     }
 
     private static List<BinaryMemberMapping> LookupMappings(BinarySerializerOptions options,
-        Type parentType, List<BinaryMemberInfo>? parentMembers = null)
+        BinarySerializerVersion? useVersion, Type parentType, List<BinaryMemberInfo>? parentMembers = null)
     {
         var mappings = new List<BinaryMemberMapping>();
 
-        var members = options.TypeResolver.ResolveMembers(parentType);
+        var members = options.TypeResolver.ResolveMembers(parentType, fromExpression: false,
+            useVersion, parentMembers?.LastOrDefault());
+
         for (var i = 0; i < members.Length; i++)
         {
             var member = members[i];
@@ -67,10 +71,8 @@ public static class BinaryObjectMapper
                 ? memberType.IsSameOrNullableArgumentType(parentType)
                 : parentMembers.Any(p => memberType.IsSameOrNullableArgumentType(p.GetRequiredType()));
 
-            if (!member.CanRead || containSameTypeReference)
-            {
-                continue; // 排除自引用类型
-            }
+            // 排除自引用类型
+            if (containSameTypeReference) continue;
 
             var converter = options.ConverterResolver.ResolveConverter(memberType,
                 member.GetCustomAttribute<BinaryConverterAttribute>());
@@ -87,7 +89,7 @@ public static class BinaryObjectMapper
                 }
 
                 // 级联查找子级成员映射
-                var referenceMappings = LookupMappings(options, memberType, parentMembers);
+                var referenceMappings = LookupMappings(options, useVersion, memberType, parentMembers);
                 if (referenceMappings.Count > 0)
                 {
                     mappings.AddRange(referenceMappings);

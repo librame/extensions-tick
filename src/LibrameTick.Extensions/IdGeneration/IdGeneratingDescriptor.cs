@@ -10,6 +10,8 @@
 
 #endregion
 
+using Librame.Extensions.Infrastructure;
+
 namespace Librame.Extensions.IdGeneration;
 
 /// <summary>
@@ -20,18 +22,18 @@ namespace Librame.Extensions.IdGeneration;
 /// </remarks>
 /// <param name="nowTicks">给定的现在时钟周期数。</param>
 /// <param name="baseTicks">给定的基础时钟周期数。</param>
-/// <param name="accuracy">给定的时间精度。</param>
+/// <param name="precision">给定的时间精度。</param>
 /// <param name="description">给定的详细描述。</param>
-public class IdGeneratingDescriptor(long nowTicks, long baseTicks, TimePrecision accuracy, string? description)
+public class IdGeneratingDescriptor(long nowTicks, long baseTicks, TimePrecision precision, string? description)
 {
     /// <summary>
     /// 构造一个 <see cref="IdGeneratingDescriptor"/>。
     /// </summary>
     /// <param name="nowTicks">给定的现在时钟周期数。</param>
     /// <param name="baseTicks">给定的基础时钟周期数。</param>
-    /// <param name="accuracy">给定的时间精度。</param>
-    public IdGeneratingDescriptor(long nowTicks, long baseTicks, TimePrecision accuracy)
-        : this(nowTicks, baseTicks, accuracy, null)
+    /// <param name="precision">给定的时间精度。</param>
+    public IdGeneratingDescriptor(long nowTicks, long baseTicks, TimePrecision precision)
+        : this(nowTicks, baseTicks, precision, null)
     {
     }
 
@@ -49,7 +51,7 @@ public class IdGeneratingDescriptor(long nowTicks, long baseTicks, TimePrecision
     /// <summary>
     /// 时间精度。
     /// </summary>
-    public TimePrecision Accuracy { get; init; } = accuracy;
+    public TimePrecision Precision { get; init; } = precision;
 
     /// <summary>
     /// 详细描述。

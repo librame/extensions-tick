@@ -15,8 +15,7 @@ namespace Librame.Extensions.Device;
 /// <summary>
 /// 定义一个实现 <see cref="IDeviceUsage{Single}"/> 的处理器时刻。
 /// </summary>
-[Serializable]
-public sealed class ProcessorMoment : StaticDefaultInitializer<ProcessorMoment>, IDeviceUsage<float>
+public sealed class ProcessorMoment : IDeviceUsage<float>
 {
     /// <summary>
     /// 空闲时间。

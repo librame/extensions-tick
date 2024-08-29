@@ -40,8 +40,22 @@ public interface ILockDependency : IDisposable, IDependency
     /// <summary>
     /// 使用 Monitor 锁定动作。
     /// </summary>
+    /// <param name="action">给定的动作。</param>
+    void Lock(Action action);
+
+    /// <summary>
+    /// 使用 Monitor 锁定动作。
+    /// </summary>
     /// <param name="action">给定的动作（传入参数为锁索引）。</param>
     void Lock(Action<int> action);
+
+    /// <summary>
+    /// 使用 Monitor 锁定方法。
+    /// </summary>
+    /// <typeparam name="TResult">指定的结果类型。</typeparam>
+    /// <param name="func">给定的方法。</param>
+    /// <returns>返回 <typeparamref name="TResult"/>。</returns>
+    TResult Lock<TResult>(Func<TResult> func);
 
     /// <summary>
     /// 使用 Monitor 锁定方法。

@@ -28,16 +28,22 @@ public abstract class Compressor<TAdapted, TCompressed> : ICompressor<TCompresse
     /// </exception>
     public Compressor(CompressionOptions options)
     {
-        var apdater = options.AdapterResolver.Resolve<TAdapted, TCompressed>();
-        if (apdater is null)
-        {
-            throw new ArgumentException($"Cannot resolve compressor adapter for '{typeof(CompressionAdapter<TAdapted, TCompressed>).Name}'.");
-        }
+        var apdater = options.AdapterResolver.Resolve<TAdapted, TCompressed>()
+            ?? throw new ArgumentException($"Cannot resolve compressor adapter for '{typeof(CompressionAdapter<TAdapted, TCompressed>).Name}'.");
 
-        Options = options;
         Adapter = apdater;
+        RealAdapter = apdater;
+        Options = options;
     }
 
+
+    /// <summary>
+    /// 获取压缩适配器。
+    /// </summary>
+    /// <value>
+    /// 返回 <see cref="ICompressionAdapter"/>。
+    /// </value>
+    public ICompressionAdapter Adapter { get; init; }
 
     /// <summary>
     /// 获取压缩器选项。
@@ -53,7 +59,7 @@ public abstract class Compressor<TAdapted, TCompressed> : ICompressor<TCompresse
     /// <value>
     /// 返回 <see cref="CompressionAdapter{TAdapted, TCompressed}"/>。
     /// </value>
-    public CompressionAdapter<TAdapted, TCompressed> Adapter { get; init; }
+    public CompressionAdapter<TAdapted, TCompressed> RealAdapter { get; init; }
 
 
     /// <summary>
@@ -67,6 +73,6 @@ public abstract class Compressor<TAdapted, TCompressed> : ICompressor<TCompresse
     /// 解压 <typeparamref name="TCompressed"/>。
     /// </summary>
     /// <param name="compressed">给定已压缩的 <typeparamref name="TCompressed"/>。</param>
-    /// <param name="original">给定原始的 <typeparamref name="TCompressed"/>。</param>
-    public abstract void Decompress(TCompressed compressed, TCompressed original);
+    /// <param name="decompressed">给定的解压 <typeparamref name="TCompressed"/>。</param>
+    public abstract void Decompress(TCompressed compressed, TCompressed decompressed);
 }
