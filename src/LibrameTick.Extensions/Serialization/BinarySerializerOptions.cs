@@ -44,14 +44,17 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// <param name="enableCompressions">启用压缩功能。</param>
     public BinarySerializerOptions(bool enableAlgorithms, bool enableCompressions)
     {
-        Algorithms = new() { IsReferenceEnabled = enableAlgorithms };
-        Compressions = new() { IsReferenceEnabled = enableCompressions };
+        Algorithms = new() { IsRefEnabled = enableAlgorithms };
+        Compressions = new() { IsRefEnabled = enableCompressions };
         Converters = InternalBinaryConverters.InitializeConverters();
         Encoding = DependencyRegistration.CurrentContext.Encoding;
         AutomaticInstantiationIfNull = true;
 
         OrderByMembersFunc = (member, index, count)
-            => member.GetCustomAttribute<BinaryOrderAttribute>()?.Id ?? (index + 1);
+            => member.GetCustomAttribute<BinaryOrderAttribute>()?.Id
+                ?? member.GetCustomAttribute<JsonPropertyOrderAttribute>()?.Order // 兼容 JSON 排序
+                ?? (index + 1);
+
         CascadeChildrenInvokeFunc = InternalBinaryChildrenInvoker.CascadeInvoke;
 
         TypeResolver = new InternalBinaryTypeResolver(this);
@@ -159,6 +162,9 @@ public class BinarySerializerOptions : StaticDefaultInitializer<BinarySerializer
     /// <summary>
     /// 获取或设置按成员排序。传入参数依次为成员信息、成员当前索引、成员总数。
     /// </summary>
+    /// <remarks>
+    /// 默认同时支持 <see cref="BinaryOrderAttribute"/> 和 <see cref="JsonPropertyOrderAttribute"/> 特性标注。
+    /// </remarks>
     /// <value>
     /// 返回排序方法。
     /// </value>

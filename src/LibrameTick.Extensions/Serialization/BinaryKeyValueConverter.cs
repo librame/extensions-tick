@@ -13,13 +13,13 @@
 namespace Librame.Extensions.Serialization;
 
 /// <summary>
-/// 定义继承 <see cref="BinaryConverter{TConverted}"/> 的泛型二进制列表转换器。
+/// 定义继承 <see cref="AbstractBinaryConverter{TConverted}"/> 的泛型二进制列表转换器。
 /// </summary>
 /// <typeparam name="TKey">指定要转换的目标键类型。</typeparam>
 /// <typeparam name="TValue">指定要转换的目标值类型。</typeparam>
 /// <param name="namedFunc">给定的命名方法（可选）。</param>
 public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFunc = null)
-    : BinaryConverter<KeyValuePair<TKey, TValue>>
+    : AbstractBinaryConverter<KeyValuePair<TKey, TValue>>
 {
     private readonly Type _keyType = typeof(TKey);
     private readonly Type _valueType = typeof(TValue);
@@ -49,8 +49,8 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
     /// <returns>返回字节数组。</returns>
     protected override KeyValuePair<TKey, TValue> ReadCore(BinaryReader reader, BinaryMemberInfo member)
     {
-        var keyConverter = member.Options.ConverterResolver.ResolveConverter(_keyType) as BinaryConverter<TKey>;
-        var valueConverter = member.Options.ConverterResolver.ResolveConverter(_valueType) as BinaryConverter<TValue>;
+        var keyConverter = member.Options.ConverterResolver.ResolveConverter(_keyType) as AbstractBinaryConverter<TKey>;
+        var valueConverter = member.Options.ConverterResolver.ResolveConverter(_valueType) as AbstractBinaryConverter<TValue>;
 
         var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
 
@@ -89,8 +89,8 @@ public class BinaryKeyValueConverter<TKey, TValue>(Func<string, string>? namedFu
     /// <param name="member">给定的 <see cref="BinaryMemberInfo"/>。</param>
     protected override void WriteCore(BinaryWriter writer, KeyValuePair<TKey, TValue> value, BinaryMemberInfo member)
     {
-        var keyConverter = member.Options.ConverterResolver.ResolveConverter(_keyType) as BinaryConverter<TKey>;
-        var valueConverter = member.Options.ConverterResolver.ResolveConverter(_valueType) as BinaryConverter<TValue>;
+        var keyConverter = member.Options.ConverterResolver.ResolveConverter(_keyType) as AbstractBinaryConverter<TKey>;
+        var valueConverter = member.Options.ConverterResolver.ResolveConverter(_valueType) as AbstractBinaryConverter<TValue>;
 
         var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
 

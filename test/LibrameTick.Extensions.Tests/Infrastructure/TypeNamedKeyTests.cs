@@ -8,9 +8,9 @@ namespace Librame.Extensions.Infrastructure
         [Fact]
         public void AllTest()
         {
-            var type = typeof(TypeNamedKey);
+            var type = typeof(TypedNamedKey);
 
-            var original = new TypeNamedKey(type);
+            var original = new TypedNamedKey(type);
             var compare = original with { };
 
             Assert.Equal(original, compare);

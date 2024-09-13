@@ -18,7 +18,7 @@ namespace Librame.Extensions.IdGeneration;
 /// <summary>
 /// 定义雪花 64 位整型标识生成器。
 /// </summary>
-public class SnowflakeIdGenerator : ClockIdGenerator<long>
+public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
 {
     private readonly long _machineId;
     private readonly long _dataCenterId;

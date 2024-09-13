@@ -21,7 +21,8 @@ namespace Librame.Extensions.Proxy;
 /// </remarks>
 /// <param name="proxySource">给定的代理来源复合实例。</param>
 /// <param name="interceptor">给定的调用拦截器。</param>
-public class ProxyDecorator<TInterface>(TInterface proxySource, IInterceptor interceptor) : IProxyDecorator<TInterface>
+public sealed class ProxyDecorator<TInterface>(TInterface proxySource, IInterceptor interceptor)
+    : IProxyDecorator<TInterface>
 {
     /// <summary>
     /// 代理来源复合实例。
@@ -65,7 +66,7 @@ public class ProxyDecorator<TInterface>(TInterface proxySource, IInterceptor int
     /// <exception cref="NotSupportedException">
     /// Invalid method call expression.
     /// </exception>
-    public virtual TResult Only<TResult>(Expression<Func<TInterface, TResult>> invokeExpression)
+    public TResult Only<TResult>(Expression<Func<TInterface, TResult>> invokeExpression)
     {
         if (invokeExpression.Body is not MethodCallExpression methodCall)
             throw new NotSupportedException($"Invalid method call expression '{invokeExpression.Body.Type}'.");

@@ -31,7 +31,7 @@ namespace LibrameTick.Extensions.Sample
             using (var ms = DependencyRegistration.CurrentContext.MemoryStreams.GetStream())
             {
                 formatter.Serialize(ms, _processorInfo);
-                buffer = ms.ToArray();
+                buffer = ms.GetBuffer();
             }
 
             for (int i = 0; i < _count; i++)
@@ -62,7 +62,7 @@ namespace LibrameTick.Extensions.Sample
         {
             var processorType = typeof(ProcessorDeviceInfo);
 
-            var buffer = BinarySerializer.SerializeObject(processorType, _processorInfo);
+            var buffer = BinarySerializer.SerializeObject(_processorInfo, processorType);
 
             for (int i = 0; i < _count; i++)
             {

@@ -13,12 +13,12 @@
 namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义用于控制当前引用是否启用的接口。
+/// 定义可控制引用是否启用的接口。
 /// </summary>
-public interface IReferenceEnablement
+public interface IReferencable
 {
     /// <summary>
     /// 获取或设置当前是否已启用此引用。
     /// </summary>
-    bool IsReferenceEnabled { get; set; }
+    bool IsRefEnabled { get; set; }
 }

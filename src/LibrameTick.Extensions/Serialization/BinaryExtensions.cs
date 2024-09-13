@@ -124,16 +124,21 @@ public static class BinaryExtensions
 
     #region IsAttributeDefined
 
-    private static readonly Type _ignoreAttributeType = typeof(BinaryIgnoreAttribute);
+    private static readonly Type _binaryIgnoreAttributeType = typeof(BinaryIgnoreAttribute);
+    private static readonly Type _jsonIgnoreAttributeType = typeof(JsonIgnoreAttribute);
 
 
     /// <summary>
     /// 判断成员是否定义了忽略特性。
     /// </summary>
+    /// <remarks>
+    /// 默认同时支持 <see cref="BinaryIgnoreAttribute"/> 和 <see cref="JsonIgnoreAttribute"/> 特性标注。
+    /// </remarks>
     /// <param name="member">给定的 <see cref="MemberInfo"/>。</param>
     /// <returns>返回是否定义的布尔值。</returns>
     public static bool IsIgnoreAttributeDefined(this MemberInfo member)
-        => member.IsDefined(_ignoreAttributeType, inherit: false);
+        => member.IsDefined(_binaryIgnoreAttributeType, inherit: false)
+            || member.IsDefined(_jsonIgnoreAttributeType, inherit: false);
 
 
     /// <summary>

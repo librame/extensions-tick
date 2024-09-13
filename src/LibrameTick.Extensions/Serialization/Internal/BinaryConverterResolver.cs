@@ -24,7 +24,7 @@ internal sealed class BinaryConverterResolver(BinarySerializerOptions options) :
     public BinarySerializerOptions Options { get; init; } = options;
 
 
-    public BinaryConverter<TConverted>? ResolveConverter<TConverted>(BinaryConverterAttribute? attribute)
+    public AbstractBinaryConverter<TConverted>? ResolveConverter<TConverted>(BinaryConverterAttribute? attribute)
     {
         var typeToConvert = typeof(TConverted);
 
@@ -33,11 +33,11 @@ internal sealed class BinaryConverterResolver(BinarySerializerOptions options) :
             typeToConvert = attribute.ConvertedType;
         }
 
-        return (BinaryConverter<TConverted>?)ResolveConverter(typeToConvert, attribute?.Name);
+        return (AbstractBinaryConverter<TConverted>?)ResolveConverter(typeToConvert, attribute?.Name);
     }
 
-    public BinaryConverter<TConverted>? ResolveConverter<TConverted>(string? name = null)
-        => (BinaryConverter<TConverted>?)ResolveConverter(typeof(TConverted), name);
+    public AbstractBinaryConverter<TConverted>? ResolveConverter<TConverted>(string? name = null)
+        => (AbstractBinaryConverter<TConverted>?)ResolveConverter(typeof(TConverted), name);
 
     public IBinaryConverter? ResolveConverter(Type typeToConvert, BinaryConverterAttribute? attribute)
     {

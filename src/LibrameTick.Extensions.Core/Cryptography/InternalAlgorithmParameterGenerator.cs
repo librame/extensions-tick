@@ -10,18 +10,10 @@
 
 #endregion
 
-namespace Librame.Extensions.Infrastructure;
+using Librame.Extensions.Infrastructure;
 
-/// <summary>
-/// 定义文件插件接口。
-/// </summary>
-public interface IFilePlugin
+namespace Librame.Extensions.Cryptography;
+
+internal sealed class InternalAlgorithmParameterGenerator : AbstractAlgorithmParameterGenerator
 {
-    /// <summary>
-    /// 获取插件要应用的文件路径。
-    /// </summary>
-    /// <value>
-    /// 返回 <see cref="FluentFilePath"/>。
-    /// </value>
-    FluentFilePath Path { get; }
 }

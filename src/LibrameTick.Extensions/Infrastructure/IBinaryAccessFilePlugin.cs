@@ -13,9 +13,9 @@
 namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义文件的二进制存取插件接口。
+/// 定义继承 <see cref="IPlugin{FluentFilePath}"/> 的二进制存取文件插件接口。
 /// </summary>
-public interface IBinaryAccessFilePlugin : IFilePlugin
+public interface IBinaryAccessFilePlugin : IPlugin<FluentFilePath>
 {
 
     #region No Buffer

@@ -17,7 +17,7 @@ namespace Librame.Extensions.IdGeneration;
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的标识生成选项。
 /// </summary>
-public class IdGenerationOptions : IOptions
+public sealed class IdGenerationOptions : IOptions
 {
     /// <summary>
     /// 构造一个 <see cref="IdGenerationOptions"/>。

@@ -17,7 +17,7 @@ namespace Librame.Extensions.Persistence;
 /// </summary>
 /// <typeparam name="TPersistence">指定的持久化类型。</typeparam>
 /// <param name="initialFunc">给定的实例初始方法。</param>
-public abstract class PersistenceProvider<TPersistence>(Func<TPersistence> initialFunc)
+public abstract class AbstractPersistenceProvider<TPersistence>(Func<TPersistence> initialFunc)
     : IPersistenceProvider<TPersistence>
 {
     /// <summary>

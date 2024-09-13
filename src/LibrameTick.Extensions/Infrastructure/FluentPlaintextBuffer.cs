@@ -13,12 +13,12 @@
 namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义实现 <see cref="Fluent{TSelf, TChain}"/> 的流畅明文字节数组缓冲区。
+/// 定义实现 <see cref="AbstractFluent{TSelf, TChain}"/> 的流畅明文字节数组缓冲区。
 /// </summary>
 /// <param name="initialBytes">给定的初始字节数组。</param>
 /// <param name="encoding">给定的字符编码。</param>
 public class FluentPlaintextBuffer(byte[] initialBytes, Encoding encoding)
-    : Fluent<FluentPlaintextBuffer, byte[]>(initialBytes), IEquatable<FluentPlaintextBuffer>
+    : AbstractFluent<FluentPlaintextBuffer, byte[]>(initialBytes), IEquatable<FluentPlaintextBuffer>
 {
     /// <summary>
     /// 构造一个 <see cref="FluentPlaintextBuffer"/>。
@@ -65,11 +65,12 @@ public class FluentPlaintextBuffer(byte[] initialBytes, Encoding encoding)
     public virtual FluentPlaintextBuffer Switch(Func<byte[], byte[]> newBytesFunc)
         => base.Switch(fluent => newBytesFunc(fluent.CurrentValue));
 
+
     /// <summary>
-    /// 复制一个当前流畅字节数组的副本。
+    /// 创建一个当前流畅字节数组的副本。
     /// </summary>
     /// <returns>返回 <see cref="FluentPlaintextBuffer"/>。</returns>
-    public override FluentPlaintextBuffer Copy()
+    protected override FluentPlaintextBuffer Create()
         => new(CurrentValue, Encoding);
 
 

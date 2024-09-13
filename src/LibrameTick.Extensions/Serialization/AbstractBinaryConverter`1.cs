@@ -16,7 +16,7 @@ namespace Librame.Extensions.Serialization;
 /// 定义抽象实现 <see cref="IBinaryConverter"/> 的泛型二进制转换器。
 /// </summary>
 /// <typeparam name="TConverted">指定被转换的类型。</typeparam>
-public abstract class BinaryConverter<TConverted> : IBinaryConverter
+public abstract class AbstractBinaryConverter<TConverted> : IBinaryConverter
 {
     /// <summary>
     /// 获取被转换的类型。

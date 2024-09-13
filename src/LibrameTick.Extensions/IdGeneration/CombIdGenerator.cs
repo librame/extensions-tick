@@ -25,7 +25,7 @@ namespace Librame.Extensions.IdGeneration;
 /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
 /// <param name="clock">给定的 <see cref="IClockDependency"/>。</param>
 public class CombIdGenerator(CombIdGeneration generation, IdGenerationOptions options, IClockDependency clock)
-    : ClockIdGenerator<Guid>(options, clock)
+    : AbstractClockIdGenerator<Guid>(options, clock)
 {
     private static readonly string _accuracyDescription = "100ns";
 

@@ -17,7 +17,7 @@ namespace Librame.Extensions.Cryptography;
 /// <summary>
 /// 定义算法引用选项。
 /// </summary>
-public class AlgorithmReferenceOptions : StaticDefaultInitializer<AlgorithmReferenceOptions>, IReferenceEnablement
+public class AlgorithmReferenceOptions : StaticDefaultInitializer<AlgorithmReferenceOptions>, IReferencable
 {
     /// <summary>
     /// 构造一个 <see cref="AlgorithmReferenceOptions"/> 默认实例。
@@ -57,7 +57,7 @@ public class AlgorithmReferenceOptions : StaticDefaultInitializer<AlgorithmRefer
     /// <remarks>
     /// 主要用于控制外部引用此压缩功能是否已启用。默认不启用。
     /// </remarks>
-    public bool IsReferenceEnabled { get; set; }
+    public bool IsRefEnabled { get; set; }
 
     /// <summary>
     /// 获取或设置非对称流解密器（传入参数依次为：加密流、解密流）。

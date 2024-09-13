@@ -28,7 +28,7 @@ namespace Librame.Extensions.Cron;
 ///     <para>W 只用于日域，表示指定天（周一到周五）的工作日，如 15W 表示接近月的第十五个工作日，具体为月的第十五天为周六，那么在第十四天周五执行，如果第十五天为周日，则第十六天周一执行，除外在工作日当天执行，LW 表示月最后一个工作日（注：不能跨月只限当月，使用此参数不要指定列表或范围）。</para>
 /// </remarks>
 /// <typeparam name="TDateTime">指定的时间类型。</typeparam>
-public abstract class CronExpression<TDateTime>
+public abstract class AbstractCronExpression<TDateTime>
     where TDateTime : struct
 {
     private static readonly Regex _lwRegex = new("^L-[0-9]*[W]?", RegexOptions.Compiled);
@@ -46,7 +46,7 @@ public abstract class CronExpression<TDateTime>
     /// </summary>
     /// <param name="expression">给定的 CRON 表达式字符串。</param>
     /// <param name="options">给定的 CRON 选项。</param>
-    protected CronExpression(string expression, CronOptions options)
+    protected AbstractCronExpression(string expression, CronOptions options)
     {
         expression = expression.Trim();
         ArgumentException.ThrowIfNullOrEmpty(expression, nameof(expression));

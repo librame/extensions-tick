@@ -19,7 +19,7 @@ namespace Librame.Extensions.Compression;
 /// <summary>
 /// 定义压缩选项。
 /// </summary>
-public class CompressionOptions : StaticDefaultInitializer<CompressionOptions>, IReferenceEnablement
+public sealed class CompressionOptions : StaticDefaultInitializer<CompressionOptions>, IReferencable
 {
     /// <summary>
     /// 构造一个 <see cref="CompressionOptions"/>。
@@ -47,7 +47,7 @@ public class CompressionOptions : StaticDefaultInitializer<CompressionOptions>, 
     /// <remarks>
     /// 主要用于控制外部引用此压缩功能是否已启用。默认不启用。
     /// </remarks>
-    public bool IsReferenceEnabled { get; set; }
+    public bool IsRefEnabled { get; set; }
 
     /// <summary>
     /// 获取压缩适配器列表。

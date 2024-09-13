@@ -16,7 +16,7 @@ namespace Librame.Extensions.IdGeneration;
 /// 定义抽象实现 <see cref="IIdGenerator{TId}"/> 的标识生成器。
 /// </summary>
 /// <typeparam name="TId">指定的标识类型。</typeparam>
-public abstract class IdGenerator<TId> : IIdGenerator<TId>
+public abstract class AbstractIdGenerator<TId> : IIdGenerator<TId>
     where TId : IEquatable<TId>
 {
     /// <summary>

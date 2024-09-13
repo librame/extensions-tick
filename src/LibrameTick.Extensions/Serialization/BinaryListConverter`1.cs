@@ -13,13 +13,13 @@
 namespace Librame.Extensions.Serialization;
 
 /// <summary>
-/// 定义继承 <see cref="BinaryConverter{TConverted}"/> 的泛型二进制列表转换器。
+/// 定义继承 <see cref="AbstractBinaryConverter{TConverted}"/> 的泛型二进制列表转换器。
 /// </summary>
 /// <typeparam name="TList">指定要转换的目标列表类型。</typeparam>
 /// <typeparam name="TItem">指定要转换的目标列表元素类型。</typeparam>
 /// <param name="namedFunc">给定的命名方法（可选）。</param>
 public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc = null)
-    : BinaryConverter<TList>
+    : AbstractBinaryConverter<TList>
     where TList : IList<TItem>, new()
 {
     private readonly Type _itemType = typeof(TItem);
@@ -52,7 +52,7 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
         var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
 
         var converter = member.Options.ConverterResolver.ResolveConverter(_itemType);
-        if (converter is BinaryConverter<TItem> itemConverter)
+        if (converter is AbstractBinaryConverter<TItem> itemConverter)
         {
             for (var i = 0; i < count; i++)
             {
@@ -110,7 +110,7 @@ public class BinaryListConverter<TList, TItem>(Func<string, string>? namedFunc =
         var useVersion = BinarySerializerVersion.FromAttribute(member.GetCustomAttribute<BinaryVersionAttribute>());
 
         var converter = member.Options.ConverterResolver.ResolveConverter(_itemType);
-        if (converter is BinaryConverter<TItem> itemConverter)
+        if (converter is AbstractBinaryConverter<TItem> itemConverter)
         {
             for (var i = 0; i < count; i++)
             {

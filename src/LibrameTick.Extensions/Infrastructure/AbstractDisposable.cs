@@ -15,15 +15,15 @@ namespace Librame.Extensions.Infrastructure;
 /// <summary>
 /// 定义抽象实现 <see cref="IDisposable"/> 的可释放资源类。
 /// </summary>
-public abstract class Disposable : IDisposable
+public abstract class AbstractDisposable : IDisposable
 {
     private bool _disposed = false;
 
 
     /// <summary>
-    /// 析构当前 <see cref="Disposable"/> 对象实例。
+    /// 析构当前 <see cref="AbstractDisposable"/> 对象实例。
     /// </summary>
-    ~Disposable()
+    ~AbstractDisposable()
     {
         Dispose(disposing: false);
     }

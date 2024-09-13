@@ -21,7 +21,8 @@ namespace Librame.Extensions.Proxy;
 /// <param name="target">给定的目标 <see cref="MethodInfo"/>。</param>
 /// <param name="source">给定的来源 <see cref="MethodInfo"/>。</param>
 /// <param name="args">给定的实参数组。</param>
-public class MethodDescriptor(MethodInfo target, MethodInfo source, object?[]? args) : IEquatable<MethodDescriptor>
+public sealed class MethodDescriptor(MethodInfo target, MethodInfo source, object?[]? args)
+    : IEquatable<MethodDescriptor>
 {
     /// <summary>
     /// 拦截的目标方法信息，通常是接口方法信息。
@@ -49,7 +50,7 @@ public class MethodDescriptor(MethodInfo target, MethodInfo source, object?[]? a
     /// </summary>
     /// <param name="other">给定的 <see cref="MethodDescriptor"/>。</param>
     /// <returns>返回布尔值。</returns>
-    public virtual bool Equals(MethodDescriptor? other)
+    public bool Equals(MethodDescriptor? other)
         => other is not null && Target.Equals(other.Target);
 
     /// <summary>

@@ -24,7 +24,7 @@ namespace Librame.Extensions.IdGeneration;
 /// <param name="baseTicks">给定的基础时钟周期数。</param>
 /// <param name="precision">给定的时间精度。</param>
 /// <param name="description">给定的详细描述。</param>
-public class IdGeneratingDescriptor(long nowTicks, long baseTicks, TimePrecision precision, string? description)
+public sealed class IdGeneratingDescriptor(long nowTicks, long baseTicks, TimePrecision precision, string? description)
 {
     /// <summary>
     /// 构造一个 <see cref="IdGeneratingDescriptor"/>。

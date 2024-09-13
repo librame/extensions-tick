@@ -15,12 +15,12 @@ using Librame.Extensions.Dependency;
 namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义实现 <see cref="Fluent{TSelf, TChain}"/> 的流畅字节序列流。
+/// 定义实现 <see cref="AbstractFluent{TSelf, TChain}"/> 的流畅字节序列流。
 /// </summary>
 /// <param name="initialStream">给定的 <see cref="Stream"/>。</param>
 /// <param name="useBufferedStream">是否使用缓冲流（可选；默认使用 <see cref="BufferedStream"/> 处理 <paramref name="initialStream"/>，除非 <paramref name="initialStream"/> 本身已是 <see cref="BufferedStream"/>）。</param>
 public class FluentStream(Stream initialStream, bool useBufferedStream = true)
-    : Fluent<FluentStream, Stream>(initialStream), IEquatable<FluentStream>, IDisposable
+    : AbstractFluent<FluentStream, Stream>(initialStream), IEquatable<FluentStream>, IDisposable
 {
     /// <summary>
     /// 获取是否使用缓冲流。
@@ -31,7 +31,7 @@ public class FluentStream(Stream initialStream, bool useBufferedStream = true)
     /// 重写当前流。
     /// </summary>
     /// <remarks>
-    ///     <para>重写以在启用 <see cref="UseBufferedStream"/> 时，使用缓冲流处理 <see cref="Fluent{TSelf, TChain}.CurrentValue"/>。</para>
+    ///     <para>重写以在启用 <see cref="UseBufferedStream"/> 时，使用缓冲流处理 <see cref="AbstractFluent{TSelf, TChain}.CurrentValue"/>。</para>
     /// </remarks>
     public override Stream CurrentValue
     {
@@ -226,12 +226,13 @@ public class FluentStream(Stream initialStream, bool useBufferedStream = true)
         });
     }
 
+
     /// <summary>
-    /// 复制一个当前流畅字节序列流的副本。
+    /// 创建一个当前流畅字节序列流的副本。
     /// </summary>
     /// <returns>返回 <see cref="FluentStream"/>。</returns>
-    public override FluentStream Copy()
-        => new(CurrentValue);
+    protected override FluentStream Create()
+        => new(CurrentValue, UseBufferedStream);
 
 
     /// <summary>

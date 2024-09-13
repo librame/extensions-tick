@@ -15,12 +15,12 @@ using Librame.Extensions.Dependency;
 namespace Librame.Extensions.IdGeneration;
 
 /// <summary>
-/// 定义继承 <see cref="IdGenerator{TId}"/> 的时钟类标识生成器。
+/// 定义继承 <see cref="AbstractIdGenerator{TId}"/> 的时钟类标识生成器。
 /// </summary>
 /// <param name="options">给定的 <see cref="IdGenerationOptions"/>。</param>
 /// <param name="clock">给定的 <see cref="IClockDependency"/>。</param>
-public abstract class ClockIdGenerator<TId>(IdGenerationOptions options, IClockDependency clock)
-    : IdGenerator<TId>
+public abstract class AbstractClockIdGenerator<TId>(IdGenerationOptions options, IClockDependency clock)
+    : AbstractIdGenerator<TId>
     where TId : IEquatable<TId>
 {
     /// <summary>

@@ -22,7 +22,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
     private readonly ConcurrentDictionary<PropertyNoticeNamedKey, object> _propertyValues;
     private readonly ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>> _propertyFuncs;
 
-    private readonly TypeNamedKey _baseKey;
+    private readonly TypedNamedKey _baseKey;
 
 
     /// <summary>
@@ -42,7 +42,7 @@ public sealed class PropertyNotifier : IPropertyNotifier
         _propertyValues = propertyValues ?? new ConcurrentDictionary<PropertyNoticeNamedKey, object>();
         _propertyFuncs = propertyFuncs ?? new ConcurrentDictionary<PropertyNoticeNamedKey, Func<object>>();
 
-        _baseKey = new TypeNamedKey(source.GetType(), named);
+        _baseKey = new TypedNamedKey(source.GetType(), named);
 
         Source = source;
         Named = named;

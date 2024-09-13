@@ -17,19 +17,17 @@ namespace Librame.Extensions.IdGeneration;
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的雪花标识选项。
 /// </summary>
-public class SnowflakeIdOptions : IOptions
+public sealed class SnowflakeIdOptions : IOptions
 {
     /// <summary>
     /// 标识总位长。默认 64 位。
     /// </summary>
-    protected int TotalBits
-        => 1 << 6;
+    private static readonly int _totalBits = 1 << 6;
 
     /// <summary>
     /// 前置信号位长。默认 1 位。
     /// </summary>
-    protected int SignBits
-        => 1;
+    private static readonly int _signBits = 1;
 
 
     /// <summary>
@@ -54,7 +52,7 @@ public class SnowflakeIdOptions : IOptions
     /// 时钟周期数位长。默认 41 位。
     /// </summary>
     public int TicksBits
-        => TotalBits - SignBits - DataCenterIdBits - MachineIdBits - SequenceBits;
+        => _totalBits - _signBits - DataCenterIdBits - MachineIdBits - SequenceBits;
 
 
     /// <summary>
@@ -110,7 +108,7 @@ public class SnowflakeIdOptions : IOptions
     public long ParseDataCenterId(long id, bool isOther = false)
     {
         if (isOther)
-            return (id << (TicksBits + SignBits)) >> (TicksBits + MachineIdBits + SequenceBits + SignBits);
+            return (id << (TicksBits + _signBits)) >> (TicksBits + MachineIdBits + SequenceBits + _signBits);
         
         return id >> DataCenterIdLeftShift & ~(-1L << DataCenterIdBits);
     }
@@ -124,7 +122,7 @@ public class SnowflakeIdOptions : IOptions
     public long ParseMachineId(long id, bool isOther = false)
     {
         if (isOther)
-            return (id << (TicksBits + DataCenterIdBits + SignBits)) >> (TicksBits + DataCenterIdBits + SequenceBits + SignBits);
+            return (id << (TicksBits + DataCenterIdBits + _signBits)) >> (TicksBits + DataCenterIdBits + SequenceBits + _signBits);
         
         return id >> MachineIdLeftShift & ~(-1L << MachineIdBits);
     }
@@ -138,7 +136,7 @@ public class SnowflakeIdOptions : IOptions
     public long ParseSequence(long id, bool isOther = false)
     {
         if (isOther)
-            return (id << (TotalBits - SequenceBits)) >> (TotalBits - SequenceBits);
+            return (id << (_totalBits - SequenceBits)) >> (_totalBits - SequenceBits);
 
         return id & ~(-1L << SequenceBits);
     }

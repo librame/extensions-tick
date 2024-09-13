@@ -15,13 +15,13 @@ namespace Librame.Extensions.Infrastructure.Storage
 
             filePlugin.Write(byteArray);
 
-            Assert.True(filePlugin.Path.Exists());
+            Assert.True(filePlugin.Source.Exists());
 
             var buffer = filePlugin.Read();
 
             Assert.True(byteArray.SequenceEqualByReadOnlySpan(buffer));
 
-            filePlugin.Path.Delete();
+            filePlugin.Source.Delete();
         }
 
     }

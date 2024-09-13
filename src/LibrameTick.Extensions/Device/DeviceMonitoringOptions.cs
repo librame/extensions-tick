@@ -18,7 +18,7 @@ namespace Librame.Extensions.Device;
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的设备监视选项。
 /// </summary>
-public class DeviceMonitoringOptions : IOptions
+public sealed class DeviceMonitoringOptions : IOptions
 {
     /// <summary>
     /// 提升准确性的处理器重复采集次数（默认 3 次）。

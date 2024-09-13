@@ -13,11 +13,11 @@
 namespace Librame.Extensions.Serialization;
 
 /// <summary>
-/// 定义继承 <see cref="BinaryConverter{TConverted}"/> 的泛型二进制枚举转换器。
+/// 定义继承 <see cref="AbstractBinaryConverter{TConverted}"/> 的泛型二进制枚举转换器。
 /// </summary>
 /// <typeparam name="TEnum">指定要转换的目标枚举类型。</typeparam>
 /// <param name="namedFunc">给定的命名方法（可选）。</param>
-public class BinaryEnumConverter<TEnum>(Func<string, string>? namedFunc = null) : BinaryConverter<TEnum>
+public class BinaryEnumConverter<TEnum>(Func<string, string>? namedFunc = null) : AbstractBinaryConverter<TEnum>
     where TEnum : struct, Enum
 {
     /// <summary>

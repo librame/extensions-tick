@@ -13,12 +13,12 @@
 namespace Librame.Extensions.Cron;
 
 /// <summary>
-/// 定义默认实现 <see cref="CronExpression{TDateTime}"/> 偏移的 CRON 表达式。
+/// 定义默认实现 <see cref="AbstractCronExpression{TDateTime}"/> 偏移的 CRON 表达式。
 /// </summary>
 /// <param name="expression">给定的 CRON 表达式字符串。</param>
 /// <param name="options">给定的 CRON 选项。</param>
 public class DefaultCronExpressionOffset(string expression, CronOptions options)
-    : CronExpression<DateTimeOffset>(expression, options)
+    : AbstractCronExpression<DateTimeOffset>(expression, options)
 {
 
     /// <summary>

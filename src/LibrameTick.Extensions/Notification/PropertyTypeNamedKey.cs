@@ -18,21 +18,21 @@ namespace Librame.Extensions.Notification;
 /// 定义属性类型命名键。
 /// </summary>
 /// <remarks>
-/// 构造一个 <see cref="TypeNamedKey"/>。
+/// 构造一个 <see cref="TypedNamedKey"/>。
 /// </remarks>
 /// <param name="propertyName">给定的属性名称。</param>
-/// <param name="baseKey">给定的 <see cref="TypeNamedKey"/> 基础键。</param>
-public class PropertyNoticeNamedKey(string propertyName, TypeNamedKey baseKey)
+/// <param name="baseKey">给定的 <see cref="TypedNamedKey"/> 基础键。</param>
+public class PropertyNoticeNamedKey(string propertyName, TypedNamedKey baseKey)
     : IEquatable<PropertyNoticeNamedKey>
 {
     /// <summary>
-    /// 构造一个 <see cref="TypeNamedKey"/>。
+    /// 构造一个 <see cref="TypedNamedKey"/>。
     /// </summary>
     /// <param name="propertyName">给定的属性名称。</param>
     /// <param name="sourceType">给定的来源类型。</param>
     /// <param name="named">给定的命名（可选）。</param>
     public PropertyNoticeNamedKey(string propertyName, Type sourceType, string? named = null)
-        : this(propertyName, new TypeNamedKey(sourceType, named))
+        : this(propertyName, new TypedNamedKey(sourceType, named))
     {
     }
 
@@ -45,7 +45,7 @@ public class PropertyNoticeNamedKey(string propertyName, TypeNamedKey baseKey)
     /// <summary>
     /// 基础键。
     /// </summary>
-    public TypeNamedKey BaseKey { get; init; } = baseKey;
+    public TypedNamedKey BaseKey { get; init; } = baseKey;
 
 
     /// <summary>
@@ -95,9 +95,9 @@ public class PropertyNoticeNamedKey(string propertyName, TypeNamedKey baseKey)
     /// <typeparam name="T">指定的类型。</typeparam>
     /// <param name="propertyName">给定的属性名称。</param>
     /// <param name="named">给定的命名（可选）。</param>
-    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
+    /// <returns>返回 <see cref="TypedNamedKey"/>。</returns>
     public static PropertyNoticeNamedKey Create<T>(string propertyName, string? named = null)
-        => new(propertyName, TypeNamedKey.Create<T>(named));
+        => new(propertyName, TypedNamedKey.Create<T>(named));
 
     /// <summary>
     /// 创建带连接符的泛型属性类型命名键。
@@ -106,9 +106,9 @@ public class PropertyNoticeNamedKey(string propertyName, TypeNamedKey baseKey)
     /// <param name="propertyName">给定的属性名称。</param>
     /// <param name="connector">给定的连接符。</param>
     /// <param name="named">给定的命名（可选）。</param>
-    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
+    /// <returns>返回 <see cref="TypedNamedKey"/>。</returns>
     public static PropertyNoticeNamedKey CreateWithConnector<T>(string propertyName, string connector, string? named = null)
-        => new(propertyName, TypeNamedKey.CreateWithConnector<T>(connector, named));
+        => new(propertyName, TypedNamedKey.CreateWithConnector<T>(connector, named));
 
     /// <summary>
     /// 创建带连接符的属性类型命名键。
@@ -117,9 +117,9 @@ public class PropertyNoticeNamedKey(string propertyName, TypeNamedKey baseKey)
     /// <param name="type">给定的类型。</param>
     /// <param name="connector">给定的连接符。</param>
     /// <param name="named">给定的命名（可选）。</param>
-    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
+    /// <returns>返回 <see cref="TypedNamedKey"/>。</returns>
     public static PropertyNoticeNamedKey CreateWithConnector(string propertyName, Type type,
         string connector, string? named = null)
-        => new(propertyName, TypeNamedKey.CreateWithConnector(type, connector, named));
+        => new(propertyName, TypedNamedKey.CreateWithConnector(type, connector, named));
 
 }

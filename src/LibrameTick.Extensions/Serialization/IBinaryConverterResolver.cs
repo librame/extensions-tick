@@ -31,16 +31,16 @@ public interface IBinaryConverterResolver
     /// </summary>
     /// <typeparam name="TConverted">指定的被转换类型。</typeparam>
     /// <param name="attribute">给定的 <see cref="BinaryConverterAttribute"/>。</param>
-    /// <returns>返回 <see cref="BinaryConverter{TConverted}"/>。</returns>
-    BinaryConverter<TConverted>? ResolveConverter<TConverted>(BinaryConverterAttribute? attribute);
+    /// <returns>返回 <see cref="AbstractBinaryConverter{TConverted}"/>。</returns>
+    AbstractBinaryConverter<TConverted>? ResolveConverter<TConverted>(BinaryConverterAttribute? attribute);
 
     /// <summary>
     /// 解析指定类型的二进制转换器。
     /// </summary>
     /// <typeparam name="TConverted">指定的被转换类型。</typeparam>
     /// <param name="name">给定的转换器名称（可选）。</param>
-    /// <returns>返回 <see cref="BinaryConverter{TConverted}"/>。</returns>
-    BinaryConverter<TConverted>? ResolveConverter<TConverted>(string? name = null);
+    /// <returns>返回 <see cref="AbstractBinaryConverter{TConverted}"/>。</returns>
+    AbstractBinaryConverter<TConverted>? ResolveConverter<TConverted>(string? name = null);
 
     /// <summary>
     /// 解析指定类型的二进制转换器。

@@ -17,7 +17,7 @@ namespace Librame.Extensions.Filtration;
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的程序集筛选选项。
 /// </summary>
-public class AssemblyFiltrationOptions : IOptions
+public sealed class AssemblyFiltrationOptions : IOptions
 {
     /// <summary>
     /// 过滤描述符列表集合。

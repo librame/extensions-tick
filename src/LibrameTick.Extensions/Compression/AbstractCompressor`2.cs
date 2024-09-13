@@ -17,16 +17,16 @@ namespace Librame.Extensions.Compression;
 /// </summary>
 /// <typeparam name="TAdapted">指定的被适配类型。</typeparam>
 /// <typeparam name="TCompressed">指定的被压缩类型。</typeparam>
-public abstract class Compressor<TAdapted, TCompressed> : ICompressor<TCompressed>
+public abstract class AbstractCompressor<TAdapted, TCompressed> : ICompressor<TCompressed>
 {
     /// <summary>
-    /// 构造一个 <see cref="Compressor{TAdapted, TCompressed}"/>。
+    /// 构造一个 <see cref="AbstractCompressor{TAdapted, TCompressed}"/>。
     /// </summary>
     /// <param name="options">给定的 <see cref="CompressionOptions"/>。</param>
     /// <exception cref="ArgumentException">
     /// Cannot resolve compressor adapter for '<see cref="CompressionAdapter{TAdapted, TCompressed}"/>'.
     /// </exception>
-    public Compressor(CompressionOptions options)
+    public AbstractCompressor(CompressionOptions options)
     {
         var apdater = options.AdapterResolver.Resolve<TAdapted, TCompressed>()
             ?? throw new ArgumentException($"Cannot resolve compressor adapter for '{typeof(CompressionAdapter<TAdapted, TCompressed>).Name}'.");

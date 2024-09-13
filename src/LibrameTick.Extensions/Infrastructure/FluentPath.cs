@@ -15,12 +15,12 @@ using Librame.Extensions.Dependency;
 namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义实现 <see cref="Fluent{TSelf, TChain}"/> 的流畅路径。
+/// 定义实现 <see cref="AbstractFluent{TSelf, TChain}"/> 的流畅路径。
 /// </summary>
 /// <param name="initialPath">给定的初始路径。</param>
 /// <param name="dependency">给定的 <see cref="IPathDependency"/>（可选；默认使用 <see cref="DependencyRegistration.CurrentContext"/> 的路径依赖）。</param>
 public class FluentPath(string initialPath, IPathDependency? dependency = null)
-    : Fluent<FluentPath, string>(initialPath), IEquatable<FluentPath>
+    : AbstractFluent<FluentPath, string>(initialPath), IEquatable<FluentPath>
 {
     /// <summary>
     /// 获取路径依赖。
@@ -90,11 +90,12 @@ public class FluentPath(string initialPath, IPathDependency? dependency = null)
     public override FluentPath Switch(Func<FluentPath, string> newPathfunc)
         => base.Switch(fluent => Path.GetFullPath(newPathfunc(this)));
 
+
     /// <summary>
-    /// 复制一个当前流畅路径的副本。
+    /// 创建一个当前流畅路径的副本。
     /// </summary>
     /// <returns>返回 <see cref="FluentPath"/>。</returns>
-    public override FluentPath Copy()
+    protected override FluentPath Create()
         => new(CurrentValue, Dependency);
 
 

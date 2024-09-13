@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Compression;
 
 /// <summary>
-/// 定义实现 <see cref="Compressor{TAdapted, Stream}"/> 的流式压缩器接口。
+/// 定义实现 <see cref="AbstractCompressor{TAdapted, Stream}"/> 的流式压缩器接口。
 /// </summary>
 /// <typeparam name="TStreamAdapted">指定的流式适配类型。</typeparam>
 /// <remarks>
@@ -21,7 +21,7 @@ namespace Librame.Extensions.Compression;
 /// </remarks>
 /// <param name="options">给定的 <see cref="CompressionOptions"/>。</param>
 public class StreamCompressor<TStreamAdapted>(CompressionOptions options)
-    : Compressor<TStreamAdapted, Stream>(options)
+    : AbstractCompressor<TStreamAdapted, Stream>(options)
     where TStreamAdapted : Stream
 {
 

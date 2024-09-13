@@ -15,7 +15,7 @@ namespace Librame.Extensions.Proxy;
 /// <summary>
 /// 定义实现 <see cref="IProxyGenerator"/> 的代理生成器。
 /// </summary>
-public class ProxyGenerator : IProxyGenerator
+public sealed class ProxyGenerator : IProxyGenerator
 {
 
     /// <summary>
@@ -25,7 +25,7 @@ public class ProxyGenerator : IProxyGenerator
     /// <typeparam name="TInterceptor">指定的拦截器类型。</typeparam>
     /// <param name="source">给定的来源实例。</param>
     /// <returns>返回 <typeparamref name="TInterface"/>。</returns>
-    public virtual TInterface CreateInterfaceProxy<TInterface, TInterceptor>(TInterface source)
+    public TInterface CreateInterfaceProxy<TInterface, TInterceptor>(TInterface source)
         where TInterceptor : DispatchProxy, IInterceptor
     {
         try
@@ -54,7 +54,7 @@ public class ProxyGenerator : IProxyGenerator
     /// <typeparam name="TInterceptor">指定的拦截器类型。</typeparam>
     /// <param name="source">给定的来源实例。</param>
     /// <returns>返回 <see cref="IProxyDecorator{TInterface}"/>。</returns>
-    public virtual IProxyDecorator<TInterface> CreateInterfaceProxyDecorator<TInterface, TInterceptor>(TInterface source)
+    public IProxyDecorator<TInterface> CreateInterfaceProxyDecorator<TInterface, TInterceptor>(TInterface source)
         where TInterceptor : DispatchProxy, IInterceptor
     {
         try

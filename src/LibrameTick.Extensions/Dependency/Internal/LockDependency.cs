@@ -31,7 +31,6 @@ internal sealed class LockDependency(int maxLockersCount, TimeSpan deadlockDurat
 
     #region Monitor
 
-    // 定义锁对象列表
     private readonly List<object> _lockers = new(maxLockersCount);
 
     public int MaxLockersCount { get; init; } = maxLockersCount;

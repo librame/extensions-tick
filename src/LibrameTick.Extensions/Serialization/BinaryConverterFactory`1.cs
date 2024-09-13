@@ -13,7 +13,7 @@
 namespace Librame.Extensions.Serialization;
 
 /// <summary>
-/// 定义实现 <see cref="BinaryConverter{TConverted}"/> 的泛型二进制转换器工厂。
+/// 定义实现 <see cref="AbstractBinaryConverter{TConverted}"/> 的泛型二进制转换器工厂。
 /// </summary>
 /// <typeparam name="TConverted">指定要转换的类型。</typeparam>
 /// <param name="readFunc">给定的读取方法。</param>
@@ -22,7 +22,7 @@ namespace Librame.Extensions.Serialization;
 public class BinaryConverterFactory<TConverted>(
     Func<BinaryReader, BinaryMemberInfo, TConverted> readFunc,
     Action<BinaryWriter, TConverted, BinaryMemberInfo> writeAction,
-    Func<string, string>? namedFunc = null) : BinaryConverter<TConverted>
+    Func<string, string>? namedFunc = null) : AbstractBinaryConverter<TConverted>
 {
 
     /// <summary>

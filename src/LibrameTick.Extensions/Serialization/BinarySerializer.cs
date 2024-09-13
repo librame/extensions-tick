@@ -203,7 +203,7 @@ public static class BinarySerializer
     public static T? Deserialize<T>(FluentStream fluentStream, BinarySerializerOptions options,
         T? initial = default)
     {
-        if (options.Compressions.IsReferenceEnabled)
+        if (options.Compressions.IsRefEnabled)
         {
             fluentStream.SwitchUnderlyWithNewMemory((fileStream, decompressedStream) =>
             {
@@ -211,7 +211,7 @@ public static class BinarySerializer
             });
         }
 
-        if (options.Algorithms.IsReferenceEnabled)
+        if (options.Algorithms.IsRefEnabled)
         {
             fluentStream.SwitchUnderlyWithNewMemory((fileOrDecompressedStream, decryptedStream) =>
             {
@@ -245,7 +245,7 @@ public static class BinarySerializer
     public static object? DeserializeObject(FluentStream fluentStream, Type inputType,
         BinarySerializerOptions options, object? initial = null)
     {
-        if (options.Compressions.IsReferenceEnabled)
+        if (options.Compressions.IsRefEnabled)
         {
             fluentStream.SwitchUnderlyWithNewMemory((fileStream, decompressedStream) =>
             {
@@ -253,7 +253,7 @@ public static class BinarySerializer
             });
         }
 
-        if (options.Algorithms.IsReferenceEnabled)
+        if (options.Algorithms.IsRefEnabled)
         {
             fluentStream.SwitchUnderlyWithNewMemory((fileOrDecompressedStream, decryptedStream) =>
             {
@@ -290,12 +290,12 @@ public static class BinarySerializer
 
         SerializeCore(tempStream, instance, options);
 
-        if (options.Algorithms.IsReferenceEnabled)
+        if (options.Algorithms.IsRefEnabled)
         {
             fluentStream.SwitchNewMemory(ref tempStream, options.Algorithms.DefaultStreamEncryptor);
         }
 
-        if (options.Compressions.IsReferenceEnabled)
+        if (options.Compressions.IsRefEnabled)
         {
             fluentStream.SwitchNewMemory(ref tempStream, (currentStream, compressedStream) =>
             {
@@ -303,7 +303,7 @@ public static class BinarySerializer
             });
         }
 
-        fluentStream.CopyFrom(ref tempStream);
+        fluentStream.CopyFrom(ref tempStream, disposing: true);
     }
 
     /// <summary>
@@ -323,12 +323,12 @@ public static class BinarySerializer
 
         SerializeObjectCore(tempStream, obj, inputType, options);
 
-        if (options.Algorithms.IsReferenceEnabled)
+        if (options.Algorithms.IsRefEnabled)
         {
             fluentStream.SwitchNewMemory(ref tempStream, options.Algorithms.DefaultStreamEncryptor);
         }
 
-        if (options.Compressions.IsReferenceEnabled)
+        if (options.Compressions.IsRefEnabled)
         {
             fluentStream.SwitchNewMemory(ref tempStream, (currentStream, compressedStream) =>
             {
@@ -336,7 +336,7 @@ public static class BinarySerializer
             });
         }
 
-        fluentStream.CopyFrom(ref tempStream);
+        fluentStream.CopyFrom(ref tempStream, disposing: true);
     }
 
     #endregion

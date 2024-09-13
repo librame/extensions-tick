@@ -14,7 +14,7 @@ using Librame.Extensions.Infrastructure;
 
 namespace Librame.Extensions.Cryptography.Internal;
 
-internal sealed class AlgorithmDependency(AlgorithmKeyring keyring) : Disposable, IAlgorithmDependency
+internal sealed class AlgorithmDependency(AlgorithmKeyring keyring) : AbstractDisposable, IAlgorithmDependency
 {
     private readonly ConcurrentDictionary<string, IDisposable> _disposables = new();
 

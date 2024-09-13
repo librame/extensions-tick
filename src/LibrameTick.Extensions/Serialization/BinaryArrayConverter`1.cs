@@ -13,16 +13,16 @@
 namespace Librame.Extensions.Serialization;
 
 /// <summary>
-/// 定义继承 <see cref="BinaryConverter{TConverted}"/> 的泛型二进制数组转换器。
+/// 定义继承 <see cref="AbstractBinaryConverter{TConverted}"/> 的泛型二进制数组转换器。
 /// </summary>
 /// <typeparam name="TArray">指定要转换的目标数组类型。</typeparam>
 /// <param name="readFunc">给定的读取方法。</param>
 /// <param name="writeAction">给定的写入动作。</param>
 /// <param name="namedFunc">给定的命名方法（可选）。</param>
-public class BinaryArrayConverter<TArray>(
+public sealed class BinaryArrayConverter<TArray>(
     Func<BinaryReader, BinaryMemberInfo, BinaryArrayAttribute, TArray> readFunc,
     Action<BinaryWriter, TArray, BinaryMemberInfo, BinaryArrayAttribute> writeAction,
-    Func<string, string>? namedFunc = null) : BinaryConverter<TArray>
+    Func<string, string>? namedFunc = null) : AbstractBinaryConverter<TArray>
 {
     /// <summary>
     /// 获取转换器名称。

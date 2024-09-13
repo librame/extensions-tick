@@ -13,14 +13,14 @@
 namespace Librame.Extensions.Serialization;
 
 /// <summary>
-/// 定义继承 <see cref="BinaryConverter{TConverted}"/> 的泛型二进制字典转换器。
+/// 定义继承 <see cref="AbstractBinaryConverter{TConverted}"/> 的泛型二进制字典转换器。
 /// </summary>
 /// <typeparam name="TDict">指定要转换的目标字典类型。</typeparam>
 /// <typeparam name="TKey">指定要转换的目标字典键类型。</typeparam>
 /// <typeparam name="TValue">指定要转换的目标字典值类型。</typeparam>
 /// <param name="namedFunc">给定的命名方法（可选）。</param>
 public class BinaryDictionaryConverter<TDict, TKey, TValue>(
-    Func<string, string>? namedFunc = null) : BinaryConverter<TDict>
+    Func<string, string>? namedFunc = null) : AbstractBinaryConverter<TDict>
     where TDict : IDictionary<TKey, TValue>, new()
 {
     private readonly Type _pairType = typeof(KeyValuePair<TKey, TValue>);

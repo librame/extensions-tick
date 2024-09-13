@@ -15,11 +15,11 @@ using Librame.Extensions.Dependency;
 namespace Librame.Extensions.Persistence;
 
 /// <summary>
-/// 定义继承 <see cref="PersistenceProvider{TPersistence}"/> 且抽象实现 <see cref="IFilePersistenceProvider{TPersistence}"/> 的文件持久化提供程序。
+/// 定义继承 <see cref="AbstractPersistenceProvider{TPersistence}"/> 且抽象实现 <see cref="IFilePersistenceProvider{TPersistence}"/> 的文件持久化提供程序。
 /// </summary>
 /// <typeparam name="TPersistence">指定的持久化类型。</typeparam>
 public abstract class FilePersistenceProvider<TPersistence>
-    : PersistenceProvider<TPersistence>, IFilePersistenceProvider<TPersistence>
+    : AbstractPersistenceProvider<TPersistence>, IFilePersistenceProvider<TPersistence>
 {
     private bool _disposed = false;
     private readonly FileSystemWatcher? _fileWatcher;

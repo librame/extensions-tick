@@ -21,7 +21,7 @@ namespace Librame.Extensions.Device;
 /// 构造一个 <see cref="LocalDeviceMonitor"/>。
 /// </remarks>
 /// <param name="options">给定的 <see cref="DeviceMonitoringOptions"/>。</param>
-public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Disposable, IDeviceMonitor
+public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : AbstractDisposable, IDeviceMonitor
 {
     private Ping? _ping;
 

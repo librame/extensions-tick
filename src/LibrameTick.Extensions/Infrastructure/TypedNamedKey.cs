@@ -13,14 +13,14 @@
 namespace Librame.Extensions.Infrastructure;
 
 /// <summary>
-/// 定义类型命名键。
+/// 定义定型命名键。
 /// </summary>
 /// <remarks>
-/// 构造一个 <see cref="TypeNamedKey"/>。
+/// 构造一个 <see cref="TypedNamedKey"/>。
 /// </remarks>
-/// <param name="Typed">给定的类型。</param>
+/// <param name="Typed">给定的定型。</param>
 /// <param name="Named">给定的命名（可选）。</param>
-public record class TypeNamedKey(Type Typed, string? Named = null)
+public record class TypedNamedKey(Type Typed, string? Named = null)
 {
     /// <summary>
     /// 字符串连接符。
@@ -44,32 +44,32 @@ public record class TypeNamedKey(Type Typed, string? Named = null)
 
 
     /// <summary>
-    /// 创建泛型类型命名键。
+    /// 创建泛型定型命名键。
     /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <typeparam name="T">指定的定型。</typeparam>
     /// <param name="named">给定的命名（可选）。</param>
-    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
-    public static TypeNamedKey Create<T>(string? named = null)
+    /// <returns>返回 <see cref="TypedNamedKey"/>。</returns>
+    public static TypedNamedKey Create<T>(string? named = null)
         => new(typeof(T), named);
 
     /// <summary>
-    /// 创建带连接符的泛型类型命名键。
+    /// 创建带连接符的泛型定型命名键。
     /// </summary>
-    /// <typeparam name="T">指定的类型。</typeparam>
+    /// <typeparam name="T">指定的定型。</typeparam>
     /// <param name="connector">给定的连接符。</param>
     /// <param name="named">给定的命名（可选）。</param>
-    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
-    public static TypeNamedKey CreateWithConnector<T>(string connector, string? named = null)
+    /// <returns>返回 <see cref="TypedNamedKey"/>。</returns>
+    public static TypedNamedKey CreateWithConnector<T>(string connector, string? named = null)
         => new(typeof(T), named) { Connector = connector };
 
     /// <summary>
-    /// 创建带连接符的类型命名键。
+    /// 创建带连接符的定型命名键。
     /// </summary>
-    /// <param name="type">给定的类型。</param>
+    /// <param name="type">给定的定型。</param>
     /// <param name="connector">给定的连接符。</param>
     /// <param name="named">给定的命名（可选）。</param>
-    /// <returns>返回 <see cref="TypeNamedKey"/>。</returns>
-    public static TypeNamedKey CreateWithConnector(Type type, string connector, string? named = null)
+    /// <returns>返回 <see cref="TypedNamedKey"/>。</returns>
+    public static TypedNamedKey CreateWithConnector(Type type, string connector, string? named = null)
         => new(type, named) { Connector = connector };
 
 }
