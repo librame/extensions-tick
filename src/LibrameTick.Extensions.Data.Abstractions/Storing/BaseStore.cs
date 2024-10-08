@@ -396,7 +396,7 @@ public class BaseStore<T> : IStore<T>
     /// <returns>返回一个包含 <see cref="IList{T}"/> 的异步操作。</returns>
     public virtual Task<IList<T>?> FindListAsync(Expression<Func<T, bool>>? predicate = null,
         CancellationToken cancellationToken = default, ISpecification<IAccessor>? specification = null)
-        => cancellationToken.SimpleTask(() => FindList(predicate, specification));
+        => cancellationToken.SimpleTaskResult(() => FindList(predicate, specification));
 
 
     /// <summary>

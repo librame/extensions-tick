@@ -36,8 +36,9 @@ public interface ICounting<TCount> : IObjectCounting
     /// <param name="decrement">给定的减量（可选；如果为空则表示自减）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回 <see cref="ValueTask{TValue}"/>。</returns>
-    ValueTask<TCount> DecrementalCountAsync(TCount count, TCount? decrement, CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleValueTask(decrement is null ? --count : count -= decrement);
+    async ValueTask<TCount> DecrementalCountAsync(TCount count, TCount? decrement,
+        CancellationToken cancellationToken = default)
+        => await TaskExtensions.InvokeAsync(() => DecrementalCount(count, decrement), cancellationToken);
 
 
     /// <summary>
@@ -56,8 +57,9 @@ public interface ICounting<TCount> : IObjectCounting
     /// <param name="increment">给定的增量（可选；如果为空则表示自增）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回 <see cref="ValueTask{TValue}"/>。</returns>
-    ValueTask<TCount> IncrementalCountAsync(TCount count, TCount? increment, CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleValueTask(increment is null ? ++count : count += increment);
+    async ValueTask<TCount> IncrementalCountAsync(TCount count, TCount? increment,
+        CancellationToken cancellationToken = default)
+        => await TaskExtensions.InvokeAsync(() => IncrementalCount(count, increment), cancellationToken);
 
 
     /// <summary>
@@ -96,9 +98,9 @@ public interface ICounting<TCount> : IObjectCounting
     /// <param name="decrement">给定的减量（可选；如果为空则表示自减）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回 <see cref="ValueTask{Object}"/>。</returns>
-    ValueTask<object> IObjectCounting.DecrementalObjectCountAsync(object count, object? decrement,
+    async ValueTask<object> IObjectCounting.DecrementalObjectCountAsync(object count, object? decrement,
         CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(DecrementalObjectCount(count, decrement));
+        => await TaskExtensions.InvokeAsync(() => DecrementalObjectCount(count, decrement), cancellationToken);
 
 
     /// <summary>
@@ -117,9 +119,9 @@ public interface ICounting<TCount> : IObjectCounting
     /// <param name="increment">给定的增量（可选；如果为空则表示自增）。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回 <see cref="ValueTask{Object}"/>。</returns>
-    ValueTask<object> IObjectCounting.IncrementalObjectCountAsync(object count, object? increment,
+    async ValueTask<object> IObjectCounting.IncrementalObjectCountAsync(object count, object? increment,
         CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(IncrementalObjectCount(count, increment));
+        => await TaskExtensions.InvokeAsync(() => IncrementalObjectCount(count, increment), cancellationToken);
 
     #endregion
 

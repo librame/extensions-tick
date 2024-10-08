@@ -24,7 +24,7 @@ internal sealed class AlgorithmDependencyInitializer : IDependencyInitializer<IA
         keyring.Rsa = InitializeRsaCertPair(context, keyring);
         keyring.Ecdsa = InitializeEcdsaCertPair(context, keyring);
 
-        return new AlgorithmDependency(keyring);
+        return new AlgorithmDependency(new(keyring));
     }
 
 

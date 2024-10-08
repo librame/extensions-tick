@@ -9,9 +9,9 @@ namespace LibrameTick.Extensions.Sample
         private static readonly string _testUrl = "http://www.contoso.com/index.htm?id=1#main";
 
 
-        public static void RunHandle()
+        public static void Run()
         {
-            Console.WriteLine(nameof(RunHandle));
+            Console.WriteLine(nameof(Run));
 
             var url = _testUrl
                 .SetAbsoluteUrl()
@@ -23,9 +23,9 @@ namespace LibrameTick.Extensions.Sample
             url.Handle(uri => throw new ArgumentException("Test error."), _failRetries, _failRetryInterval);
         }
 
-        public static async Task RunHandleAsync()
+        public static async Task RunAsync()
         {
-            Console.WriteLine(nameof(RunHandleAsync));
+            Console.WriteLine(nameof(RunAsync));
 
             var url = _testUrl
                 .SetAbsoluteUrl()

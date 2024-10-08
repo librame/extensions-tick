@@ -67,7 +67,7 @@ public interface IPublisher<TPublishedBy> : IEquatable<IPublisher<TPublishedBy>>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含发表者（兼容标识或字符串）的异步操作。</returns>
     ValueTask<object?> IObjectPublisher.GetObjectPublishedByAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectPublishedBy);
+        => cancellationToken.SimpleValueTaskResult(GetObjectPublishedBy);
 
 
     /// <summary>
@@ -91,7 +91,7 @@ public interface IPublisher<TPublishedBy> : IEquatable<IPublisher<TPublishedBy>>
     {
         var realNewPublishedBy = ToPublishedBy(newPublishedBy, nameof(newPublishedBy));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             PublishedBy = realNewPublishedBy;
             return newPublishedBy;

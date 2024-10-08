@@ -10,10 +10,10 @@
 
 #endregion
 
-namespace Librame.Extensions.Infrastructure;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
-/// 定义一个算法接口。
+/// 定义算法接口。
 /// </summary>
 public interface IAlgorithm
 {

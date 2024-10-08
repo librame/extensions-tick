@@ -53,7 +53,7 @@ namespace Librame.Extensions.Data.Accessing
         }
 
         public Task<User[]> GetUsersAsync(CancellationToken cancellationToken = default)
-            => cancellationToken.SimpleTask(GetUsers);
+            => cancellationToken.SimpleTaskResult(GetUsers);
 
     }
 }

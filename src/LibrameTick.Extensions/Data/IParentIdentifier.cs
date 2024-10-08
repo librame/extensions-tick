@@ -39,8 +39,8 @@ public interface IParentIdentifier<TId> : IIdentifier<TId>, IObjectParentIdentif
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含对象父标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    ValueTask<object?> IObjectParentIdentifier.GetObjectParentIdAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectParentId);
+    async ValueTask<object?> IObjectParentIdentifier.GetObjectParentIdAsync(CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(GetObjectParentId, cancellationToken);
 
 
     /// <summary>
@@ -60,16 +60,9 @@ public interface IParentIdentifier<TId> : IIdentifier<TId>, IObjectParentIdentif
     /// <param name="newParentId">给定的父标识对象。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含对象父标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    ValueTask<object?> IObjectParentIdentifier.SetObjectParentIdAsync(object? newParentId, CancellationToken cancellationToken)
-    {
-        var parentId = ToId(newParentId, nameof(newParentId));
-
-        return cancellationToken.SimpleValueTask(() =>
-        {
-            ParentId = parentId;
-            return newParentId;
-        });
-    }
+    async ValueTask<object?> IObjectParentIdentifier.SetObjectParentIdAsync(object? newParentId,
+        CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(() => SetObjectParentId(newParentId), cancellationToken);
 
     #endregion
 

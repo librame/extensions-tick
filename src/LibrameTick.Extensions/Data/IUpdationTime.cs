@@ -67,7 +67,7 @@ public interface IUpdationTime<TUpdatedTime> : IEquatable<IUpdationTime<TUpdated
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
     ValueTask<object> IObjectUpdationTime.GetObjectUpdatedTimeAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectUpdatedTime);
+        => cancellationToken.SimpleValueTaskResult(GetObjectUpdatedTime);
 
 
     /// <summary>
@@ -91,7 +91,7 @@ public interface IUpdationTime<TUpdatedTime> : IEquatable<IUpdationTime<TUpdated
     {
         var realNewUpdatedTime = ToUpdatedTime(newUpdatedTime, nameof(newUpdatedTime));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             UpdatedTime = realNewUpdatedTime;
             return newUpdatedTime;

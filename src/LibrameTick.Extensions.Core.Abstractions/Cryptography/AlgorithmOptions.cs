@@ -10,50 +10,45 @@
 
 #endregion
 
-using Librame.Extensions.Cryptography;
-using Librame.Extensions.Infrastructure.Cryptography;
+using Librame.Extensions.Dependency;
+using Librame.Extensions.Infrastructure;
 
-namespace Librame.Extensions.Infrastructure;
+namespace Librame.Extensions.Cryptography;
 
 /// <summary>
 /// 定义实现 <see cref="IOptions"/> 的算法选项。
 /// </summary>
-public class AlgorithmOptions : DependencyKeyring
+public class AlgorithmOptions : StaticDefaultInitializer<AlgorithmOptions>, IOptions
 {
     /// <summary>
     /// 构造一个 <see cref="AlgorithmOptions"/>。
     /// </summary>
     public AlgorithmOptions()
     {
-        // 初始使用默认 CKI 填充所有基础密钥
-        AlgorithmExtensions.PopulateDefaultCki(this);
+        Keyring = AlgorithmExtensions.AlgorithmDependency.Value.Engine.Keyring;
+        Encoding = DependencyRegistration.CurrentContext.Encoding;
     }
 
 
     /// <summary>
-    /// RSA 选项。
+    /// 获取或设置算法密钥环。
     /// </summary>
-    public SigningCredentialsOptions Rsa { get; set; } = new();
-
+    /// <remarks>
+    /// 默认使用 <see cref="AlgorithmExtensions.AlgorithmDependency"/> 内置的算法密钥环。
+    /// </remarks>
+    /// <value>
+    /// 返回 <see cref="AlgorithmKeyring"/>。
+    /// </value>
+    public AlgorithmKeyring Keyring { get; set; }
 
     /// <summary>
-    /// 字符编码（默认使用 <see cref="Encoding.UTF8"/>）。
+    /// 获取或设置字符编码。
     /// </summary>
-    public Encoding Encoding { get; set; } = Encoding.UTF8;
-
-
-    /// <summary>
-    /// 获取哈希码。
-    /// </summary>
-    /// <returns>返回 32 位整数。</returns>
-    public override int GetHashCode()
-        => ToString().GetHashCode();
-
-    /// <summary>
-    /// 转换为字符串。
-    /// </summary>
-    /// <returns>返回字符串。</returns>
-    public override string ToString()
-        => $"{nameof(Encoding)}={Encoding.AsEncodingName()};{base.ToString()};{nameof(Rsa)}:{Rsa}";
-
+    /// <remarks>
+    /// 默认使用 <see cref="DependencyRegistration.CurrentContext"/> 内置的字符编码。
+    /// </remarks>
+    /// <value>
+    /// 返回 <see cref="System.Text.Encoding"/>。
+    /// </value>
+    public Encoding Encoding { get; set; }
 }

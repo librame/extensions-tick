@@ -75,7 +75,7 @@ public interface IRanking<TRank> : IComparable<IRanking<TRank>>, IEquatable<IRan
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含排名（兼容整数、单双精度的排名字段）的异步操作。</returns>
     ValueTask<object> IObjectRanking.GetObjectRankAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectRank);
+        => cancellationToken.SimpleValueTaskResult(GetObjectRank);
 
 
     /// <summary>
@@ -99,7 +99,7 @@ public interface IRanking<TRank> : IComparable<IRanking<TRank>>, IEquatable<IRan
     {
         var rank = ToRank(newRank, nameof(newRank));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             Rank = rank;
             return newRank;

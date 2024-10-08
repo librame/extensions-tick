@@ -321,7 +321,7 @@ public abstract class AbstractAccessor : AbstractPriorable, IAccessor
         where TEntity : class
         => specification is null
             ? await Query<TEntity>().ToListAsync(cancellationToken)
-            : await cancellationToken.SimpleTask(() => Query<TEntity>().Where(specification.IsSatisfiedBy).ToList());
+            : await cancellationToken.SimpleTaskResult(() => Query<TEntity>().Where(specification.IsSatisfiedBy).ToList());
 
 
     /// <summary>

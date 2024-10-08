@@ -57,8 +57,8 @@ public interface IIdentifier<TId> : IEquatable<IIdentifier<TId>>, IObjectIdentif
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    ValueTask<object> IObjectIdentifier.GetObjectIdAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectId);
+    async ValueTask<object> IObjectIdentifier.GetObjectIdAsync(CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(GetObjectId, cancellationToken);
 
 
     /// <summary>
@@ -78,16 +78,9 @@ public interface IIdentifier<TId> : IEquatable<IIdentifier<TId>>, IObjectIdentif
     /// <param name="newId">给定的新对象标识。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含标识（兼容各种引用与值类型标识）的异步操作。</returns>
-    ValueTask<object> IObjectIdentifier.SetObjectIdAsync(object newId, CancellationToken cancellationToken)
-    {
-        var id = ToId(newId, nameof(newId));
-
-        return cancellationToken.SimpleValueTask(() =>
-        {
-            Id = id;
-            return newId;
-        });
-    }
+    async ValueTask<object> IObjectIdentifier.SetObjectIdAsync(object newId,
+        CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(() => SetObjectId(newId), cancellationToken);
 
     #endregion
 

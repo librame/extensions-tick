@@ -43,7 +43,7 @@ public interface IPublication<TPublishedBy> : IPublication<TPublishedBy, DateTim
     /// <returns>返回一个包含 <see cref="IPublication{TPublishedBy}"/> 的异步操作。</returns>
     ValueTask<IPublication<TPublishedBy>> SetPublicationAsync(TPublishedBy? newPublishedBy, DateTimeOffset newPublishedTime,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleValueTask(() => SetPublication(newPublishedBy, newPublishedTime));
+        => cancellationToken.SimpleValueTaskResult(() => SetPublication(newPublishedBy, newPublishedTime));
 
 
     /// <summary>
@@ -69,7 +69,7 @@ public interface IPublication<TPublishedBy> : IPublication<TPublishedBy, DateTim
     {
         var publishedTime = ToPublishedTime(newPublishedTime, nameof(newPublishedTime));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             PublishedTime = publishedTime;
             PublishedTimeTicks = PublishedTime.Ticks;

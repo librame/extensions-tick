@@ -3,8 +3,10 @@
 //using BenchmarkDotNet.Running;
 using LibrameTick.Extensions.Sample;
 
-FluentUrlSample.RunHandle();
 
-await FluentUrlSample.RunHandleAsync();
+//await TaskSample.RunAsync();
+
+//FluentUrlSample.Run();
+//await FluentUrlSample.RunAsync();
 
 //BenchmarkRunner.Run<BinarySerializerBenchmark>();

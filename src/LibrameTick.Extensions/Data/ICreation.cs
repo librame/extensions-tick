@@ -41,9 +41,9 @@ public interface ICreation<TCreatedBy> : ICreation<TCreatedBy, DateTimeOffset>, 
     /// <param name="newCreatedTime">给定的新创建日期。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="ICreation{TCreatedBy}"/> 的异步操作。</returns>
-    Task<ICreation<TCreatedBy>> SetCreationAsync(TCreatedBy? newCreatedBy, DateTimeOffset newCreatedTime,
+    async Task<ICreation<TCreatedBy>> SetCreationAsync(TCreatedBy? newCreatedBy, DateTimeOffset newCreatedTime,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(() => SetCreation(newCreatedBy, newCreatedTime));
+        => await TaskExtensions.InvokeAsync(() => SetCreation(newCreatedBy, newCreatedTime), cancellationToken);
 
 
     /// <summary>
@@ -65,18 +65,9 @@ public interface ICreation<TCreatedBy> : ICreation<TCreatedBy, DateTimeOffset>, 
     /// <param name="newCreatedTime">给定的新创建时间对象。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-    ValueTask<object> IObjectCreationTime.SetObjectCreatedTimeAsync(object newCreatedTime, CancellationToken cancellationToken)
-    {
-        var createdTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
-
-        return cancellationToken.SimpleValueTask(() =>
-        {
-            CreatedTime = createdTime;
-            CreatedTimeTicks = CreatedTime.Ticks;
-
-            return newCreatedTime;
-        });
-    }
+    async ValueTask<object> IObjectCreationTime.SetObjectCreatedTimeAsync(object newCreatedTime,
+        CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(() => SetObjectCreatedTime(newCreatedTime), cancellationToken);
 
 }
 

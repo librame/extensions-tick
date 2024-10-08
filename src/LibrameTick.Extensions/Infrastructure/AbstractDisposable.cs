@@ -59,17 +59,17 @@ public abstract class AbstractDisposable : IDisposable
     {
         if (_disposed)
         {
-            // 防止被多次调用。
+            // 防止被多次调用
             return;
         }
 
         if (disposing)
         {
-            // 释放已托管资源。
+            // 释放已托管资源
             ReleaseManaged();
         }
 
-        // 释放原生（非托管）资源。
+        // 释放原生（非托管）资源
         ReleaseNative();
 
         _disposed = true;

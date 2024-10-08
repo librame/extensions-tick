@@ -70,9 +70,9 @@ public static class CollectionsExtensions
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
-    public static Task<IPagingList<T>> AsPagingAsync<T>(this IEnumerable<T> collection, Action<IPagingList<T>> pageAction,
+    public static async Task<IPagingList<T>> AsPagingAsync<T>(this IEnumerable<T> collection, Action<IPagingList<T>> pageAction,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(() => collection.AsPaging(pageAction));
+        => await TaskExtensions.InvokeAsync(() => collection.AsPaging(pageAction), cancellationToken).ConfigureAwait(false);
 
     /// <summary>
     /// 异步可查询分页。
@@ -85,9 +85,9 @@ public static class CollectionsExtensions
     /// <param name="pageAction">给定的分页动作。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="IPagingList{T}"/> 的异步操作。</returns>
-    public static Task<IPagingList<T>> AsPagingAsync<T>(this IQueryable<T> queryable, Action<IPagingList<T>> pageAction,
+    public static async Task<IPagingList<T>> AsPagingAsync<T>(this IQueryable<T> queryable, Action<IPagingList<T>> pageAction,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(() => queryable.AsPaging(pageAction));
+        => await TaskExtensions.InvokeAsync(() => queryable.AsPaging(pageAction), cancellationToken).ConfigureAwait(false);
 
 
     /// <summary>
@@ -106,9 +106,9 @@ public static class CollectionsExtensions
     /// <param name="queryables">给定的 <see cref="IQueryable{T}"/> 可枚举集合。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回复合的 <see cref="IPagingList{T}"/> 异步操作。</returns>
-    public static Task<IPagingList<T>> CompositePagingAsync<T>(this IEnumerable<IPagingList<T>> queryables,
+    public static async Task<IPagingList<T>> CompositePagingAsync<T>(this IEnumerable<IPagingList<T>> queryables,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(() => queryables.CompositePaging());
+        => await TaskExtensions.InvokeAsync(() => queryables.CompositePaging(), cancellationToken).ConfigureAwait(false);
 
     #endregion
 
@@ -140,11 +140,11 @@ public static class CollectionsExtensions
     /// <param name="items">给定的类型实例集合。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含 <see cref="ITreeingList{TItem, TId}"/> 的异步操作。</returns>
-    public static Task<ITreeingList<TItem, TId>> AsTreeingAsync<TItem, TId>(this IEnumerable<TItem> items,
+    public static async Task<ITreeingList<TItem, TId>> AsTreeingAsync<TItem, TId>(this IEnumerable<TItem> items,
         CancellationToken cancellationToken = default)
         where TItem : IParentIdentifier<TId>
         where TId : IEquatable<TId>
-        => cancellationToken.SimpleTask(items.AsTreeing<TItem, TId>);
+        => await TaskExtensions.InvokeAsync(items.AsTreeing<TItem, TId>, cancellationToken).ConfigureAwait(false);
 
 
     private static List<TreeingNode<TItem, TId>> LookupNodes<TItem, TId>(IEnumerable<TItem> items,

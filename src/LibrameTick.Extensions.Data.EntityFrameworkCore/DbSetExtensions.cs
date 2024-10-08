@@ -59,8 +59,8 @@ public static class DbSetExtensions
         if (checkLocal)
         {
             return predicate is null
-                ? await cancellationToken.SimpleTask(dbSet.Local.FirstOrDefault)
-                : await cancellationToken.SimpleTask(() => dbSet.Local.FirstOrDefault(predicate.Compile()));
+                ? await cancellationToken.SimpleTaskResult(dbSet.Local.FirstOrDefault)
+                : await cancellationToken.SimpleTaskResult(() => dbSet.Local.FirstOrDefault(predicate.Compile()));
         }
 
         return predicate is null
@@ -110,8 +110,8 @@ public static class DbSetExtensions
         if (checkLocal)
         {
             return predicate is null
-                ? await cancellationToken.SimpleTask(dbSet.Local.Any)
-                : await cancellationToken.SimpleTask(() => dbSet.Local.Any(predicate.Compile()));
+                ? await cancellationToken.SimpleTaskResult(dbSet.Local.Any)
+                : await cancellationToken.SimpleTaskResult(() => dbSet.Local.Any(predicate.Compile()));
         }
 
         return predicate is null

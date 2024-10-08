@@ -48,11 +48,11 @@ internal sealed class InternalStorableFileManager : IStorableFileManager
 
     public Task<IStorableFileInfo> GetFileInfoAsync(string subpath,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(() => _fileProvider.GetFileInfo(subpath));
+        => cancellationToken.SimpleTaskResult(() => _fileProvider.GetFileInfo(subpath));
 
     public Task<IStorableDirectoryContents> GetDirectoryContentsAsync(string subpath,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(() => _fileProvider.GetDirectoryContents(subpath));
+        => cancellationToken.SimpleTaskResult(() => _fileProvider.GetDirectoryContents(subpath));
 
 
     #region Read

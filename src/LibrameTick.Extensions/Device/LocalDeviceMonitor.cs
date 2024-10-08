@@ -115,7 +115,7 @@ public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Abstra
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="ProcessorDeviceInfo"/> 的异步操作。</returns>
     public Task<ProcessorDeviceInfo> GetProcessorAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(GetProcessor);
+        => cancellationToken.SimpleTaskResult(GetProcessor);
 
 
     /// <summary>
@@ -131,7 +131,7 @@ public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Abstra
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="MemoryDeviceInfo"/> 的异步操作。</returns>
     public Task<MemoryDeviceInfo> GetMemoryAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(GetMemory);
+        => cancellationToken.SimpleTaskResult(GetMemory);
 
 
     /// <summary>
@@ -147,7 +147,7 @@ public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Abstra
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="CompositeDiskDeviceInfo"/> 的异步操作。</returns>
     public Task<CompositeDiskDeviceInfo> GetDisksAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(GetDisks);
+        => cancellationToken.SimpleTaskResult(GetDisks);
 
 
     /// <summary>
@@ -163,7 +163,7 @@ public sealed class LocalDeviceMonitor(DeviceMonitoringOptions options) : Abstra
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含 <see cref="CompositeNetworkDeviceInfo"/> 的异步操作。</returns>
     public Task<CompositeNetworkDeviceInfo> GetNetworksAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleTask(GetNetworks);
+        => cancellationToken.SimpleTaskResult(GetNetworks);
 
 
     /// <summary>

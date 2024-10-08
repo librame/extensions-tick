@@ -66,8 +66,8 @@ public interface ICreator<TCreatedBy> : IEquatable<ICreator<TCreatedBy>>, IObjec
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
-    ValueTask<object?> IObjectCreator.GetObjectCreatedByAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectCreatedBy);
+    async ValueTask<object?> IObjectCreator.GetObjectCreatedByAsync(CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(GetObjectCreatedBy, cancellationToken);
 
 
     /// <summary>
@@ -87,16 +87,9 @@ public interface ICreator<TCreatedBy> : IEquatable<ICreator<TCreatedBy>>, IObjec
     /// <param name="newCreatedBy">给定的新创建者对象。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含创建者（兼容标识或字符串）的异步操作。</returns>
-    ValueTask<object?> IObjectCreator.SetObjectCreatedByAsync(object? newCreatedBy, CancellationToken cancellationToken)
-    {
-        var createdBy = ToCreatedBy(newCreatedBy, nameof(newCreatedBy));
-
-        return cancellationToken.SimpleValueTask(() =>
-        {
-            CreatedBy = createdBy;
-            return newCreatedBy;
-        });
-    }
+    async ValueTask<object?> IObjectCreator.SetObjectCreatedByAsync(object? newCreatedBy,
+        CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(() => SetObjectCreatedBy(newCreatedBy), cancellationToken);
 
     #endregion
 

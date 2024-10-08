@@ -71,8 +71,8 @@ public interface ILockoutTiming<TLockoutTime> : IEquatable<ILockoutTiming<TLocko
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含锁定开始时间（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）的异步操作。</returns>
-    ValueTask<object?> IObjectLockoutTiming.GetObjectLockoutStartAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectLockoutStart);
+    async ValueTask<object?> IObjectLockoutTiming.GetObjectLockoutStartAsync(CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(GetObjectLockoutStart, cancellationToken);
 
 
     /// <summary>
@@ -92,16 +92,9 @@ public interface ILockoutTiming<TLockoutTime> : IEquatable<ILockoutTiming<TLocko
     /// <param name="newLockoutStart">给定的新锁定开始时间对象。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含锁定开始时间（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）的异步操作。</returns>
-    ValueTask<object?> IObjectLockoutTiming.SetObjectLockoutStartAsync(object? newLockoutStart, CancellationToken cancellationToken)
-    {
-        var lockoutStart = ToLockoutTime(newLockoutStart, nameof(newLockoutStart));
-
-        return cancellationToken.SimpleValueTask(() =>
-        {
-            LockoutStart = lockoutStart;
-            return newLockoutStart;
-        });
-    }
+    async ValueTask<object?> IObjectLockoutTiming.SetObjectLockoutStartAsync(object? newLockoutStart,
+        CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(() => SetObjectLockoutStart(newLockoutStart), cancellationToken);
 
 
     /// <summary>
@@ -116,8 +109,8 @@ public interface ILockoutTiming<TLockoutTime> : IEquatable<ILockoutTiming<TLocko
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含锁定结束时间（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）的异步操作。</returns>
-    ValueTask<object?> IObjectLockoutTiming.GetObjectLockoutEndAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectLockoutEnd);
+    async ValueTask<object?> IObjectLockoutTiming.GetObjectLockoutEndAsync(CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(GetObjectLockoutEnd, cancellationToken);
 
 
     /// <summary>
@@ -137,16 +130,9 @@ public interface ILockoutTiming<TLockoutTime> : IEquatable<ILockoutTiming<TLocko
     /// <param name="newLockoutEnd">给定的新锁定结束时间对象。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含锁定结束时间（提供对 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/> 的支持）的异步操作。</returns>
-    ValueTask<object?> IObjectLockoutTiming.SetObjectLockoutEndAsync(object? newLockoutEnd, CancellationToken cancellationToken)
-    {
-        var lockoutEnd = ToLockoutTime(newLockoutEnd, nameof(newLockoutEnd));
-
-        return cancellationToken.SimpleValueTask(() =>
-        {
-            LockoutEnd = lockoutEnd;
-            return newLockoutEnd;
-        });
-    }
+    async ValueTask<object?> IObjectLockoutTiming.SetObjectLockoutEndAsync(object? newLockoutEnd,
+        CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(() => SetObjectLockoutEnd(newLockoutEnd), cancellationToken);
 
     #endregion
 

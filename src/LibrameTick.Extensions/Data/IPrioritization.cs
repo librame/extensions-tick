@@ -75,7 +75,7 @@ public interface IPrioritization<TPriority> : IComparable<IPrioritization<TPrior
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含优先级（兼容整数、单双精度的优先级字段）的异步操作。</returns>
     ValueTask<object> IObjectPrioritization.GetObjectPriorityAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectPriority);
+        => cancellationToken.SimpleValueTaskResult(GetObjectPriority);
 
 
     /// <summary>
@@ -99,7 +99,7 @@ public interface IPrioritization<TPriority> : IComparable<IPrioritization<TPrior
     {
         var priority = ToPriority(newPriority, nameof(newPriority));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             Priority = priority;
             return newPriority;

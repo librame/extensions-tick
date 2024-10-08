@@ -43,7 +43,7 @@ public interface IUpdation<TUpdatedBy> : IUpdation<TUpdatedBy, DateTimeOffset>, 
     /// <returns>返回一个包含 <see cref="IUpdation{TUpdatedBy}"/> 的异步操作。</returns>
     ValueTask<IUpdation<TUpdatedBy>> SetUpdationAsync(TUpdatedBy? newUpdatedBy, DateTimeOffset newUpdatedTime,
         CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleValueTask(() => SetUpdation(newUpdatedBy, newUpdatedTime));
+        => cancellationToken.SimpleValueTaskResult(() => SetUpdation(newUpdatedBy, newUpdatedTime));
 
 
     /// <summary>
@@ -69,7 +69,7 @@ public interface IUpdation<TUpdatedBy> : IUpdation<TUpdatedBy, DateTimeOffset>, 
     {
         var updatedTime = ToUpdatedTime(newUpdatedTime, nameof(newUpdatedTime));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             UpdatedTime = updatedTime;
             UpdatedTimeTicks = UpdatedTime.Ticks;

@@ -66,8 +66,8 @@ public interface ICreationTime<TCreatedTime> : IEquatable<ICreationTime<TCreated
     /// </summary>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-    ValueTask<object> IObjectCreationTime.GetObjectCreatedTimeAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectCreatedTime);
+    async ValueTask<object> IObjectCreationTime.GetObjectCreatedTimeAsync(CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(GetObjectCreatedTime, cancellationToken);
 
 
     /// <summary>
@@ -87,16 +87,8 @@ public interface ICreationTime<TCreatedTime> : IEquatable<ICreationTime<TCreated
     /// <param name="newCreatedTime">给定的新创建时间对象。</param>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含日期与时间（兼容 <see cref="DateTime"/> 或 <see cref="DateTimeOffset"/>）的异步操作。</returns>
-    ValueTask<object> IObjectCreationTime.SetObjectCreatedTimeAsync(object newCreatedTime, CancellationToken cancellationToken)
-    {
-        var createdTime = ToCreatedTime(newCreatedTime, nameof(newCreatedTime));
-
-        return cancellationToken.SimpleValueTask(() =>
-        {
-            CreatedTime = createdTime;
-            return newCreatedTime;
-        });
-    }
+    async ValueTask<object> IObjectCreationTime.SetObjectCreatedTimeAsync(object newCreatedTime, CancellationToken cancellationToken)
+        => await TaskExtensions.InvokeAsync(() => SetObjectCreatedTime(newCreatedTime), cancellationToken);
 
     #endregion
 

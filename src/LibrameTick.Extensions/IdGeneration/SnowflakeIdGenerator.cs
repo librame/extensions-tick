@@ -165,7 +165,7 @@ public class SnowflakeIdGenerator : AbstractClockIdGenerator<long>
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>（可选）。</param>
     /// <returns>返回一个包含长整数的异步操作。</returns>
     public virtual ValueTask<long> GetLastTicksAsync(CancellationToken cancellationToken = default)
-        => cancellationToken.SimpleValueTask(() => _lastTicksAsync);
+        => cancellationToken.SimpleValueTaskResult(() => _lastTicksAsync);
 
 
     /// <summary>

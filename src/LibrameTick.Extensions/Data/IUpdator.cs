@@ -67,7 +67,7 @@ public interface IUpdator<TUpdatedBy> : IEquatable<IUpdator<TUpdatedBy>>, IObjec
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含更新者（兼容标识或字符串）的异步操作。</returns>
     ValueTask<object?> IObjectUpdator.GetObjectUpdatedByAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectUpdatedBy);
+        => cancellationToken.SimpleValueTaskResult(GetObjectUpdatedBy);
 
 
     /// <summary>
@@ -91,7 +91,7 @@ public interface IUpdator<TUpdatedBy> : IEquatable<IUpdator<TUpdatedBy>>, IObjec
     {
         var realNewUpdatedBy = ToUpdatedBy(newUpdatedBy, nameof(newUpdatedBy));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             UpdatedBy = realNewUpdatedBy;
             return newUpdatedBy;

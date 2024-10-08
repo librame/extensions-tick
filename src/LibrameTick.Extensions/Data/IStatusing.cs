@@ -66,7 +66,7 @@ public interface IStatusing<TStatus> : IEquatable<IStatusing<TStatus>>, IObjectS
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含状态（兼容不支持枚举类型的实体框架）的异步操作。</returns>
     ValueTask<object> IObjectStatusing.GetObjectStatusAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectStatus);
+        => cancellationToken.SimpleValueTaskResult(GetObjectStatus);
 
 
     /// <summary>
@@ -90,7 +90,7 @@ public interface IStatusing<TStatus> : IEquatable<IStatusing<TStatus>>, IObjectS
     {
         var status = ToStatus(newStatus, nameof(newStatus));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             Status = status;
             return newStatus;

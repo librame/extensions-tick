@@ -342,7 +342,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsMd5(this byte[] buffer)
     {
-        using var md5 = AlgorithmDependency.Value.LazyMd5.Value;
+        using var md5 = AlgorithmDependency.Value.Engine.LazyMd5.Value;
         return md5.ComputeHash(buffer);
     }
 
@@ -353,7 +353,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsMd5(this Stream stream)
     {
-        using var md5 = AlgorithmDependency.Value.LazyMd5.Value;
+        using var md5 = AlgorithmDependency.Value.Engine.LazyMd5.Value;
         return md5.ComputeHash(stream);
     }
 
@@ -365,7 +365,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsMd5Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var md5 = AlgorithmDependency.Value.LazyMd5.Value;
+        using var md5 = AlgorithmDependency.Value.Engine.LazyMd5.Value;
         return await md5.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -377,7 +377,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha1(this byte[] buffer)
     {
-        using var sha1 = AlgorithmDependency.Value.LazySha1.Value;
+        using var sha1 = AlgorithmDependency.Value.Engine.LazySha1.Value;
         return sha1.ComputeHash(buffer);
     }
 
@@ -388,7 +388,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha1(this Stream stream)
     {
-        using var sha1 = AlgorithmDependency.Value.LazySha1.Value;
+        using var sha1 = AlgorithmDependency.Value.Engine.LazySha1.Value;
         return sha1.ComputeHash(stream);
     }
 
@@ -400,7 +400,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsSha1Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var sha1 = AlgorithmDependency.Value.LazySha1.Value;
+        using var sha1 = AlgorithmDependency.Value.Engine.LazySha1.Value;
         return await sha1.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -412,7 +412,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha256(this byte[] buffer)
     {
-        using var sha256 = AlgorithmDependency.Value.LazySha256.Value;
+        using var sha256 = AlgorithmDependency.Value.Engine.LazySha256.Value;
         return sha256.ComputeHash(buffer);
     }
 
@@ -423,7 +423,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha256(this Stream stream)
     {
-        using var sha256 = AlgorithmDependency.Value.LazySha256.Value;
+        using var sha256 = AlgorithmDependency.Value.Engine.LazySha256.Value;
         return sha256.ComputeHash(stream);
     }
 
@@ -435,7 +435,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsSha256Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var sha256 = AlgorithmDependency.Value.LazySha256.Value;
+        using var sha256 = AlgorithmDependency.Value.Engine.LazySha256.Value;
         return await sha256.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -447,7 +447,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha384(this byte[] buffer)
     {
-        using var sha384 = AlgorithmDependency.Value.LazySha384.Value;
+        using var sha384 = AlgorithmDependency.Value.Engine.LazySha384.Value;
         return sha384.ComputeHash(buffer);
     }
 
@@ -458,7 +458,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha384(this Stream stream)
     {
-        using var sha384 = AlgorithmDependency.Value.LazySha384.Value;
+        using var sha384 = AlgorithmDependency.Value.Engine.LazySha384.Value;
         return sha384.ComputeHash(stream);
     }
 
@@ -470,7 +470,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsSha384Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var sha384 = AlgorithmDependency.Value.LazySha384.Value;
+        using var sha384 = AlgorithmDependency.Value.Engine.LazySha384.Value;
         return await sha384.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -482,7 +482,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha512(this byte[] buffer)
     {
-        using var sha512 = AlgorithmDependency.Value.LazySha512.Value;
+        using var sha512 = AlgorithmDependency.Value.Engine.LazySha512.Value;
         return sha512.ComputeHash(buffer);
     }
 
@@ -493,7 +493,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsSha512(this Stream stream)
     {
-        using var sha512 = AlgorithmDependency.Value.LazySha512.Value;
+        using var sha512 = AlgorithmDependency.Value.Engine.LazySha512.Value;
         return sha512.ComputeHash(stream);
     }
 
@@ -505,7 +505,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsSha512Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var sha512 = AlgorithmDependency.Value.LazySha512.Value;
+        using var sha512 = AlgorithmDependency.Value.Engine.LazySha512.Value;
         return await sha512.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -567,7 +567,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacMd5(this byte[] buffer)
     {
-        using var hmacMd5 = AlgorithmDependency.Value.LazyHmacMd5.Value;
+        using var hmacMd5 = AlgorithmDependency.Value.Engine.LazyHmacMd5.Value;
         return hmacMd5.ComputeHash(buffer);
     }
 
@@ -578,7 +578,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacMd5(this Stream stream)
     {
-        using var hmacMd5 = AlgorithmDependency.Value.LazyHmacMd5.Value;
+        using var hmacMd5 = AlgorithmDependency.Value.Engine.LazyHmacMd5.Value;
         return hmacMd5.ComputeHash(stream);
     }
 
@@ -590,7 +590,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsHmacMd5Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var hmacMd5 = AlgorithmDependency.Value.LazyHmacMd5.Value;
+        using var hmacMd5 = AlgorithmDependency.Value.Engine.LazyHmacMd5.Value;
         return await hmacMd5.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -602,7 +602,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha1(this byte[] buffer)
     {
-        using var hmacSha1 = AlgorithmDependency.Value.LazyHmacSha1.Value;
+        using var hmacSha1 = AlgorithmDependency.Value.Engine.LazyHmacSha1.Value;
         return hmacSha1.ComputeHash(buffer);
     }
 
@@ -613,7 +613,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha1(this Stream stream)
     {
-        using var hmacSha1 = AlgorithmDependency.Value.LazyHmacSha1.Value;
+        using var hmacSha1 = AlgorithmDependency.Value.Engine.LazyHmacSha1.Value;
         return hmacSha1.ComputeHash(stream);
     }
 
@@ -625,7 +625,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsHmacSha1Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var hmacSha1 = AlgorithmDependency.Value.LazyHmacSha1.Value;
+        using var hmacSha1 = AlgorithmDependency.Value.Engine.LazyHmacSha1.Value;
         return await hmacSha1.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -637,7 +637,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha256(this byte[] buffer)
     {
-        using var hmacSha256 = AlgorithmDependency.Value.LazyHmacSha256.Value;
+        using var hmacSha256 = AlgorithmDependency.Value.Engine.LazyHmacSha256.Value;
         return hmacSha256.ComputeHash(buffer);
     }
 
@@ -648,7 +648,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha256(this Stream stream)
     {
-        using var hmacSha256 = AlgorithmDependency.Value.LazyHmacSha256.Value;
+        using var hmacSha256 = AlgorithmDependency.Value.Engine.LazyHmacSha256.Value;
         return hmacSha256.ComputeHash(stream);
     }
 
@@ -660,7 +660,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsHmacSha256Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var hmacSha256 = AlgorithmDependency.Value.LazyHmacSha256.Value;
+        using var hmacSha256 = AlgorithmDependency.Value.Engine.LazyHmacSha256.Value;
         return await hmacSha256.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -672,7 +672,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha384(this byte[] buffer)
     {
-        using var hmacSha384 = AlgorithmDependency.Value.LazyHmacSha384.Value;
+        using var hmacSha384 = AlgorithmDependency.Value.Engine.LazyHmacSha384.Value;
         return hmacSha384.ComputeHash(buffer);
     }
 
@@ -683,7 +683,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha384(this Stream stream)
     {
-        using var hmacSha384 = AlgorithmDependency.Value.LazyHmacSha384.Value;
+        using var hmacSha384 = AlgorithmDependency.Value.Engine.LazyHmacSha384.Value;
         return hmacSha384.ComputeHash(stream);
     }
 
@@ -695,7 +695,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsHmacSha384Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var hmacSha384 = AlgorithmDependency.Value.LazyHmacSha384.Value;
+        using var hmacSha384 = AlgorithmDependency.Value.Engine.LazyHmacSha384.Value;
         return await hmacSha384.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -707,7 +707,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha512(this byte[] buffer)
     {
-        using var hmacSha512 = AlgorithmDependency.Value.LazyHmacSha512.Value;
+        using var hmacSha512 = AlgorithmDependency.Value.Engine.LazyHmacSha512.Value;
         return hmacSha512.ComputeHash(buffer);
     }
 
@@ -718,7 +718,7 @@ public static class AlgorithmExtensions
     /// <returns>返回哈希字节数组。</returns>
     public static byte[] AsHmacSha512(this Stream stream)
     {
-        using var hmacSha512 = AlgorithmDependency.Value.LazyHmacSha512.Value;
+        using var hmacSha512 = AlgorithmDependency.Value.Engine.LazyHmacSha512.Value;
         return hmacSha512.ComputeHash(stream);
     }
 
@@ -730,7 +730,7 @@ public static class AlgorithmExtensions
     /// <returns>返回一个包含哈希字节数组的异步操作。</returns>
     public static async Task<byte[]> AsHmacSha512Async(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var hmacSha512 = AlgorithmDependency.Value.LazyHmacSha512.Value;
+        using var hmacSha512 = AlgorithmDependency.Value.Engine.LazyHmacSha512.Value;
         return await hmacSha512.ComputeHashAsync(stream, cancellationToken).ConfigureAwait(false);
     }
 
@@ -789,7 +789,7 @@ public static class AlgorithmExtensions
 
     private static ICryptoTransform Create3DesEncryptor(byte[]? rgbKey, byte[]? rgbIV)
     {
-        using var des = AlgorithmDependency.Value.Lazy3Des.Value;
+        using var des = AlgorithmDependency.Value.Engine.Lazy3Des.Value;
 
         return rgbKey is null || rgbIV is null
             ? des.CreateEncryptor()
@@ -843,7 +843,7 @@ public static class AlgorithmExtensions
 
     private static ICryptoTransform Create3DesDecryptor(byte[]? rgbKey, byte[]? rgbIV)
     {
-        using var des = AlgorithmDependency.Value.Lazy3Des.Value;
+        using var des = AlgorithmDependency.Value.Engine.Lazy3Des.Value;
 
         return rgbKey is null || rgbIV is null
             ? des.CreateDecryptor()
@@ -919,7 +919,7 @@ public static class AlgorithmExtensions
 
     private static ICryptoTransform CreateAesEncryptor(byte[]? rgbKey, byte[]? rgbIV)
     {
-        using var des = AlgorithmDependency.Value.LazyAes.Value;
+        using var des = AlgorithmDependency.Value.Engine.LazyAes.Value;
 
         return rgbKey is null || rgbIV is null
             ? des.CreateEncryptor()
@@ -973,7 +973,7 @@ public static class AlgorithmExtensions
 
     private static ICryptoTransform CreateAesDecryptor(byte[]? rgbKey, byte[]? rgbIV)
     {
-        using var des = AlgorithmDependency.Value.LazyAes.Value;
+        using var des = AlgorithmDependency.Value.Engine.LazyAes.Value;
 
         return rgbKey is null || rgbIV is null
             ? des.CreateDecryptor()
@@ -1026,9 +1026,9 @@ public static class AlgorithmExtensions
     public static byte[] AsAesCcm(this byte[] plaintext)
     {
         var ciphertext = new byte[plaintext.Length];
-        var aesCcmKeyring = AlgorithmDependency.Value.Keyring.AesCcm;
+        var aesCcmKeyring = AlgorithmDependency.Value.Engine.Keyring.AesCcm;
 
-        using var aesCcm = AlgorithmDependency.Value.LazyAesCcm.Value;
+        using var aesCcm = AlgorithmDependency.Value.Engine.LazyAesCcm.Value;
         aesCcm.Encrypt(aesCcmKeyring.Nonce, plaintext, ciphertext, aesCcmKeyring.Tag);
 
         return ciphertext;
@@ -1042,9 +1042,9 @@ public static class AlgorithmExtensions
     public static byte[] FromAesCcm(this byte[] ciphertext)
     {
         var plaintext = new byte[ciphertext.Length];
-        var aesCcmKeyring = AlgorithmDependency.Value.Keyring.AesCcm;
+        var aesCcmKeyring = AlgorithmDependency.Value.Engine.Keyring.AesCcm;
 
-        using var aesCcm = AlgorithmDependency.Value.LazyAesCcm.Value;
+        using var aesCcm = AlgorithmDependency.Value.Engine.LazyAesCcm.Value;
         aesCcm.Decrypt(aesCcmKeyring.Nonce, ciphertext, aesCcmKeyring.Tag, plaintext);
 
         return plaintext;
@@ -1082,9 +1082,9 @@ public static class AlgorithmExtensions
     public static byte[] AsAesGcm(this byte[] plaintext)
     {
         var ciphertext = new byte[plaintext.Length];
-        var aesGcmKeyring = AlgorithmDependency.Value.Keyring.AesGcm;
+        var aesGcmKeyring = AlgorithmDependency.Value.Engine.Keyring.AesGcm;
 
-        using var aesGcm = AlgorithmDependency.Value.LazyAesGcm.Value;
+        using var aesGcm = AlgorithmDependency.Value.Engine.LazyAesGcm.Value;
         aesGcm.Encrypt(aesGcmKeyring.Nonce, plaintext, ciphertext, aesGcmKeyring.Tag);
 
         return ciphertext;
@@ -1098,9 +1098,9 @@ public static class AlgorithmExtensions
     public static byte[] FromAesGcm(this byte[] ciphertext)
     {
         var plaintext = new byte[ciphertext.Length];
-        var aesGcmKeyring = AlgorithmDependency.Value.Keyring.AesGcm;
+        var aesGcmKeyring = AlgorithmDependency.Value.Engine.Keyring.AesGcm;
 
-        using var aesGcm = AlgorithmDependency.Value.LazyAesGcm.Value;
+        using var aesGcm = AlgorithmDependency.Value.Engine.LazyAesGcm.Value;
         aesGcm.Decrypt(aesGcmKeyring.Nonce, ciphertext, aesGcmKeyring.Tag, plaintext);
 
         return plaintext;
@@ -1162,7 +1162,7 @@ public static class AlgorithmExtensions
     {
         padding ??= RSAEncryptionPadding.Pkcs1;
 
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PublicAlgo;
 
         // RSA 单次加密受支持 Key 的模长(modulus)-n 长度限制，超出限制需分段加密
         var bufferSize = rsa.KeySize / 8 - 11;
@@ -1213,7 +1213,7 @@ public static class AlgorithmExtensions
         RSAEncryptionPadding? padding = null, Func<RSA>? createPublicRsaFunc = null)
     {
         padding ??= RSAEncryptionPadding.Pkcs1;
-        createPublicRsaFunc ??= () => AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        createPublicRsaFunc ??= () => AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PublicAlgo;
 
         using var rsa = createPublicRsaFunc();
 
@@ -1244,7 +1244,7 @@ public static class AlgorithmExtensions
     /// <returns>返回经过解密的字节数组。</returns>
     public static byte[] FromPrivateRsa(this byte[] ciphertext, RSAEncryptionPadding? padding = null)
     {
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PrivateAlgo;
 
         // 解密时分段长度需使用密钥大小对应的字节长度
         var keySizeInBytes = rsa.KeySize / 8;
@@ -1294,7 +1294,7 @@ public static class AlgorithmExtensions
         RSAEncryptionPadding? padding = null, Func<RSA>? createPrivateRsaFunc = null)
     {
         padding ??= RSAEncryptionPadding.Pkcs1;
-        createPrivateRsaFunc ??= () => AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        createPrivateRsaFunc ??= () => AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PrivateAlgo;
 
         using var rsa = createPrivateRsaFunc();
 
@@ -1327,7 +1327,7 @@ public static class AlgorithmExtensions
     public static byte[] SignDataPrivateRsa(this byte[] data, HashAlgorithmName? hashName = null,
         RSASignaturePadding? padding = null)
     {
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PrivateAlgo;
         return rsa.SignData(data, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
     }
 
@@ -1341,7 +1341,7 @@ public static class AlgorithmExtensions
     public static byte[] SignDataPrivateRsa(this Stream data, HashAlgorithmName? hashName = null,
         RSASignaturePadding? padding = null)
     {
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PrivateAlgo;
         return rsa.SignData(data, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
     }
 
@@ -1356,7 +1356,7 @@ public static class AlgorithmExtensions
     public static bool VerifyDataPublicRsa(this byte[] data, byte[] signed, HashAlgorithmName? hashName = null,
         RSASignaturePadding? padding = null)
     {
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PublicAlgo;
         return rsa.VerifyData(data, signed, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
     }
 
@@ -1371,7 +1371,7 @@ public static class AlgorithmExtensions
     public static bool VerifyDataPublicRsa(this Stream data, byte[] signed, HashAlgorithmName? hashName = null,
         RSASignaturePadding? padding = null)
     {
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PublicAlgo;
         return rsa.VerifyData(data, signed, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
     }
 
@@ -1385,7 +1385,7 @@ public static class AlgorithmExtensions
     /// <returns>返回经过加密的字节数组。</returns>
     public static byte[] SignHashPrivateRsa(this byte[] hash, HashAlgorithmName? hashName = null, RSASignaturePadding? padding = null)
     {
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PrivateAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PrivateAlgo;
         return rsa.SignHash(hash, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
     }
 
@@ -1399,7 +1399,7 @@ public static class AlgorithmExtensions
     /// <returns>返回经过解密的字节数组。</returns>
     public static bool VerifyHashPublicRsa(this byte[] ciphertext, byte[] hash, HashAlgorithmName? hashName = null, RSASignaturePadding? padding = null)
     {
-        using var rsa = AlgorithmDependency.Value.LazyRsaPair.Value.PublicAlgo;
+        using var rsa = AlgorithmDependency.Value.Engine.LazyRsaPair.Value.PublicAlgo;
         return rsa.VerifyHash(hash, ciphertext, hashName ?? HashAlgorithmName.SHA256, padding ?? RSASignaturePadding.Pkcs1);
     }
 
@@ -1435,7 +1435,7 @@ public static class AlgorithmExtensions
     /// <returns>返回数字签名的字节数组。</returns>
     public static byte[] SignDataPrivateEcdsa(this byte[] data)
     {
-        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo;
+        using var ecdsa = AlgorithmDependency.Value.Engine.LazyEcdsaPair.Value.PrivateAlgo;
         return ecdsa.SignData(data);
     }
 
@@ -1446,7 +1446,7 @@ public static class AlgorithmExtensions
     /// <returns>返回数字签名的字节数组。</returns>
     public static byte[] SignDataPrivateEcdsa(this Stream data)
     {
-        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo;
+        using var ecdsa = AlgorithmDependency.Value.Engine.LazyEcdsaPair.Value.PrivateAlgo;
         return ecdsa.SignData(data);
     }
 
@@ -1458,7 +1458,7 @@ public static class AlgorithmExtensions
     /// <returns>返回签名是否有效的布尔值。</returns>
     public static bool VerifyDataPublicEcdsa(this byte[] data, byte[] signed)
     {
-        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo;
+        using var ecdsa = AlgorithmDependency.Value.Engine.LazyEcdsaPair.Value.PublicAlgo;
         return ecdsa.VerifyData(data, signed);
     }
 
@@ -1470,7 +1470,7 @@ public static class AlgorithmExtensions
     /// <returns>返回签名是否有效的布尔值。</returns>
     public static bool VerifyDataPublicEcdsa(this Stream data, byte[] signed)
     {
-        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo;
+        using var ecdsa = AlgorithmDependency.Value.Engine.LazyEcdsaPair.Value.PublicAlgo;
         return ecdsa.VerifyData(data, signed);
     }
 
@@ -1482,7 +1482,7 @@ public static class AlgorithmExtensions
     /// <returns>返回数字签名的字节数组。</returns>
     public static byte[] SignHashPrivateEcdsa(this byte[] hash)
     {
-        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PrivateAlgo;
+        using var ecdsa = AlgorithmDependency.Value.Engine.LazyEcdsaPair.Value.PrivateAlgo;
         return ecdsa.SignHash(hash);
     }
 
@@ -1494,7 +1494,7 @@ public static class AlgorithmExtensions
     /// <returns>返回签名是否有效的布尔值。</returns>
     public static bool VerifyHashPublicEcdsa(this byte[] hash,  byte[] signed)
     {
-        using var ecdsa = AlgorithmDependency.Value.LazyEcdsaPair.Value.PublicAlgo;
+        using var ecdsa = AlgorithmDependency.Value.Engine.LazyEcdsaPair.Value.PublicAlgo;
         return ecdsa.VerifyHash(hash, signed);
     }
 

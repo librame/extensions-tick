@@ -66,7 +66,7 @@ public interface IPartitioning<TPartition> : IEquatable<IPartitioning<TPartition
     /// <param name="cancellationToken">给定的 <see cref="CancellationToken"/>。</param>
     /// <returns>返回一个包含分区的异步操作。</returns>
     ValueTask<object> IObjectPartitioning.GetObjectPartitionAsync(CancellationToken cancellationToken)
-        => cancellationToken.SimpleValueTask(GetObjectPartition);
+        => cancellationToken.SimpleValueTaskResult(GetObjectPartition);
 
 
     /// <summary>
@@ -90,7 +90,7 @@ public interface IPartitioning<TPartition> : IEquatable<IPartitioning<TPartition
     {
         var rank = ToPartition(newPartition, nameof(newPartition));
 
-        return cancellationToken.SimpleValueTask(() =>
+        return cancellationToken.SimpleValueTaskResult(() =>
         {
             Partition = rank;
             return newPartition;
